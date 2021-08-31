@@ -41,6 +41,7 @@ add_library(pathnode_sample SHARED
   src/sample_publisher.cpp
   src/sample_subscriber.cpp
   src/sample_relay.cpp
+  src/sample_relay_with_path.cpp
   )
 ament_target_dependencies(pathnode_sample
     "rclcpp"
@@ -61,6 +62,10 @@ rclcpp_components_register_node(pathnode_sample
 rclcpp_components_register_node(pathnode_sample
   PLUGIN "pathnode_sample::Relay"
   EXECUTABLE relay)
+rclcpp_components_register_node(pathnode_sample
+  PLUGIN "pathnode_sample::RelayWithPath"
+  EXECUTABLE relay_with_path)
+
 
 install(TARGETS
   pathnode_sample)
