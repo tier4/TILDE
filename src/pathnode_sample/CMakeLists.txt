@@ -14,6 +14,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(std_msgs REQUIRED)
 
 find_package(pathnode REQUIRED)
+find_package(path_info_msg REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -32,6 +33,7 @@ function(add_dependencies library)
     "rclcpp_components"
     "std_msgs"
     "pathnode"
+    "path_info_msg"
     )
 endfunction()
 
@@ -48,6 +50,7 @@ ament_target_dependencies(pathnode_sample
     "rclcpp_components"
     "std_msgs"
     "pathnode"
+    "path_info_msg"
     )
 # target_link_libraries(pathnode_sample
 #   "pathnode"

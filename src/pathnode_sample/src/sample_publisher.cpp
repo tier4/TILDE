@@ -7,6 +7,7 @@
 #include "rclcpp_components/register_node_macro.hpp"
 
 #include "std_msgs/msg/string.hpp"
+#include "path_info_msg/msg/path_info.hpp"
 
 #include "pathnode/path_node.hpp"
 
