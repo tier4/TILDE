@@ -11,6 +11,7 @@
 #include "std_msgs/msg/string.hpp"
 
 #include "pathnode/path_node.hpp"
+#include "path_info_msg/msg/path_info.hpp"
 
 using namespace std::chrono_literals;
 
@@ -39,8 +40,9 @@ public:
         const auto is_first = get_parameter(IS_FIRST).get_value<bool>();
         if(is_first) {
           // TODO: set now
-          auto msg = std::make_unique<std_msgs::msg::String>();
-          msg->data = std::to_string(now_ns());
+          auto msg = std::make_unique<path_info_msg::msg::PathInfo>();
+          msg->path_start = now();
+          msg->topic_name = std::string(pub_->get_topic_name());
           path_info_pub_->publish(std::move(msg));
         }
 
@@ -68,15 +70,15 @@ public:
 
     const auto is_first = get_parameter(IS_FIRST).get_value<bool>();
     if(is_first) {
-      path_info_pub_ = this->create_publisher<std_msgs::msg::String>(pathname_ + "_info", qos);
+      path_info_pub_ = this->create_publisher<path_info_msg::msg::PathInfo>(pathname_ + "_info", qos);
     } else {
       auto path_info_callback =
-          [this](std_msgs::msg::String::UniquePtr msg) -> void
+          [this](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
           {
-            this->path_start_ns_ = std::stod(msg->data);
+            this->path_start_ns_ = rclcpp::Time(msg->path_start).nanoseconds();
             std::cout << "get path_info: " << this->path_start_ns_ << std::endl;
           };
-      path_info_sub_ = this->create_subscription<std_msgs::msg::String>(
+      path_info_sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
           pathname_ + "_info", qos, path_info_callback);
     }
   }
@@ -87,8 +89,8 @@ private:
 
   // TODO: have multiple path
   std::string pathname_;
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr path_info_pub_;
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr path_info_sub_;
+  rclcpp::Publisher<path_info_msg::msg::PathInfo>::SharedPtr path_info_pub_;
+  rclcpp::Subscription<path_info_msg::msg::PathInfo>::SharedPtr path_info_sub_;
 
   // TODO: have multiple times
   rclcpp::Time path_start_time_;
@@ -104,10 +106,15 @@ private:
     return false;
   }
 
-  double now_ns() const
+  rclcpp::Time now() const
   {
     rclcpp::Clock ros_clock(RCL_ROS_TIME);
-    return ros_clock.now().nanoseconds();
+    return ros_clock.now();
+  }
+
+  double now_ns() const
+  {
+    return now().nanoseconds();
   }
 };
 
