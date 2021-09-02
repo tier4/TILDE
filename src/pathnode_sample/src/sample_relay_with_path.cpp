@@ -38,13 +38,17 @@ public:
       [this](std_msgs::msg::String::UniquePtr msg) -> void
       {
         const auto is_first = get_parameter(IS_FIRST).get_value<bool>();
+
+        // TODO: set now
+        auto m = std::make_unique<path_info_msg::msg::PathInfo>();
         if(is_first) {
-          // TODO: set now
-          auto msg = std::make_unique<path_info_msg::msg::PathInfo>();
-          msg->path_start = now();
-          msg->topic_name = std::string(pub_->get_topic_name());
-          path_info_pub_->publish(std::move(msg));
+          m->path_start = now();
+        } else {
+          // TODO validate path info
+          m->path_start = path_start_time_;
         }
+        m->topic_name = std::string(pub_->get_topic_name());
+        path_info_pub_->publish(std::move(m));
 
         /********************
          * original routine
@@ -68,19 +72,19 @@ public:
 
     pathname_ = "path";  // actually, topics are mapped to path
 
-    const auto is_first = get_parameter(IS_FIRST).get_value<bool>();
-    if(is_first) {
-      path_info_pub_ = this->create_publisher<path_info_msg::msg::PathInfo>(pathname_ + "_info", qos);
-    } else {
-      auto path_info_callback =
-          [this](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
-          {
-            this->path_start_ns_ = rclcpp::Time(msg->path_start).nanoseconds();
-            std::cout << "get path_info: " << this->path_start_ns_ << std::endl;
-          };
-      path_info_sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
-          pathname_ + "_info", qos, path_info_callback);
-    }
+    path_info_pub_ = this->create_publisher<path_info_msg::msg::PathInfo>(pathname_ + "_info", qos);
+    auto path_info_callback =
+        [this](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
+        {
+          if(msg->topic_name != sub_->get_topic_name()) return;
+
+          this->path_start_time_ = rclcpp::Time(msg->path_start);
+          std::cout << "get path_info: "
+                    << " topic: "  << msg->topic_name
+                    << " path_start: " << this->path_start_time_.nanoseconds() << std::endl;
+        };
+    path_info_sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
+        pathname_ + "_info", qos, path_info_callback);
   }
 
 private:
@@ -94,14 +98,13 @@ private:
 
   // TODO: have multiple times
   rclcpp::Time path_start_time_;
-  double path_start_ns_;
   double path_dead_line_ns_;
 
   bool exceeds_deadline(const std::string& path) const
   {
     (void)path;
     std::cout << "now: " << now_ns()
-              << " path_start: " << path_start_ns_
+              << " path_start: " << path_start_time_.nanoseconds()
               << " deadline: " << std::to_string(path_dead_line_ns_) << std::endl;
     return false;
   }
