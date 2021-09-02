@@ -20,6 +20,7 @@ namespace pathnode_sample
 
 // TODO: define per path
 const std::string IS_FIRST = "is_first";
+const std::string PATH_DEADLINE_SEC = "path_deadline_sec";
 const std::string PATH_DEADLINE_NS = "path_deadline_ns";
 
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
@@ -28,10 +29,15 @@ class RelayWithPath : public pathnode::PathNode
 {
 public:
   explicit RelayWithPath(const rclcpp::NodeOptions & options)
-      : PathNode("relay", options)
+      : PathNode("relay", options),
+        CLOCK_TYPE(RCL_SYSTEM_TIME),
+        path_start_time_(0, 0, CLOCK_TYPE), path_deadline_duration_(0, 0)
   {
-    declare_parameter(IS_FIRST, false);
-    declare_parameter(PATH_DEADLINE_NS, 10 * 1000 * 1000);
+    declare_parameter<bool>(IS_FIRST, false);
+    // 	whole seconds (valid values are >= 0)
+    declare_parameter<int64_t>(PATH_DEADLINE_SEC, (int64_t) 0);
+    // nanoseconds (valid values are [0, 999999999])
+    declare_parameter<int64_t>(PATH_DEADLINE_NS, (int64_t)(10 * 1000 * 1000));
 
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     auto callback =
@@ -42,10 +48,20 @@ public:
         // TODO: set now
         auto m = std::make_unique<path_info_msg::msg::PathInfo>();
         if(is_first) {
-          m->path_start = now();
+          this->path_start_time_ = now();
+
+          // TODO check range
+          auto deadline_tv_sec = get_parameter(PATH_DEADLINE_SEC).get_value<int64_t>();
+          auto deadline_tv_ns = get_parameter(PATH_DEADLINE_NS).get_value<int64_t>();
+
+          this->path_deadline_duration_ = rclcpp::Duration(deadline_tv_sec, deadline_tv_ns);
+
+          m->path_start = this->path_start_time_;
+          m->path_deadline_duration = this->path_deadline_duration_;
         } else {
-          // TODO validate path info
+          // TODO validate path_info
           m->path_start = path_start_time_;
+          m->path_deadline_duration = path_deadline_duration_;
         }
         m->topic_name = std::string(pub_->get_topic_name());
         path_info_pub_->publish(std::move(m));
@@ -78,7 +94,8 @@ public:
         {
           if(msg->topic_name != sub_->get_topic_name()) return;
 
-          this->path_start_time_ = rclcpp::Time(msg->path_start);
+          this->path_start_time_ = rclcpp::Time(msg->path_start, CLOCK_TYPE);
+          this->path_deadline_duration_ = msg->path_deadline_duration;
           std::cout << "get path_info: "
                     << " topic: "  << msg->topic_name
                     << " path_start: " << this->path_start_time_.nanoseconds() << std::endl;
@@ -97,21 +114,30 @@ private:
   rclcpp::Subscription<path_info_msg::msg::PathInfo>::SharedPtr path_info_sub_;
 
   // TODO: have multiple times
+  rcl_clock_type_t CLOCK_TYPE;
   rclcpp::Time path_start_time_;
-  double path_dead_line_ns_;
+  rclcpp::Duration path_deadline_duration_;
 
   bool exceeds_deadline(const std::string& path) const
   {
     (void)path;
-    std::cout << "now: " << now_ns()
+    std::cout << std::fixed
+              << "now: " << now_ns()
               << " path_start: " << path_start_time_.nanoseconds()
-              << " deadline: " << std::to_string(path_dead_line_ns_) << std::endl;
+              << " deadline: " << std::to_string(path_deadline_duration_.nanoseconds()) << std::endl;
+
+    // TODO: verify path_info.valid_ns
+    if(path_start_time_ + path_deadline_duration_ <= now()) {
+      std::cout << "path overrun!" << std::endl;
+      return true;
+    }
+
     return false;
   }
 
   rclcpp::Time now() const
   {
-    rclcpp::Clock ros_clock(RCL_ROS_TIME);
+    rclcpp::Clock ros_clock(CLOCK_TYPE);
     return ros_clock.now();
   }
 
