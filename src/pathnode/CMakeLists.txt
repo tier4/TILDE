@@ -11,6 +11,8 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 find_package(rclcpp REQUIRED)
 
+find_package(path_info_msg REQUIRED)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -34,6 +36,7 @@ add_library(${PROJECT_NAME} SHARED
 )
 ament_target_dependencies(${PROJECT_NAME}
   "rclcpp"
+  "path_info_msg"
 )
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE "PATHNODE_BUILDING_LIBRARY")
