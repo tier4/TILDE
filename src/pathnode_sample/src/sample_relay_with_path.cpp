@@ -29,10 +29,9 @@ class RelayWithPath : public pathnode::PathNode
 {
 public:
   explicit RelayWithPath(const rclcpp::NodeOptions & options)
-      : PathNode("relay", options)
+      : PathNode("relay", options), path_name_("sample_path")
   {
     /* newly introduced variables for path */
-    const std::string path_name = "sample_path";
     declare_parameter<bool>(IS_FIRST, false);
     // 	whole seconds (valid values are >= 0)
     declare_parameter<int64_t>(PATH_DEADLINE_SEC, (int64_t) 0);
@@ -47,15 +46,19 @@ public:
     pub_ = this->create_publisher<std_msgs::msg::String>("out", qos);
 
     auto callback =
-        [this, &path_name](const std_msgs::msg::String &msg) -> void
+        [this](const std_msgs::msg::String &msg) -> void
       {
         std::cout << "sample_relay_with_path callback" << std::endl;
-        if(exceeds_deadline(path_name)) {
-          // do_error
-          return;
-        }
+        on_pathed_subscription(path_name_);
 
+        // if(exceeds_deadline(this->path_name_)) {
+          // do_error
+        //  return;
+        //}
+
+        std::cout << "sample_relay_with_path publish" << std::endl;
         pub_->publish(msg);
+        std::cout << "sample_relay_with_path published" << std::endl;
       };
 
 
@@ -64,19 +67,28 @@ public:
     auto deadline_tv_nsec = get_parameter(PATH_DEADLINE_NS).get_value<int64_t>();
 
     pathnode::PathNodeSubscriptionOptions path_node_options;
-    path_node_options.path_name_ = path_name;
+    path_node_options.path_name_ = path_name_;
+    path_node_options.is_first_ = get_parameter(IS_FIRST).get_value<bool>();
     path_node_options.path_deadline_duration_ = rclcpp::Duration(deadline_tv_sec,
                                                                  deadline_tv_nsec);
 
     path_node_options.publish_topic_names_.push_back(pub_->get_topic_name());
 
-    // Create a publisher with a custom Quality of Service profile.
+    // baggy
+    /*
     sub_ = this->create_path_node_subscription<std_msgs::msg::String>(
         path_node_options,
         "in", qos, callback);
+    */
+
+    sub_ = this->create_subscription<std_msgs::msg::String>(
+        "in", qos, callback);
+    setup_path(sub_->get_topic_name(),
+               path_node_options);
   }
 
 private:
+  std::string path_name_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_;
 };

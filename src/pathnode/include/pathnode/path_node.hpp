@@ -28,8 +28,11 @@ struct PathNodeInfo
   std::string subscription_topic_name_;
   // topics published in the main subscription callback
   std::vector<std::string> publish_topic_names_;
+
+  bool is_first_;
   rclcpp::Time path_start_time_;
   rclcpp::Duration path_deadline_duration_;
+
 
   rclcpp::Publisher<path_info_msg::msg::PathInfo>::SharedPtr pub_;
   rclcpp::Subscription<path_info_msg::msg::PathInfo>::SharedPtr sub_;
@@ -54,9 +57,19 @@ public:
   RCLCPP_PUBLIC
   virtual ~PathNode();
 
+  void setup_path(
+      const std::string &sub_topic,
+      const PathNodeSubscriptionOptions &path_node_options);
+
+
+  /// send path info at the beginning of main-topic subscription callback
+  void on_pathed_subscription(const std::string &path_name);
+
+  /// DON'T USE ME. create custom subscription
   /**
    * for now, we can use `const &` only for CallbackT arguments
    * TODO: support other types
+   * TODO: in this implementation, original `callback(msg)` fails
    */
   template<
     typename MessageT,
@@ -86,11 +99,13 @@ public:
   {
     const auto& path_name = path_node_options.path_name_;
 
+    // setup path_info_map
     if(path_node_info_map_.find(path_name) == path_node_info_map_.end()) {
       PathNodeInfo info;
       info.path_name_ = path_name;
       info.subscription_topic_name_ = topic_name;
       info.publish_topic_names_ = path_node_options.publish_topic_names_;
+      info.is_first_ = path_node_options.is_first_;
       info.pub_ = this->create_publisher<path_info_msg::msg::PathInfo>(path_name + "_info", qos);
       auto path_info_callback =
           [this, &info](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
@@ -107,11 +122,12 @@ public:
       info.sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
           path_name + "_info", qos, path_info_callback);
 
+      std::cout << "create_path_info: " << path_name << std::endl;
       path_node_info_map_[path_name] = info;
     }
 
+    // add pre-process to main callback
     auto main_topic_callback =
-        //[this, &path_node_options, &callback](MessageT msg) -> void
         [this, &path_node_options, &callback](CallbackArgT msg) -> void
         {
           std::cout << "main_topic_callback" << std::endl;
@@ -128,24 +144,26 @@ public:
 
           auto m = std::make_unique<path_info_msg::msg::PathInfo>();
           if(is_first) {
-            info.path_start_time_ = now();
-            info.path_deadline_duration_ = path_node_options.path_deadline_duration_;
+            info->path_start_time_ = now();
+            info->path_deadline_duration_ = path_node_options.path_deadline_duration_;
 
-            m->path_start = info.path_start_time_;
-            m->path_deadline_duration = info.path_deadline_duration_;
+            m->path_start = info->path_start_time_;
+            m->path_deadline_duration = info->path_deadline_duration_;
           } else {
             // TODO validate path_info
-            m->path_start = info.path_start_time_;
-            m->path_deadline_duration = info.path_deadline_duration_;
+            m->path_start = info->path_start_time_;
+            m->path_deadline_duration = info->path_deadline_duration_;
           }
 
-          for(const auto &pub_topic : info.publish_topic_names_) {
+          for(const auto &pub_topic : info->publish_topic_names_) {
             m->topic_name = pub_topic;
-            info.pub_->publish(*m);
+            std::cout << "send path_info: " << pub_topic << std::endl;
+            info->pub_->publish(*m);
           }
 
           // finally, call original function
           callback(msg);
+          std::cout << "end" << std::endl;
         };
 
     return create_subscription<MessageT>(
@@ -160,29 +178,34 @@ protected:
 
   bool exceeds_deadline(const std::string& path) const
   {
+    std::cout << "exceeds_deadline in: " << path << std::endl;;
     auto path_node_it = path_node_info_map_.find(path);
+    std::cout << "exceeds_deadline inin" << std::endl;;
     if(path_node_it == path_node_info_map_.end()) {
+      std::cout << "cannot find path_node_info: " << std::endl;;
       // TODO: return bool? raise exception?
-      return true;
+      return false;
     }
+    std::cout << "exceeds_deadline found" << std::endl;;
     const auto &info = path_node_it->second;
 
     std::cout << std::fixed
               << "now: " << now_ns()
-              << " path_start: " << info.path_start_time_.nanoseconds()
-              << " deadline: " << std::to_string(info.path_deadline_duration_.nanoseconds()) << std::endl;
+              << " path_start: " << info->path_start_time_.nanoseconds()
+              << " deadline: " << std::to_string(info->path_deadline_duration_.nanoseconds()) << std::endl;
 
     // TODO: verify path_info.valid_ns
-    if(info.path_start_time_ + info.path_deadline_duration_ <= now()) {
+    if(info->path_start_time_ + info->path_deadline_duration_ <= now()) {
       std::cout << "path overrun!" << std::endl;
       return true;
     }
 
+    std::cout << "exceeds_deadline return false" << std::endl;;
     return false;
   }
 
 private:
-  std::map<std::string, PathNodeInfo> path_node_info_map_;
+  std::map<std::string, std::shared_ptr<PathNodeInfo>> path_node_info_map_;
   rcl_clock_type_t CLOCK_TYPE;
 
   rclcpp::Time now() const
