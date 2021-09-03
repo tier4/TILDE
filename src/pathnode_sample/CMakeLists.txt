@@ -27,23 +27,13 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-function(add_dependencies library)
-  ament_target_dependencies(${library}
-    "rclcpp"
-    "rclcpp_components"
-    "std_msgs"
-    "pathnode"
-    "path_info_msg"
-    )
-endfunction()
-
 include_directories(include)
 
 add_library(pathnode_sample SHARED
   src/sample_publisher.cpp
   src/sample_subscriber.cpp
   src/sample_relay.cpp
-  # src/sample_relay_with_path.cpp
+  src/sample_relay_with_path.cpp
   )
 ament_target_dependencies(pathnode_sample
     "rclcpp"
@@ -52,9 +42,6 @@ ament_target_dependencies(pathnode_sample
     "pathnode"
     "path_info_msg"
     )
-# target_link_libraries(pathnode_sample
-#   "pathnode"
-# )
 
 rclcpp_components_register_node(pathnode_sample
   PLUGIN "pathnode_sample::Talker"
@@ -65,9 +52,9 @@ rclcpp_components_register_node(pathnode_sample
 rclcpp_components_register_node(pathnode_sample
   PLUGIN "pathnode_sample::Relay"
   EXECUTABLE relay)
-# rclcpp_components_register_node(pathnode_sample
-#   PLUGIN "pathnode_sample::RelayWithPath"
-#   EXECUTABLE relay_with_path)
+rclcpp_components_register_node(pathnode_sample
+  PLUGIN "pathnode_sample::RelayWithPath"
+  EXECUTABLE relay_with_path)
 
 
 install(TARGETS
