@@ -5,13 +5,12 @@ using pathnode::PathNodeInfo;
 using pathnode::PathNode;
 
 PathNodeSubscriptionOptions::PathNodeSubscriptionOptions():
-    path_deadline_duration_(0, 0)
+    valid_min_(0, 0), valid_max_(0, 0)
 {
 }
 
 PathNodeInfo::PathNodeInfo():
     CLOCK_TYPE(RCL_SYSTEM_TIME),
-    path_deadline_duration_(0, 0),
     valid_min_(0, 0), valid_max_(0, 0)
 {
 }
@@ -38,7 +37,6 @@ PathNode::~PathNode()
 }
 
 void PathNode::setup_path(
-    const std::string &sub_topic,
     const PathNodeSubscriptionOptions &path_node_options)
 {
   const auto& path_name = path_node_options.path_name_;
@@ -46,41 +44,30 @@ void PathNode::setup_path(
   // create path_info pub/sub
   if(path_node_info_map_.find(path_name) == path_node_info_map_.end()) {
     auto info = std::make_shared<PathNodeInfo>();
-    rclcpp::QoS qos(3); // TODO: may need the number of nodes in the path
+    rclcpp::QoS qos(1);
 
     info->path_name_ = path_name;
-    info->subscription_topic_name_ = sub_topic;
-    info->publish_topic_names_ = path_node_options.publish_topic_names_;
     info->is_first_ = path_node_options.is_first_;
+    info->valid_min_ = path_node_options.valid_min_;
+    info->valid_max_ = path_node_options.valid_max_;
+
     if(info->is_first_) {
-      info->path_deadline_duration_ = path_node_options.path_deadline_duration_;
+      info->pub_ = this->create_publisher<path_info_msg::msg::PathInfo>(path_name + "_info", qos);
+    } else {
+      auto path_info_callback =
+          [this](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
+          {
+            auto info_it = path_node_info_map_.find(msg->path_name);
+            if(info_it == path_node_info_map_.end()) {
+              std::cout << "path_info not found: " << msg->path_name << std::endl;
+              return;
+            }
+            auto info = info_it->second;
+            info->path_tickets_.insert(rclcpp::Time(msg->path_start, info->CLOCK_TYPE));
+          };
+      info->sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
+          path_name + "_info", qos, path_info_callback);
     }
-    info->pub_ = this->create_publisher<path_info_msg::msg::PathInfo>(path_name + "_info", qos);
-
-    auto path_info_callback =
-        [this](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
-        {
-          auto info_it = path_node_info_map_.find(msg->path_name);
-          if(info_it == path_node_info_map_.end()) {
-            std::cout << "path_info not found: " << msg->path_name << std::endl;
-            return;
-          }
-          auto info = info_it->second;
-
-          std::cout << "path_info_callback in: " << msg->topic_name << " "
-                    << "info sub topic name: " << info->subscription_topic_name_
-                    << std::endl;
-          if(msg->topic_name != info->subscription_topic_name_) return;
-
-          // TODO: validate msg->valid_ns
-          info->path_tickets_.insert(rclcpp::Time(msg->path_start, info->CLOCK_TYPE));
-          info->path_deadline_duration_ = msg->path_deadline_duration;
-          std::cout << "get path_info: "
-                    << " topic: "  << msg->topic_name
-                    << std::endl;
-        };
-    info->sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
-        path_name + "_info", qos, path_info_callback);
 
     std::cout << "create_path_info: " << path_name << std::endl;
     path_node_info_map_[path_name] = info;
@@ -95,25 +82,14 @@ void PathNode::on_pathed_subscription(const std::string &path_name)
     return;
   }
 
-  auto info = info_it->second;
+  auto &info = info_it->second;
+
+  if(!info->is_first_) {
+    return;
+  }
 
   auto m = std::make_unique<path_info_msg::msg::PathInfo>();
   m->path_name = path_name;
-
-  /* TODO: only first callback sends path info
-  // if is_first, set start_time, deadline_duration by myself.
-  // Otherwise, path_info callback does it.
-  if(info->is_first_) {
-    info->path_start_time_ = now();
-  }
-
-  m->path_start = info->path_start_time_;
-  */
-  m->path_deadline_duration = info->path_deadline_duration_;
-
-  for(const auto &pub_topic : info->publish_topic_names_) {
-    m->topic_name = pub_topic;
-    std::cout << "send path_info: " << pub_topic << std::endl;
-    info->pub_->publish(*m);
-  }
+  m->path_start = now();
+  info->pub_->publish(*m);
 }

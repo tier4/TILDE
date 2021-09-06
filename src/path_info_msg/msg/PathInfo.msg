@@ -1,7 +1,3 @@
 string path_name
 builtin_interfaces/Time path_start
-string topic_name
 builtin_interfaces/Time callback_start
-uint32 valid_ns
-builtin_interfaces/Duration path_deadline_duration
-

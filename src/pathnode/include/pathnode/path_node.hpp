@@ -15,8 +15,8 @@ struct PathNodeSubscriptionOptions
 {
   std::string path_name_;
   bool is_first_;
-  rclcpp::Duration path_deadline_duration_;
-  std::vector<std::string> publish_topic_names_;
+  rclcpp::Duration valid_min_;
+  rclcpp::Duration valid_max_;
 
   PathNodeSubscriptionOptions();
 };
@@ -29,15 +29,9 @@ struct PathNodeInfo
 
   rcl_clock_type_t CLOCK_TYPE;
   std::string path_name_;
-  // main subscription topic
-  std::string subscription_topic_name_;
-  // topics published in the main subscription callback
-  std::vector<std::string> publish_topic_names_;
 
   bool is_first_;
-  // rclcpp::Time path_start_time_;
   PathTickets path_tickets_;
-  rclcpp::Duration path_deadline_duration_;
   rclcpp::Duration valid_min_;
   rclcpp::Duration valid_max_;
 
@@ -56,7 +50,6 @@ public:
     NO_INFO
   };
 
-
   RCLCPP_PUBLIC
   explicit PathNode(
     const std::string & node_name,
@@ -72,7 +65,6 @@ public:
   virtual ~PathNode();
 
   void setup_path(
-      const std::string &sub_topic,
       const PathNodeSubscriptionOptions &path_node_options);
 
 
@@ -117,21 +109,14 @@ public:
     if(path_node_info_map_.find(path_name) == path_node_info_map_.end()) {
       PathNodeInfo info;
       info.path_name_ = path_name;
-      info.subscription_topic_name_ = topic_name;
-      info.publish_topic_names_ = path_node_options.publish_topic_names_;
       info.is_first_ = path_node_options.is_first_;
       info.pub_ = this->create_publisher<path_info_msg::msg::PathInfo>(path_name + "_info", qos);
       auto path_info_callback =
           [this, &info](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
           {
-            if(msg->topic_name != info.subscription_topic_name_) return;
-
-            // TODO: validate msg->valid_ns
             auto st = rclcpp::Time(msg->path_start, info.CLOCK_TYPE);
             info.path_tickets_.insert(st);
-            info.path_deadline_duration_ = msg->path_deadline_duration;
             std::cout << "get path_info: "
-                      << " topic: "  << msg->topic_name
                       << " path_start: " << st.nanoseconds() << std::endl;
           };
       info.sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
@@ -153,26 +138,6 @@ public:
           auto info_it = this->path_node_info_map_.find(path_name);
           if(info_it == this->path_node_info_map_.end()) {
             return callback(msg);
-          }
-
-          auto info = info_it->second;
-
-          // TODO: only first send path_info
-          auto m = std::make_unique<path_info_msg::msg::PathInfo>();
-          if(is_first) {
-            info->path_deadline_duration_ = path_node_options.path_deadline_duration_;
-
-            m->path_start = now();
-            m->path_deadline_duration = info->path_deadline_duration_;
-          } else {
-            // TODO validate path_info
-            m->path_deadline_duration = info->path_deadline_duration_;
-          }
-
-          for(const auto &pub_topic : info->publish_topic_names_) {
-            m->topic_name = pub_topic;
-            std::cout << "send path_info: " << pub_topic << std::endl;
-            info->pub_->publish(*m);
           }
 
           // finally, call original function
