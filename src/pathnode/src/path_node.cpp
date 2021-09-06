@@ -91,7 +91,7 @@ void PathNode::on_pathed_subscription(const std::string &path_name)
   auto m = std::make_unique<path_info_msg::msg::PathInfo>();
   m->path_name = path_name;
   m->path_start = now();
-  info->pub_->publish(*m);
+  info->pub_->publish(m);
 }
 
 rclcpp::Time PathNode::pop_path_start_time(const std::string& path)
