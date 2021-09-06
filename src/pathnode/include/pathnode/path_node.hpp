@@ -155,35 +155,7 @@ public:
 
 protected:
 
-  deadline_t exceeds_deadline(const std::string& path) const
-  {
-    auto path_node_it = path_node_info_map_.find(path);
-    if(path_node_it == path_node_info_map_.end()) {
-      std::cout << "cannot find path_node_info: " << std::endl;;
-      return NO_INFO;
-    }
-    auto &info = path_node_it->second;
-
-    // TODO: verify path_info.valid_ns
-    auto &tickets = info->path_tickets_;
-    deadline_t ret = OVERRUN;
-
-    auto nw = now();
-    for(auto it=tickets.begin(); it!=tickets.end(); it++) {
-      // if ticket is too old, remove it
-      if(*it + info->valid_max_ < nw) {
-        it = tickets.erase(it);
-        continue;
-      }
-      if(*it - info->valid_min_ < nw && nw < *it + info->valid_max_) {
-        ret = OK;
-        it = tickets.erase(it);
-        break;
-      }
-    }
-
-    return ret;
-  }
+  rclcpp::Time pop_path_start_time(const std::string& path);
 
 private:
   std::map<std::string, std::shared_ptr<PathNodeInfo>> path_node_info_map_;

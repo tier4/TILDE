@@ -93,3 +93,34 @@ void PathNode::on_pathed_subscription(const std::string &path_name)
   m->path_start = now();
   info->pub_->publish(*m);
 }
+
+rclcpp::Time PathNode::pop_path_start_time(const std::string& path)
+{
+  rclcpp::Time ret(0, 0, CLOCK_TYPE);
+  auto path_node_it = path_node_info_map_.find(path);
+  if(path_node_it == path_node_info_map_.end()) {
+    std::cout << "cannot find path_node_info: " << std::endl;;
+    return ret;
+  }
+  auto &info = path_node_it->second;
+
+  // TODO: verify path_info.valid_ns
+  auto &tickets = info->path_tickets_;
+
+  auto nw = now();
+  for(auto it=tickets.begin(); it!=tickets.end(); it++) {
+    // if ticket is too old, remove it
+    if(*it + info->valid_max_ < nw) {
+      it = tickets.erase(it);
+      continue;
+    }
+    if(*it - info->valid_min_ < nw && nw < *it + info->valid_max_) {
+      ret = *it;
+      it = tickets.erase(it);
+      break;
+    }
+  }
+
+  return ret;
+}
+

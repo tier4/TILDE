@@ -55,17 +55,9 @@ public:
       {
         on_pathed_subscription(path_name_);
 
-        auto check = exceeds_deadline(this->path_name_);
-        switch(check) {
-          case pathnode::PathNode::deadline_t::OK:
-            break;
-          case pathnode::PathNode::deadline_t::OVERRUN:
-            std::cout << "overrun" << std::endl;
-            return;
-          case pathnode::PathNode::deadline_t::NO_INFO:
-            std::cout << "overrun" << std::endl;
-            return;
-        }
+        auto path_start_time = pop_path_start_time(path_name_);
+        // TODO check deadline
+        (void) path_start_time;
 
         // usual procedure
         pub_->publish(msg);
