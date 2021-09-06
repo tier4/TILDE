@@ -178,29 +178,24 @@ protected:
 
   bool exceeds_deadline(const std::string& path) const
   {
-    std::cout << "exceeds_deadline in: " << path << std::endl;;
     auto path_node_it = path_node_info_map_.find(path);
-    std::cout << "exceeds_deadline inin" << std::endl;;
     if(path_node_it == path_node_info_map_.end()) {
       std::cout << "cannot find path_node_info: " << std::endl;;
       // TODO: return bool? raise exception?
       return false;
     }
-    std::cout << "exceeds_deadline found" << std::endl;;
     const auto &info = path_node_it->second;
-
-    std::cout << std::fixed
-              << "now: " << now_ns()
-              << " path_start: " << info->path_start_time_.nanoseconds()
-              << " deadline: " << std::to_string(info->path_deadline_duration_.nanoseconds()) << std::endl;
 
     // TODO: verify path_info.valid_ns
     if(info->path_start_time_ + info->path_deadline_duration_ <= now()) {
+      std::cout << std::fixed
+                << "now: " << now_ns()
+                << " path_start: " << info->path_start_time_.nanoseconds()
+                << " deadline: " << std::to_string(info->path_deadline_duration_.nanoseconds()) << std::endl;
       std::cout << "path overrun!" << std::endl;
       return true;
     }
 
-    std::cout << "exceeds_deadline return false" << std::endl;;
     return false;
   }
 
