@@ -1,6 +1,8 @@
 #ifndef PATH_NODE_HPP_
 #define PATH_NODE_HPP_
 
+#include <set>
+
 #include "rclcpp/node.hpp"
 #include "rclcpp/visibility_control.hpp"
 
@@ -22,6 +24,9 @@ struct PathNodeSubscriptionOptions
 // TODO: hide me
 struct PathNodeInfo
 {
+  using PathTicket = rclcpp::Time;
+  using PathTickets = std::set<PathTicket>;
+
   rcl_clock_type_t CLOCK_TYPE;
   std::string path_name_;
   // main subscription topic
@@ -30,9 +35,11 @@ struct PathNodeInfo
   std::vector<std::string> publish_topic_names_;
 
   bool is_first_;
-  rclcpp::Time path_start_time_;
+  // rclcpp::Time path_start_time_;
+  PathTickets path_tickets_;
   rclcpp::Duration path_deadline_duration_;
-
+  rclcpp::Duration valid_min_;
+  rclcpp::Duration valid_max_;
 
   rclcpp::Publisher<path_info_msg::msg::PathInfo>::SharedPtr pub_;
   rclcpp::Subscription<path_info_msg::msg::PathInfo>::SharedPtr sub_;
@@ -43,6 +50,13 @@ struct PathNodeInfo
 class PathNode : public rclcpp::Node
 {
 public:
+  enum deadline_t {
+    OK,
+    OVERRUN,
+    NO_INFO
+  };
+
+
   RCLCPP_PUBLIC
   explicit PathNode(
     const std::string & node_name,
@@ -113,11 +127,12 @@ public:
             if(msg->topic_name != info.subscription_topic_name_) return;
 
             // TODO: validate msg->valid_ns
-            info.path_start_time_ = rclcpp::Time(msg->path_start, info.CLOCK_TYPE);
+            auto st = rclcpp::Time(msg->path_start, info.CLOCK_TYPE);
+            info.path_tickets_.insert(st);
             info.path_deadline_duration_ = msg->path_deadline_duration;
             std::cout << "get path_info: "
                       << " topic: "  << msg->topic_name
-                      << " path_start: " << info.path_start_time_.nanoseconds() << std::endl;
+                      << " path_start: " << st.nanoseconds() << std::endl;
           };
       info.sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
           path_name + "_info", qos, path_info_callback);
@@ -142,16 +157,15 @@ public:
 
           auto info = info_it->second;
 
+          // TODO: only first send path_info
           auto m = std::make_unique<path_info_msg::msg::PathInfo>();
           if(is_first) {
-            info->path_start_time_ = now();
             info->path_deadline_duration_ = path_node_options.path_deadline_duration_;
 
-            m->path_start = info->path_start_time_;
+            m->path_start = now();
             m->path_deadline_duration = info->path_deadline_duration_;
           } else {
             // TODO validate path_info
-            m->path_start = info->path_start_time_;
             m->path_deadline_duration = info->path_deadline_duration_;
           }
 
@@ -176,27 +190,34 @@ public:
 
 protected:
 
-  bool exceeds_deadline(const std::string& path) const
+  deadline_t exceeds_deadline(const std::string& path) const
   {
     auto path_node_it = path_node_info_map_.find(path);
     if(path_node_it == path_node_info_map_.end()) {
       std::cout << "cannot find path_node_info: " << std::endl;;
-      // TODO: return bool? raise exception?
-      return false;
+      return NO_INFO;
     }
-    const auto &info = path_node_it->second;
+    auto &info = path_node_it->second;
 
     // TODO: verify path_info.valid_ns
-    if(info->path_start_time_ + info->path_deadline_duration_ <= now()) {
-      std::cout << std::fixed
-                << "now: " << now_ns()
-                << " path_start: " << info->path_start_time_.nanoseconds()
-                << " deadline: " << std::to_string(info->path_deadline_duration_.nanoseconds()) << std::endl;
-      std::cout << "path overrun!" << std::endl;
-      return true;
+    auto &tickets = info->path_tickets_;
+    deadline_t ret = OVERRUN;
+
+    auto nw = now();
+    for(auto it=tickets.begin(); it!=tickets.end(); it++) {
+      // if ticket is too old, remove it
+      if(*it + info->valid_max_ < nw) {
+        it = tickets.erase(it);
+        continue;
+      }
+      if(*it - info->valid_min_ < nw && nw < *it + info->valid_max_) {
+        ret = OK;
+        it = tickets.erase(it);
+        break;
+      }
     }
 
-    return false;
+    return ret;
   }
 
 private:

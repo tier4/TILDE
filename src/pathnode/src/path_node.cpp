@@ -11,8 +11,8 @@ PathNodeSubscriptionOptions::PathNodeSubscriptionOptions():
 
 PathNodeInfo::PathNodeInfo():
     CLOCK_TYPE(RCL_SYSTEM_TIME),
-    path_start_time_(0, 0, CLOCK_TYPE),
-    path_deadline_duration_(0, 0)
+    path_deadline_duration_(0, 0),
+    valid_min_(0, 0), valid_max_(0, 0)
 {
 }
 
@@ -73,11 +73,11 @@ void PathNode::setup_path(
           if(msg->topic_name != info->subscription_topic_name_) return;
 
           // TODO: validate msg->valid_ns
-          info->path_start_time_ = rclcpp::Time(msg->path_start, info->CLOCK_TYPE);
+          info->path_tickets_.insert(rclcpp::Time(msg->path_start, info->CLOCK_TYPE));
           info->path_deadline_duration_ = msg->path_deadline_duration;
           std::cout << "get path_info: "
                     << " topic: "  << msg->topic_name
-                    << " path_start: " << info->path_start_time_.nanoseconds() << std::endl;
+                    << std::endl;
         };
     info->sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
         path_name + "_info", qos, path_info_callback);
@@ -100,6 +100,7 @@ void PathNode::on_pathed_subscription(const std::string &path_name)
   auto m = std::make_unique<path_info_msg::msg::PathInfo>();
   m->path_name = path_name;
 
+  /* TODO: only first callback sends path info
   // if is_first, set start_time, deadline_duration by myself.
   // Otherwise, path_info callback does it.
   if(info->is_first_) {
@@ -107,6 +108,7 @@ void PathNode::on_pathed_subscription(const std::string &path_name)
   }
 
   m->path_start = info->path_start_time_;
+  */
   m->path_deadline_duration = info->path_deadline_duration_;
 
   for(const auto &pub_topic : info->publish_topic_names_) {
