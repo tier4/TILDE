@@ -154,23 +154,14 @@ public:
   }
 
 protected:
-
-  rclcpp::Time pop_path_start_time(const std::string& path);
+  bool pop_path_start_time(const std::string& path, rclcpp::Time &out);
+  rclcpp::Duration get_path_valid_min(const std::string &path);
+  rclcpp::Duration get_path_valid_max(const std::string &path);
+  rclcpp::Time now() const;
+  rcl_clock_type_t CLOCK_TYPE;
 
 private:
   std::map<std::string, std::shared_ptr<PathNodeInfo>> path_node_info_map_;
-  rcl_clock_type_t CLOCK_TYPE;
-
-  rclcpp::Time now() const
-  {
-    rclcpp::Clock ros_clock(CLOCK_TYPE);
-    return ros_clock.now();
-  }
-
-  double now_ns() const
-  {
-    return now().nanoseconds();
-  }
 };
 
 } // namespace pathnode

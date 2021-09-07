@@ -55,11 +55,38 @@ public:
       {
         on_pathed_subscription(path_name_);
 
-        auto path_start_time = pop_path_start_time(path_name_);
-        // TODO check deadline
-        (void) path_start_time;
+        rclcpp::Time path_start_time(0, 0, CLOCK_TYPE);
+
+        if(!pop_path_start_time(path_name_, path_start_time)) {
+          std::cout << "cannot find path_start_time" << std::endl;;
+          // do what you want: error handling or continue routine without deadline detection
+          return;
+        }
+
+        auto valid_min = get_path_valid_min(path_name_);
+        auto valid_max = get_path_valid_max(path_name_);
+
+        auto deadline_exceeds =
+            [this, &path_start_time, &valid_min, &valid_max]() -> bool
+            {
+              auto nw = this->now();
+              std::cout << "path_start_time: " << path_start_time.nanoseconds() << " "
+                        << "valid_min: " << valid_min.nanoseconds() << " "
+                        << "nw: " << nw.nanoseconds() << " "
+                        << "valid_max: " << valid_max.nanoseconds() << " "
+                        << "min: " << (path_start_time - valid_min).nanoseconds() << " "
+                        << "max: " << (path_start_time + valid_max).nanoseconds() << std::endl;
+              return !(path_start_time - valid_min < nw && nw < path_start_time + valid_max);
+            };
+
+        // you can call deadline_exceeds many times in your routine
+        if(deadline_exceeds()) {
+          std::cout << "deadline exceeds!" << std::endl;
+          return;
+        }
 
         // usual procedure
+        std::cout << "relay: " << msg.data << std::endl;
         pub_->publish(msg);
       };
 
@@ -88,7 +115,7 @@ public:
     setup_path(path_node_options);
   }
 
-private:
+ private:
   std::string path_name_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_;

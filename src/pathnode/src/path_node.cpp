@@ -41,37 +41,41 @@ void PathNode::setup_path(
 {
   const auto& path_name = path_node_options.path_name_;
 
-  // create path_info pub/sub
-  if(path_node_info_map_.find(path_name) == path_node_info_map_.end()) {
-    auto info = std::make_shared<PathNodeInfo>();
-    rclcpp::QoS qos(1);
-
-    info->path_name_ = path_name;
-    info->is_first_ = path_node_options.is_first_;
-    info->valid_min_ = path_node_options.valid_min_;
-    info->valid_max_ = path_node_options.valid_max_;
-
-    if(info->is_first_) {
-      info->pub_ = this->create_publisher<path_info_msg::msg::PathInfo>(path_name + "_info", qos);
-    } else {
-      auto path_info_callback =
-          [this](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
-          {
-            auto info_it = path_node_info_map_.find(msg->path_name);
-            if(info_it == path_node_info_map_.end()) {
-              std::cout << "path_info not found: " << msg->path_name << std::endl;
-              return;
-            }
-            auto info = info_it->second;
-            info->path_tickets_.insert(rclcpp::Time(msg->path_start, info->CLOCK_TYPE));
-          };
-      info->sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
-          path_name + "_info", qos, path_info_callback);
-    }
-
-    std::cout << "create_path_info: " << path_name << std::endl;
-    path_node_info_map_[path_name] = info;
+  // if path_info already exists, then do nothing
+  if(path_node_info_map_.find(path_name) != path_node_info_map_.end()) {
+    return;
   }
+
+  // prepare path_info data structure
+  // if first node then prepare path_info publisher else prepare path_info callback
+  auto info = std::make_shared<PathNodeInfo>();
+  rclcpp::QoS qos(1);
+
+  info->path_name_ = path_name;
+  info->is_first_ = path_node_options.is_first_;
+  info->valid_min_ = path_node_options.valid_min_;
+  info->valid_max_ = path_node_options.valid_max_;
+
+  if(info->is_first_) {
+    info->pub_ = this->create_publisher<path_info_msg::msg::PathInfo>(path_name + "_info", qos);
+  } else {
+    auto path_info_callback =
+        [this](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
+        {
+          auto info_it = path_node_info_map_.find(msg->path_name);
+          if(info_it == path_node_info_map_.end()) {
+            std::cout << "path_info not found: " << msg->path_name << std::endl;
+            return;
+          }
+          auto info = info_it->second;
+          info->path_tickets_.insert(rclcpp::Time(msg->path_start, info->CLOCK_TYPE));
+        };
+    info->sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
+        path_name + "_info", qos, path_info_callback);
+  }
+
+  std::cout << "create_path_info: " << path_name << std::endl;
+  path_node_info_map_[path_name] = info;
 }
 
 void PathNode::on_pathed_subscription(const std::string &path_name)
@@ -90,13 +94,15 @@ void PathNode::on_pathed_subscription(const std::string &path_name)
 
   auto m = std::make_unique<path_info_msg::msg::PathInfo>();
   m->path_name = path_name;
-  m->path_start = now();
-  info->pub_->publish(m);
+  auto nw = now();
+  m->path_start = nw;
+  info->path_tickets_.insert(nw); // for myself
+  info->pub_->publish(std::move(m));
 }
 
-rclcpp::Time PathNode::pop_path_start_time(const std::string& path)
+bool PathNode::pop_path_start_time(const std::string& path, rclcpp::Time &out)
 {
-  rclcpp::Time ret(0, 0, CLOCK_TYPE);
+  bool ret = false;
   auto path_node_it = path_node_info_map_.find(path);
   if(path_node_it == path_node_info_map_.end()) {
     std::cout << "cannot find path_node_info: " << std::endl;;
@@ -104,7 +110,6 @@ rclcpp::Time PathNode::pop_path_start_time(const std::string& path)
   }
   auto &info = path_node_it->second;
 
-  // TODO: verify path_info.valid_ns
   auto &tickets = info->path_tickets_;
 
   auto nw = now();
@@ -115,7 +120,8 @@ rclcpp::Time PathNode::pop_path_start_time(const std::string& path)
       continue;
     }
     if(*it - info->valid_min_ < nw && nw < *it + info->valid_max_) {
-      ret = *it;
+      ret = true;
+      out = *it;
       it = tickets.erase(it);
       break;
     }
@@ -124,3 +130,31 @@ rclcpp::Time PathNode::pop_path_start_time(const std::string& path)
   return ret;
 }
 
+rclcpp::Duration PathNode::get_path_valid_min(const std::string &path)
+{
+  auto path_node_it = path_node_info_map_.find(path);
+  if(path_node_it == path_node_info_map_.end()) {
+    std::cout << "get_path_valid_min: cannot find path_node_info: " << path << std::endl;;
+    return rclcpp::Duration(0, 0);
+  }
+
+  auto &info = path_node_it->second;
+  return info->valid_min_;
+}
+
+rclcpp::Duration PathNode::get_path_valid_max(const std::string &path)
+{
+  auto path_node_it = path_node_info_map_.find(path);
+  if(path_node_it == path_node_info_map_.end()) {
+    std::cout << "get_path_valid_max: cannot find path_node_info: " << path << std::endl;;
+    return rclcpp::Duration(0, 0);
+  }
+
+  auto &info = path_node_it->second;
+  return info->valid_max_;
+}
+
+rclcpp::Time PathNode::now() const
+{
+  return rclcpp::Clock(CLOCK_TYPE).now();
+}
