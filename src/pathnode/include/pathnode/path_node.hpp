@@ -2,6 +2,7 @@
 #define PATH_NODE_HPP_
 
 #include <set>
+#include <mutex>
 
 #include "rclcpp/node.hpp"
 #include "rclcpp/visibility_control.hpp"
@@ -161,6 +162,7 @@ protected:
   rcl_clock_type_t CLOCK_TYPE;
 
 private:
+  std::mutex path_node_info_map_mutex_;
   std::map<std::string, std::shared_ptr<PathNodeInfo>> path_node_info_map_;
 };
 

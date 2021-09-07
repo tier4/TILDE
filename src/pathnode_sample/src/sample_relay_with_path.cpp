@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdio>
 #include <memory>
+#include <thread>
 #include <utility>
 
 #include "rclcpp/rclcpp.hpp"
@@ -24,6 +25,7 @@ const std::string PATH_VALID_MIN_SEC = "path_valid_min_sec";
 const std::string PATH_VALID_MIN_NS  = "path_valid_min_ns";
 const std::string PATH_VALID_MAX_SEC = "path_valid_max_sec";
 const std::string PATH_VALID_MAX_NS  = "path_valid_max_ns";
+const std::string WAIT_MSEC          = "wait_msec";
 
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
@@ -38,22 +40,27 @@ public:
     // 	whole seconds (valid values are >= 0)
     declare_parameter<int64_t>(PATH_VALID_MIN_SEC, (int64_t) 0);
     // nanoseconds (valid values are [0, 999999999])
-    declare_parameter<int64_t>(PATH_VALID_MIN_NS, (int64_t)(10 * 1000 * 1000));
+    declare_parameter<int64_t>(PATH_VALID_MIN_NS, (int64_t)( 1 * 1000 * 1000));
     // 	whole seconds (valid values are >= 0)
     declare_parameter<int64_t>(PATH_VALID_MAX_SEC, (int64_t) 0);
     // nanoseconds (valid values are [0, 999999999])
     declare_parameter<int64_t>(PATH_VALID_MAX_NS, (int64_t)(10 * 1000 * 1000));
     /* from here */
 
+    // for dummy sleep
+    declare_parameter<int64_t>(WAIT_MSEC, (int64_t) 0);
+
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
 
     rclcpp::QoS qos(rclcpp::KeepLast(7));
     pub_ = this->create_publisher<std_msgs::msg::String>("out", qos);
 
+    auto wait_msec = get_parameter(WAIT_MSEC).get_value<int64_t>();
+
     auto callback =
-        [this](const std_msgs::msg::String &msg) -> void
+        [this, wait_msec](const std_msgs::msg::String &msg) -> void
       {
-        on_pathed_subscription(path_name_);
+        this->on_pathed_subscription(this->path_name_);
 
         rclcpp::Time path_start_time(0, 0, CLOCK_TYPE);
 
@@ -86,6 +93,8 @@ public:
         }
 
         // usual procedure
+        std::chrono::duration<int64_t, std::milli> dur(wait_msec);
+        std::this_thread::sleep_for(dur);
         std::cout << "relay: " << msg.data << std::endl;
         pub_->publish(msg);
       };

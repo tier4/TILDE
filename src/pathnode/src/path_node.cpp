@@ -41,6 +41,7 @@ void PathNode::setup_path(
 {
   const auto& path_name = path_node_options.path_name_;
 
+  std::lock_guard lock{path_node_info_map_mutex_};
   // if path_info already exists, then do nothing
   if(path_node_info_map_.find(path_name) != path_node_info_map_.end()) {
     return;
@@ -62,6 +63,7 @@ void PathNode::setup_path(
     auto path_info_callback =
         [this](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
         {
+          std::lock_guard lock{path_node_info_map_mutex_};
           auto info_it = path_node_info_map_.find(msg->path_name);
           if(info_it == path_node_info_map_.end()) {
             std::cout << "path_info not found: " << msg->path_name << std::endl;
@@ -80,9 +82,9 @@ void PathNode::setup_path(
 
 void PathNode::on_pathed_subscription(const std::string &path_name)
 {
+  std::lock_guard lock{path_node_info_map_mutex_};
   auto info_it = this->path_node_info_map_.find(path_name);
   if(info_it == this->path_node_info_map_.end()) {
-    std::cout << "pathinfo not found: " << path_name << std::endl;
     return;
   }
 
@@ -102,20 +104,23 @@ void PathNode::on_pathed_subscription(const std::string &path_name)
 
 bool PathNode::pop_path_start_time(const std::string& path, rclcpp::Time &out)
 {
+  std::lock_guard lock{path_node_info_map_mutex_};
   bool ret = false;
   auto path_node_it = path_node_info_map_.find(path);
   if(path_node_it == path_node_info_map_.end()) {
-    std::cout << "cannot find path_node_info: " << std::endl;;
+    std::cout << "pop_path_start_time cannot find path_node_info: " << std::endl;;
     return ret;
   }
-  auto &info = path_node_it->second;
+  auto info = path_node_it->second;
 
   auto &tickets = info->path_tickets_;
 
   auto nw = now();
-  for(auto it=tickets.begin(); it!=tickets.end(); it++) {
+  for(auto it=tickets.begin(); it!=tickets.end();) {
     // if ticket is too old, remove it
     if(*it + info->valid_max_ < nw) {
+      std::cout << "pop_path_start_time erase: " << it->nanoseconds() << std::endl;
+      // TODO: silently erase? Is it bettter to notify that there is too old ticket?
       it = tickets.erase(it);
       continue;
     }
@@ -125,6 +130,7 @@ bool PathNode::pop_path_start_time(const std::string& path, rclcpp::Time &out)
       it = tickets.erase(it);
       break;
     }
+    it++;
   }
 
   return ret;
@@ -132,6 +138,8 @@ bool PathNode::pop_path_start_time(const std::string& path, rclcpp::Time &out)
 
 rclcpp::Duration PathNode::get_path_valid_min(const std::string &path)
 {
+  // TODO: need lock? initialize once and read only access
+  // std::lock_guard lock{path_node_info_map_mutex_};
   auto path_node_it = path_node_info_map_.find(path);
   if(path_node_it == path_node_info_map_.end()) {
     std::cout << "get_path_valid_min: cannot find path_node_info: " << path << std::endl;;
@@ -144,6 +152,8 @@ rclcpp::Duration PathNode::get_path_valid_min(const std::string &path)
 
 rclcpp::Duration PathNode::get_path_valid_max(const std::string &path)
 {
+  // TODO: need lock? initialize once and read only access
+  // std::lock_guard lock{path_node_info_map_mutex_};
   auto path_node_it = path_node_info_map_.find(path);
   if(path_node_it == path_node_info_map_.end()) {
     std::cout << "get_path_valid_max: cannot find path_node_info: " << path << std::endl;;
