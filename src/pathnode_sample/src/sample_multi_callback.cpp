@@ -16,6 +16,7 @@ using namespace std::chrono_literals;
 namespace pathnode_sample
 {
 
+const std::string REENTRANT      = "reentrant";
 const std::string SUB1_WAIT_MS   = "sub1_wait_ms";
 const std::string SUB2_WAIT_MS   = "sub2_wait_ms";
 const std::string SUB3_WAIT_MS   = "sub3_wait_ms";
@@ -31,6 +32,7 @@ public:
   explicit SampleMultiCallback(const rclcpp::NodeOptions & options)
       : Node("sample_multi_callback", options)
   {
+    declare_parameter<bool>(REENTRANT,       false);
     declare_parameter<int64_t>(SUB1_WAIT_MS, (int64_t) 0);
     declare_parameter<int64_t>(SUB2_WAIT_MS, (int64_t) 0);
     declare_parameter<int64_t>(SUB3_WAIT_MS, (int64_t) 0);
@@ -38,6 +40,11 @@ public:
     declare_parameter<int64_t>(TIMER2_WAIT_MS, (int64_t) 0);
     declare_parameter<int64_t>(TIMER1_INTERVAL_MS, (int64_t) 1000);
     declare_parameter<int64_t>(TIMER2_INTERVAL_MS, (int64_t) 1000);
+
+
+    if(get_parameter(REENTRANT).get_value<bool>()) {
+      callback_group_ = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+    }
 
     int64_t sub1_wait_ms   = get_parameter(SUB1_WAIT_MS).get_value<int64_t>();
     int64_t sub2_wait_ms   = get_parameter(SUB2_WAIT_MS).get_value<int64_t>();
@@ -47,8 +54,11 @@ public:
     int64_t timer1_interval_ms = get_parameter(TIMER1_INTERVAL_MS).get_value<int64_t>();
     int64_t timer2_interval_ms = get_parameter(TIMER2_INTERVAL_MS).get_value<int64_t>();
 
+    auto sub_options = rclcpp::SubscriptionOptions();
+    sub_options.callback_group = callback_group_;
 
     pub1_ = create_publisher<std_msgs::msg::String>("pub1", 1);
+
     auto sub1_callback =
         [this, sub1_wait_ms](const std_msgs::msg::String &msg) -> void
         {
@@ -57,8 +67,7 @@ public:
           pub1_->publish(msg);
         };
     sub1_ = create_subscription<std_msgs::msg::String>(
-        "sub1", 3, sub1_callback);
-
+        "sub1", 3, sub1_callback, sub_options);
 
     pub2_ = create_publisher<std_msgs::msg::String>("pub2", 1);
     auto sub2_callback =
@@ -69,7 +78,7 @@ public:
           pub2_->publish(msg);
         };
     sub2_ = create_subscription<std_msgs::msg::String>(
-        "sub2", 3, sub2_callback);
+        "sub2", 3, sub2_callback, sub_options);
 
     pub3_ = create_publisher<std_msgs::msg::String>("pub3", 1);
     auto sub3_callback =
@@ -80,7 +89,7 @@ public:
           pub3_->publish(msg);
         };
     sub3_ = create_subscription<std_msgs::msg::String>(
-        "sub3", 3, sub3_callback);
+        "sub3", 3, sub3_callback, sub_options);
 
     timer1_pub_ = create_publisher<std_msgs::msg::String>("timer_pub1", 1);
     timer1_ = create_wall_timer(std::chrono::duration<int64_t, std::milli>(timer1_interval_ms),
@@ -90,7 +99,8 @@ public:
                                   std_msgs::msg::String msg;
                                   msg.data = "timer1_callback";
                                   timer1_pub_->publish(msg);
-                                });
+                                },
+                                callback_group_);
 
     timer2_pub_ = create_publisher<std_msgs::msg::String>("timer_pub2", 1);
     timer2_ = create_wall_timer(std::chrono::duration<int64_t, std::milli>(timer2_interval_ms),
@@ -100,7 +110,8 @@ public:
                                   std_msgs::msg::String msg;
                                   msg.data = "timer2_callback";
                                   timer2_pub_->publish(msg);
-                                });
+                                },
+                                callback_group_);
   }
 
 private:
@@ -115,6 +126,8 @@ private:
   rclcpp::TimerBase::SharedPtr timer2_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr timer1_pub_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr timer2_pub_;
+
+  rclcpp::CallbackGroup::SharedPtr callback_group_;
 
   void sleep(const std::string &name,
              int64_t ms)
