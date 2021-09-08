@@ -52,7 +52,7 @@ public:
     auto sub1_callback =
         [this, sub1_wait_ms](const std_msgs::msg::String &msg) -> void
         {
-          std::cout << "sub1_callback " << msg.data << std::endl;
+          std::cout << get_name() << ":sub1_callback " << msg.data << std::endl;
           sleep("sub1_callback", sub1_wait_ms);
           pub1_->publish(msg);
         };
@@ -64,7 +64,7 @@ public:
     auto sub2_callback =
         [this, sub2_wait_ms](const std_msgs::msg::String &msg) -> void
         {
-          std::cout << "sub2_callback " << msg.data << std::endl;
+          std::cout << get_name() << "sub2_callback " << msg.data << std::endl;
           sleep("sub2_callback", sub2_wait_ms);
           pub2_->publish(msg);
         };
@@ -75,7 +75,7 @@ public:
     auto sub3_callback =
         [this, sub3_wait_ms](const std_msgs::msg::String &msg) -> void
         {
-          std::cout << "sub3_callback " << msg.data << std::endl;
+          std::cout << get_name() << "sub3_callback " << msg.data << std::endl;
           sleep("sub3_callback", sub3_wait_ms);
           pub3_->publish(msg);
         };
@@ -119,9 +119,9 @@ private:
   void sleep(const std::string &name,
              int64_t ms)
   {
-    std::cout << name << " start sleep " << ms << std::endl;
+    std::cout << get_name() << ":" << name << " start sleep " << ms << std::endl;
     std::this_thread::sleep_for(std::chrono::duration<int64_t, std::milli>(ms));
-    std::cout << name << " wakeup and return" << std::endl;
+    std::cout << get_name() << ":" << name << " wakeup and return" << std::endl;
   }
 };
 
