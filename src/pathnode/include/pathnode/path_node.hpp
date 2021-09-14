@@ -6,6 +6,7 @@
 
 #include "rclcpp/node.hpp"
 #include "rclcpp/visibility_control.hpp"
+#include "rclcpp/node_interfaces/get_node_topics_interface.hpp"
 
 #include "path_info_msg/msg/path_info.hpp"
 
@@ -72,11 +73,9 @@ public:
   /// send path info at the beginning of main-topic subscription callback
   void on_pathed_subscription(const std::string &path_name);
 
-  /// DON'T USE ME. create custom subscription
+  /// create custom subscription
   /**
-   * for now, we can use `const &` only for CallbackT arguments
-   * TODO: support other types
-   * TODO: in this implementation, original `callback(msg)` fails
+   * This is the implementation of `first node only send path_info` strategy.
    */
   template<
     typename MessageT,
@@ -104,6 +103,11 @@ public:
       MessageMemoryStrategyT::create_default()
     ))
   {
+    auto node_topics_interface = rclcpp::node_interfaces::get_node_topics_interface(this);
+    auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
+    std::cout << __func__ << " topic_name: " << topic_name << std::endl;
+    std::cout << __func__ << " resolved_topic_name: " << resolved_topic_name << std::endl;
+
     const auto& path_name = path_node_options.path_name_;
 
     setup_path(path_node_options);

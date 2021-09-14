@@ -35,6 +35,7 @@ add_library(pathnode_sample SHARED
   src/sample_relay.cpp
   src/sample_relay_with_path.cpp
   src/sample_relay_with_path2.cpp
+  src/sample_relay_with_sub_timing.cpp
   src/sample_multi_callback.cpp
   )
 ament_target_dependencies(pathnode_sample
@@ -60,6 +61,9 @@ rclcpp_components_register_node(pathnode_sample
 rclcpp_components_register_node(pathnode_sample
   PLUGIN "pathnode_sample::RelayWithPath2"
   EXECUTABLE relay_with_path2)
+rclcpp_components_register_node(pathnode_sample
+  PLUGIN "pathnode_sample::RelayWithSubTiming"
+  EXECUTABLE relay_with_sub_timing)
 rclcpp_components_register_node(pathnode_sample
   PLUGIN "pathnode_sample::SampleMultiCallback"
   EXECUTABLE sample_multi_callback)

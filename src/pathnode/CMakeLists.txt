@@ -33,6 +33,7 @@ install(
 
 add_library(${PROJECT_NAME} SHARED
   "src/path_node.cpp"
+  "src/sub_timing_advertise_node.cpp"
 )
 ament_target_dependencies(${PROJECT_NAME}
   "rclcpp"
