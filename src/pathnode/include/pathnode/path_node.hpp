@@ -106,44 +106,18 @@ public:
   {
     const auto& path_name = path_node_options.path_name_;
 
-    // setup path_info_map
-    if(path_node_info_map_.find(path_name) == path_node_info_map_.end()) {
-      PathNodeInfo info;
-      info.path_name_ = path_name;
-      info.is_first_ = path_node_options.is_first_;
-      info.pub_ = this->create_publisher<path_info_msg::msg::PathInfo>(path_name + "_info", qos);
-      auto path_info_callback =
-          [this, &info](path_info_msg::msg::PathInfo::UniquePtr msg) -> void
-          {
-            auto st = rclcpp::Time(msg->path_start, info.CLOCK_TYPE);
-            info.path_tickets_.insert(st);
-            std::cout << "get path_info: "
-                      << " path_start: " << st.nanoseconds() << std::endl;
-          };
-      info.sub_ = this->create_subscription<path_info_msg::msg::PathInfo>(
-          path_name + "_info", qos, path_info_callback);
-
-      std::cout << "create_path_info: " << path_name << std::endl;
-      path_node_info_map_[path_name] = info;
-    }
+    setup_path(path_node_options);
 
     // add pre-process to main callback
+    // if callback is reference(i.e. &callback), SEGV in callback(std::forward<...>)
+    // I guess we should hold variables such as pub_ in original function (really?)
     auto main_topic_callback =
-        [this, &path_node_options, &callback](CallbackArgT msg) -> void
+        [this, path_name, callback](CallbackArgT msg) -> void
         {
-          std::cout << "main_topic_callback" << std::endl;
-          // TODO: make path_node_options const (need C++14?)
-
-          const auto& path_name = path_node_options.path_name_;
-          const auto is_first = path_node_options.is_first_;
-          auto info_it = this->path_node_info_map_.find(path_name);
-          if(info_it == this->path_node_info_map_.end()) {
-            return callback(msg);
-          }
+          on_pathed_subscription(path_name);
 
           // finally, call original function
-          callback(msg);
-          std::cout << "end" << std::endl;
+          callback(std::forward<CallbackArgT>(msg));
         };
 
     return create_subscription<MessageT>(
