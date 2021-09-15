@@ -93,8 +93,6 @@ public:
 private:
   /// topic name vs TopicInfoPublisher
   std::map<std::string, TopicInfoPublisher> topic_info_pubs_;
-  rclcpp::Time now() const;
-  rcl_clock_type_t CLOCK_TYPE;
 };
 
 } // namespace pathnode
