@@ -10,9 +10,9 @@ from path_info_msg.msg import TopicInfo
 
 LIDAR_PREPROCESS = [
     '/sensing/lidar/top/self_cropped/pointcloud_ex',
-    # '/sensing/lidar/top/mirror_cropped/pointcloud_ex',
+    # '/sensing/lidar/top/mirror_cropped/pointcloud_ex',  # not autoware node
     '/sensing/lidar/top/rectified/pointcloud_ex',
-    # '/sensing/lidar/top/outlier_filtered/pointcloud',
+    '/sensing/lidar/top/outlier_filtered/pointcloud',
     '/sensing/lidar/concatenated/pointcloud',
     '/sensing/lidar/measurement_range_cropped/pointcloud',
 ]
