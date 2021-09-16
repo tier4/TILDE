@@ -64,15 +64,19 @@ public:
     auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
 
     auto topic_info_name = resolved_topic_name + "_info";
+
     auto topic_info_pub = create_publisher<path_info_msg::msg::TopicInfo>(
         topic_info_name,
         rclcpp::QoS(1));
     topic_info_pubs_[topic_info_name] = topic_info_pub;
 
+
     auto main_topic_callback
         = [this, resolved_topic_name, topic_info_name, callback](CallbackArgT msg) -> void
           {
             auto m = std::make_unique<path_info_msg::msg::TopicInfo>();
+            m->seq = seq_;
+            ++seq_;
             m->node_fqn = get_fully_qualified_name();
             m->topic_name = resolved_topic_name;
             m->callback_start = now();
@@ -93,6 +97,7 @@ public:
 private:
   /// topic name vs TopicInfoPublisher
   std::map<std::string, TopicInfoPublisher> topic_info_pubs_;
+  int64_t seq_;
 };
 
 } // namespace pathnode
