@@ -48,13 +48,13 @@ class TopicInfoStatistics(object):
             np.save(fname, self.data)
 
         # TODO: ignore nan(-1) field
-        self.data[self.data < 0] = 0.0
+        data = self.data[self.data.min(axis=1) > 0]
 
         nano2msec = 1000 * 1000
-        self.data /= nano2msec
+        data /= nano2msec
 
-        diff = self.data[:, 1:] - self.data[:, :-1]
-        e2e = self.data[:, -1] - self.data[:, 0]
+        diff = data[:, 1:] - data[:, :-1]
+        e2e = data[:, -1] - data[:, 0]
 
         maxtime = diff.max(axis=0)
         avgtime = diff.mean(axis=0)
@@ -87,6 +87,10 @@ class PathVisNode(Node):
         topics = self.get_parameter("topics").get_parameter_value().string_array_value
         window = self.get_parameter("window").get_parameter_value().integer_value
 
+        self.seq_min = 0
+        self.seq_max = window
+        self.window = window
+
         self.statistics = TopicInfoStatistics(topics, window)
         self.subs = []
         for topic in topics:
@@ -100,6 +104,10 @@ class PathVisNode(Node):
 
     def listener_callback(self, topic_info):
         seq = topic_info.seq
+
+        if not (self.seq_min <= seq < self.seq_max):
+            return
+
         topic = topic_info.topic_name
         stime = Time.from_msg(topic_info.callback_start).nanoseconds
         dump = self.get_parameter("dump").get_parameter_value().bool_value
@@ -108,6 +116,8 @@ class PathVisNode(Node):
         self.statistics.set(seq, topic, stime)
         if self.statistics.is_filled():
             self.statistics.dump_and_clear(dump)
+            self.seq_min += self.window
+            self.seq_max += self.window
 
 def main(args=None):
     rclpy.init(args=args)
