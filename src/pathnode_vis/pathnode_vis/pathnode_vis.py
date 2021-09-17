@@ -21,6 +21,7 @@ class TopicInfoStatistics(object):
     def __init__(self, topics, max_rows=10):
         self.topics = topics
         self.t2i = {topic:i for i, topic in enumerate(topics)}
+        # (n_messages, n_subcallbacks), nanoseconds
         self.data = - np.ones((max_rows, len(topics)), dtype=np.float)
         self.max_rows = max_rows
         self.num_dump = -1
@@ -49,13 +50,18 @@ class TopicInfoStatistics(object):
         # TODO: ignore nan(-1) field
         self.data[self.data < 0] = 0.0
 
-        diff = self.data[1:] - self.data[:-1]
-
         nano2msec = 1000 * 1000
+        self.data /= nano2msec
 
-        maxtime = diff.max(axis=0) / nano2msec
-        avgtime = diff.mean(axis=0) / nano2msec
-        mintime = diff.min(axis=0) / nano2msec
+        diff = self.data[:, 1:] - self.data[:, :-1]
+        e2e = self.data[:, -1] - self.data[:, 0]
+
+        maxtime = diff.max(axis=0)
+        avgtime = diff.mean(axis=0)
+        mintime = diff.min(axis=0)
+        maxe2e = e2e.max()
+        avge2e = e2e.mean()
+        mine2e = e2e.min()
 
         def fmt(vec):
             s = ""
@@ -66,6 +72,7 @@ class TopicInfoStatistics(object):
         print("max: " + fmt(maxtime))
         print("avg: " + fmt(avgtime))
         print("min: " + fmt(mintime))
+        print("e2e: " + fmt([maxe2e, avge2e, mine2e]))
         print("")
 
         self.data[...] = -1.0
