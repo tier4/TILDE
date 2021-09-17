@@ -5,6 +5,9 @@
 #include "rclcpp/node.hpp"
 #include "rclcpp/visibility_control.hpp"
 #include "rclcpp/node_interfaces/get_node_topics_interface.hpp"
+#include "rclcpp/message_info.hpp"
+
+#include "rmw/types.h"
 
 #include "path_info_msg/msg/topic_info.hpp"
 
@@ -72,14 +75,20 @@ public:
     seqs_[topic_info_name] = 0;
 
     auto main_topic_callback
-        = [this, resolved_topic_name, topic_info_name, callback](CallbackArgT msg) -> void
+        = [this, resolved_topic_name, topic_info_name, callback](CallbackArgT msg,
+                                                                 const rclcpp::MessageInfo &info) -> void
           {
+            auto minfo = info.get_rmw_message_info();
+
             auto m = std::make_unique<path_info_msg::msg::TopicInfo>();
             auto &seq = seqs_[topic_info_name];
             m->seq = seq;
             seq++;
             m->node_fqn = get_fully_qualified_name();
             m->topic_name = resolved_topic_name;
+            for(size_t i=0; i<RMW_GID_STORAGE_SIZE; i++) {
+              m->publisher_gid[i] = minfo.publisher_gid.data[i];
+            }
             m->callback_start = now();
             topic_info_pubs_[topic_info_name]->publish(std::move(m));
 
