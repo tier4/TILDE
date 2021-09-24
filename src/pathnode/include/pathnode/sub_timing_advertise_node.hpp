@@ -119,7 +119,9 @@ public:
   )
   {
     auto pub = create_publisher<MessageT, AllocatorT, PublisherT>(topic_name, qos, options);
-    return std::make_shared<TimingAdvertisePublisher<MessageT, AllocatorT>>(pub);
+    auto info_topic = std::string(pub->get_topic_name()) + "_info_pub";
+    auto info_pub = create_publisher<path_info_msg::msg::TopicInfo>(info_topic, 1);
+    return std::make_shared<TimingAdvertisePublisher<MessageT, AllocatorT>>(info_pub, pub, get_fully_qualified_name());
   }
 
 
