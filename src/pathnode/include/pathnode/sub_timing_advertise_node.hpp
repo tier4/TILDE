@@ -10,6 +10,7 @@
 #include "rmw/types.h"
 
 #include "path_info_msg/msg/topic_info.hpp"
+#include "timing_advertise_publisher.hpp"
 
 namespace pathnode
 {
@@ -33,7 +34,7 @@ public:
   RCLCPP_PUBLIC
   virtual ~SubTimingAdvertiseNode();
 
-    /// create custom subscription
+  /// create custom subscription
   /**
    * This is the implementation of `first node only send path_info` strategy.
    */
@@ -104,7 +105,25 @@ public:
         msg_mem_strat);
   }
 
-private:
+  template<
+    typename MessageT,
+    typename AllocatorT = std::allocator<void>,
+    typename PublisherT = rclcpp::Publisher<MessageT, AllocatorT>,
+    typename TimingAdvertisePublisherT = TimingAdvertisePublisher<MessageT, AllocatorT>>
+  std::shared_ptr<TimingAdvertisePublisherT>
+  create_timing_advertise_publisher(
+    const std::string & topic_name,
+    const rclcpp::QoS & qos,
+    const rclcpp::PublisherOptionsWithAllocator<AllocatorT> & options =
+    rclcpp::PublisherOptionsWithAllocator<AllocatorT>()
+  )
+  {
+    auto pub = create_publisher<MessageT, AllocatorT, PublisherT>(topic_name, qos, options);
+    return std::make_shared<TimingAdvertisePublisher<MessageT, AllocatorT>>(pub);
+  }
+
+
+ private:
   /// topic info name vs TopicInfoPublisher
   std::map<std::string, TopicInfoPublisher> topic_info_pubs_;
   /// topic info name vs seq

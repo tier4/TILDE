@@ -33,11 +33,11 @@ public:
     // Create a publisher with a custom Quality of Service profile.
     rclcpp::QoS qos(rclcpp::KeepLast(7));
     sub_ = this->create_timing_advertise_subscription<std_msgs::msg::String>("in", qos, callback);
-    pub_ = this->create_publisher<std_msgs::msg::String>("out", qos);
+    pub_ = this->create_timing_advertise_publisher<std_msgs::msg::String>("out", qos);
   }
 
 private:
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
+  std::shared_ptr<pathnode::TimingAdvertisePublisher<std_msgs::msg::String>> pub_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_;
 };
 
