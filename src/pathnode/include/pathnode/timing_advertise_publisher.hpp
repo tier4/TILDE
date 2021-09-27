@@ -1,8 +1,11 @@
 #ifndef TIMING_ADVERTISE_PUBLISHER_HPP_
 #define TIMING_ADVERTISE_PUBLISHER_HPP_
 
+#include <memory>
+
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/clock.hpp"
+#include "rclcpp/macros.hpp"
 
 #include "path_info_msg/msg/topic_info.hpp"
 
@@ -38,6 +41,8 @@ class TimingAdvertisePublisher
   using TopicInfoPublisher = rclcpp::Publisher<path_info_msg::msg::TopicInfo>;
 
 public:
+  RCLCPP_SMART_PTR_DEFINITIONS(TimingAdvertisePublisher)
+
   TimingAdvertisePublisher(
       std::shared_ptr<TopicInfoPublisher> info_pub,
       std::shared_ptr<PublisherT> pub,

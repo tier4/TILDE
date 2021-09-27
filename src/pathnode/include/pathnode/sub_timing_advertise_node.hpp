@@ -1,11 +1,14 @@
 #ifndef SUB_TIMING_ADVERTISE_NODE_HPP_
 #define SUB_TIMING_ADVERTISE_NODE_HPP_
 
+#include <memory>
 #include <set>
+
 #include "rclcpp/node.hpp"
 #include "rclcpp/visibility_control.hpp"
 #include "rclcpp/node_interfaces/get_node_topics_interface.hpp"
 #include "rclcpp/message_info.hpp"
+#include "rclcpp/macros.hpp"
 
 #include "rmw/types.h"
 
@@ -20,6 +23,9 @@ class SubTimingAdvertiseNode : public rclcpp::Node
   using TopicInfoPublisher = rclcpp::Publisher<path_info_msg::msg::TopicInfo>::SharedPtr;
 
 public:
+  RCLCPP_SMART_PTR_DEFINITIONS(SubTimingAdvertiseNode)
+
+
   RCLCPP_PUBLIC
   explicit SubTimingAdvertiseNode(
     const std::string & node_name,
