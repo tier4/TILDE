@@ -25,11 +25,7 @@ auto get_timestamp(rclcpp::Time t, const T *a) -> decltype(a->header.timestamp, 
   return a->header.timestamp;
 }
 
-auto get_timestamp(rclcpp::Time t, ...) -> rclcpp::Time
-{
-  std::cout << "get rclcpp::Time t" << std::endl;
-  return t;
-}
+rclcpp::Time get_timestamp(rclcpp::Time t, ...);
 
 template<typename MessageT,
          typename AllocatorT = std::allocator<void>>
@@ -53,44 +49,36 @@ public:
   void
   publish(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
-    std::cout << "TAP publish" << std::endl;
-    auto info = std::make_unique<path_info_msg::msg::TopicInfo>();
-    info->seq = seq_;
-    seq_++;
-    info->node_fqn = node_fqn_;
-    info->topic_name = pub_->get_topic_name();
-
-    info->callback_start = get_timestamp(clock_->now(), msg.get());
-    info_pub_->publish(std::move(info));
-
+    publish_info(get_timestamp(clock_->now(), msg.get()));
     pub_->publish(std::move(msg));
   }
 
   void
   publish(const MessageT & msg)
   {
-    std::cout << "TAP publish" << std::endl;
+    publish_info(get_timestamp(clock_->now(), &msg));
     pub_->publish(msg);
   }
 
   void
   publish(const rcl_serialized_message_t & serialized_msg)
   {
-    std::cout << "TAP publish" << std::endl;
+    std::cout << "TAP publish serialized message (not supported)" << std::endl;
+    // publish_info(get_timestamp(clock_->now(), msg.get()));
     pub_->publish(serialized_msg);
   }
 
   void
   publish(const rclcpp::SerializedMessage & serialized_msg)
   {
-    std::cout << "TAP publish" << std::endl;
+    std::cout << "TAP publish SerializedMessage (not supported)" << std::endl;
     pub_->publish(serialized_msg);
   }
 
   void
   publish(rclcpp::LoanedMessage<MessageT, AllocatorT> && loaned_msg)
   {
-    std::cout << "TAP publish" << std::endl;
+    std::cout << "TAP publish LoanedMessage (not supported)" << std::endl;
     pub_->publish(loaned_msg);
   }
 
@@ -102,6 +90,18 @@ private:
   int64_t seq_;
   const std::string node_fqn_;
   std::unique_ptr<rclcpp::Clock> clock_;
+
+  void publish_info(const rclcpp::Time &t)
+  {
+    auto info = std::make_unique<path_info_msg::msg::TopicInfo>();
+    info->seq = seq_;
+    seq_++;
+    info->node_fqn = node_fqn_;
+    info->topic_name = pub_->get_topic_name();
+
+    info->callback_start = t;
+    info_pub_->publish(std::move(info));
+  }
 };
 
 } // namespace pathnode
