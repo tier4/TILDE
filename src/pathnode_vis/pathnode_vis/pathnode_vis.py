@@ -1,5 +1,6 @@
 #!env python3
 
+import os
 import collections
 import numpy as np
 from logging import basicConfig, getLogger, DEBUG
@@ -10,7 +11,7 @@ from rclpy.time import Time
 
 from path_info_msg.msg import TopicInfo
 
-basicConfig(level=DEBUG)
+basicConfig(level=os.getenv('LOG_LEVEL', 'INFO'))
 logger = getLogger(__name__)
 
 # for subscriber demo
