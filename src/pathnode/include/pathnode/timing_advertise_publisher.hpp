@@ -2,6 +2,7 @@
 #define TIMING_ADVERTISE_PUBLISHER_HPP_
 
 #include <memory>
+#include <type_traits>
 
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/clock.hpp"
@@ -21,11 +22,44 @@ auto get_timestamp(rclcpp::Time t, T a) -> decltype(a.header.timestamp, t)
 }
 */
 
+template<typename M, typename = void>
+struct HasHeader : public std::false_type {};
+
+template<typename M>
+struct HasHeader<M, decltype((void) M::header)>: std::true_type {};
+
+template <typename M, typename Enable = void> struct Process {
+  static rclcpp::Time get_timestamp2(rclcpp::Time t, M *m) {
+    std::cout << "rclcpp::Time2" << std::endl;
+    return t;
+  }
+
+  static rclcpp::Time get_timestamp3(rclcpp::Time t, const M *m) {
+    std::cout << "rclcpp::Time3" << std::endl;
+    return t;
+  }
+};
+
+template <typename M>
+struct Process<M, typename std::enable_if<HasHeader<M>::value>::type> {
+  static rclcpp::Time get_timestamp2(rclcpp::Time t, M *m) {
+    std::cout << "header Time2" << std::endl;
+    return m->header.stamp;
+  }
+
+  static rclcpp::Time get_timestamp3(rclcpp::Time t, const M *m) {
+    std::cout << "header Time3" << std::endl;
+    return m->header.stamp;
+  }
+
+};
+
 template <class T>
-auto get_timestamp(rclcpp::Time t, const T *a) -> decltype(a->header.timestamp, t)
+auto get_timestamp(rclcpp::Time t, T *a) -> decltype(rclcpp::Time(a->header.stamp), t)
 {
   std::cout << "get header timestamp" << std::endl;
-  return a->header.timestamp;
+  rclcpp::Time ret(a->header.stamp);
+  return ret;
 }
 
 rclcpp::Time get_timestamp(rclcpp::Time t, ...);
@@ -54,14 +88,14 @@ public:
   void
   publish(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
-    publish_info(get_timestamp(clock_->now(), msg.get()));
+    publish_info(Process<MessageT>::get_timestamp2(clock_->now(), msg.get()));
     pub_->publish(std::move(msg));
   }
 
   void
   publish(const MessageT & msg)
   {
-    publish_info(get_timestamp(clock_->now(), &msg));
+    publish_info(Process<MessageT>::get_timestamp3(clock_->now(), &msg));
     pub_->publish(msg);
   }
 
@@ -96,7 +130,7 @@ private:
   const std::string node_fqn_;
   std::unique_ptr<rclcpp::Clock> clock_;
 
-  void publish_info(const rclcpp::Time &t)
+  void publish_info(rclcpp::Time t)
   {
     auto info = std::make_unique<path_info_msg::msg::TopicInfo>();
     info->seq = seq_;

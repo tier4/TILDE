@@ -73,7 +73,7 @@ public:
     auto node_topics_interface = get_node_topics_interface(this);
     auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
 
-    auto topic_info_name = resolved_topic_name + "_info";
+    auto topic_info_name = resolved_topic_name + "/info/sub";
 
     auto topic_info_pub = create_publisher<path_info_msg::msg::TopicInfo>(
         topic_info_name,
@@ -125,7 +125,7 @@ public:
   )
   {
     auto pub = create_publisher<MessageT, AllocatorT, PublisherT>(topic_name, qos, options);
-    auto info_topic = std::string(pub->get_topic_name()) + "_info_pub";
+    auto info_topic = std::string(pub->get_topic_name()) + "/info/pub";
     auto info_pub = create_publisher<path_info_msg::msg::TopicInfo>(info_topic, 1);
     return std::make_shared<TimingAdvertisePublisher<MessageT, AllocatorT>>(info_pub, pub, get_fully_qualified_name());
   }

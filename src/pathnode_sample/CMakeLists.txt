@@ -12,6 +12,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 find_package(pathnode REQUIRED)
 find_package(path_info_msg REQUIRED)
@@ -31,6 +32,7 @@ include_directories(include)
 
 add_library(pathnode_sample SHARED
   src/sample_publisher.cpp
+  src/sample_publish_header.cpp
   src/sample_subscriber.cpp
   src/sample_relay.cpp
   src/sample_relay_with_path.cpp
@@ -44,11 +46,15 @@ ament_target_dependencies(pathnode_sample
     "std_msgs"
     "pathnode"
     "path_info_msg"
+    "sensor_msgs"
     )
 
 rclcpp_components_register_node(pathnode_sample
   PLUGIN "pathnode_sample::Talker"
   EXECUTABLE talker)
+rclcpp_components_register_node(pathnode_sample
+  PLUGIN "pathnode_sample::TalkerWithHeader"
+  EXECUTABLE talker_with_header)
 rclcpp_components_register_node(pathnode_sample
   PLUGIN "pathnode_sample::Listener"
   EXECUTABLE listener)
