@@ -15,6 +15,10 @@ find_package(std_msgs REQUIRED)
 set(msg_files
   "msg/PathInfo.msg"
   "msg/TopicInfo.msg"
+
+  "msg/SubTopicTimeInfo.msg"
+  "msg/PubTopicTimeInfo.msg"
+  "msg/PubInfo.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}

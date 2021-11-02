@@ -8,7 +8,7 @@
 #include "rclcpp/clock.hpp"
 #include "rclcpp/macros.hpp"
 
-#include "path_info_msg/msg/topic_info.hpp"
+#include "path_info_msg/msg/pub_info.hpp"
 
 namespace pathnode
 {
@@ -21,6 +21,16 @@ auto get_timestamp(rclcpp::Time t, T a) -> decltype(a.header.timestamp, t)
   return a.header.timestamp;
 }
 */
+
+class InputInfo
+{
+public:
+  rclcpp::Time sub_time;
+  bool has_header_stamp;
+  rclcpp::Time header_stamp;
+
+  InputInfo(): has_header_stamp(false) {}
+};
 
 template<typename M, typename = void>
 struct HasHeader : public std::false_type {};
@@ -64,24 +74,41 @@ auto get_timestamp(rclcpp::Time t, T *a) -> decltype(rclcpp::Time(a->header.stam
 
 rclcpp::Time get_timestamp(rclcpp::Time t, ...);
 
+class TimingAdvertisePublisherBase
+{
+public:
+  using InfoMsg = path_info_msg::msg::PubInfo;
+
+  void set_input_info(const std::string &sub_topic,
+                      const std::shared_ptr<InputInfo> p);
+
+protected:
+  // parent node subscription topic vs InputInfo
+  std::map<std::string, std::shared_ptr<InputInfo>> input_infos_;
+};
+
+
 template<typename MessageT,
          typename AllocatorT = std::allocator<void>>
-class TimingAdvertisePublisher
+class TimingAdvertisePublisher: public TimingAdvertisePublisherBase
 {
+private:
   using MessageAllocatorTraits = rclcpp::allocator::AllocRebind<MessageT, AllocatorT>;
   using MessageAllocator = typename MessageAllocatorTraits::allocator_type;
   using MessageDeleter = rclcpp::allocator::Deleter<MessageAllocator, MessageT>;
   using PublisherT = rclcpp::Publisher<MessageT, AllocatorT>;
-  using TopicInfoPublisher = rclcpp::Publisher<path_info_msg::msg::TopicInfo>;
+  using PubInfoPublisher = rclcpp::Publisher<InfoMsg>;
 
 public:
+
+
   RCLCPP_SMART_PTR_DEFINITIONS(TimingAdvertisePublisher)
 
   TimingAdvertisePublisher(
-      std::shared_ptr<TopicInfoPublisher> info_pub,
+      std::shared_ptr<PubInfoPublisher> info_pub,
       std::shared_ptr<PublisherT> pub,
-      const std::string &node_fqn)
-      : info_pub_(info_pub), pub_(pub), seq_(0), node_fqn_(node_fqn), clock_(std::make_unique<rclcpp::Clock>())
+      const std::string &node_fqn):
+  info_pub_(info_pub), pub_(pub), node_fqn_(node_fqn), clock_(std::make_unique<rclcpp::Clock>())
   {
   }
 
@@ -124,22 +151,37 @@ public:
   // TODO get_allocator
 
 private:
-  std::shared_ptr<TopicInfoPublisher> info_pub_;
+  std::shared_ptr<PubInfoPublisher> info_pub_;
   std::shared_ptr<PublisherT> pub_;
-  int64_t seq_;
   const std::string node_fqn_;
   std::unique_ptr<rclcpp::Clock> clock_;
 
-  void publish_info(rclcpp::Time t)
+  /**
+   * t: header stamp
+   * TODO: we cannot distinguish t is header.stamp or now in current implementation
+   */
+  void publish_info(rclcpp::Time &&t)
   {
-    auto info = std::make_unique<path_info_msg::msg::TopicInfo>();
-    info->seq = seq_;
-    seq_++;
-    info->node_fqn = node_fqn_;
-    info->topic_name = pub_->get_topic_name();
+    auto msg = std::make_unique<path_info_msg::msg::PubInfo>();
+    msg->header.stamp = clock_->now();
+    // msg->header.frame_id  // Nothing todo
 
-    info->callback_start = t;
-    info_pub_->publish(std::move(info));
+    msg->output_info.topic_name = pub_->get_topic_name();
+    msg->output_info.node_fqn = node_fqn_;
+    msg->output_info.pub_time = clock_->now();
+    msg->output_info.header_stamp = t;
+
+    msg->input_infos.resize(input_infos_.size());
+    size_t i = 0;
+    for(const auto &[topic, input_info]: input_infos_) {
+      msg->input_infos[i].topic_name = topic;
+      msg->input_infos[i].sub_time = input_info->sub_time;
+      msg->input_infos[i].has_header_stamp = input_info->has_header_stamp;
+      msg->input_infos[i].header_stamp = input_info->header_stamp;
+      i++;
+    }
+
+    info_pub_->publish(std::move(msg));
   }
 };
 

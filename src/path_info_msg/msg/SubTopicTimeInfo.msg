@@ -1,0 +1,4 @@
+string topic_name
+builtin_interfaces/Time sub_time
+bool has_header_stamp
+builtin_interfaces/Time header_stamp
