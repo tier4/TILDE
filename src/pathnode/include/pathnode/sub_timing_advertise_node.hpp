@@ -145,7 +145,7 @@ public:
             // TODO: consider race condition in multi threaded executor.
             // i.e. subA comes when subB callback which uses topicA is running
             for(auto &[topic, tap]: timing_advertise_pubs_) {
-              tap->set_input_info(topic, input_info);
+              tap->set_input_info(resolved_topic_name, input_info);
             }
 
             // finally, call original function
