@@ -108,26 +108,31 @@ public:
             using ConstRef = const MessageT &;
             using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
             using SharedConstPtr = std::shared_ptr<const MessageT>;
-            using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>;
+            using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT> &;
+            using SharedPtr = std::shared_ptr<MessageT>;
 
             rclcpp::Time header_stamp;
             rclcpp::Time t = this->now();
 
             using S = std::decay_t<decltype(msg)>;
             if constexpr (std::is_same_v<S, ConstRef>) {
-              std::cout << "visit: ConstRef\n";
+              // std::cout << "visit: ConstRef\n";
               header_stamp = Process<MessageT>::get_timestamp3(t, &msg);
             }
             else if constexpr (std::is_same_v<S, UniquePtr>) {
-              std::cout << "visit: UniquePtr\n";
+              // std::cout << "visit: UniquePtr\n";
               header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
             }
             else if constexpr (std::is_same_v<S, SharedConstPtr>) {
-              std::cout << "visit: SharedPtr\n";
+              // std::cout << "visit: SharedConstPtr\n";
               header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
             }
             else if constexpr (std::is_same_v<S, ConstRefSharedConstPtr>) {
-              std::cout << "visit: SharedPtr\n";
+              // std::cout << "visit: ConstRefSharedPtr\n";
+              header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
+            }
+            else if constexpr (std::is_same_v<S, SharedPtr>) {
+              // std::cout << "visit: SharedPtr\n";
               header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
             }
             else {
