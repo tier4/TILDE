@@ -112,7 +112,7 @@ public:
             using SharedPtr = std::shared_ptr<MessageT>;
 
             rclcpp::Time header_stamp;
-            rclcpp::Time t = this->now();
+            rclcpp::Time t(0, 100, this->now().get_clock_type());
 
             using S = std::decay_t<decltype(msg)>;
             if constexpr (std::is_same_v<S, ConstRef>) {
