@@ -10,7 +10,7 @@ rclcpp::Time pathnode::get_timestamp(rclcpp::Time t, ...)
 
 void TimingAdvertisePublisherBase::set_input_info(
     const std::string &sub_topic,
-    const std::shared_ptr<InputInfo> p)
+    const std::shared_ptr<const InputInfo> p)
 {
   input_infos_[sub_topic] = p;
 }
