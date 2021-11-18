@@ -182,9 +182,10 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("pickle_file")
-    parser.add_argument("topic", default="/sensing/lidar/no_ground/pointcloud", nargs="?")
     parser.add_argument("stamp_index", type=int, default=0,
                         help="header stamp index")
+    parser.add_argument("topic", default="/sensing/lidar/no_ground/pointcloud", nargs="?")
+
     args = parser.parse_args()
 
     main(args)
