@@ -80,11 +80,11 @@ public:
   using InfoMsg = path_info_msg::msg::PubInfo;
 
   void set_input_info(const std::string &sub_topic,
-                      const std::shared_ptr<InputInfo> p);
+                      const std::<const InputInfo> p);
 
 protected:
   // parent node subscription topic vs InputInfo
-  std::map<std::string, std::shared_ptr<InputInfo>> input_infos_;
+  std::map<std::string, std::shared_ptr<const InputInfo>> input_infos_;
 };
 
 
