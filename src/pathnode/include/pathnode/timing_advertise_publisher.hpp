@@ -80,11 +80,21 @@ public:
   using InfoMsg = path_info_msg::msg::PubInfo;
 
   void set_input_info(const std::string &sub_topic,
-                      const std::<const InputInfo> p);
+                      const std::shared_ptr<const InputInfo> p);
 
-protected:
+  void set_explicit_input_info(
+      const std::string &sub_topic,
+      const rclcpp::Time &stamp);
+
+  void set_input_info(path_info_msg::msg::PubInfo &info_msg);
+
+private:
   // parent node subscription topic vs InputInfo
   std::map<std::string, std::shared_ptr<const InputInfo>> input_infos_;
+
+  // explicit InputInfo
+  // If this is set, FW creates PubInfo only by this info
+  std::map<std::string, InputInfo> explicit_input_infos_;
 };
 
 
@@ -171,15 +181,7 @@ private:
     msg->output_info.pub_time = clock_->now();
     msg->output_info.header_stamp = t;
 
-    msg->input_infos.resize(input_infos_.size());
-    size_t i = 0;
-    for(const auto &[topic, input_info]: input_infos_) {
-      msg->input_infos[i].topic_name = topic;
-      msg->input_infos[i].sub_time = input_info->sub_time;
-      msg->input_infos[i].has_header_stamp = input_info->has_header_stamp;
-      msg->input_infos[i].header_stamp = input_info->header_stamp;
-      i++;
-    }
+    set_input_info(*msg);
 
     info_pub_->publish(std::move(msg));
   }
