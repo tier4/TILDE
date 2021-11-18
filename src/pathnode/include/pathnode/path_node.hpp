@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PATH_NODE_HPP_
-#define PATH_NODE_HPP_
+#ifndef PATHNODE__PATH_NODE_HPP_
+#define PATHNODE__PATH_NODE_HPP_
 
 #include <set>
 #include <mutex>
+#include <string>
+#include <memory>
+#include <utility>
+#include <map>
 
 #include "rclcpp/node.hpp"
 #include "rclcpp/visibility_control.hpp"
@@ -37,7 +41,7 @@ struct PathNodeSubscriptionOptions
   PathNodeSubscriptionOptions();
 };
 
-// TODO: hide me
+// TODO(y-okumura-isp): hide me
 struct PathNodeInfo
 {
   using PathTicket = rclcpp::Time;
@@ -158,6 +162,6 @@ private:
   std::map<std::string, std::shared_ptr<PathNodeInfo>> path_node_info_map_;
 };
 
-} // namespace pathnode
+}  // namespace pathnode
 
-#endif // PATH_NODE_HPP_
+#endif  // PATHNODE__PATH_NODE_HPP_
