@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SUB_TIMING_ADVERTISE_NODE_HPP_
-#define SUB_TIMING_ADVERTISE_NODE_HPP_
+#ifndef PATHNODE__SUB_TIMING_ADVERTISE_NODE_HPP_
+#define PATHNODE__SUB_TIMING_ADVERTISE_NODE_HPP_
 
+#include <map>
 #include <memory>
 #include <set>
+#include <string>
+#include <utility>
 
 #include "rclcpp/node.hpp"
 #include "rclcpp/visibility_control.hpp"
@@ -100,8 +103,9 @@ public:
     seqs_[topic_info_name] = 0;
 
     auto main_topic_callback
-        = [this, resolved_topic_name, topic_info_name, callback](CallbackArgT msg,
-                                                                 const rclcpp::MessageInfo &info) -> void
+        = [this, resolved_topic_name, topic_info_name, callback](
+            CallbackArgT msg,
+            const rclcpp::MessageInfo &info) -> void
           {
             // publish subscription timing
             auto minfo = info.get_rmw_message_info();
@@ -112,7 +116,7 @@ public:
             seq++;
             m->node_fqn = get_fully_qualified_name();
             m->topic_name = resolved_topic_name;
-            for(size_t i=0; i<RMW_GID_STORAGE_SIZE; i++) {
+            for(size_t i = 0; i < RMW_GID_STORAGE_SIZE; i++) {
               m->publisher_gid[i] = minfo.publisher_gid.data[i];
             }
             m->callback_start = now();
@@ -132,24 +136,19 @@ public:
             if constexpr (std::is_same_v<S, ConstRef>) {
               // std::cout << "visit: ConstRef\n";
               header_stamp = Process<MessageT>::get_timestamp3(t, &msg);
-            }
-            else if constexpr (std::is_same_v<S, UniquePtr>) {
+            } else if constexpr (std::is_same_v<S, UniquePtr>) {
               // std::cout << "visit: UniquePtr\n";
               header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
-            }
-            else if constexpr (std::is_same_v<S, SharedConstPtr>) {
+            } else if constexpr (std::is_same_v<S, SharedConstPtr>) {
               // std::cout << "visit: SharedConstPtr\n";
               header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
-            }
-            else if constexpr (std::is_same_v<S, ConstRefSharedConstPtr>) {
+            } else if constexpr (std::is_same_v<S, ConstRefSharedConstPtr>) {
               // std::cout << "visit: ConstRefSharedPtr\n";
               header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
-            }
-            else if constexpr (std::is_same_v<S, SharedPtr>) {
+            } else if constexpr (std::is_same_v<S, SharedPtr>) {
               // std::cout << "visit: SharedPtr\n";
               header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
-            }
-            else {
+            } else {
               static_assert(always_false_v<S>, "non-exhaustive visitor!");
             }
 
@@ -161,9 +160,9 @@ public:
               input_info->header_stamp = header_stamp;
             }
 
-            // TODO: consider race condition in multi threaded executor.
+            // TODO(y-okumura-isp): consider race condition in multi threaded executor.
             // i.e. subA comes when subB callback which uses topicA is running
-            for(auto &[topic, tap]: timing_advertise_pubs_) {
+            for(auto &[topic, tap] : timing_advertise_pubs_) {
               tap->set_input_info(resolved_topic_name, input_info);
             }
 
@@ -194,9 +193,11 @@ public:
   {
     auto pub = create_publisher<MessageT, AllocatorT, PublisherT>(topic_name, qos, options);
     auto info_topic = std::string(pub->get_topic_name()) + "/info/pub";
-    auto info_pub = create_publisher<TimingAdvertisePublisherBase::InfoMsg>(info_topic, rclcpp::QoS(1), options);
+    auto info_pub = create_publisher<TimingAdvertisePublisherBase::InfoMsg>(
+        info_topic, rclcpp::QoS(1), options);
 
-    auto ta_pub = std::make_shared<TimingAdvertisePublisherT>(info_pub, pub, get_fully_qualified_name());
+    auto ta_pub = std::make_shared<TimingAdvertisePublisherT>(
+        info_pub, pub, get_fully_qualified_name());
     timing_advertise_pubs_[info_topic] = ta_pub;
     return ta_pub;
   }
@@ -210,6 +211,6 @@ private:
   std::map<std::string, int64_t> seqs_;
 };
 
-} // namespace pathnode
+}  // namespace pathnode
 
-#endif // SUB_TIMING_ADVERTISE_NODE_HPP_
+#endif  // PATHNODE__SUB_TIMING_ADVERTISE_NODE_HPP_
