@@ -34,7 +34,7 @@ class Relay : public pathnode::PathNode
 {
 public:
   explicit Relay(const rclcpp::NodeOptions & options)
-      : PathNode("relay", options)
+  : PathNode("relay", options)
   {
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     auto callback =
