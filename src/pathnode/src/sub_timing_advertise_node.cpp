@@ -19,17 +19,17 @@
 using pathnode::SubTimingAdvertiseNode;
 
 SubTimingAdvertiseNode::SubTimingAdvertiseNode(
-    const std::string & node_name,
-    const rclcpp::NodeOptions & options):
-    Node(node_name, options)
+  const std::string & node_name,
+  const rclcpp::NodeOptions & options)
+: Node(node_name, options)
 {
 }
 
 SubTimingAdvertiseNode::SubTimingAdvertiseNode(
-    const std::string & node_name,
-    const std::string & namespace_,
-    const rclcpp::NodeOptions & options):
-    Node(node_name, namespace_, options)
+  const std::string & node_name,
+  const std::string & namespace_,
+  const rclcpp::NodeOptions & options)
+: Node(node_name, namespace_, options)
 {
 }
 
