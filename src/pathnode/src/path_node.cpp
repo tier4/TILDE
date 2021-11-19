@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "pathnode/path_node.hpp"
 
 using pathnode::PathNodeSubscriptionOptions;
@@ -112,7 +117,7 @@ void PathNode::on_pathed_subscription(const std::string &path_name)
   m->path_name = path_name;
   auto nw = now();
   m->path_start = nw;
-  info->path_tickets_.insert(nw); // for myself
+  info->path_tickets_.insert(nw);  // for myself
   info->pub_->publish(std::move(m));
 }
 
@@ -130,11 +135,11 @@ bool PathNode::pop_path_start_time(const std::string& path, rclcpp::Time &out)
   auto &tickets = info->path_tickets_;
 
   auto nw = now();
-  for(auto it=tickets.begin(); it!=tickets.end();) {
+  for(auto it = tickets.begin(); it != tickets.end();) {
     // if ticket is too old, remove it
     if(*it + info->valid_max_ < nw) {
       std::cout << "pop_path_start_time erase: " << it->nanoseconds() << std::endl;
-      // TODO: silently erase? Is it bettter to notify that there is too old ticket?
+      // TODO(y-okumura-isp): silently erase? Is it bettter to notify that there is too old ticket?
       it = tickets.erase(it);
       continue;
     }
@@ -152,7 +157,7 @@ bool PathNode::pop_path_start_time(const std::string& path, rclcpp::Time &out)
 
 rclcpp::Duration PathNode::get_path_valid_min(const std::string &path)
 {
-  // TODO: need lock? initialize once and read only access
+  // TODO(y-okumura-isp): need lock? initialize once and read only access
   // std::lock_guard lock{path_node_info_map_mutex_};
   auto path_node_it = path_node_info_map_.find(path);
   if(path_node_it == path_node_info_map_.end()) {
@@ -166,7 +171,7 @@ rclcpp::Duration PathNode::get_path_valid_min(const std::string &path)
 
 rclcpp::Duration PathNode::get_path_valid_max(const std::string &path)
 {
-  // TODO: need lock? initialize once and read only access
+  // TODO(y-okumura-isp): need lock? initialize once and read only access
   // std::lock_guard lock{path_node_info_map_mutex_};
   auto path_node_it = path_node_info_map_.find(path);
   if(path_node_it == path_node_info_map_.end()) {
