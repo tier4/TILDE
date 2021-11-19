@@ -34,7 +34,7 @@ class RelayWithSubTiming : public pathnode::SubTimingAdvertiseNode
 {
 public:
   explicit RelayWithSubTiming(const rclcpp::NodeOptions & options)
-      : SubTimingAdvertiseNode("relay", options)
+  : SubTimingAdvertiseNode("relay", options)
   {
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     auto callback =
