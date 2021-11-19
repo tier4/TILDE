@@ -33,13 +33,13 @@ using namespace std::chrono_literals;
 namespace pathnode_sample
 {
 
-// TODO: define per path
-const std::string IS_FIRST = "is_first";
-const std::string PATH_VALID_MIN_SEC = "path_valid_min_sec";
-const std::string PATH_VALID_MIN_NS = "path_valid_min_ns";
-const std::string PATH_VALID_MAX_SEC = "path_valid_max_sec";
-const std::string PATH_VALID_MAX_NS = "path_valid_max_ns";
-const std::string WAIT_MSEC = "wait_msec";
+// TODO(y-okumura-isp): define per path
+const char IS_FIRST[] = "is_first";
+const char PATH_VALID_MIN_SEC[] = "path_valid_min_sec";
+const char PATH_VALID_MIN_NS[] = "path_valid_min_ns";
+const char PATH_VALID_MAX_SEC[] = "path_valid_max_sec";
+const char PATH_VALID_MAX_NS[] = "path_valid_max_ns";
+const char WAIT_MSEC[] = "wait_msec";
 
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
@@ -88,7 +88,7 @@ public:
       };
 
 
-    // TODO check range
+    // TODO(y-okumura-isp) check range
     auto valid_min_tv_sec = get_parameter(PATH_VALID_MIN_SEC).get_value<int64_t>();
     auto valid_min_tv_nsec = get_parameter(PATH_VALID_MIN_NS).get_value<int64_t>();
     auto valid_max_tv_sec = get_parameter(PATH_VALID_MAX_SEC).get_value<int64_t>();
