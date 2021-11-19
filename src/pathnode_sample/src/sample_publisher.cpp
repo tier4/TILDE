@@ -35,7 +35,7 @@ class Talker : public pathnode::PathNode
 {
 public:
   explicit Talker(const rclcpp::NodeOptions & options)
-      : PathNode("talker", options)
+  : PathNode("talker", options)
   {
     // Create a function for when messages are to be sent.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
