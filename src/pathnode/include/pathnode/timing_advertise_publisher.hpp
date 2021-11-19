@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TIMING_ADVERTISE_PUBLISHER_HPP_
-#define TIMING_ADVERTISE_PUBLISHER_HPP_
+#ifndef PATHNODE__TIMING_ADVERTISE_PUBLISHER_HPP_
+#define PATHNODE__TIMING_ADVERTISE_PUBLISHER_HPP_
 
+#include <map>
 #include <memory>
+#include <string>
 #include <type_traits>
+#include <utility>
 
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/clock.hpp"
@@ -75,7 +78,6 @@ struct Process<M, typename std::enable_if<HasHeader<M>::value>::type> {
     std::cout << "header Time3" << std::endl;
     return m->header.stamp;
   }
-
 };
 
 template <class T>
@@ -124,8 +126,6 @@ private:
   using PubInfoPublisher = rclcpp::Publisher<InfoMsg>;
 
 public:
-
-
   RCLCPP_SMART_PTR_DEFINITIONS(TimingAdvertisePublisher)
 
   TimingAdvertisePublisher(
@@ -172,7 +172,7 @@ public:
     pub_->publish(loaned_msg);
   }
 
-  // TODO get_allocator
+  // TODO(y-okumura-isp) get_allocator
 
 private:
   std::shared_ptr<PubInfoPublisher> info_pub_;
@@ -201,6 +201,6 @@ private:
   }
 };
 
-} // namespace pathnode
+}  // namespace pathnode
 
-#endif // TIMING_ADVERTISE_PUBLISHER_HPP_
+#endif  // PATHNODE__TIMING_ADVERTISE_PUBLISHER_HPP_
