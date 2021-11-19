@@ -64,7 +64,8 @@ struct PathNodeInfo
 class PathNode : public rclcpp::Node
 {
 public:
-  enum deadline_t {
+  enum deadline_t
+  {
     OK,
     OVERRUN,
     NO_INFO
@@ -85,11 +86,11 @@ public:
   virtual ~PathNode();
 
   void setup_path(
-      const PathNodeSubscriptionOptions &path_node_options);
+    const PathNodeSubscriptionOptions & path_node_options);
 
 
   /// send path info at the beginning of main-topic subscription callback
-  void on_pathed_subscription(const std::string &path_name);
+  void on_pathed_subscription(const std::string & path_name);
 
   /// create custom subscription
   /**
@@ -111,7 +112,7 @@ public:
   >
   std::shared_ptr<SubscriptionT>
   create_path_node_subscription(
-    const PathNodeSubscriptionOptions &path_node_options,
+    const PathNodeSubscriptionOptions & path_node_options,
     const std::string & topic_name,
     const rclcpp::QoS & qos,
     CallbackT && callback,
@@ -119,14 +120,14 @@ public:
     rclcpp::SubscriptionOptionsWithAllocator<AllocatorT>(),
     typename MessageMemoryStrategyT::SharedPtr msg_mem_strat = (
       MessageMemoryStrategyT::create_default()
-    ))
+  ))
   {
     auto node_topics_interface = rclcpp::node_interfaces::get_node_topics_interface(this);
     auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
     std::cout << __func__ << " topic_name: " << topic_name << std::endl;
     std::cout << __func__ << " resolved_topic_name: " << resolved_topic_name << std::endl;
 
-    const auto& path_name = path_node_options.path_name_;
+    const auto & path_name = path_node_options.path_name_;
 
     setup_path(path_node_options);
 
@@ -134,26 +135,26 @@ public:
     // if callback is reference(i.e. &callback), SEGV in callback(std::forward<...>)
     // I guess we should hold variables such as pub_ in original function (really?)
     auto main_topic_callback =
-        [this, path_name, callback](CallbackArgT msg) -> void
-        {
-          on_pathed_subscription(path_name);
+      [this, path_name, callback](CallbackArgT msg) -> void
+      {
+        on_pathed_subscription(path_name);
 
-          // finally, call original function
-          callback(std::forward<CallbackArgT>(msg));
-        };
+        // finally, call original function
+        callback(std::forward<CallbackArgT>(msg));
+      };
 
     return create_subscription<MessageT>(
-        topic_name,
-        qos,
-        main_topic_callback,
-        options,
-        msg_mem_strat);
+      topic_name,
+      qos,
+      main_topic_callback,
+      options,
+      msg_mem_strat);
   }
 
 protected:
-  bool pop_path_start_time(const std::string& path, rclcpp::Time &out);
-  rclcpp::Duration get_path_valid_min(const std::string &path);
-  rclcpp::Duration get_path_valid_max(const std::string &path);
+  bool pop_path_start_time(const std::string & path, rclcpp::Time & out);
+  rclcpp::Duration get_path_valid_min(const std::string & path);
+  rclcpp::Duration get_path_valid_max(const std::string & path);
   rclcpp::Time now() const;
   rcl_clock_type_t CLOCK_TYPE;
 
