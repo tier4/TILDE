@@ -30,14 +30,14 @@ using namespace std::chrono_literals;
 namespace pathnode_sample
 {
 
-const std::string REENTRANT = "reentrant";
-const std::string SUB1_WAIT_MS = "sub1_wait_ms";
-const std::string SUB2_WAIT_MS = "sub2_wait_ms";
-const std::string SUB3_WAIT_MS = "sub3_wait_ms";
-const std::string TIMER1_WAIT_MS = "timer1_wait_ms";
-const std::string TIMER2_WAIT_MS = "timer2_wait_ms";
-const std::string TIMER1_INTERVAL_MS = "timer1_interval_ms";
-const std::string TIMER2_INTERVAL_MS = "timer2_interval_ms";
+const char REENTRANT[] = "reentrant";
+const char SUB1_WAIT_MS[] = "sub1_wait_ms";
+const char SUB2_WAIT_MS[] = "sub2_wait_ms";
+const char SUB3_WAIT_MS[] = "sub3_wait_ms";
+const char TIMER1_WAIT_MS[] = "timer1_wait_ms";
+const char TIMER2_WAIT_MS[] = "timer2_wait_ms";
+const char TIMER1_INTERVAL_MS[] = "timer1_interval_ms";
+const char TIMER2_INTERVAL_MS[] = "timer2_interval_ms";
 
 /// multiple callback for checking callback blocking
 class SampleMultiCallback : public rclcpp::Node
@@ -156,6 +156,6 @@ private:
 };
 
 
-} // pathnode_sample
+}  // namespace pathnode_sample
 
 RCLCPP_COMPONENTS_REGISTER_NODE(pathnode_sample::SampleMultiCallback)
