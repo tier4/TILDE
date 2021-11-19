@@ -16,7 +16,7 @@
 
 class TestTimingAdvertisePublisher : public ::testing::Test
 {
-  public:
+public:
   void SetUp()
   {
   }
