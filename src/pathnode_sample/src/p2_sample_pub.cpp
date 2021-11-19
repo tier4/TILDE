@@ -15,6 +15,7 @@
 #include <chrono>
 #include <cstdio>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "rclcpp/rclcpp.hpp"
@@ -35,7 +36,7 @@ class P2Publisher : public pathnode::SubTimingAdvertiseNode
 {
 public:
   explicit P2Publisher(const rclcpp::NodeOptions & options)
-      : SubTimingAdvertiseNode("talker", options)
+  : SubTimingAdvertiseNode("talker", options)
   {
     const std::string TIMER_MS = "timer_ms";
 
