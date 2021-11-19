@@ -36,7 +36,7 @@ class TalkerWithHeader : public pathnode::SubTimingAdvertiseNode
 {
 public:
   explicit TalkerWithHeader(const rclcpp::NodeOptions & options)
-      : SubTimingAdvertiseNode("talker", options)
+  : SubTimingAdvertiseNode("talker", options)
   {
     // Create a function for when messages are to be sent.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
@@ -53,7 +53,6 @@ public:
         msg_pc_ = std::make_unique<sensor_msgs::msg::PointCloud2>();
         msg_pc_->header.stamp = rclcpp::Time(0);
         pub_pc_->publish(std::move(msg_pc_));
-
       };
     // Create a publisher with a custom Quality of Service profile.
     rclcpp::QoS qos(rclcpp::KeepLast(7));
