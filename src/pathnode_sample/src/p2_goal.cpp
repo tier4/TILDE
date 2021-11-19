@@ -35,18 +35,19 @@ class P2Goal : public pathnode::SubTimingAdvertiseNode
 {
 public:
   explicit P2Goal(const rclcpp::NodeOptions & options)
-      : SubTimingAdvertiseNode("talker", options)
+  : SubTimingAdvertiseNode("talker", options)
   {
     rclcpp::QoS qos(rclcpp::KeepLast(7));
 
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     auto sub_callback =
-        [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
-        {
-          (void) msg;
-          RCLCPP_INFO(this->get_logger(), "recieved");
-        };
-    sub_pc_ = this->create_timing_advertise_subscription<sensor_msgs::msg::PointCloud2>("in", qos, sub_callback);
+      [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
+      {
+        (void) msg;
+        RCLCPP_INFO(this->get_logger(), "recieved");
+      };
+    sub_pc_ = this->create_timing_advertise_subscription<sensor_msgs::msg::PointCloud2>(
+      "in", qos, sub_callback);
   }
 
 private:
