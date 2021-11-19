@@ -46,7 +46,8 @@ public:
   bool has_header_stamp;
   rclcpp::Time header_stamp;
 
-  InputInfo(): has_header_stamp(false) {}
+  InputInfo()
+  : has_header_stamp(false) {}
 };
 
 template<typename M, typename = void>
@@ -55,33 +56,40 @@ struct HasHeader : public std::false_type {};
 template<typename M>
 struct HasHeader<M, decltype((void) M::header)>: std::true_type {};
 
-template <typename M, typename Enable = void> struct Process {
-  static rclcpp::Time get_timestamp2(rclcpp::Time t, M *m) {
+template<typename M, typename Enable = void>
+struct Process
+{
+  static rclcpp::Time get_timestamp2(rclcpp::Time t, M * m)
+  {
     std::cout << "rclcpp::Time2" << std::endl;
     return t;
   }
 
-  static rclcpp::Time get_timestamp3(rclcpp::Time t, const M *m) {
+  static rclcpp::Time get_timestamp3(rclcpp::Time t, const M * m)
+  {
     std::cout << "rclcpp::Time3" << std::endl;
     return t;
   }
 };
 
-template <typename M>
-struct Process<M, typename std::enable_if<HasHeader<M>::value>::type> {
-  static rclcpp::Time get_timestamp2(rclcpp::Time t, M *m) {
+template<typename M>
+struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
+{
+  static rclcpp::Time get_timestamp2(rclcpp::Time t, M * m)
+  {
     std::cout << "header Time2" << std::endl;
     return m->header.stamp;
   }
 
-  static rclcpp::Time get_timestamp3(rclcpp::Time t, const M *m) {
+  static rclcpp::Time get_timestamp3(rclcpp::Time t, const M * m)
+  {
     std::cout << "header Time3" << std::endl;
     return m->header.stamp;
   }
 };
 
-template <class T>
-auto get_timestamp(rclcpp::Time t, T *a) -> decltype(rclcpp::Time(a->header.stamp), t)
+template<class T>
+auto get_timestamp(rclcpp::Time t, T * a)->decltype(rclcpp::Time(a->header.stamp), t)
 {
   std::cout << "get header timestamp" << std::endl;
   rclcpp::Time ret(a->header.stamp);
@@ -95,14 +103,15 @@ class TimingAdvertisePublisherBase
 public:
   using InfoMsg = path_info_msg::msg::PubInfo;
 
-  void set_input_info(const std::string &sub_topic,
-                      const std::shared_ptr<const InputInfo> p);
+  void set_input_info(
+    const std::string & sub_topic,
+    const std::shared_ptr<const InputInfo> p);
 
   void set_explicit_input_info(
-      const std::string &sub_topic,
-      const rclcpp::Time &stamp);
+    const std::string & sub_topic,
+    const rclcpp::Time & stamp);
 
-  void set_input_info(path_info_msg::msg::PubInfo &info_msg);
+  void set_input_info(path_info_msg::msg::PubInfo & info_msg);
 
 private:
   // parent node subscription topic vs InputInfo
@@ -115,8 +124,8 @@ private:
 
 
 template<typename MessageT,
-         typename AllocatorT = std::allocator<void>>
-class TimingAdvertisePublisher: public TimingAdvertisePublisherBase
+  typename AllocatorT = std::allocator<void>>
+class TimingAdvertisePublisher : public TimingAdvertisePublisherBase
 {
 private:
   using MessageAllocatorTraits = rclcpp::allocator::AllocRebind<MessageT, AllocatorT>;
@@ -129,10 +138,10 @@ public:
   RCLCPP_SMART_PTR_DEFINITIONS(TimingAdvertisePublisher)
 
   TimingAdvertisePublisher(
-      std::shared_ptr<PubInfoPublisher> info_pub,
-      std::shared_ptr<PublisherT> pub,
-      const std::string &node_fqn):
-  info_pub_(info_pub), pub_(pub), node_fqn_(node_fqn), clock_(std::make_unique<rclcpp::Clock>())
+    std::shared_ptr<PubInfoPublisher> info_pub,
+    std::shared_ptr<PublisherT> pub,
+    const std::string & node_fqn)
+  : info_pub_(info_pub), pub_(pub), node_fqn_(node_fqn), clock_(std::make_unique<rclcpp::Clock>())
   {
   }
 
@@ -184,7 +193,7 @@ private:
    * t: header stamp
    * TODO: we cannot distinguish t is header.stamp or now in current implementation
    */
-  void publish_info(rclcpp::Time &&t)
+  void publish_info(rclcpp::Time && t)
   {
     auto msg = std::make_unique<path_info_msg::msg::PubInfo>();
     msg->header.stamp = clock_->now();
