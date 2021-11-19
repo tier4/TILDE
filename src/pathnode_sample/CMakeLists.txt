@@ -39,19 +39,16 @@ add_library(pathnode_sample SHARED
   src/sample_relay_with_path2.cpp
   src/sample_relay_with_sub_timing.cpp
   src/sample_multi_callback.cpp
-
   src/p2_sample_pub.cpp
   src/p2_relay_timer.cpp
-  src/p2_goal.cpp
-  )
+  src/p2_goal.cpp)
 ament_target_dependencies(pathnode_sample
     "rclcpp"
     "rclcpp_components"
     "std_msgs"
     "pathnode"
     "path_info_msg"
-    "sensor_msgs"
-    )
+    "sensor_msgs")
 
 rclcpp_components_register_node(pathnode_sample
   PLUGIN "pathnode_sample::Talker"
