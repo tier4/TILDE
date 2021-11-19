@@ -1,9 +1,23 @@
 #!env python3
+# Copyright 2021 Research Institute of Systems Planning, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 import os
 import collections
 import numpy as np
-from logging import basicConfig, getLogger, DEBUG
+from logging import basicConfig, getLogger
 
 import rclpy
 from rclpy.node import Node
@@ -17,7 +31,9 @@ logger = getLogger(__name__)
 # for subscriber demo
 LIDAR_PREPROCESS = [
     '/sensing/lidar/top/self_cropped/pointcloud_ex',
-    # '/sensing/lidar/top/mirror_cropped/pointcloud_ex',  # subscriber is /sensing/lidar/top/velodyne_interpolate_node which is not autoware node
+    # subscriber is /sensing/lidar/top/velodyne_interpolate_node
+    # which is not autoware node
+    # '/sensing/lidar/top/mirror_cropped/pointcloud_ex',
     '/sensing/lidar/top/rectified/pointcloud_ex',
     '/sensing/lidar/top/outlier_filtered/pointcloud',
     '/sensing/lidar/concatenated/pointcloud',
@@ -28,16 +44,19 @@ LIDAR_PREPROCESS = [
 LIDAR_PREPROCESS_PUB = [
     '/sensing/lidar/top/self_cropped/pointcloud_ex',
     '/sensing/lidar/top/mirror_cropped/pointcloud_ex',
-    # '/sensing/lidar/top/rectified/pointcloud_ex',  # publisher is /sensing/lidar/top/velodyne_interpolate_node which is not autoware node
+    # publisher is /sensing/lidar/top/velodyne_interpolate_node
+    # which is not autoware node
+    # '/sensing/lidar/top/rectified/pointcloud_ex',
     '/sensing/lidar/top/outlier_filtered/pointcloud',
     '/sensing/lidar/concatenated/pointcloud',
     '/sensing/lidar/measurement_range_cropped/pointcloud',
 ]
 
+
 class TopicInfoStatistics(object):
     def __init__(self, topics, max_rows=10):
         self.topics = topics
-        self.t2i = {topic:i for i, topic in enumerate(topics)}
+        self.t2i = {topic: i for i, topic in enumerate(topics)}
         self.seq2time = collections.defaultdict(lambda: - np.ones(len(self.t2i), dtype=np.float64))
         # (n_messages, n_subcallbacks), nanoseconds
         self.data = - np.ones((max_rows, len(topics)), dtype=np.float)
@@ -104,6 +123,7 @@ class TopicInfoStatistics(object):
         self.data[...] = -1.0
         self.data_idx = 0
 
+
 class PathVisNode(Node):
     def __init__(self):
         super().__init__('path_vis_node')
@@ -144,6 +164,7 @@ class PathVisNode(Node):
         self.statistics.set(seq, topic, stime)
         if self.statistics.is_filled():
             self.statistics.dump_and_clear(dump)
+
 
 def main(args=None):
     rclpy.init(args=args)
