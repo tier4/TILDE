@@ -36,10 +36,10 @@ namespace pathnode_sample
 // TODO: define per path
 const std::string IS_FIRST = "is_first";
 const std::string PATH_VALID_MIN_SEC = "path_valid_min_sec";
-const std::string PATH_VALID_MIN_NS  = "path_valid_min_ns";
+const std::string PATH_VALID_MIN_NS = "path_valid_min_ns";
 const std::string PATH_VALID_MAX_SEC = "path_valid_max_sec";
-const std::string PATH_VALID_MAX_NS  = "path_valid_max_ns";
-const std::string WAIT_MSEC          = "wait_msec";
+const std::string PATH_VALID_MAX_NS = "path_valid_max_ns";
+const std::string WAIT_MSEC = "wait_msec";
 
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
@@ -47,15 +47,15 @@ class RelayWithPath : public pathnode::PathNode
 {
 public:
   explicit RelayWithPath(const rclcpp::NodeOptions & options)
-      : PathNode("relay", options), path_name_("sample_path")
+  : PathNode("relay", options), path_name_("sample_path")
   {
     /* newly introduced variables for path */
     declare_parameter<bool>(IS_FIRST, false);
-    // 	whole seconds (valid values are >= 0)
+    //  whole seconds (valid values are >= 0)
     declare_parameter<int64_t>(PATH_VALID_MIN_SEC, (int64_t) 0);
     // nanoseconds (valid values are [0, 999999999])
     declare_parameter<int64_t>(PATH_VALID_MIN_NS, (int64_t)( 1 * 1000 * 1000));
-    // 	whole seconds (valid values are >= 0)
+    //  whole seconds (valid values are >= 0)
     declare_parameter<int64_t>(PATH_VALID_MAX_SEC, (int64_t) 0);
     // nanoseconds (valid values are [0, 999999999])
     declare_parameter<int64_t>(PATH_VALID_MAX_NS, (int64_t)(10 * 1000 * 1000));
@@ -72,14 +72,14 @@ public:
     auto wait_msec = get_parameter(WAIT_MSEC).get_value<int64_t>();
 
     auto callback =
-        [this, wait_msec](const std_msgs::msg::String &msg) -> void
+      [this, wait_msec](const std_msgs::msg::String & msg) -> void
       {
         this->on_pathed_subscription(this->path_name_);
 
         rclcpp::Time path_start_time(0, 0, CLOCK_TYPE);
 
-        if(!pop_path_start_time(path_name_, path_start_time)) {
-          std::cout << "cannot find path_start_time" << std::endl;;
+        if (!pop_path_start_time(path_name_, path_start_time)) {
+          std::cout << "cannot find path_start_time" << std::endl;
           // do what you want: error handling or continue routine without deadline detection
           return;
         }
@@ -88,20 +88,20 @@ public:
         auto valid_max = get_path_valid_max(path_name_);
 
         auto deadline_exceeds =
-            [this, &path_start_time, &valid_min, &valid_max]() -> bool
-            {
-              auto nw = this->now();
-              std::cout << "path_start_time: " << path_start_time.nanoseconds() << " "
-                        << "valid_min: " << valid_min.nanoseconds() << " "
-                        << "nw: " << nw.nanoseconds() << " "
-                        << "valid_max: " << valid_max.nanoseconds() << " "
-                        << "min: " << (path_start_time - valid_min).nanoseconds() << " "
-                        << "max: " << (path_start_time + valid_max).nanoseconds() << std::endl;
-              return !(path_start_time - valid_min < nw && nw < path_start_time + valid_max);
-            };
+          [this, &path_start_time, &valid_min, &valid_max]() -> bool
+          {
+            auto nw = this->now();
+            std::cout << "path_start_time: " << path_start_time.nanoseconds() << " " <<
+              "valid_min: " << valid_min.nanoseconds() << " " <<
+              "nw: " << nw.nanoseconds() << " " <<
+              "valid_max: " << valid_max.nanoseconds() << " " <<
+              "min: " << (path_start_time - valid_min).nanoseconds() << " " <<
+              "max: " << (path_start_time + valid_max).nanoseconds() << std::endl;
+            return !(path_start_time - valid_min < nw && nw < path_start_time + valid_max);
+          };
 
         // you can call deadline_exceeds many times in your routine
-        if(deadline_exceeds()) {
+        if (deadline_exceeds()) {
           std::cout << "deadline exceeds!" << std::endl;
           return;
         }
@@ -115,9 +115,9 @@ public:
 
 
     // TODO check range
-    auto valid_min_tv_sec  = get_parameter(PATH_VALID_MIN_SEC).get_value<int64_t>();
+    auto valid_min_tv_sec = get_parameter(PATH_VALID_MIN_SEC).get_value<int64_t>();
     auto valid_min_tv_nsec = get_parameter(PATH_VALID_MIN_NS).get_value<int64_t>();
-    auto valid_max_tv_sec  = get_parameter(PATH_VALID_MAX_SEC).get_value<int64_t>();
+    auto valid_max_tv_sec = get_parameter(PATH_VALID_MAX_SEC).get_value<int64_t>();
     auto valid_max_tv_nsec = get_parameter(PATH_VALID_MAX_NS).get_value<int64_t>();
 
     pathnode::PathNodeSubscriptionOptions path_node_options;
@@ -134,11 +134,11 @@ public:
     */
 
     sub_ = this->create_subscription<std_msgs::msg::String>(
-        "in", qos, callback);
+      "in", qos, callback);
     setup_path(path_node_options);
   }
 
- private:
+private:
   std::string path_name_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_;
