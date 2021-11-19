@@ -26,24 +26,21 @@ if(BUILD_TESTING)
 
   ament_add_gtest(${PROJECT_NAME}_test
     test/test_timing_advertise_publisher.cpp)
-    target_include_directories(${PROJECT_NAME}_test
-            PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<INSTALL_INTERFACE:include>
-            )
-    ament_target_dependencies(
-            ${PROJECT_NAME}_test
-            "rclcpp"
-	    "path_info_msg"
-    )
+  target_include_directories(${PROJECT_NAME}_test
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+  ament_target_dependencies(
+    ${PROJECT_NAME}_test
+    "rclcpp"
+    "path_info_msg")
 endif()
 
 include_directories(include)
 ament_export_include_directories(include)
 install(
   DIRECTORY include/
-  DESTINATION include
-  )
+  DESTINATION include)
 
 add_library(${PROJECT_NAME} SHARED
   "src/path_node.cpp"
