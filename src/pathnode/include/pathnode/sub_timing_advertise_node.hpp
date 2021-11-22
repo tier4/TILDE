@@ -108,6 +108,7 @@ public:
       CallbackArgT msg,
       const rclcpp::MessageInfo & info) -> void
       {
+        auto subtime = this->now();
         // publish subscription timing
         auto minfo = info.get_rmw_message_info();
 
@@ -155,7 +156,7 @@ public:
 
         auto input_info = std::make_shared<InputInfo>();
 
-        input_info->sub_time = now();
+        input_info->sub_time = subtime;
         if (header_stamp != t) {
           input_info->has_header_stamp = true;
           input_info->header_stamp = header_stamp;
@@ -165,6 +166,9 @@ public:
         // i.e. subA comes when subB callback which uses topicA is running
         for (auto &[topic, tap] : timing_advertise_pubs_) {
           tap->set_input_info(resolved_topic_name, input_info);
+          if (input_info->has_header_stamp) {
+            tap->set_explicit_subtime(resolved_topic_name, input_info->header_stamp, subtime);
+          }
         }
 
         // finally, call original function

@@ -41,6 +41,7 @@ add_library(pathnode_sample SHARED
   src/sample_multi_callback.cpp
   src/p2_sample_pub.cpp
   src/p2_relay_timer.cpp
+  src/p2_relay_timer_with_buffer.cpp
   src/p2_goal.cpp)
 ament_target_dependencies(pathnode_sample
     "rclcpp"
@@ -81,6 +82,9 @@ rclcpp_components_register_node(pathnode_sample
 rclcpp_components_register_node(pathnode_sample
   PLUGIN "pathnode_sample::P2RelayTimer"
   EXECUTABLE p2_relaytimer)
+rclcpp_components_register_node(pathnode_sample
+  PLUGIN "pathnode_sample::P2RelayTimerWithBuffer"
+  EXECUTABLE p2_relaytimer_with_buffer)
 rclcpp_components_register_node(pathnode_sample
   PLUGIN "pathnode_sample::P2Goal"
   EXECUTABLE p2_goal)

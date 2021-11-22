@@ -91,7 +91,7 @@ void TimingAdvertisePublisherBase::set_explicit_subtime(
   auto & header_stamp2sub_time = explicit_sub_callback_infos_[sub_topic];
   header_stamp2sub_time[header_stamp] = sub_time;
 
-  while(header_stamp2sub_time.size() > MAX_SUB_CALLBACK_INFOS_) {
+  while (header_stamp2sub_time.size() > MAX_SUB_CALLBACK_INFOS_) {
     header_stamp2sub_time.erase(header_stamp2sub_time.begin());
   }
 }
