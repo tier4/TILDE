@@ -103,10 +103,19 @@ class TimingAdvertisePublisherBase
 public:
   using InfoMsg = path_info_msg::msg::PubInfo;
 
+  TimingAdvertisePublisherBase();
+
   void set_input_info(
     const std::string & sub_topic,
     const std::shared_ptr<const InputInfo> p);
 
+  void set_explicit_subtime(
+    const std::string & sub_topic,
+    const rclcpp::Time & header_stamp,
+    const rclcpp::Time & sub_time);
+  /**
+   * assume set_explicit_subtime is already called
+   */
   void set_explicit_input_info(
     const std::string & sub_topic,
     const rclcpp::Time & stamp);
@@ -120,6 +129,10 @@ private:
   // explicit InputInfo
   // If this is set, FW creates PubInfo only by this info
   std::map<std::string, InputInfo> explicit_input_infos_;
+  // topic, header stamp vs sub callback time
+  std::map<std::string, std::map<rclcpp::Time, rclcpp::Time>> explicit_sub_callback_infos_;
+
+  const size_t MAX_SUB_CALLBACK_INFOS_;
 };
 
 

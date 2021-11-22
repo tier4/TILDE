@@ -7,7 +7,6 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(ament_cmake_gtest REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 find_package(rclcpp REQUIRED)
@@ -15,6 +14,7 @@ find_package(path_info_msg REQUIRED)
 find_package(rmw REQUIRED)
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
   # uncomment the line when a copyright and license is not present in all source files
@@ -24,14 +24,15 @@ if(BUILD_TESTING)
   # set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
-  ament_add_gtest(${PROJECT_NAME}_test
+  ament_add_gtest(test_timing_advertise_publisher
     test/test_timing_advertise_publisher.cpp)
-  target_include_directories(${PROJECT_NAME}_test
+  target_include_directories(test_timing_advertise_publisher
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
-  ament_target_dependencies(
-    ${PROJECT_NAME}_test
+  target_link_libraries(test_timing_advertise_publisher
+    ${PROJECT_NAME})
+  ament_target_dependencies(test_timing_advertise_publisher
     "rclcpp"
     "path_info_msg")
 endif()

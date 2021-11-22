@@ -25,6 +25,12 @@ rclcpp::Time pathnode::get_timestamp(rclcpp::Time t, ...)
   return t;
 }
 
+
+TimingAdvertisePublisherBase::TimingAdvertisePublisherBase()
+: MAX_SUB_CALLBACK_INFOS_(10)
+{
+}
+
 void TimingAdvertisePublisherBase::set_input_info(
   const std::string & sub_topic,
   const std::shared_ptr<const InputInfo> p)
@@ -36,8 +42,15 @@ void TimingAdvertisePublisherBase::set_explicit_input_info(
   const std::string & sub_topic,
   const rclcpp::Time & stamp)
 {
-  // TODO(y-okumura-isp) set me
-  // explicit_input_infos_[sub_topic].sub_time;
+  auto it = explicit_sub_callback_infos_.find(sub_topic);
+  if (it != explicit_sub_callback_infos_.end() &&
+    it->second.find(stamp) != it->second.end())
+  {
+    explicit_input_infos_[sub_topic].sub_time = it->second[stamp];
+  } else {
+    explicit_input_infos_[sub_topic].sub_time = rclcpp::Time(0, 0);
+  }
+
   explicit_input_infos_[sub_topic].has_header_stamp = true;
   explicit_input_infos_[sub_topic].header_stamp = stamp;
 }
@@ -67,5 +80,18 @@ void TimingAdvertisePublisherBase::set_input_info(path_info_msg::msg::PubInfo & 
       i++;
     }
     explicit_input_infos_.clear();
+  }
+}
+
+void TimingAdvertisePublisherBase::set_explicit_subtime(
+  const std::string & sub_topic,
+  const rclcpp::Time & header_stamp,
+  const rclcpp::Time & sub_time)
+{
+  auto & header_stamp2sub_time = explicit_sub_callback_infos_[sub_topic];
+  header_stamp2sub_time[header_stamp] = sub_time;
+
+  while(header_stamp2sub_time.size() > MAX_SUB_CALLBACK_INFOS_) {
+    header_stamp2sub_time.erase(header_stamp2sub_time.begin());
   }
 }
