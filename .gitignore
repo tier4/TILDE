@@ -4,3 +4,5 @@
 /log/
 /*npy
 /*/*npy
+/src/analysis/__pycache__/
+/src/pathnode_vis/test/__pycache__/
