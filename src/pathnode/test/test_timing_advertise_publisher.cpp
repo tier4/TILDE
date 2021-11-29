@@ -141,3 +141,46 @@ TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime) {
   EXPECT_EQ(msg.input_infos[0].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[0].header_stamp, rclcpp::Time(0, 0));
 }
+
+TEST_F(TestTimingAdvertisePublisher, set_multiple_topic) {
+  TimingAdvertisePublisherBase pub;
+  const std::string TOPIC1 = "sample_topic1";
+  const std::string TOPIC2 = "sample_topic2";
+
+  pub.set_explicit_subtime(
+    TOPIC1,
+    rclcpp::Time(1, 0),
+    rclcpp::Time(2, 0));
+  pub.set_explicit_input_info(
+    TOPIC1,
+    rclcpp::Time(1, 0));
+
+  pub.set_explicit_subtime(
+    TOPIC2,
+    rclcpp::Time(1, 1),
+    rclcpp::Time(2, 1));
+  pub.set_explicit_input_info(
+    TOPIC2,
+    rclcpp::Time(1, 1));
+
+  path_info_msg::msg::PubInfo msg;
+  pub.set_input_info(msg);
+
+  EXPECT_EQ(msg.input_infos.size(), 2ul);
+  int idx1 = 0;
+  int idx2 = 1;
+  if (msg.input_infos[0].topic_name == TOPIC2) {
+    idx1 = 1;
+    idx2 = 0;
+  }
+
+  EXPECT_EQ(msg.input_infos[idx1].topic_name, TOPIC1);
+  EXPECT_EQ(msg.input_infos[idx1].sub_time, rclcpp::Time(2, 0));
+  EXPECT_EQ(msg.input_infos[idx1].has_header_stamp, true);
+  EXPECT_EQ(msg.input_infos[idx1].header_stamp, rclcpp::Time(1, 0));
+
+  EXPECT_EQ(msg.input_infos[idx2].topic_name, TOPIC2);
+  EXPECT_EQ(msg.input_infos[idx2].sub_time, rclcpp::Time(2, 1));
+  EXPECT_EQ(msg.input_infos[idx2].has_header_stamp, true);
+  EXPECT_EQ(msg.input_infos[idx2].header_stamp, rclcpp::Time(1, 1));
+}
