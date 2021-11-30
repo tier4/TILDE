@@ -61,13 +61,13 @@ struct Process
 {
   static rclcpp::Time get_timestamp2(rclcpp::Time t, M * m)
   {
-    std::cout << "rclcpp::Time2" << std::endl;
+    // std::cout << "rclcpp::Time2" << std::endl;
     return t;
   }
 
   static rclcpp::Time get_timestamp3(rclcpp::Time t, const M * m)
   {
-    std::cout << "rclcpp::Time3" << std::endl;
+    // std::cout << "rclcpp::Time3" << std::endl;
     return t;
   }
 };
@@ -77,13 +77,13 @@ struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
 {
   static rclcpp::Time get_timestamp2(rclcpp::Time t, M * m)
   {
-    std::cout << "header Time2" << std::endl;
+    // std::cout << "header Time2" << std::endl;
     return m->header.stamp;
   }
 
   static rclcpp::Time get_timestamp3(rclcpp::Time t, const M * m)
   {
-    std::cout << "header Time3" << std::endl;
+    // std::cout << "header Time3" << std::endl;
     return m->header.stamp;
   }
 };
@@ -91,7 +91,7 @@ struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
 template<class T>
 auto get_timestamp(rclcpp::Time t, T * a)->decltype(rclcpp::Time(a->header.stamp), t)
 {
-  std::cout << "get header timestamp" << std::endl;
+  // std::cout << "get header timestamp" << std::endl;
   rclcpp::Time ret(a->header.stamp);
   return ret;
 }
