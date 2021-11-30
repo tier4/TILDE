@@ -56,7 +56,7 @@ TEST_F(TestTimingAdvertisePublisher, set_input_info) {
   EXPECT_EQ(msg.input_infos[0].header_stamp, rclcpp::Time(0, 1));
 }
 
-TEST_F(TestTimingAdvertisePublisher, set_explicit_input_info) {
+TEST_F(TestTimingAdvertisePublisher, add_explicit_input_info) {
   // set input_info & explicit_input_info
   TimingAdvertisePublisherBase pub;
   auto info = std::make_shared<pathnode::InputInfo>();
@@ -69,7 +69,7 @@ TEST_F(TestTimingAdvertisePublisher, set_explicit_input_info) {
   pub.set_input_info(TOPIC, info);
   pub.set_input_info(TOPIC + "2", info);
 
-  pub.set_explicit_input_info(
+  pub.add_explicit_input_info(
     TOPIC,
     rclcpp::Time(0, 2));
 
@@ -96,7 +96,7 @@ TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime) {
       rclcpp::Time(i, 1));
   }
 
-  pub.set_explicit_input_info(
+  pub.add_explicit_input_info(
     TOPIC,
     rclcpp::Time(5, 0));
 
@@ -110,7 +110,7 @@ TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime) {
   EXPECT_EQ(msg.input_infos[0].header_stamp, rclcpp::Time(5, 0));
 
   // the 1st element exists
-  pub.set_explicit_input_info(
+  pub.add_explicit_input_info(
     TOPIC,
     rclcpp::Time(0, 0));
 
@@ -129,7 +129,7 @@ TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime) {
     rclcpp::Time(10, 0),
     rclcpp::Time(10, 1));
 
-  pub.set_explicit_input_info(
+  pub.add_explicit_input_info(
     TOPIC,
     rclcpp::Time(0, 0));
 
@@ -151,7 +151,7 @@ TEST_F(TestTimingAdvertisePublisher, set_multiple_topic) {
     TOPIC1,
     rclcpp::Time(1, 0),
     rclcpp::Time(2, 0));
-  pub.set_explicit_input_info(
+  pub.add_explicit_input_info(
     TOPIC1,
     rclcpp::Time(1, 0));
 
@@ -159,7 +159,7 @@ TEST_F(TestTimingAdvertisePublisher, set_multiple_topic) {
     TOPIC2,
     rclcpp::Time(1, 1),
     rclcpp::Time(2, 1));
-  pub.set_explicit_input_info(
+  pub.add_explicit_input_info(
     TOPIC2,
     rclcpp::Time(1, 1));
 

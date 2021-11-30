@@ -75,7 +75,7 @@ public:
         auto msg = std::move(this->msg_pcs_.back());
         msg_pcs_.pop_back();
 
-        pub_pc_->set_explicit_input_info(
+        pub_pc_->add_explicit_input_info(
           this->sub_pc_->get_topic_name(),
           msg->header.stamp
         );

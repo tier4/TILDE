@@ -20,6 +20,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/clock.hpp"
@@ -116,7 +117,7 @@ public:
   /**
    * assume set_explicit_subtime is already called
    */
-  void set_explicit_input_info(
+  void add_explicit_input_info(
     const std::string & sub_topic,
     const rclcpp::Time & stamp);
 
@@ -128,7 +129,7 @@ private:
 
   // explicit InputInfo
   // If this is set, FW creates PubInfo only by this info
-  std::map<std::string, InputInfo> explicit_input_infos_;
+  std::map<std::string, std::vector<InputInfo>> explicit_input_infos_;
   // topic, header stamp vs sub callback time
   std::map<std::string, std::map<rclcpp::Time, rclcpp::Time>> explicit_sub_callback_infos_;
 

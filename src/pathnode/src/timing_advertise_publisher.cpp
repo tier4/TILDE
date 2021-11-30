@@ -16,6 +16,7 @@
 #include <string>
 
 #include "pathnode/timing_advertise_publisher.hpp"
+#include "path_info_msg/msg/sub_topic_time_info.hpp"
 
 using pathnode::TimingAdvertisePublisherBase;
 
@@ -38,25 +39,29 @@ void TimingAdvertisePublisherBase::set_input_info(
   input_infos_[sub_topic] = p;
 }
 
-void TimingAdvertisePublisherBase::set_explicit_input_info(
+void TimingAdvertisePublisherBase::add_explicit_input_info(
   const std::string & sub_topic,
   const rclcpp::Time & stamp)
 {
+  InputInfo info;
   auto it = explicit_sub_callback_infos_.find(sub_topic);
   if (it != explicit_sub_callback_infos_.end() &&
     it->second.find(stamp) != it->second.end())
   {
-    explicit_input_infos_[sub_topic].sub_time = it->second[stamp];
+    info.sub_time = it->second[stamp];
   } else {
-    explicit_input_infos_[sub_topic].sub_time = rclcpp::Time(0, 0);
+    info.sub_time = rclcpp::Time(0, 0);
   }
 
-  explicit_input_infos_[sub_topic].has_header_stamp = true;
-  explicit_input_infos_[sub_topic].header_stamp = stamp;
+  info.has_header_stamp = true;
+  info.header_stamp = stamp;
+  explicit_input_infos_[sub_topic].push_back(info);
 }
 
 void TimingAdvertisePublisherBase::set_input_info(path_info_msg::msg::PubInfo & info_msg)
 {
+  info_msg.input_infos.clear();
+
   if (explicit_input_infos_.size() == 0) {
     info_msg.input_infos.resize(input_infos_.size());
 
@@ -69,15 +74,15 @@ void TimingAdvertisePublisherBase::set_input_info(path_info_msg::msg::PubInfo & 
       i++;
     }
   } else {
-    info_msg.input_infos.resize(explicit_input_infos_.size());
-
-    size_t i = 0;
-    for (const auto &[topic, input_info] : explicit_input_infos_) {
-      info_msg.input_infos[i].topic_name = topic;
-      info_msg.input_infos[i].sub_time = input_info.sub_time;
-      info_msg.input_infos[i].has_header_stamp = input_info.has_header_stamp;
-      info_msg.input_infos[i].header_stamp = input_info.header_stamp;
-      i++;
+    for (const auto &[topic, input_infos] : explicit_input_infos_) {
+      for (const auto & input_info : input_infos) {
+        path_info_msg::msg::SubTopicTimeInfo info;
+        info.topic_name = topic;
+        info.sub_time = input_info.sub_time;
+        info.has_header_stamp = input_info.has_header_stamp;
+        info.header_stamp = input_info.header_stamp;
+        info_msg.input_infos.push_back(info);
+      }
     }
     explicit_input_infos_.clear();
   }
