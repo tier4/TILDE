@@ -1,3 +1,5 @@
+import collections
+
 def time2str(t):
     return f"{t.sec}.{t.nanosec:09d}"
 
@@ -15,7 +17,7 @@ class PubInfo(object):
     """
     PubInfo
       - out_info = TopicInfo
-      - in_infos = {topic_name => TopicInfo}
+      - in_infos = {topic_name => list of TopicInfo}
     """
     def __init__(self, out_topic, out_stamp):
         self.out_info = TopicInfo(out_topic, True, out_stamp)
@@ -23,7 +25,7 @@ class PubInfo(object):
         self.in_infos = {}
 
     def add_input_info(self, in_topic, has_stamp, stamp):
-        self.in_infos[in_topic] = TopicInfo(in_topic, has_stamp, stamp)
+        self.in_infos.setdefault(in_topic, []).append(TopicInfo(in_topic, has_stamp, stamp))
 
     def __str__(self):
         s = "PubInfo: \n"

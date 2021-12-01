@@ -63,13 +63,14 @@ class InputSensorStampSolver(object):
             if not next_pubinfo:
                 continue
 
-            for in_info in next_pubinfo.in_infos.values():
-                nx_topic = in_info.topic
-                nx_stamp = time2str(in_info.stamp)
-                if dists[nx_topic][nx_stamp] > 0:
-                    continue
-                dists[nx_topic][nx_stamp] = dists[topic][stamp] + 1
-                queue.append((nx_topic, nx_stamp))
+            for in_infos in next_pubinfo.in_infos.values():
+                for in_info in in_infos:
+                    nx_topic = in_info.topic
+                    nx_stamp = time2str(in_info.stamp)
+                    if dists[nx_topic][nx_stamp] > 0:
+                        continue
+                    dists[nx_topic][nx_stamp] = dists[topic][stamp] + 1
+                    queue.append((nx_topic, nx_stamp))
 
 
     def append(self, topic, stamp, sensor_topic, sensor_stamp):
