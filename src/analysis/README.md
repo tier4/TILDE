@@ -80,3 +80,26 @@ now: '/sensing/lidar/pointcloud_preprocessor/transform_listener_impl_5588e2f5709
 (snip)
 ```
 
+## parse_pub_info.py
+
+PugInfo が保存された bag ファイルを pub_info.py のデータ書式に変換し
+pkl 形式で保存する。
+結果は `${CWD}/topic_infos.pkl` に保存される。
+
+``` bash
+parse_pub_info.py <path/to/bagfile>
+```
+
+## pubinfo_traverse.py
+
+parse_pub_info.py で作成された pkl ファイルを元に E2E latency を算出する。
+第三引数が終点となるトピック名。
+第二引数は何番目に送信されたトピック(正確には PubInfo)を対象とするか。あまり若い数字だと初期化中の為辿り付けないセンサーが発生することがある。
+
+``` bash
+./pubinfo_traverse.py \
+  <path/to>/topic_infos.pkl \
+  1000 \
+  /localization/pose_twist_fusion_filter/twist_with_covariance 
+```
+
