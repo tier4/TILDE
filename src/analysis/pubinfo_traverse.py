@@ -3,6 +3,7 @@
 import pickle
 import argparse
 from collections import deque, defaultdict
+import time
 
 import rclpy
 from rclpy.clock import Clock, ClockType
@@ -38,13 +39,17 @@ class InputSensorStampSolver(object):
         # dists[topic][stamp]
         dists = defaultdict(lambda: defaultdict(lambda: -1))
         queue = deque()
+        parentQ = deque()
 
         dists[tgt_topic][tgt_stamp] = 1
         queue.append((tgt_topic, tgt_stamp))
+        parentQ.append("")
 
+        st = time.time()
         start = None
         while len(queue) != 0:
             topic, stamp = queue.popleft()
+            parent = parentQ.popleft()
             is_leaf_s = "looks_sensor" if is_leaf[topic] else ""
 
             if start is None:
@@ -52,7 +57,7 @@ class InputSensorStampSolver(object):
             dur = start - strstamp2time(stamp)
             dur_ms = dur.nanoseconds // 10**6
 
-            print(f"{topic:80} {stamp:>20} {dur_ms:4} ms {is_leaf_s}")
+            print(f"{topic:80} {stamp:>20} {dur_ms:4} ms {is_leaf_s} {parent}")
 
             # NDT-EKF has loop, so skip
             if topic == "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias":
@@ -71,7 +76,10 @@ class InputSensorStampSolver(object):
                         continue
                     dists[nx_topic][nx_stamp] = dists[topic][stamp] + 1
                     queue.append((nx_topic, nx_stamp))
+                    parentQ.append(topic)
 
+        et = time.time()
+        print(f"solve internal: {(et-st)*1000} [ms]")
 
     def append(self, topic, stamp, sensor_topic, sensor_stamp):
         dic = self.topic_stamp_to_sensor_stamp
@@ -177,8 +185,12 @@ def main(args):
     #     print(f"  {p} {is_leaf}")
     # print("")
 
+    st = time.time()
     solver = InputSensorStampSolver()
     solver.solve(pubinfos, tgt_topic, tgt_stamp)
+    et = time.time()
+
+    print(f"solve {(et-st) * 1000} [ms]")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
