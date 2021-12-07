@@ -1,6 +1,9 @@
 import collections
 
 def time2str(t):
+    """
+    t: builtin_interfaces.msg.Time
+    """
     return f"{t.sec}.{t.nanosec:09d}"
 
 class TopicInfo(object):
@@ -51,6 +54,7 @@ class PubInfos(object):
     we can get PubInfo by topic_vs_pubinfo[topic_name][stamp].
     '''
     def __init__(self):
+        # {topic => {stamp_str => PubInfo}}
         self.topic_vs_pubinfos = {}
 
     def add(self, pubinfo):
@@ -64,6 +68,23 @@ class PubInfos(object):
             infos[out_stamp] = {}
 
         infos[out_stamp] = pubinfo
+
+    def erase_until(self, stamp):
+        """
+        erase added pubinfo where out_stamp < stamp
+        stamp: rclpy.Time
+        """
+        thres_stamp = time2str(stamp)
+        erases = {}
+        for (topic, infos) in self.topic_vs_pubinfos.items():
+            for stamp in infos.keys():
+                if thres_stamp <= stamp:
+                    continue
+                erases.setdefault(topic, []).append(stamp)
+
+        for (topic, stamps) in erases.items():
+            for stamp in stamps:
+                del self.topic_vs_pubinfos[topic][stamp]
 
     def topics(self):
         return list(self.topic_vs_pubinfos.keys())

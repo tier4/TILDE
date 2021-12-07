@@ -18,6 +18,8 @@ from statistics import mean
 
 import rclpy
 from rclpy.node import Node
+from rclpy.time import Time
+from builtin_interfaces.msg import Time as TimeMsg
 
 from pathnode_vis.pubinfo_traverse import TopicGraph, InputSensorStampSolver
 from path_info_msg.msg import PubInfo, PubTopicTimeInfo, SubTopicTimeInfo
@@ -148,7 +150,12 @@ class PerTopicLatencyStat(object):
     def print_report(self):
         reports = self.report()
         for (topic, report) in reports.items():
-            print(f"{topic:80} {report['dur_min']:>6.1f} {report['dur_mean']:>6.1f} {report['dur_min']:>6.1f} {report['is_all_leaf']}")
+            s = f"{topic:80} "
+            s += f"{report['dur_min']:>6.1f} "
+            s += f"{report['dur_mean']:>6.1f} "
+            s += f"{report['dur_max']:>6.1f} "
+            s += f"{report['is_all_leaf']}"
+            print(s)
 
 class LatencyViewerNode(Node):
     def __init__(self):
@@ -158,6 +165,7 @@ class LatencyViewerNode(Node):
         self.declare_parameter("graph_pkl", GRAPH_PKL)
         self.declare_parameter("timer_sec", TIMER_SEC)
         self.declare_parameter("target_topic", TARGET_TOPIC)
+        self.declare_parameter("keep_info_sec", 3)
 
         self.subs = {}
         topics = self.get_parameter("topics").get_parameter_value().string_array_value
@@ -180,6 +188,7 @@ class LatencyViewerNode(Node):
                                        self.timer_callback)
 
         self.target_topic = self.get_parameter("target_topic").get_parameter_value().string_value
+        self.keep_info_sec = self.get_parameter("keep_info_sec").get_parameter_value().integer_value
 
     def listener_callback(self, pub_info_msg):
         # print(f"{pub_info_msg.output_info.topic_name}")
@@ -197,6 +206,7 @@ class LatencyViewerNode(Node):
         target_topic = self.target_topic
 
         stamps = sorted(pubinfos.stamps(target_topic))
+        print(f"stamps: {len(stamps)}, {stamps[0] if len(stamps) > 0 else ''}")
         # [-3] has no specific meaning.
         # But [-1] may not have full info. So we look somewhat old info.
         idx = -3
@@ -208,12 +218,17 @@ class LatencyViewerNode(Node):
         stats = PerTopicLatencyStat()
         for target_stamp in stamps[:idx]:
             results = solver.solve(pubinfos, target_topic, target_stamp)
-
             for r in results.data:
                 stats.add(r.topic, r.dur_ms, r.is_leaf)
-                # print(f"{r.topic:80} {r.stamp:>20} {r.dur_ms:4} ms {r.is_leaf} {r.parent}")
 
         stats.print_report()
+        print("")
+
+        # cleanup PubInfos
+        (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split("."))
+        until_stamp = TimeMsg(sec=latest_sec - self.keep_info_sec,
+                            nanosec=latest_ns)
+        pubinfos.erase_until(until_stamp)
 
 def main(args=None):
     rclpy.init(args=args)
