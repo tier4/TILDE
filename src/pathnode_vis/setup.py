@@ -21,6 +21,9 @@ setup(
     entry_points={
         'console_scripts': [
             'pathnode_vis = pathnode_vis.pathnode_vis:main',
+            'latency_viewer = pathnode_vis.latency_viewer:main',
+            'pubinfo_traverse = pathnode_vis.pubinfo_traverse:main',
+            'parse_pub_info = pathnode_vis.parse_pub_info:main',
         ],
     },
 )
