@@ -106,7 +106,7 @@ class InputSensorStampSolver(object):
                     parentQ.append(topic)
 
         et = time.time()
-        print(f"solve internal: {(et-st)*1000} [ms]")
+        # print(f"solve internal: {(et-st)*1000} [ms]")
 
         return ret
 
