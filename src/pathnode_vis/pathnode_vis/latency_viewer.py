@@ -159,6 +159,11 @@ class PerTopicLatencyStat(object):
 
     def print_report(self):
         reports = self.report()
+        s = "{:80} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6}".format(
+            "topic", "dur", "dur", "dur", "e2e", "e2e", "e2e"
+        )
+        print(s)
+
         for (topic, report) in reports.items():
             s = f"{topic:80} "
             s += f"{report['dur_min']:>6.1f} "
