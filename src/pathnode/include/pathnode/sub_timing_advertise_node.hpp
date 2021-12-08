@@ -202,7 +202,8 @@ public:
       info_topic, rclcpp::QoS(1), options);
 
     auto ta_pub = std::make_shared<TimingAdvertisePublisherT>(
-      info_pub, pub, get_fully_qualified_name());
+      info_pub, pub, get_fully_qualified_name(),
+      this->get_clock());
     timing_advertise_pubs_[info_topic] = ta_pub;
     return ta_pub;
   }

@@ -111,19 +111,26 @@ TARGET_TOPIC = "/sensing/lidar/concatenated/pointcloud"
 class LatencyStat(object):
     def __init__(self):
         self.dur_ms_list = []
+        self.dur_pub_ms_list = []
         self.is_leaf_list = []
 
-    def add(self, dur_ms, is_leaf):
+    def add(self, dur_ms, dur_pub_ms, is_leaf):
         self.dur_ms_list.append(dur_ms)
+        self.dur_pub_ms_list.append(dur_pub_ms)
         self.is_leaf_list.append(is_leaf)
 
     def report(self):
         dur_ms_list = self.dur_ms_list
         is_leaf_list = self.is_leaf_list
+        dur_pub_ms_list = self.dur_pub_ms_list
 
         dur_min = float(min(dur_ms_list))
         dur_mean = float(mean(dur_ms_list))
         dur_max = float(max(dur_ms_list))
+
+        dur_pub_min = float(min(dur_pub_ms_list))
+        dur_pub_mean = float(mean(dur_pub_ms_list))
+        dur_pub_max = float(max(dur_pub_ms_list))
 
         is_all_leaf = all(is_leaf_list)
 
@@ -131,6 +138,9 @@ class LatencyStat(object):
             "dur_min": dur_min,
             "dur_mean": dur_mean,
             "dur_max": dur_max,
+            "dur_pub_min": dur_pub_min,
+            "dur_pub_mean": dur_pub_mean,
+            "dur_pub_max": dur_pub_max,
             "is_all_leaf": is_all_leaf,
             }
 
@@ -138,8 +148,8 @@ class PerTopicLatencyStat(object):
     def __init__(self):
         self.data = {}
 
-    def add(self, topic, dur_ms, is_leaf):
-        self.data.setdefault(topic, LatencyStat()).add(dur_ms, is_leaf)
+    def add(self, topic, dur_ms, dur_pub_ms, is_leaf):
+        self.data.setdefault(topic, LatencyStat()).add(dur_ms, dur_pub_ms, is_leaf)
 
     def report(self):
         ret = {}
@@ -154,6 +164,9 @@ class PerTopicLatencyStat(object):
             s += f"{report['dur_min']:>6.1f} "
             s += f"{report['dur_mean']:>6.1f} "
             s += f"{report['dur_max']:>6.1f} "
+            s += f"{report['dur_pub_min']:>6.1f} "
+            s += f"{report['dur_pub_mean']:>6.1f} "
+            s += f"{report['dur_pub_max']:>6.1f} "
             s += f"{report['is_all_leaf']}"
             print(s)
 
@@ -192,9 +205,13 @@ class LatencyViewerNode(Node):
 
     def listener_callback(self, pub_info_msg):
         # print(f"{pub_info_msg.output_info.topic_name}")
-        pub_info = PubInfoObj(pub_info_msg.output_info.topic_name, pub_info_msg.output_info.header_stamp)
+        output_info = pub_info_msg.output_info
+        pub_info = PubInfoObj(output_info.topic_name,
+                              output_info.pub_time,
+                              output_info.header_stamp)
         for input_info in pub_info_msg.input_infos:
             pub_info.add_input_info(input_info.topic_name,
+                                    input_info.sub_time,
                                     input_info.has_header_stamp,
                                     input_info.header_stamp)
         self.pub_infos.add(pub_info)
@@ -219,7 +236,7 @@ class LatencyViewerNode(Node):
         for target_stamp in stamps[:idx]:
             results = solver.solve(pubinfos, target_topic, target_stamp)
             for r in results.data:
-                stats.add(r.topic, r.dur_ms, r.is_leaf)
+                stats.add(r.topic, r.dur_ms, r.dur_pub_ms, r.is_leaf)
 
         stats.print_report()
         print("")

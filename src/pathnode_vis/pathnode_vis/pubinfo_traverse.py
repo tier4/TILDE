@@ -17,17 +17,19 @@ def strstamp2time(strstamp):
     return Time(seconds=int(sec), nanoseconds=int(nanosec))
 
 class SolverResult(object):
-    def __init__(self, topic, stamp, dur_ms, is_leaf, parent):
+    def __init__(self, topic, stamp, dur_ms, dur_pub_ms, is_leaf, parent):
         """
         topic: topic [string]
         stamp: header.stamp [rclpy.Time]
-        dur_ms: duration in ms [double]
+        dur_ms: duration of header.stamp in ms [double]
+        dur_pub_ms: duration of output.pub_time in ms [double]
         is_leaf: bool
         parent: parent topic [string]
         """
         self.topic = topic
         self.stamp = stamp
         self.dur_ms = dur_ms
+        self.dur_pub_ms = dur_pub_ms
         self.is_leaf = is_leaf
         self.parent = parent
 
@@ -65,26 +67,35 @@ class InputSensorStampSolver(object):
         queue = deque()
         parentQ = deque()
 
+        start = strstamp2time(tgt_stamp)
+        start_pub_info = pubinfos.get(tgt_topic, tgt_stamp)
+        start_pub_time = start_pub_info.out_info.pubsub_stamp
+
         dists[tgt_topic][tgt_stamp] = 1
-        queue.append((tgt_topic, tgt_stamp))
+        queue.append((tgt_topic, tgt_stamp, start_pub_time))
         parentQ.append("")
 
         st = time.time()
-        start = None
 
         ret = SolverResults()
         while len(queue) != 0:
-            topic, stamp = queue.popleft()
+            topic, stamp, sub_time = queue.popleft()
             parent = parentQ.popleft()
             is_leaf_s = "looks_sensor" if is_leaf[topic] else ""
 
-            if start is None:
-                start = strstamp2time(stamp)
             dur = start - strstamp2time(stamp)
             dur_ms = dur.nanoseconds // 10**6
 
+            dur_pub = Time.from_msg(start_pub_time) - Time.from_msg(sub_time)
+            dur_pub_ms = dur_pub.nanoseconds // 10**6
+            print("hhh")
+            print(start_pub_time)
+            print(sub_time)
+            print(dur_pub)
+            print(dur_pub_ms)
+
             # print(f"{topic:80} {stamp:>20} {dur_ms:4} ms {is_leaf_s} {parent}")
-            ret.add(topic, stamp, dur_ms, is_leaf[topic], parent)
+            ret.add(topic, stamp, dur_ms, dur_pub_ms, is_leaf[topic], parent)
 
             # NDT-EKF has loop, so skip
             if topic == "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias":
@@ -102,7 +113,7 @@ class InputSensorStampSolver(object):
                     if dists[nx_topic][nx_stamp] > 0:
                         continue
                     dists[nx_topic][nx_stamp] = dists[topic][stamp] + 1
-                    queue.append((nx_topic, nx_stamp))
+                    queue.append((nx_topic, nx_stamp, in_info.pubsub_stamp))
                     parentQ.append(topic)
 
         et = time.time()

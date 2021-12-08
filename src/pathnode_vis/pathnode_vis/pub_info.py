@@ -7,8 +7,15 @@ def time2str(t):
     return f"{t.sec}.{t.nanosec:09d}"
 
 class TopicInfo(object):
-    def __init__(self, topic, has_stamp, stamp):
+    def __init__(self, topic, pubsub_stamp, has_stamp, stamp):
+        """
+        topic: target topic [string]
+        pubsub_stamp: when publish or subscription callback is called [builtin_interfaces.msg.Time]
+        has_stamp: whether main topic has header.stamp or not [bool]
+        stamp: header.stamp [builtin_interfaces.msg.Time]
+        """
         self.topic = topic
+        self.pubsub_stamp = pubsub_stamp
         self.has_stamp = has_stamp
         self.stamp = stamp
 
@@ -22,18 +29,24 @@ class PubInfo(object):
       - out_info = TopicInfo
       - in_infos = {topic_name => list of TopicInfo}
     """
-    def __init__(self, out_topic, out_stamp):
-        self.out_info = TopicInfo(out_topic, True, out_stamp)
+    def __init__(self, out_topic, pub_time, out_stamp):
+        """
+        out_topic: topic name
+        pub_time: when publish main topic [builtin_interfaces.msg.Time]
+        out_stamp: main topic header.stamp [builtin_interfaces.msg.Time]
+        """
+        self.out_info = TopicInfo(out_topic, pub_time, True, out_stamp)
         # topic name vs TopicInfo
         self.in_infos = {}
 
-    def add_input_info(self, in_topic, has_stamp, stamp):
+    def add_input_info(self, in_topic, sub_stamp, has_stamp, stamp):
         """
         in_topic: topic string
         has_stamp: bool
-        stamp: rclpy.Time
+        stamp: header stamp [builtin_interfaces.msg.Time]
         """
-        self.in_infos.setdefault(in_topic, []).append(TopicInfo(in_topic, has_stamp, stamp))
+        info = TopicInfo(in_topic, sub_stamp, has_stamp, stamp)
+        self.in_infos.setdefault(in_topic, []).append(info)
 
     def __str__(self):
         s = "PubInfo: \n"

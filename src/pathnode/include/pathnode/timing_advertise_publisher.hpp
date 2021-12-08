@@ -154,8 +154,9 @@ public:
   TimingAdvertisePublisher(
     std::shared_ptr<PubInfoPublisher> info_pub,
     std::shared_ptr<PublisherT> pub,
-    const std::string & node_fqn)
-  : info_pub_(info_pub), pub_(pub), node_fqn_(node_fqn), clock_(std::make_unique<rclcpp::Clock>())
+    const std::string & node_fqn,
+    std::shared_ptr<rclcpp::Clock> clock)
+  : info_pub_(info_pub), pub_(pub), node_fqn_(node_fqn), clock_(clock)
   {
   }
 
@@ -201,7 +202,7 @@ private:
   std::shared_ptr<PubInfoPublisher> info_pub_;
   std::shared_ptr<PublisherT> pub_;
   const std::string node_fqn_;
-  std::unique_ptr<rclcpp::Clock> clock_;
+  std::shared_ptr<rclcpp::Clock> clock_;
 
   /**
    * t: header stamp
