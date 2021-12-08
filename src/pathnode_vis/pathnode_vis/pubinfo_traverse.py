@@ -88,11 +88,6 @@ class InputSensorStampSolver(object):
 
             dur_pub = Time.from_msg(start_pub_time) - Time.from_msg(sub_time)
             dur_pub_ms = dur_pub.nanoseconds // 10**6
-            print("hhh")
-            print(start_pub_time)
-            print(sub_time)
-            print(dur_pub)
-            print(dur_pub_ms)
 
             # print(f"{topic:80} {stamp:>20} {dur_ms:4} ms {is_leaf_s} {parent}")
             ret.add(topic, stamp, dur_ms, dur_pub_ms, is_leaf[topic], parent)
