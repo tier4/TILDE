@@ -104,7 +104,6 @@ LEAVES = [
     "/vehicle/status/twist",
     ]
 PUB_INFO = "topic_infos.pkl"
-GRAPH_PKL = "graph.pkl"
 TIMER_SEC = 1.0
 TARGET_TOPIC = "/sensing/lidar/concatenated/pointcloud"
 
@@ -180,10 +179,11 @@ class LatencyViewerNode(Node):
         super().__init__('latency_viewer_node')
         self.declare_parameter("topics", PUB_INFO_TOPICS)
         self.declare_parameter("leaves", LEAVES)
-        self.declare_parameter("graph_pkl", GRAPH_PKL)
+        self.declare_parameter("graph_pkl", "")
         self.declare_parameter("timer_sec", TIMER_SEC)
         self.declare_parameter("target_topic", TARGET_TOPIC)
         self.declare_parameter("keep_info_sec", 3)
+        self.declare_parameter("wait_sec_to_init_graph", 10)
 
         self.subs = {}
         topics = self.get_parameter("topics").get_parameter_value().string_array_value
@@ -195,9 +195,11 @@ class LatencyViewerNode(Node):
                 1)
             self.subs[topic] = sub
 
+        self.solver = None
         graph_pkl = self.get_parameter("graph_pkl").get_parameter_value().string_value
-        graph = pickle.load(open(graph_pkl, "rb"))
-        self.solver = InputSensorStampSolver(graph)
+        if graph_pkl:
+            graph = pickle.load(open(graph_pkl, "rb"))
+            self.solver = InputSensorStampSolver(graph)
 
         self.pub_infos = PubInfosObj()
 
@@ -207,6 +209,9 @@ class LatencyViewerNode(Node):
 
         self.target_topic = self.get_parameter("target_topic").get_parameter_value().string_value
         self.keep_info_sec = self.get_parameter("keep_info_sec").get_parameter_value().integer_value
+        self.wait_sec_to_init_graph = \
+            self.get_parameter("wait_sec_to_init_graph").get_parameter_value().integer_value
+        self.wait_init = 0
 
     def listener_callback(self, pub_info_msg):
         # print(f"{pub_info_msg.output_info.topic_name}")
@@ -224,11 +229,24 @@ class LatencyViewerNode(Node):
     def timer_callback(self):
         # print(f"timer_callback")
         pubinfos = self.pub_infos
-        solver = self.solver
+
         target_topic = self.target_topic
 
         stamps = sorted(pubinfos.stamps(target_topic))
         print(f"stamps: {len(stamps)}, {stamps[0] if len(stamps) > 0 else ''}")
+        if len(stamps) == 0:
+            return
+
+        if not self.solver:
+            if self.wait_init < self.wait_sec_to_init_graph:
+                self.wait_init += 1
+                return
+            print("init solver")
+            graph = TopicGraph(pubinfos)
+            self.solver = InputSensorStampSolver(graph)
+
+        solver = self.solver
+
         # [-3] has no specific meaning.
         # But [-1] may not have full info. So we look somewhat old info.
         idx = -3

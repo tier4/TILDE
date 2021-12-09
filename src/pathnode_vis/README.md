@@ -113,9 +113,54 @@ See source codes for parameters.
 
 ## latency viewer
 
-``` bash
-# (1) generate graph pkl
+The latency viewer outputs E2E latency online, just like `vmstat` or `top`.
+You can run the latency viewer before or after running the target application.
 
-# (2) run
+The latency viewer show latencies from `target_topic` to source topics.
+Here is the example command and report.
+
+``` bash
+# (1) run your application
+ros2 launch ...
+
+# (2) run latency viewer
+ros2 run pathnode_vis latency_viewer \
+  --ros-args \
+    -p target_topic:=/localization/pose_twist_fusion_filter/twist_with_covariance
 ```
 
+You can see the following lines are displayed repeatedly.
+
+```
+topic                                                                               dur    dur    dur    e2e    e2e    e2e
+/localization/pose_twist_fusion_filter/twist_with_covariance                        0.0    0.0    0.0    0.0    0.0    0.0 False
+/localization/pose_estimator/pose                                                 232.0  289.0  354.0    4.0   51.8  124.0 False
+/localization/pose_estimator/pose_with_covariance                                 232.0  289.0  354.0    4.0   51.8  124.0 False
+(snip)
+/sensing/imu/imu_data                                                               0.0   19.2   71.0    4.0   21.3   74.0 True
+/vehicle/status/twist                                                               5.0   35.9   75.0    9.0   38.5   79.0 True
+(snip)
+/sensing/lidar/top/rectified/pointcloud                                           232.0  289.1  354.0   30.0   89.1  160.0 True
+```
+
+This means:
+
+- `topic` columns:
+  - topics are displayed from `target_topic` to source topics, such as sensors.
+  - latency viewer traverses your application DAG and finds these topics.
+  - Topics forms DAG in general, and topics are listed by BFS order from `target_topic`.
+- dur and e2e columns:
+  - e2e column may be what you want. This is the end-to-end latency from listed topics to `target_topic`.  
+    There are three floating numbers, which mean min, mean, max in order.
+    The definition is `<target_topic publising time> - <listed topic subscription time>)`.  
+    So, you can see it takes 30.0 [ms] from pointcloud subscription to twist_with_covariance publishing in the fastest case.
+
+Other parameter:
+
+- `topics` [string array]
+  - `/*/info/pub` topics list
+- `wait_sec_to_init_graph` [int]
+  - As in above, latency viewer constructs DAG of your application.
+  - Latency viewr listens topics for `wait_sec_to_init_graph` seconds before constructing DAG.
+- and so on
+  - please see latency_viewer.py
