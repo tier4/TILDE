@@ -51,7 +51,7 @@ class InputSensorStampSolver(object):
         topic: target topic
         stamp: target stamp(str)
 
-        return list of {sensor: oldest stamp}
+        return SolverResults
 
         Calcurate topic_stamp_to_sensor_stamp internally.
         """
