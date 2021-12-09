@@ -163,14 +163,20 @@ class PerTopicLatencyStat(object):
         )
         print(s)
 
+        def p(v):
+            if v > 1000:
+                return "   inf"
+            else:
+                return "{:>6.1f}".format(v)
+
         for (topic, report) in reports.items():
             s = f"{topic:80} "
-            s += f"{report['dur_min']:>6.1f} "
-            s += f"{report['dur_mean']:>6.1f} "
-            s += f"{report['dur_max']:>6.1f} "
-            s += f"{report['dur_pub_min']:>6.1f} "
-            s += f"{report['dur_pub_mean']:>6.1f} "
-            s += f"{report['dur_pub_max']:>6.1f} "
+            s += f"{p(report['dur_min'])} "
+            s += f"{p(report['dur_mean'])} "
+            s += f"{p(report['dur_max'])} "
+            s += f"{p(report['dur_pub_min'])} "
+            s += f"{p(report['dur_pub_mean'])} "
+            s += f"{p(report['dur_pub_max'])} "
             s += f"{report['is_all_leaf']}"
             print(s)
 
