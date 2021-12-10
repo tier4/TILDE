@@ -27,8 +27,9 @@ rclcpp::Time pathnode::get_timestamp(rclcpp::Time t, ...)
 }
 
 
-TimingAdvertisePublisherBase::TimingAdvertisePublisherBase()
-: MAX_SUB_CALLBACK_INFOS_(10)
+TimingAdvertisePublisherBase::TimingAdvertisePublisherBase(std::shared_ptr<rclcpp::Clock> clock)
+: clock_(clock),
+  MAX_SUB_CALLBACK_INFOS_SEC_(2)
 {
 }
 
@@ -96,7 +97,20 @@ void TimingAdvertisePublisherBase::set_explicit_subtime(
   auto & header_stamp2sub_time = explicit_sub_callback_infos_[sub_topic];
   header_stamp2sub_time[header_stamp] = sub_time;
 
-  while (header_stamp2sub_time.size() > MAX_SUB_CALLBACK_INFOS_) {
-    header_stamp2sub_time.erase(header_stamp2sub_time.begin());
+  rclcpp::Duration dur(MAX_SUB_CALLBACK_INFOS_SEC_, 0);
+  auto thres = clock_->now() - dur;
+
+  for(auto it = header_stamp2sub_time.begin();
+      it != header_stamp2sub_time.end();) {
+    if(it->first < thres) {
+      it = header_stamp2sub_time.erase(it);
+    } else {
+      break;
+    }
   }
+}
+
+void TimingAdvertisePublisherBase::set_max_sub_callback_infos_sec(size_t sec)
+{
+  MAX_SUB_CALLBACK_INFOS_SEC_ = sec;
 }

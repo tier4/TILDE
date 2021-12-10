@@ -104,7 +104,7 @@ class TimingAdvertisePublisherBase
 public:
   using InfoMsg = path_info_msg::msg::PubInfo;
 
-  TimingAdvertisePublisherBase();
+  explicit TimingAdvertisePublisherBase(std::shared_ptr<rclcpp::Clock> clock);
 
   void set_input_info(
     const std::string & sub_topic,
@@ -114,6 +114,7 @@ public:
     const std::string & sub_topic,
     const rclcpp::Time & header_stamp,
     const rclcpp::Time & sub_time);
+
   /**
    * assume set_explicit_subtime is already called
    */
@@ -122,6 +123,11 @@ public:
     const rclcpp::Time & stamp);
 
   void set_input_info(path_info_msg::msg::PubInfo & info_msg);
+
+  void set_max_sub_callback_infos_sec(size_t sec);
+
+protected:
+  std::shared_ptr<rclcpp::Clock> clock_;
 
 private:
   // parent node subscription topic vs InputInfo
@@ -133,7 +139,8 @@ private:
   // topic, header stamp vs sub callback time
   std::map<std::string, std::map<rclcpp::Time, rclcpp::Time>> explicit_sub_callback_infos_;
 
-  const size_t MAX_SUB_CALLBACK_INFOS_;
+  // how many seconds to preserve explicit_sub_callback_infos per topic
+  size_t MAX_SUB_CALLBACK_INFOS_SEC_;
 };
 
 
@@ -156,7 +163,7 @@ public:
     std::shared_ptr<PublisherT> pub,
     const std::string & node_fqn,
     std::shared_ptr<rclcpp::Clock> clock)
-  : info_pub_(info_pub), pub_(pub), node_fqn_(node_fqn), clock_(clock)
+  : TimingAdvertisePublisherBase(clock), info_pub_(info_pub), pub_(pub), node_fqn_(node_fqn)
   {
   }
 
@@ -202,7 +209,6 @@ private:
   std::shared_ptr<PubInfoPublisher> info_pub_;
   std::shared_ptr<PublisherT> pub_;
   const std::string node_fqn_;
-  std::shared_ptr<rclcpp::Clock> clock_;
 
   /**
    * t: header stamp
