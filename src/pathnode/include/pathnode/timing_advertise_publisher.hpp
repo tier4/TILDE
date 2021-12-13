@@ -205,6 +205,18 @@ public:
 
   // TODO(y-okumura-isp) get_allocator
 
+  size_t
+  get_subscription_count() const
+  {
+    return pub_->get_subscription_count();
+  }
+
+  size_t
+  get_intra_process_subscription_count() const
+  {
+    return pub_->get_intra_process_subscription_count();
+  }
+
 private:
   std::shared_ptr<PubInfoPublisher> info_pub_;
   std::shared_ptr<PublisherT> pub_;
