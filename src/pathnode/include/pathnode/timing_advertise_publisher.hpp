@@ -217,6 +217,13 @@ public:
     return pub_->get_intra_process_subscription_count();
   }
 
+  RCLCPP_PUBLIC
+  const char *
+  get_topic_name() const
+  {
+    return pub_->get_topic_name();
+  }
+
 private:
   std::shared_ptr<PubInfoPublisher> info_pub_;
   std::shared_ptr<PublisherT> pub_;
