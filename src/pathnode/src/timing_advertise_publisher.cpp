@@ -100,9 +100,10 @@ void TimingAdvertisePublisherBase::set_explicit_subtime(
   rclcpp::Duration dur(MAX_SUB_CALLBACK_INFOS_SEC_, 0);
   auto thres = clock_->now() - dur;
 
-  for(auto it = header_stamp2sub_time.begin();
-      it != header_stamp2sub_time.end();) {
-    if(it->first < thres) {
+  for (auto it = header_stamp2sub_time.begin();
+    it != header_stamp2sub_time.end(); )
+  {
+    if (it->first < thres) {
       it = header_stamp2sub_time.erase(it);
     } else {
       break;
