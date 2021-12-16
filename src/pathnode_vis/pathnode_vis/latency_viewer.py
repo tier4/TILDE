@@ -22,7 +22,10 @@ from builtin_interfaces.msg import Time as TimeMsg
 
 from path_info_msg.msg import PubInfo
 from pathnode_vis.pubinfo_traverse import TopicGraph, InputSensorStampSolver
-from pathnode_vis.pub_info import PubInfos as PubInfosObj
+from pathnode_vis.pub_info import (
+    PubInfo as PubInfoObj,
+    PubInfos as PubInfosObj
+    )
 
 EXCLUDES_TOPICS = [
     "/diagnostics/info/pub",
@@ -236,7 +239,7 @@ class LatencyViewerNode(Node):
         map
           a list of pubinfo topics
         """
-        msg_type = "path_info_msg/msg/TopicInfo"
+        msg_type = "path_info_msg/msg/PubInfo"
         topic_and_types = self.get_topic_names_and_types()
         filtered_topic_and_types = \
             filter(lambda x: msg_type in x[1], topic_and_types)
