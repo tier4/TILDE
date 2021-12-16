@@ -18,83 +18,14 @@ from statistics import mean
 
 import rclpy
 from rclpy.node import Node
-from rclpy.time import Time
 from builtin_interfaces.msg import Time as TimeMsg
 
+from path_info_msg.msg import PubInfo
 from pathnode_vis.pubinfo_traverse import TopicGraph, InputSensorStampSolver
-from path_info_msg.msg import PubInfo, PubTopicTimeInfo, SubTopicTimeInfo
-from pathnode_vis.pub_info import PubInfos as PubInfosObj, PubInfo as PubInfoObj, time2str
-import pathnode_vis.pub_info
+from pathnode_vis.pub_info import PubInfos as PubInfosObj
 
-PUB_INFO_TOPICS = [
-    # "/diagnostics/info/pub",
-    "/initialpose3d/info/pub",
-    "/localization/debug/ellipse_marker/info/pub",
-    "/localization/pose_estimator/exe_time_ms/info/pub",
-    "/localization/pose_estimator/initial_pose_with_covariance/info/pub",
-    "/localization/pose_estimator/initial_to_result_distance/info/pub",
-    "/localization/pose_estimator/initial_to_result_distance_new/info/pub",
-    "/localization/pose_estimator/initial_to_result_distance_old/info/pub",
-    "/localization/pose_estimator/iteration_num/info/pub",
-    "/localization/pose_estimator/monte_carlo_initial_pose_marker/info/pub",
-    "/localization/pose_estimator/ndt_marker/info/pub",
-    "/localization/pose_estimator/points_aligned/info/pub",
-    "/localization/pose_estimator/pose/info/pub",
-    "/localization/pose_estimator/pose_with_covariance/info/pub",
-    "/localization/pose_estimator/transform_probability/info/pub",
-    "/localization/pose_twist_fusion_filter/debug/info/pub",
-    "/localization/pose_twist_fusion_filter/debug/measured_pose/info/pub",
-    "/localization/pose_twist_fusion_filter/estimated_yaw_bias/info/pub",
-    "/localization/pose_twist_fusion_filter/pose/info/pub",
-    "/localization/pose_twist_fusion_filter/pose_with_covariance/info/pub",
-    "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias/info/pub",
-    "/localization/pose_twist_fusion_filter/pose_without_yawbias/info/pub",
-    "/localization/pose_twist_fusion_filter/twist/info/pub",
-    "/localization/pose_twist_fusion_filter/twist_with_covariance/info/pub",
-    "/localization/twist_estimator/twist/info/pub",
-    "/localization/twist_estimator/twist_with_covariance/info/pub",
-    "/localization/util/crop_box_filter_measurement_range/crop_box_polygon/info/pub",
-    "/localization/util/downsample/pointcloud/info/pub",
-    "/localization/util/measurement_range/pointcloud/info/pub",
-    "/localization/util/voxel_grid_downsample/pointcloud/info/pub",
-    "/sensing/gnss/fixed/info/pub",
-    "/sensing/gnss/pose/info/pub",
-    "/sensing/gnss/pose_with_covariance/info/pub",
-    "/sensing/imu/imu_data/info/pub",
-    "/sensing/lidar/concatenate_data/concat_num/info/pub",
-    "/sensing/lidar/concatenate_data/not_subscribed_topic_name/info/pub",
-    "/sensing/lidar/concatenated/pointcloud/info/pub",
-    "/sensing/lidar/crop_box_filter/crop_box_polygon/info/pub",
-    "/sensing/lidar/front_left/mirror_crop_box_filter/crop_box_polygon/info/pub",
-    "/sensing/lidar/front_left/mirror_cropped/pointcloud/info/pub",
-    "/sensing/lidar/front_left/self_crop_box_filter/crop_box_polygon/info/pub",
-    "/sensing/lidar/front_left/self_cropped/pointcloud/info/pub",
-    "/sensing/lidar/front_right/mirror_crop_box_filter/crop_box_polygon/info/pub",
-    "/sensing/lidar/front_right/mirror_cropped/pointcloud/info/pub",
-    "/sensing/lidar/front_right/self_crop_box_filter/crop_box_polygon/info/pub",
-    "/sensing/lidar/front_right/self_cropped/pointcloud/info/pub",
-    "/sensing/lidar/left/crop_box_filter_mirror/crop_box_polygon/info/pub",
-    "/sensing/lidar/left/crop_box_filter_self/crop_box_polygon/info/pub",
-    "/sensing/lidar/left/mirror_cropped/pointcloud_ex/info/pub",
-    "/sensing/lidar/left/outlier_filtered/pointcloud/info/pub",
-    "/sensing/lidar/left/self_cropped/pointcloud_ex/info/pub",
-    "/sensing/lidar/measurement_range_cropped/pointcloud/info/pub",
-    "/sensing/lidar/no_ground/pointcloud/info/pub",
-    "/sensing/lidar/rear/crop_box_filter_mirror/crop_box_polygon/info/pub",
-    "/sensing/lidar/rear/crop_box_filter_self/crop_box_polygon/info/pub",
-    "/sensing/lidar/rear/mirror_cropped/pointcloud_ex/info/pub",
-    "/sensing/lidar/rear/outlier_filtered/pointcloud/info/pub",
-    "/sensing/lidar/rear/self_cropped/pointcloud_ex/info/pub",
-    "/sensing/lidar/right/crop_box_filter_mirror/crop_box_polygon/info/pub",
-    "/sensing/lidar/right/crop_box_filter_self/crop_box_polygon/info/pub",
-    "/sensing/lidar/right/mirror_cropped/pointcloud_ex/info/pub",
-    "/sensing/lidar/right/outlier_filtered/pointcloud/info/pub",
-    "/sensing/lidar/right/self_cropped/pointcloud_ex/info/pub",
-    "/sensing/lidar/top/crop_box_filter_mirror/crop_box_polygon/info/pub",
-    "/sensing/lidar/top/crop_box_filter_self/crop_box_polygon/info/pub",
-    "/sensing/lidar/top/mirror_cropped/pointcloud_ex/info/pub",
-    "/sensing/lidar/top/outlier_filtered/pointcloud/info/pub",
-    "/sensing/lidar/top/self_cropped/pointcloud_ex/info/pub",
+EXCLUDES_TOPICS = [
+    "/diagnostics/info/pub",
     ]
 LEAVES = [
     "/initialpose",
@@ -106,6 +37,7 @@ LEAVES = [
 PUB_INFO = "topic_infos.pkl"
 TIMER_SEC = 1.0
 TARGET_TOPIC = "/sensing/lidar/concatenated/pointcloud"
+
 
 class LatencyStat(object):
     def __init__(self):
@@ -143,12 +75,15 @@ class LatencyStat(object):
             "is_all_leaf": is_all_leaf,
             }
 
+
 class PerTopicLatencyStat(object):
     def __init__(self):
         self.data = {}
 
     def add(self, topic, dur_ms, dur_pub_ms, is_leaf):
-        self.data.setdefault(topic, LatencyStat()).add(dur_ms, dur_pub_ms, is_leaf)
+        self.data.setdefault(topic, LatencyStat()).add(
+            dur_ms, dur_pub_ms, is_leaf
+        )
 
     def report(self):
         ret = {}
@@ -180,10 +115,11 @@ class PerTopicLatencyStat(object):
             s += f"{report['is_all_leaf']}"
             print(s)
 
+
 class LatencyViewerNode(Node):
     def __init__(self):
         super().__init__('latency_viewer_node')
-        self.declare_parameter("topics", PUB_INFO_TOPICS)
+        self.declare_parameter("excludes_topics", EXCLUDES_TOPICS)
         self.declare_parameter("leaves", LEAVES)
         self.declare_parameter("graph_pkl", "")
         self.declare_parameter("timer_sec", TIMER_SEC)
@@ -192,8 +128,12 @@ class LatencyViewerNode(Node):
         self.declare_parameter("wait_sec_to_init_graph", 10)
 
         self.subs = {}
-        topics = self.get_parameter("topics").get_parameter_value().string_array_value
+        excludes_topic = (
+            self.get_parameter("excludes_topics")
+            .get_parameter_value().string_array_value)
+        topics = self.get_pub_info_topics(excludes=excludes_topic)
         for topic in topics:
+            print(topic)
             sub = self.create_subscription(
                 PubInfo,
                 topic,
@@ -202,21 +142,30 @@ class LatencyViewerNode(Node):
             self.subs[topic] = sub
 
         self.solver = None
-        graph_pkl = self.get_parameter("graph_pkl").get_parameter_value().string_value
+        graph_pkl = (
+            self.get_parameter("graph_pkl")
+            .get_parameter_value().string_value)
         if graph_pkl:
             graph = pickle.load(open(graph_pkl, "rb"))
             self.solver = InputSensorStampSolver(graph)
 
         self.pub_infos = PubInfosObj()
 
-        timer_sec = self.get_parameter("timer_sec").get_parameter_value().double_value
-        self.timer = self.create_timer(1.0,
+        timer_sec = (
+            self.get_parameter("timer_sec")
+            .get_parameter_value().double_value)
+        self.timer = self.create_timer(timer_sec,
                                        self.timer_callback)
 
-        self.target_topic = self.get_parameter("target_topic").get_parameter_value().string_value
-        self.keep_info_sec = self.get_parameter("keep_info_sec").get_parameter_value().integer_value
-        self.wait_sec_to_init_graph = \
-            self.get_parameter("wait_sec_to_init_graph").get_parameter_value().integer_value
+        self.target_topic = (
+            self.get_parameter("target_topic")
+            .get_parameter_value().string_value)
+        self.keep_info_sec = (
+            self.get_parameter("keep_info_sec")
+            .get_parameter_value().integer_value)
+        self.wait_sec_to_init_graph = (
+            self.get_parameter("wait_sec_to_init_graph").
+            get_parameter_value().integer_value)
         self.wait_init = 0
 
     def listener_callback(self, pub_info_msg):
@@ -273,8 +222,28 @@ class LatencyViewerNode(Node):
         # cleanup PubInfos
         (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split("."))
         until_stamp = TimeMsg(sec=latest_sec - self.keep_info_sec,
-                            nanosec=latest_ns)
+                              nanosec=latest_ns)
         pubinfos.erase_until(until_stamp)
+
+    def get_pub_info_topics(self, excludes=[]):
+        """Get all topic infos
+
+        Paramters
+        ---------
+
+        Returns
+        -------
+        map
+          a list of pubinfo topics
+        """
+        msg_type = "path_info_msg/msg/TopicInfo"
+        topic_and_types = self.get_topic_names_and_types()
+        filtered_topic_and_types = \
+            filter(lambda x: msg_type in x[1], topic_and_types)
+        topics = map(lambda x: x[0], filtered_topic_and_types)
+
+        return topics
+
 
 def main(args=None):
     rclpy.init(args=args)
