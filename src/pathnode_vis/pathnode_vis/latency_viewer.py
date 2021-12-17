@@ -40,6 +40,9 @@ LEAVES = [
 PUB_INFO = "topic_infos.pkl"
 TIMER_SEC = 1.0
 TARGET_TOPIC = "/sensing/lidar/concatenated/pointcloud"
+STOPS = [
+    "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias",
+    ]
 
 
 class LatencyStat(object):
@@ -130,6 +133,7 @@ class LatencyViewerNode(Node):
         self.declare_parameter("keep_info_sec", 3)
         self.declare_parameter("wait_sec_to_init_graph", 10)
         self.declare_parameter("mode", "stat")
+        self.declare_parameter("stops", STOPS)
 
         self.subs = {}
         excludes_topic = (
@@ -146,6 +150,9 @@ class LatencyViewerNode(Node):
             self.subs[topic] = sub
 
         self.solver = None
+        self.stops = (
+            self.get_parameter("stops")
+            .get_parameter_value().string_array_value)
         graph_pkl = (
             self.get_parameter("graph_pkl")
             .get_parameter_value().string_value)
@@ -198,6 +205,7 @@ class LatencyViewerNode(Node):
         pubinfos = self.pub_infos
         target_topic = self.target_topic
         solver = self.solver
+        stops = self.stops
 
         # [-3] has no specific meaning.
         # But [-1] may not have full info. So we look somewhat old info.
@@ -209,7 +217,8 @@ class LatencyViewerNode(Node):
 
         stats = PerTopicLatencyStat()
         for target_stamp in stamps[:idx]:
-            results = solver.solve(pubinfos, target_topic, target_stamp)
+            results = solver.solve(pubinfos, target_topic, target_stamp,
+                                   stops=stops)
             for r in results.data:
                 stats.add(r.topic, r.dur_ms, r.dur_pub_ms, r.is_leaf)
 
@@ -230,6 +239,7 @@ class LatencyViewerNode(Node):
         pubinfos = self.pub_infos
         target_topic = self.target_topic
         solver = self.solver
+        stops = self.stops
 
         # [-3] has no specific meaning.
         # But [-1] may not have full info. So we look somewhat old info.
@@ -240,7 +250,8 @@ class LatencyViewerNode(Node):
             idx = 0
 
         target_stamp = stamps[idx]
-        results = solver.solve(pubinfos, target_topic, target_stamp)
+        results = solver.solve(pubinfos, target_topic, target_stamp,
+                               stops=stops)
 
         def p(v):
             if v > 1000:

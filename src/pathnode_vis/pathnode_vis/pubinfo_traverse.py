@@ -48,7 +48,8 @@ class InputSensorStampSolver(object):
         self.topic_stamp_to_sensor_stamp = {}
         self.graph = graph
 
-    def solve(self, pubinfos, tgt_topic, tgt_stamp):
+    def solve(self, pubinfos, tgt_topic, tgt_stamp,
+              stops=[]):
         """
         topic: target topic
         stamp: target stamp(str)
@@ -89,8 +90,8 @@ class InputSensorStampSolver(object):
 
             ret.add(topic, stamp, dur_ms, dur_pub_ms, is_leaf[topic], parent)
 
-            # NDT-EKF has loop, so skip
-            if topic == "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias":
+            # NDT-EKF has loop, so stop
+            if topic in stops:
                 continue
 
             # get next edges
