@@ -6,15 +6,15 @@ from collections import deque, defaultdict
 import time
 import json
 
-import rclpy
-from rclpy.clock import Clock, ClockType
 from rclpy.time import Time
 
-from pathnode_vis.pub_info import time2str, PubInfo, PubInfos
+from pathnode_vis.pub_info import time2str
+
 
 def strstamp2time(strstamp):
     sec, nanosec = strstamp.split(".")
     return Time(seconds=int(sec), nanoseconds=int(nanosec))
+
 
 class SolverResult(object):
     def __init__(self, topic, stamp, dur_ms, dur_pub_ms, is_leaf, parent):
@@ -33,12 +33,14 @@ class SolverResult(object):
         self.is_leaf = is_leaf
         self.parent = parent
 
+
 class SolverResults(object):
     def __init__(self):
         self.data = []
 
     def add(self, *args):
         self.data.append(SolverResult(*args))
+
 
 class InputSensorStampSolver(object):
     def __init__(self, graph):
@@ -59,7 +61,6 @@ class InputSensorStampSolver(object):
         path_bfs = graph.bfs_rev(tgt_topic)
         is_leaf = {t: b for (t, b) in path_bfs}
 
-        wants = []  # topic, stamp
         stamp = tgt_stamp
 
         # dists[topic][stamp]
@@ -75,13 +76,10 @@ class InputSensorStampSolver(object):
         queue.append((tgt_topic, tgt_stamp, start_pub_time))
         parentQ.append("")
 
-        st = time.time()
-
         ret = SolverResults()
         while len(queue) != 0:
             topic, stamp, sub_time = queue.popleft()
             parent = parentQ.popleft()
-            is_leaf_s = "looks_sensor" if is_leaf[topic] else ""
 
             dur = start - strstamp2time(stamp)
             dur_ms = dur.nanoseconds // 10**6
@@ -89,7 +87,6 @@ class InputSensorStampSolver(object):
             dur_pub = Time.from_msg(start_pub_time) - Time.from_msg(sub_time)
             dur_pub_ms = dur_pub.nanoseconds // 10**6
 
-            # print(f"{topic:80} {stamp:>20} {dur_ms:4} ms {is_leaf_s} {parent}")
             ret.add(topic, stamp, dur_ms, dur_pub_ms, is_leaf[topic], parent)
 
             # NDT-EKF has loop, so skip
@@ -110,9 +107,6 @@ class InputSensorStampSolver(object):
                     dists[nx_topic][nx_stamp] = dists[topic][stamp] + 1
                     queue.append((nx_topic, nx_stamp, in_info.pubsub_stamp))
                     parentQ.append(topic)
-
-        et = time.time()
-        # print(f"solve internal: {(et-st)*1000} [ms]")
 
         return ret
 
@@ -163,7 +157,6 @@ class TopicGraph(object):
         get input topics
         return List[Topic]
         """
-        ins = self.t2i[topic]
         return [self.topics[i] for i in self.rev_edges[i]]
 
     def dfs_rev(self, start_topic):
@@ -178,6 +171,7 @@ class TopicGraph(object):
         sid = self.t2i[start_topic]
 
         ret = []
+
         def dfs(v):
             ret.append(self.topics[v])
             seen[v] = True
@@ -214,6 +208,7 @@ class TopicGraph(object):
 
         return paths
 
+
 def run(args):
     pklfile = args.pickle_file
     pubinfos = pickle.load(open(pklfile, "rb"))
@@ -222,11 +217,13 @@ def run(args):
     tgt_stamp = sorted(pubinfos.stamps(tgt_topic))[args.stamp_index]
 
     graph = TopicGraph(pubinfos)
-    bfs_path = graph.bfs_rev(tgt_topic)
+
     print("dump")
     graph.dump("graph.json")
-    pickle.dump(graph, open("graph.pkl", "wb"), protocol=pickle.HIGHEST_PROTOCOL)
+    pickle.dump(graph, open("graph.pkl", "wb"),
+                protocol=pickle.HIGHEST_PROTOCOL)
 
+    # bfs_path = graph.bfs_rev(tgt_topic)
     # print(f"BFS from {tgt_topic}")
     # for p, is_leaf in bfs_path:
     #     print(f"  {p} {is_leaf}")
@@ -239,16 +236,20 @@ def run(args):
 
     print(f"solve {(et-st) * 1000} [ms]")
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("pickle_file")
     parser.add_argument("stamp_index", type=int, default=0,
                         help="header stamp index")
-    parser.add_argument("topic", default="/sensing/lidar/no_ground/pointcloud", nargs="?")
+    parser.add_argument("topic",
+                        default="/sensing/lidar/no_ground/pointcloud",
+                        nargs="?")
 
     args = parser.parse_args()
 
     run(args)
+
 
 if __name__ == "__main__":
     main()
