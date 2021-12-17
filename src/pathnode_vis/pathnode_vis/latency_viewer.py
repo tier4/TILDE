@@ -129,6 +129,7 @@ class LatencyViewerNode(Node):
         self.declare_parameter("target_topic", TARGET_TOPIC)
         self.declare_parameter("keep_info_sec", 3)
         self.declare_parameter("wait_sec_to_init_graph", 10)
+        self.declare_parameter("mode", "stat")
 
         self.subs = {}
         excludes_topic = (
@@ -184,25 +185,18 @@ class LatencyViewerNode(Node):
                                     input_info.header_stamp)
         self.pub_infos.add(pub_info)
 
-    def timer_callback(self):
-        # print(f"timer_callback")
+    def handle_stat(self, stamps):
+        """Report statistics
+
+        Paramters
+        ---------
+        stamps: stamps sorted by old-to-new order
+
+        Returns
+        -------
+        """
         pubinfos = self.pub_infos
-
         target_topic = self.target_topic
-
-        stamps = sorted(pubinfos.stamps(target_topic))
-        print(f"stamps: {len(stamps)}, {stamps[0] if len(stamps) > 0 else ''}")
-        if len(stamps) == 0:
-            return
-
-        if not self.solver:
-            if self.wait_init < self.wait_sec_to_init_graph:
-                self.wait_init += 1
-                return
-            print("init solver")
-            graph = TopicGraph(pubinfos)
-            self.solver = InputSensorStampSolver(graph)
-
         solver = self.solver
 
         # [-3] has no specific meaning.
@@ -219,8 +213,84 @@ class LatencyViewerNode(Node):
             for r in results.data:
                 stats.add(r.topic, r.dur_ms, r.dur_pub_ms, r.is_leaf)
 
+        print("stats")
         stats.print_report()
         print("")
+
+    def handle_one_hot(self, stamps):
+        """Report only one message
+
+        Paramters
+        ---------
+        stamps: stamps sorted by old-to-new order
+
+        Returns
+        -------
+        """
+        pubinfos = self.pub_infos
+        target_topic = self.target_topic
+        solver = self.solver
+
+        # [-3] has no specific meaning.
+        # But [-1] may not have full info. So we look somewhat old info.
+        idx = -3
+        if len(stamps) == 0:
+            return
+        elif len(stamps) < 3:
+            idx = 0
+
+        target_stamp = stamps[idx]
+        results = solver.solve(pubinfos, target_topic, target_stamp)
+
+        def p(v):
+            if v > 1000:
+                return "   inf"
+            else:
+                return "{:>6.1f}".format(v)
+
+        def pbool(v):
+            return "True" if v else "False"
+
+        print("one_hot")
+        s = "{:80} {:>20} {:>6} {:>6} {:>5}".format(
+            "topic", "stamp", "dur", "e2e", "is_leaf", "parent"
+        )
+        print(s)
+        for result in results.data:
+            s = f"{result.topic:80} "
+            s += f"{result.stamp:>20} "
+            s += f"{p(result.dur_ms)} "
+            s += f"{p(result.dur_pub_ms)} "
+            s += f"{pbool(result.is_leaf):>5} "
+            s += f"{result.parent}"
+            print(s)
+        print("")
+
+    def timer_callback(self):
+        # print(f"timer_callback")
+        pubinfos = self.pub_infos
+        target_topic = self.target_topic
+
+        stamps = sorted(pubinfos.stamps(target_topic))
+        print(f"stamps: {len(stamps)}, {stamps[0] if len(stamps) > 0 else ''}")
+        if len(stamps) == 0:
+            return
+
+        if not self.solver:
+            if self.wait_init < self.wait_sec_to_init_graph:
+                self.wait_init += 1
+                return
+            print("init solver")
+            graph = TopicGraph(pubinfos)
+            self.solver = InputSensorStampSolver(graph)
+
+        mode = self.get_parameter("mode").get_parameter_value().string_value
+        if mode == "stat":
+            self.handle_stat(stamps)
+        elif mode == "onehot":
+            self.handle_one_hot(stamps)
+        else:
+            print("unknown mode")
 
         # cleanup PubInfos
         (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split("."))
