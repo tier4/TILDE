@@ -47,12 +47,15 @@ class InputSensorStampSolver(object):
         # {topic: {stamp: {sensor_topic: [stamps]}}}
         self.topic_stamp_to_sensor_stamp = {}
         self.graph = graph
+        self.skips = graph.skips
 
     def solve(self, pubinfos, tgt_topic, tgt_stamp,
               stops=[]):
         """
         topic: target topic
         stamp: target stamp(str)
+
+        stops: list of stop topics to prevent loop
 
         return SolverResults
 
@@ -61,6 +64,7 @@ class InputSensorStampSolver(object):
         graph = self.graph
         path_bfs = graph.bfs_rev(tgt_topic)
         is_leaf = {t: b for (t, b) in path_bfs}
+        skips = self.skips
 
         stamp = tgt_stamp
 
@@ -102,6 +106,8 @@ class InputSensorStampSolver(object):
             for in_infos in next_pubinfo.in_infos.values():
                 for in_info in in_infos:
                     nx_topic = in_info.topic
+                    if nx_topic in skips:
+                        nx_topic = skips[nx_topic]
                     nx_stamp = time2str(in_info.stamp)
                     if dists[nx_topic][nx_stamp] > 0:
                         continue
@@ -126,9 +132,18 @@ class InputSensorStampSolver(object):
 class TopicGraph(object):
     "Construct topic graph by ignoring stamps"
 
-    def __init__(self, pubinfos):
+    def __init__(self, pubinfos, skips={}):
+        """
+        Parameters
+        ----------
+        pubinfos: PubInfos
+        skips: skip topics. {downstream: upstream} by input-to-output order
+               ex) {"/sensing/lidar/top/rectified/pointcloud_ex":
+                    "/sensing/lidar/top/mirror_cropped/pointcloud_ex"}
+        """
         self.topics = sorted(pubinfos.all_topics())
         self.t2i = {t: i for i, t in enumerate(self.topics)}
+        self.skips = skips
         n = len(self.topics)
 
         # from sub -> pub
@@ -140,6 +155,8 @@ class TopicGraph(object):
 
             out_id = self.t2i[out_topic]
             for in_topic in in_topics:
+                if in_topic in skips.keys():
+                    in_topic = skips[in_topic]
                 in_id = self.t2i[in_topic]
                 self.topic_edges[in_id].add(out_id)
                 self.rev_edges[out_id].add(in_id)

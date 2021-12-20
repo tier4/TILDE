@@ -179,6 +179,25 @@ class LatencyViewerNode(Node):
             get_parameter_value().integer_value)
         self.wait_init = 0
 
+        self.init_skips()
+
+    def init_skips(self):
+        """
+        Definition of skips.
+        See TopicGraph.__init__ comment.
+        """
+        skips = {}
+        RECT_OUT_EX = "/sensing/lidar/{}/rectified/pointcloud_ex"
+        RECT_OUT = "/sensing/lidar/{}/rectified/pointcloud"
+        RECT_IN = "/sensing/lidar/{}/mirror_cropped/pointcloud_ex"
+
+        # top
+        for pos in ["top", "left", "right"]:
+            skips[RECT_OUT_EX.format(pos)] = RECT_IN.format(pos)
+            skips[RECT_OUT.format(pos)] = RECT_IN.format(pos)
+
+        self.skips = skips
+
     def listener_callback(self, pub_info_msg):
         # print(f"{pub_info_msg.output_info.topic_name}")
         output_info = pub_info_msg.output_info
@@ -292,7 +311,7 @@ class LatencyViewerNode(Node):
                 self.wait_init += 1
                 return
             print("init solver")
-            graph = TopicGraph(pubinfos)
+            graph = TopicGraph(pubinfos, skips=self.skips)
             self.solver = InputSensorStampSolver(graph)
 
         mode = self.get_parameter("mode").get_parameter_value().string_value
