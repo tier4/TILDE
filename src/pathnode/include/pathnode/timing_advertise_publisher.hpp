@@ -44,6 +44,7 @@ class InputInfo
 {
 public:
   rclcpp::Time sub_time;
+  rclcpp::Time sub_time_steady;
   bool has_header_stamp;
   rclcpp::Time header_stamp;
 
@@ -104,16 +105,20 @@ class TimingAdvertisePublisherBase
 public:
   using InfoMsg = path_info_msg::msg::PubInfo;
 
-  explicit TimingAdvertisePublisherBase(std::shared_ptr<rclcpp::Clock> clock);
+  explicit TimingAdvertisePublisherBase(
+      std::shared_ptr<rclcpp::Clock> clock,
+      std::shared_ptr<rclcpp::Clock> steady_clock);
 
   void set_input_info(
     const std::string & sub_topic,
     const std::shared_ptr<const InputInfo> p);
 
+  /** Set sub callback time information for explicit API.
+   * It's a FW API, so your code should not call this.
+   */
   void set_explicit_subtime(
     const std::string & sub_topic,
-    const rclcpp::Time & header_stamp,
-    const rclcpp::Time & sub_time);
+    const std::shared_ptr<const InputInfo> p);
 
   /**
    * assume set_explicit_subtime is already called
@@ -128,6 +133,7 @@ public:
 
 protected:
   std::shared_ptr<rclcpp::Clock> clock_;
+  std::shared_ptr<rclcpp::Clock> steady_clock_;
 
 private:
   // parent node subscription topic vs InputInfo
@@ -137,7 +143,7 @@ private:
   // If this is set, FW creates PubInfo only by this info
   std::map<std::string, std::vector<InputInfo>> explicit_input_infos_;
   // topic, header stamp vs sub callback time
-  std::map<std::string, std::map<rclcpp::Time, rclcpp::Time>> explicit_sub_callback_infos_;
+  std::map<std::string, std::map<rclcpp::Time, std::shared_ptr<const InputInfo>>> explicit_sub_time_infos_;
 
   // how many seconds to preserve explicit_sub_callback_infos per topic
   size_t MAX_SUB_CALLBACK_INFOS_SEC_;
@@ -162,8 +168,9 @@ public:
     std::shared_ptr<PubInfoPublisher> info_pub,
     std::shared_ptr<PublisherT> pub,
     const std::string & node_fqn,
-    std::shared_ptr<rclcpp::Clock> clock)
-  : TimingAdvertisePublisherBase(clock), info_pub_(info_pub), pub_(pub), node_fqn_(node_fqn)
+    std::shared_ptr<rclcpp::Clock> clock,
+    std::shared_ptr<rclcpp::Clock> steady_clock)
+  : TimingAdvertisePublisherBase(clock, steady_clock), info_pub_(info_pub), pub_(pub), node_fqn_(node_fqn)
   {
   }
 
@@ -242,6 +249,7 @@ private:
     msg->output_info.topic_name = pub_->get_topic_name();
     msg->output_info.node_fqn = node_fqn_;
     msg->output_info.pub_time = clock_->now();
+    msg->output_info.pub_time_steady = steady_clock_->now();
     msg->output_info.header_stamp = t;
 
     set_input_info(*msg);

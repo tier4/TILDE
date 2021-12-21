@@ -23,6 +23,7 @@ SubTimingAdvertiseNode::SubTimingAdvertiseNode(
   const rclcpp::NodeOptions & options)
 : Node(node_name, options)
 {
+  steady_clock_.reset(new rclcpp::Clock(RCL_STEADY_TIME));
 }
 
 SubTimingAdvertiseNode::SubTimingAdvertiseNode(
@@ -31,6 +32,7 @@ SubTimingAdvertiseNode::SubTimingAdvertiseNode(
   const rclcpp::NodeOptions & options)
 : Node(node_name, namespace_, options)
 {
+  steady_clock_.reset(new rclcpp::Clock(RCL_STEADY_TIME));
 }
 
 SubTimingAdvertiseNode::~SubTimingAdvertiseNode()

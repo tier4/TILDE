@@ -34,12 +34,23 @@ public:
   }
 };
 
+void expect_near(
+    const rclcpp::Time && lhs,
+    const rclcpp::Time && rhs,
+    uint64_t thres_ms=1)
+{
+  uint64_t thres_ns = thres_ms * 1000 * 1000;
+  EXPECT_NEAR(lhs.nanoseconds(), rhs.nanoseconds(), thres_ns);
+}
+
 TEST_F(TestTimingAdvertisePublisher, set_input_info) {
   auto clock = std::make_shared<rclcpp::Clock>();
+  auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
 
-  TimingAdvertisePublisherBase pub(clock);
+  TimingAdvertisePublisherBase pub(clock, steady_clock);
   auto info = std::make_shared<pathnode::InputInfo>();
   info->sub_time = rclcpp::Time(1, 0);
+  info->sub_time_steady = steady_clock->now();
   info->has_header_stamp = true;
   info->header_stamp = rclcpp::Time(0, 1);
   const std::string TOPIC = "sample_topic";
@@ -54,6 +65,8 @@ TEST_F(TestTimingAdvertisePublisher, set_input_info) {
   EXPECT_EQ(msg.input_infos.size(), 1ul);
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
   EXPECT_EQ(msg.input_infos[0].sub_time, rclcpp::Time(1, 0));
+  expect_near(rclcpp::Time(msg.input_infos[0].sub_time_steady, RCL_STEADY_TIME),
+              steady_clock->now());
   EXPECT_EQ(msg.input_infos[0].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[0].header_stamp, rclcpp::Time(0, 1));
 }
@@ -61,14 +74,16 @@ TEST_F(TestTimingAdvertisePublisher, set_input_info) {
 TEST_F(TestTimingAdvertisePublisher, add_explicit_input_info_subtime_not_found) {
   // set input_info & explicit_input_info
   auto clock = std::make_shared<rclcpp::Clock>();
+  auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
 
-  TimingAdvertisePublisherBase pub(clock);
+  TimingAdvertisePublisherBase pub(clock, steady_clock);
   auto now = clock->now();
   auto info_stamp = now - rclcpp::Duration(1, 0);
   auto search_stamp = now - rclcpp::Duration(2, 0);
 
   auto info = std::make_shared<pathnode::InputInfo>();
   info->sub_time = now;
+  info->sub_time_steady = steady_clock->now();
   info->has_header_stamp = true;
   info->header_stamp = info_stamp;
   const std::string TOPIC = "sample_topic";
@@ -86,6 +101,7 @@ TEST_F(TestTimingAdvertisePublisher, add_explicit_input_info_subtime_not_found) 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
   EXPECT_EQ(msg.input_infos[0].sub_time, rclcpp::Time(0, 0));
+  EXPECT_EQ(msg.input_infos[0].sub_time_steady, rclcpp::Time(0, 0));
   EXPECT_EQ(msg.input_infos[0].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[0].header_stamp, search_stamp);
 }
@@ -93,19 +109,25 @@ TEST_F(TestTimingAdvertisePublisher, add_explicit_input_info_subtime_not_found) 
 TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime_sucess_then_purged) {
   // set input_info & explicit_input_info
   auto clock = std::make_shared<rclcpp::Clock>();
-  TimingAdvertisePublisherBase pub(clock);
+  auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
+  TimingAdvertisePublisherBase pub(clock, steady_clock);
 
   const std::string TOPIC = "sample_topic";
   auto now = clock->now();
   auto recv_base = now - rclcpp::Duration(10, 0);
+  auto recv_base_steady = steady_clock->now();
   auto stamp_base = now - rclcpp::Duration(20, 0);
   pub.set_max_sub_callback_infos_sec(21);  // psudo-boudary condition
 
   for (int i = 0; i < 10; i++) {
+    auto input_info = std::make_shared<InputInfo>();
+    input_info->sub_time = recv_base + rclcpp::Duration(i, 0);
+    input_info->sub_time_steady = recv_base_steady + rclcpp::Duration(i, 0);
+    input_info->has_header_stamp = true;
+    input_info->header_stamp = stamp_base + rclcpp::Duration(i, 0);
+
     pub.set_explicit_subtime(
-      TOPIC,
-      stamp_base + rclcpp::Duration(i, 0),
-      recv_base + rclcpp::Duration(i, 0));
+      TOPIC, input_info);
   }
 
   // normal case, middle of data
@@ -119,6 +141,7 @@ TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime_sucess_then_purged) {
   EXPECT_EQ(msg.input_infos.size(), 1ul);
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
   EXPECT_EQ(msg.input_infos[0].sub_time, recv_base + rclcpp::Duration(5, 0));
+  EXPECT_EQ(msg.input_infos[0].sub_time_steady, recv_base_steady + rclcpp::Duration(5, 0));
   EXPECT_EQ(msg.input_infos[0].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[0].header_stamp, stamp_base + rclcpp::Duration(5, 0));
 
@@ -132,15 +155,19 @@ TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime_sucess_then_purged) {
   EXPECT_EQ(msg.input_infos.size(), 1ul);
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
   EXPECT_EQ(msg.input_infos[0].sub_time, recv_base);
+  EXPECT_EQ(msg.input_infos[0].sub_time_steady, recv_base_steady);
   EXPECT_EQ(msg.input_infos[0].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[0].header_stamp, stamp_base);
 
   // 1st element should be deleted
   pub.set_max_sub_callback_infos_sec(20);  // psudo-boudary condition
+  auto input_info = std::make_shared<InputInfo>();
+  input_info->sub_time = recv_base + rclcpp::Duration(10, 0);
+  input_info->sub_time_steady = recv_base_steady + rclcpp::Duration(10, 0);
+  input_info->has_header_stamp = true;
+  input_info->header_stamp = stamp_base + rclcpp::Duration(10, 0);
   pub.set_explicit_subtime(
-    TOPIC,
-    stamp_base + rclcpp::Duration(10, 0),
-    recv_base + rclcpp::Duration(10, 0));
+      TOPIC, input_info);
 
   pub.add_explicit_input_info(
     TOPIC,
@@ -148,39 +175,52 @@ TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime_sucess_then_purged) {
 
   pub.set_input_info(msg);
 
+  // check explicit info is deleted
   EXPECT_EQ(msg.input_infos.size(), 1ul);
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
-  EXPECT_EQ(msg.input_infos[0].sub_time, rclcpp::Time(0, 0));  // subtime info is deleted
+  EXPECT_EQ(msg.input_infos[0].sub_time, rclcpp::Time(0, 0));
+  EXPECT_EQ(msg.input_infos[0].sub_time_steady, rclcpp::Time(0, 0));
   EXPECT_EQ(msg.input_infos[0].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[0].header_stamp, stamp_base);
 }
 
 TEST_F(TestTimingAdvertisePublisher, set_multiple_topic) {
   auto clock = std::make_shared<rclcpp::Clock>();
-  TimingAdvertisePublisherBase pub(clock);
+  auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
+  TimingAdvertisePublisherBase pub(clock, steady_clock);
   const std::string TOPIC1 = "sample_topic1";
   const std::string TOPIC2 = "sample_topic2";
 
   auto now = clock->now();
   auto recv_base = now - rclcpp::Duration(10, 0);
+  auto recv_base_steady = steady_clock->now();
   auto stamp_base = now - rclcpp::Duration(20, 0);
   pub.set_max_sub_callback_infos_sec(100);  // large value to prevent cleanup
 
+  auto input_info = std::make_shared<InputInfo>();
+  input_info->sub_time = recv_base;
+  input_info->sub_time_steady = recv_base_steady;
+  input_info->has_header_stamp = true;
+  input_info->header_stamp = stamp_base;
+
   pub.set_explicit_subtime(
-    TOPIC1,
-    stamp_base,
-    recv_base);
+    TOPIC1, input_info);
   pub.add_explicit_input_info(
     TOPIC1,
     stamp_base);
 
-  auto recv_base2 = stamp_base + rclcpp::Duration(2, 1);
+  auto recv_base2 = recv_base + rclcpp::Duration(2, 1);
+  auto recv_base2_steady = recv_base_steady + rclcpp::Duration(2, 1);
   auto stamp_base2 = stamp_base + rclcpp::Duration(1, 1);
 
+  auto input_info2 = std::make_shared<InputInfo>();
+  input_info2->sub_time = recv_base2;
+  input_info2->sub_time_steady = recv_base2_steady;
+  input_info2->has_header_stamp = true;
+  input_info2->header_stamp = stamp_base2;
+
   pub.set_explicit_subtime(
-    TOPIC2,
-    stamp_base2,
-    recv_base2);
+    TOPIC2, input_info2);
   pub.add_explicit_input_info(
     TOPIC2,
     stamp_base2);
@@ -198,11 +238,13 @@ TEST_F(TestTimingAdvertisePublisher, set_multiple_topic) {
 
   EXPECT_EQ(msg.input_infos[idx1].topic_name, TOPIC1);
   EXPECT_EQ(msg.input_infos[idx1].sub_time, recv_base);
+  EXPECT_EQ(msg.input_infos[idx1].sub_time_steady, recv_base_steady);
   EXPECT_EQ(msg.input_infos[idx1].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[idx1].header_stamp, stamp_base);
 
   EXPECT_EQ(msg.input_infos[idx2].topic_name, TOPIC2);
   EXPECT_EQ(msg.input_infos[idx2].sub_time, recv_base2);
+  EXPECT_EQ(msg.input_infos[idx2].sub_time_steady, recv_base2_steady);
   EXPECT_EQ(msg.input_infos[idx2].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[idx2].header_stamp, stamp_base2);
 }

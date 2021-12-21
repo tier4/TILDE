@@ -109,6 +109,7 @@ public:
       const rclcpp::MessageInfo & info) -> void
       {
         auto subtime = this->now();
+        auto subtime_steady = this->steady_clock_->now();
         // publish subscription timing
         auto minfo = info.get_rmw_message_info();
 
@@ -157,6 +158,7 @@ public:
         auto input_info = std::make_shared<InputInfo>();
 
         input_info->sub_time = subtime;
+        input_info->sub_time_steady = subtime_steady;
         if (header_stamp != t) {
           input_info->has_header_stamp = true;
           input_info->header_stamp = header_stamp;
@@ -203,7 +205,8 @@ public:
 
     auto ta_pub = std::make_shared<TimingAdvertisePublisherT>(
       info_pub, pub, get_fully_qualified_name(),
-      this->get_clock());
+      this->get_clock(),
+      steady_clock_);
     timing_advertise_pubs_[info_topic] = ta_pub;
     return ta_pub;
   }
@@ -215,6 +218,8 @@ private:
   std::map<std::string, std::shared_ptr<TimingAdvertisePublisherBase>> timing_advertise_pubs_;
   /// topic info name vs seq
   std::map<std::string, int64_t> seqs_;
+  /// node clock may be simulation time
+  std::shared_ptr<rclcpp::Clock> steady_clock_;
 };
 
 }  // namespace pathnode

@@ -27,8 +27,10 @@ rclcpp::Time pathnode::get_timestamp(rclcpp::Time t, ...)
 }
 
 
-TimingAdvertisePublisherBase::TimingAdvertisePublisherBase(std::shared_ptr<rclcpp::Clock> clock)
-: clock_(clock),
+TimingAdvertisePublisherBase::TimingAdvertisePublisherBase(
+    std::shared_ptr<rclcpp::Clock> clock,
+    std::shared_ptr<rclcpp::Clock> steady_clock)
+: clock_(clock), steady_clock_(steady_clock),
   MAX_SUB_CALLBACK_INFOS_SEC_(2)
 {
 }
@@ -45,13 +47,14 @@ void TimingAdvertisePublisherBase::add_explicit_input_info(
   const rclcpp::Time & stamp)
 {
   InputInfo info;
-  auto it = explicit_sub_callback_infos_.find(sub_topic);
-  if (it != explicit_sub_callback_infos_.end() &&
+
+  // find sub callback time info and fill info
+  auto it = explicit_sub_time_infos_.find(sub_topic);
+  if (it != explicit_sub_time_infos_.end() &&
     it->second.find(stamp) != it->second.end())
   {
-    info.sub_time = it->second[stamp];
-  } else {
-    info.sub_time = rclcpp::Time(0, 0);
+    info.sub_time = it->second[stamp]->sub_time;
+    info.sub_time_steady = it->second[stamp]->sub_time_steady;
   }
 
   info.has_header_stamp = true;
@@ -70,6 +73,7 @@ void TimingAdvertisePublisherBase::set_input_info(path_info_msg::msg::PubInfo & 
     for (const auto &[topic, input_info] : input_infos_) {
       info_msg.input_infos[i].topic_name = topic;
       info_msg.input_infos[i].sub_time = input_info->sub_time;
+      info_msg.input_infos[i].sub_time_steady = input_info->sub_time_steady;
       info_msg.input_infos[i].has_header_stamp = input_info->has_header_stamp;
       info_msg.input_infos[i].header_stamp = input_info->header_stamp;
       i++;
@@ -80,6 +84,7 @@ void TimingAdvertisePublisherBase::set_input_info(path_info_msg::msg::PubInfo & 
         path_info_msg::msg::SubTopicTimeInfo info;
         info.topic_name = topic;
         info.sub_time = input_info.sub_time;
+        info.sub_time_steady = input_info.sub_time_steady;
         info.has_header_stamp = input_info.has_header_stamp;
         info.header_stamp = input_info.header_stamp;
         info_msg.input_infos.push_back(info);
@@ -91,12 +96,12 @@ void TimingAdvertisePublisherBase::set_input_info(path_info_msg::msg::PubInfo & 
 
 void TimingAdvertisePublisherBase::set_explicit_subtime(
   const std::string & sub_topic,
-  const rclcpp::Time & header_stamp,
-  const rclcpp::Time & sub_time)
+  const std::shared_ptr<const InputInfo> p)
 {
-  auto & header_stamp2sub_time = explicit_sub_callback_infos_[sub_topic];
-  header_stamp2sub_time[header_stamp] = sub_time;
+  auto & header_stamp2sub_time = explicit_sub_time_infos_[sub_topic];
+  header_stamp2sub_time[p->header_stamp] = p;
 
+  // cleanup old infos
   rclcpp::Duration dur(MAX_SUB_CALLBACK_INFOS_SEC_, 0);
   auto thres = clock_->now() - dur;
 
