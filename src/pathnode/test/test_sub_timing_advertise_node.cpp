@@ -66,11 +66,11 @@ TEST_F(TestSubTimingAdvertiseNode, simple_case) {
     "/clock", 1);
 
   // apply "/clock"
-  auto clock_msg = std::make_unique<rosgraph_msgs::msg::Clock>();
-  clock_msg->clock.sec = 123;
-  clock_msg->clock.nanosec = 456;
+  rosgraph_msgs::msg::Clock clock_msg;
+  clock_msg.clock.sec = 123;
+  clock_msg.clock.nanosec = 456;
 
-  clock_pub->publish(std::move(clock_msg));
+  clock_pub->publish(clock_msg);
   rclcpp::spin_some(sensor_node);
   rclcpp::spin_some(main_node);
 
@@ -86,17 +86,19 @@ TEST_F(TestSubTimingAdvertiseNode, simple_case) {
       main_pub->publish(std::move(msg));
     });
 
+  bool checker_sub_called = false;
   auto checker_sub = checker_node->create_subscription<path_info_msg::msg::PubInfo>(
     "out_topic/info/pub", 1,
-    [](path_info_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
+    [&checker_sub_called, clock_msg](path_info_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
     {
-      (void) pub_info_msg;
+      checker_sub_called = true;
       std::cout << "checker_sub_callback" << std::endl;
       std::cout << "pub_info_msg: \n" <<
         "pub_time: " << str(pub_info_msg->output_info.pub_time) << "\n" <<
         "pub_time_steady: " << str(pub_info_msg->output_info.pub_time_steady) << "\n" <<
         std::endl;
-      EXPECT_TRUE(true);
+      EXPECT_EQ(pub_info_msg->output_info.pub_time,
+                clock_msg.clock);
     });
 
   // do scenario
@@ -107,4 +109,5 @@ TEST_F(TestSubTimingAdvertiseNode, simple_case) {
   rclcpp::spin_some(sensor_node);
   rclcpp::spin_some(main_node);
   rclcpp::spin_some(checker_node);
+  EXPECT_TRUE(checker_sub_called);
 }
