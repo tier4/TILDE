@@ -64,12 +64,14 @@ struct Process
   static rclcpp::Time get_timestamp2(rclcpp::Time t, M * m)
   {
     // std::cout << "rclcpp::Time2" << std::endl;
+    (void) m;
     return t;
   }
 
   static rclcpp::Time get_timestamp3(rclcpp::Time t, const M * m)
   {
     // std::cout << "rclcpp::Time3" << std::endl;
+    (void) m;
     return t;
   }
 };
@@ -80,12 +82,14 @@ struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
   static rclcpp::Time get_timestamp2(rclcpp::Time t, M * m)
   {
     // std::cout << "header Time2" << std::endl;
+    (void) t;
     return m->header.stamp;
   }
 
   static rclcpp::Time get_timestamp3(rclcpp::Time t, const M * m)
   {
     // std::cout << "header Time3" << std::endl;
+    (void) t;
     return m->header.stamp;
   }
 };
