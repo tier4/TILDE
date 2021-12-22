@@ -35,9 +35,9 @@ public:
 };
 
 void expect_near(
-    const rclcpp::Time && lhs,
-    const rclcpp::Time && rhs,
-    uint64_t thres_ms=1)
+  const rclcpp::Time && lhs,
+  const rclcpp::Time && rhs,
+  uint64_t thres_ms = 1)
 {
   uint64_t thres_ns = thres_ms * 1000 * 1000;
   EXPECT_NEAR(lhs.nanoseconds(), rhs.nanoseconds(), thres_ns);
@@ -65,8 +65,9 @@ TEST_F(TestTimingAdvertisePublisher, set_input_info) {
   EXPECT_EQ(msg.input_infos.size(), 1ul);
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
   EXPECT_EQ(msg.input_infos[0].sub_time, rclcpp::Time(1, 0));
-  expect_near(rclcpp::Time(msg.input_infos[0].sub_time_steady, RCL_STEADY_TIME),
-              steady_clock->now());
+  expect_near(
+    rclcpp::Time(msg.input_infos[0].sub_time_steady, RCL_STEADY_TIME),
+    steady_clock->now());
   EXPECT_EQ(msg.input_infos[0].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[0].header_stamp, rclcpp::Time(0, 1));
 }
@@ -167,7 +168,7 @@ TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime_sucess_then_purged) {
   input_info->has_header_stamp = true;
   input_info->header_stamp = stamp_base + rclcpp::Duration(10, 0);
   pub.set_explicit_subtime(
-      TOPIC, input_info);
+    TOPIC, input_info);
 
   pub.add_explicit_input_info(
     TOPIC,

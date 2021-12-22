@@ -28,8 +28,8 @@ rclcpp::Time pathnode::get_timestamp(rclcpp::Time t, ...)
 
 
 TimingAdvertisePublisherBase::TimingAdvertisePublisherBase(
-    std::shared_ptr<rclcpp::Clock> clock,
-    std::shared_ptr<rclcpp::Clock> steady_clock)
+  std::shared_ptr<rclcpp::Clock> clock,
+  std::shared_ptr<rclcpp::Clock> steady_clock)
 : clock_(clock), steady_clock_(steady_clock),
   MAX_SUB_CALLBACK_INFOS_SEC_(2)
 {

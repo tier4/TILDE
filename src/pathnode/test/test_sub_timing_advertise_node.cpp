@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
@@ -60,9 +61,9 @@ TEST_F(TestSubTimingAdvertiseNode, simple_case) {
   auto checker_node = std::make_shared<rclcpp::Node>("checkerNode", options);
 
   auto sensor_pub = sensor_node->create_publisher<sensor_msgs::msg::PointCloud2>(
-      "in_topic", 1);
+    "in_topic", 1);
   auto clock_pub = sensor_node->create_publisher<rosgraph_msgs::msg::Clock>(
-      "/clock", 1);
+    "/clock", 1);
 
   // apply "/clock"
   auto clock_msg = std::make_unique<rosgraph_msgs::msg::Clock>();
@@ -75,29 +76,28 @@ TEST_F(TestSubTimingAdvertiseNode, simple_case) {
 
   // prepare pub/sub
   auto main_pub = main_node->create_timing_advertise_publisher<sensor_msgs::msg::PointCloud2>(
-      "out_topic", 1);
+    "out_topic", 1);
   auto main_sub = main_node->create_timing_advertise_subscription<sensor_msgs::msg::PointCloud2>(
-      "in_topic", 1,
-      [&main_pub](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
-      {
-        std::cout << "main_sub_callback" << std::endl;
-        (void)msg;
-        main_pub->publish(std::move(msg));
-      });
+    "in_topic", 1,
+    [&main_pub](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
+    {
+      std::cout << "main_sub_callback" << std::endl;
+      (void)msg;
+      main_pub->publish(std::move(msg));
+    });
 
   auto checker_sub = checker_node->create_subscription<path_info_msg::msg::PubInfo>(
-      "out_topic/info/pub", 1,
-      [](path_info_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
-      {
-        (void) pub_info_msg;
-        std::cout << "checker_sub_callback" << std::endl;
-        std::cout << "pub_info_msg: \n"
-                  << "pub_time: " << str(pub_info_msg->output_info.pub_time) << "\n"
-                  << "pub_time_steady: " << str(pub_info_msg->output_info.pub_time_steady) << "\n"
-                  << std::endl;
-        EXPECT_TRUE(true);
-      });
-
+    "out_topic/info/pub", 1,
+    [](path_info_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
+    {
+      (void) pub_info_msg;
+      std::cout << "checker_sub_callback" << std::endl;
+      std::cout << "pub_info_msg: \n" <<
+        "pub_time: " << str(pub_info_msg->output_info.pub_time) << "\n" <<
+        "pub_time_steady: " << str(pub_info_msg->output_info.pub_time_steady) << "\n" <<
+        std::endl;
+      EXPECT_TRUE(true);
+    });
 
   // do scenario
   auto sensor_msg = std::make_unique<sensor_msgs::msg::PointCloud2>();

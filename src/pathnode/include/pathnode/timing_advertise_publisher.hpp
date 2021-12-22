@@ -110,8 +110,8 @@ public:
   using InfoMsg = path_info_msg::msg::PubInfo;
 
   explicit TimingAdvertisePublisherBase(
-      std::shared_ptr<rclcpp::Clock> clock,
-      std::shared_ptr<rclcpp::Clock> steady_clock);
+    std::shared_ptr<rclcpp::Clock> clock,
+    std::shared_ptr<rclcpp::Clock> steady_clock);
 
   void set_input_info(
     const std::string & sub_topic,
@@ -147,7 +147,8 @@ private:
   // If this is set, FW creates PubInfo only by this info
   std::map<std::string, std::vector<InputInfo>> explicit_input_infos_;
   // topic, header stamp vs sub callback time
-  std::map<std::string, std::map<rclcpp::Time, std::shared_ptr<const InputInfo>>> explicit_sub_time_infos_;
+  std::map<std::string,
+    std::map<rclcpp::Time, std::shared_ptr<const InputInfo>>> explicit_sub_time_infos_;
 
   // how many seconds to preserve explicit_sub_callback_infos per topic
   size_t MAX_SUB_CALLBACK_INFOS_SEC_;
@@ -174,7 +175,8 @@ public:
     const std::string & node_fqn,
     std::shared_ptr<rclcpp::Clock> clock,
     std::shared_ptr<rclcpp::Clock> steady_clock)
-  : TimingAdvertisePublisherBase(clock, steady_clock), info_pub_(info_pub), pub_(pub), node_fqn_(node_fqn)
+  : TimingAdvertisePublisherBase(clock, steady_clock), info_pub_(info_pub), pub_(pub), node_fqn_(
+      node_fqn)
   {
   }
 
