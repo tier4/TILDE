@@ -16,6 +16,7 @@ find_package(rmw REQUIRED)
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_lint_auto REQUIRED)
+  find_package(sensor_msgs REQUIRED)
   # the following line skips the linter which checks for copyrights
   # uncomment the line when a copyright and license is not present in all source files
   set(ament_cmake_copyright_FOUND TRUE)
@@ -35,6 +36,19 @@ if(BUILD_TESTING)
   ament_target_dependencies(test_timing_advertise_publisher
     "rclcpp"
     "path_info_msg")
+
+  ament_add_gtest(test_sub_timing_advertise_node
+    test/test_sub_timing_advertise_node.cpp)
+  target_include_directories(test_sub_timing_advertise_node
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+  target_link_libraries(test_sub_timing_advertise_node
+    ${PROJECT_NAME})
+  ament_target_dependencies(test_sub_timing_advertise_node
+    "rclcpp"
+    "path_info_msg"
+    "sensor_msgs")
 endif()
 
 include_directories(include)
