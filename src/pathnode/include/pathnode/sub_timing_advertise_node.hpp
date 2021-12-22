@@ -169,7 +169,7 @@ public:
         for (auto &[topic, tap] : timing_advertise_pubs_) {
           tap->set_input_info(resolved_topic_name, input_info);
           if (input_info->has_header_stamp) {
-            tap->set_explicit_subtime(resolved_topic_name, input_info->header_stamp, subtime);
+            tap->set_explicit_subtime(resolved_topic_name, input_info);
           }
         }
 
