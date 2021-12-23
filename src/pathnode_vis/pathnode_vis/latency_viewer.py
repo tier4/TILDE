@@ -49,17 +49,25 @@ class LatencyStat(object):
     def __init__(self):
         self.dur_ms_list = []
         self.dur_pub_ms_list = []
+        self.dur_pub_ms_steady_list = []
         self.is_leaf_list = []
 
-    def add(self, dur_ms, dur_pub_ms, is_leaf):
-        self.dur_ms_list.append(dur_ms)
-        self.dur_pub_ms_list.append(dur_pub_ms)
-        self.is_leaf_list.append(is_leaf)
+    def add(self, r):
+        """
+        Parameters
+        ----------
+        r: pubinfo_traverse.SolverResults
+        """
+        self.dur_ms_list.append(r.dur_ms)
+        self.dur_pub_ms_list.append(r.dur_pub_ms)
+        self.dur_pub_ms_steady_list.append(r.dur_pub_ms_steady)
+        self.is_leaf_list.append(r.is_leaf)
 
     def report(self):
         dur_ms_list = self.dur_ms_list
         is_leaf_list = self.is_leaf_list
         dur_pub_ms_list = self.dur_pub_ms_list
+        dur_pub_ms_steady_list = self.dur_pub_ms_steady_list
 
         dur_min = float(min(dur_ms_list))
         dur_mean = float(mean(dur_ms_list))
@@ -68,6 +76,10 @@ class LatencyStat(object):
         dur_pub_min = float(min(dur_pub_ms_list))
         dur_pub_mean = float(mean(dur_pub_ms_list))
         dur_pub_max = float(max(dur_pub_ms_list))
+
+        dur_pub_steady_min = float(min(dur_pub_ms_steady_list))
+        dur_pub_steady_mean = float(mean(dur_pub_ms_steady_list))
+        dur_pub_steady_max = float(max(dur_pub_ms_list))
 
         is_all_leaf = all(is_leaf_list)
 
@@ -78,6 +90,9 @@ class LatencyStat(object):
             "dur_pub_min": dur_pub_min,
             "dur_pub_mean": dur_pub_mean,
             "dur_pub_max": dur_pub_max,
+            "dur_pub_steady_min": dur_pub_steady_min,
+            "dur_pub_steady_mean": dur_pub_steady_mean,
+            "dur_pub_steady_max": dur_pub_steady_max,
             "is_all_leaf": is_all_leaf,
             }
 
@@ -86,10 +101,13 @@ class PerTopicLatencyStat(object):
     def __init__(self):
         self.data = {}
 
-    def add(self, topic, dur_ms, dur_pub_ms, is_leaf):
-        self.data.setdefault(topic, LatencyStat()).add(
-            dur_ms, dur_pub_ms, is_leaf
-        )
+    def add(self, r):
+        """
+        Parameters
+        ----------
+        r: pubinfo_traverse.SolverResults
+        """
+        self.data.setdefault(r.topic, LatencyStat()).add(r)
 
     def report(self):
         ret = {}
@@ -99,8 +117,8 @@ class PerTopicLatencyStat(object):
 
     def print_report(self):
         reports = self.report()
-        s = "{:80} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6}".format(
-            "topic", "dur", "dur", "dur", "e2e", "e2e", "e2e"
+        s = "{:80} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6}".format(
+            "topic", "dur", "dur", "dur", "e2e", "e2e", "e2e", "e2e_s", "e2e_s", "e2e_s"
         )
         print(s)
 
@@ -118,6 +136,9 @@ class PerTopicLatencyStat(object):
             s += f"{p(report['dur_pub_min'])} "
             s += f"{p(report['dur_pub_mean'])} "
             s += f"{p(report['dur_pub_max'])} "
+            s += f"{p(report['dur_pub_steady_min'])} "
+            s += f"{p(report['dur_pub_steady_mean'])} "
+            s += f"{p(report['dur_pub_steady_max'])} "
             s += f"{report['is_all_leaf']}"
             print(s)
 
@@ -203,10 +224,12 @@ class LatencyViewerNode(Node):
         output_info = pub_info_msg.output_info
         pub_info = PubInfoObj(output_info.topic_name,
                               output_info.pub_time,
+                              output_info.pub_time_steady,
                               output_info.header_stamp)
         for input_info in pub_info_msg.input_infos:
             pub_info.add_input_info(input_info.topic_name,
                                     input_info.sub_time,
+                                    input_info.sub_time_steady,
                                     input_info.has_header_stamp,
                                     input_info.header_stamp)
         self.pub_infos.add(pub_info)
@@ -239,7 +262,7 @@ class LatencyViewerNode(Node):
             results = solver.solve(pubinfos, target_topic, target_stamp,
                                    stops=stops)
             for r in results.data:
-                stats.add(r.topic, r.dur_ms, r.dur_pub_ms, r.is_leaf)
+                stats.add(r)
 
         print("stats")
         stats.print_report()
@@ -282,8 +305,8 @@ class LatencyViewerNode(Node):
             return "True" if v else "False"
 
         print("one_hot")
-        s = "{:80} {:>20} {:>6} {:>6} {:>5}".format(
-            "topic", "stamp", "dur", "e2e", "is_leaf", "parent"
+        s = "{:80} {:>20} {:>6} {:>6} {:>6} {:>5}".format(
+            "topic", "stamp", "dur", "e2e", "e2e_s", "is_leaf", "parent"
         )
         print(s)
         for result in results.data:
@@ -291,6 +314,7 @@ class LatencyViewerNode(Node):
             s += f"{result.stamp:>20} "
             s += f"{p(result.dur_ms)} "
             s += f"{p(result.dur_pub_ms)} "
+            s += f"{p(result.dur_pub_ms_steady)} "
             s += f"{pbool(result.is_leaf):>5} "
             s += f"{result.parent}"
             print(s)

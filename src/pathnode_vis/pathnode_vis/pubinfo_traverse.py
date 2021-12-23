@@ -17,12 +17,15 @@ def strstamp2time(strstamp):
 
 
 class SolverResult(object):
-    def __init__(self, topic, stamp, dur_ms, dur_pub_ms, is_leaf, parent):
+    def __init__(self, topic, stamp, dur_ms,
+                 dur_pub_ms, dur_pub_ms_steady,
+                 is_leaf, parent):
         """
         topic: topic [string]
         stamp: header.stamp [rclpy.Time]
         dur_ms: duration of header.stamp in ms [double]
         dur_pub_ms: duration of output.pub_time in ms [double]
+        dur_pub_ms_steady: same with above but in steady clock ms [double]
         is_leaf: bool
         parent: parent topic [string]
         """
@@ -30,6 +33,7 @@ class SolverResult(object):
         self.stamp = stamp
         self.dur_ms = dur_ms
         self.dur_pub_ms = dur_pub_ms
+        self.dur_pub_ms_steady = dur_pub_ms_steady
         self.is_leaf = is_leaf
         self.parent = parent
 
@@ -39,6 +43,12 @@ class SolverResults(object):
         self.data = []
 
     def add(self, *args):
+        """ Register Result.
+
+        Paramaters
+        ----------
+        args: completely forward. See Result.__init__.
+        """
         self.data.append(SolverResult(*args))
 
 
@@ -76,14 +86,16 @@ class InputSensorStampSolver(object):
         start = strstamp2time(tgt_stamp)
         start_pub_info = pubinfos.get(tgt_topic, tgt_stamp)
         start_pub_time = start_pub_info.out_info.pubsub_stamp
+        start_pub_time_steady = start_pub_info.out_info.pubsub_stamp_steady
 
         dists[tgt_topic][tgt_stamp] = 1
-        queue.append((tgt_topic, tgt_stamp, start_pub_time))
+        queue.append((tgt_topic, tgt_stamp,
+                      start_pub_time, start_pub_time_steady))
         parentQ.append("")
 
         ret = SolverResults()
         while len(queue) != 0:
-            topic, stamp, sub_time = queue.popleft()
+            topic, stamp, sub_time, sub_time_steady = queue.popleft()
             parent = parentQ.popleft()
 
             dur = start - strstamp2time(stamp)
@@ -92,7 +104,14 @@ class InputSensorStampSolver(object):
             dur_pub = Time.from_msg(start_pub_time) - Time.from_msg(sub_time)
             dur_pub_ms = dur_pub.nanoseconds // 10**6
 
-            ret.add(topic, stamp, dur_ms, dur_pub_ms, is_leaf[topic], parent)
+            dur_pub_steady = \
+                Time.from_msg(start_pub_time_steady) - \
+                Time.from_msg(sub_time_steady)
+            dur_pub_ms_steady = dur_pub_steady.nanoseconds // 10**6
+
+            ret.add(topic, stamp, dur_ms,
+                    dur_pub_ms, dur_pub_ms_steady,
+                    is_leaf[topic], parent)
 
             # NDT-EKF has loop, so stop
             if topic in stops:
@@ -112,7 +131,9 @@ class InputSensorStampSolver(object):
                     if dists[nx_topic][nx_stamp] > 0:
                         continue
                     dists[nx_topic][nx_stamp] = dists[topic][stamp] + 1
-                    queue.append((nx_topic, nx_stamp, in_info.pubsub_stamp))
+                    queue.append((nx_topic, nx_stamp,
+                                  in_info.pubsub_stamp,
+                                  in_info.pubsub_stamp_steady))
                     parentQ.append(topic)
 
         return ret
