@@ -97,8 +97,9 @@ TEST_F(TestSubTimingAdvertiseNode, simple_case) {
         "pub_time: " << str(pub_info_msg->output_info.pub_time) << "\n" <<
         "pub_time_steady: " << str(pub_info_msg->output_info.pub_time_steady) << "\n" <<
         std::endl;
-      EXPECT_EQ(pub_info_msg->output_info.pub_time,
-                clock_msg.clock);
+      EXPECT_EQ(
+        pub_info_msg->output_info.pub_time,
+        clock_msg.clock);
     });
 
   // do scenario

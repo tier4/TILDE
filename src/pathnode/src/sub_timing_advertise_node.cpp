@@ -24,6 +24,9 @@ SubTimingAdvertiseNode::SubTimingAdvertiseNode(
 : Node(node_name, options)
 {
   steady_clock_.reset(new rclcpp::Clock(RCL_STEADY_TIME));
+  this->declare_parameter<bool>("enable_tilde", true);
+
+  this->get_parameter("enable_tilde", enable_tilde);
 }
 
 SubTimingAdvertiseNode::SubTimingAdvertiseNode(
@@ -33,6 +36,9 @@ SubTimingAdvertiseNode::SubTimingAdvertiseNode(
 : Node(node_name, namespace_, options)
 {
   steady_clock_.reset(new rclcpp::Clock(RCL_STEADY_TIME));
+  this->declare_parameter<bool>("enable_tilde", true);
+
+  this->get_parameter("enable_tilde", enable_tilde);
 }
 
 SubTimingAdvertiseNode::~SubTimingAdvertiseNode()

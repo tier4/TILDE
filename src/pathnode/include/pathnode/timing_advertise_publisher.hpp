@@ -174,23 +174,28 @@ public:
     std::shared_ptr<PublisherT> pub,
     const std::string & node_fqn,
     std::shared_ptr<rclcpp::Clock> clock,
-    std::shared_ptr<rclcpp::Clock> steady_clock)
+    std::shared_ptr<rclcpp::Clock> steady_clock,
+    bool enable)
   : TimingAdvertisePublisherBase(clock, steady_clock), info_pub_(info_pub), pub_(pub), node_fqn_(
-      node_fqn)
+      node_fqn), enable_(enable)
   {
   }
 
   void
   publish(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
-    publish_info(Process<MessageT>::get_timestamp2(clock_->now(), msg.get()));
+    if (enable_) {
+      publish_info(Process<MessageT>::get_timestamp2(clock_->now(), msg.get()));
+    }
     pub_->publish(std::move(msg));
   }
 
   void
   publish(const MessageT & msg)
   {
-    publish_info(Process<MessageT>::get_timestamp3(clock_->now(), &msg));
+    if (enable_) {
+      publish_info(Process<MessageT>::get_timestamp3(clock_->now(), &msg));
+    }
     pub_->publish(msg);
   }
 
@@ -241,6 +246,7 @@ private:
   std::shared_ptr<PubInfoPublisher> info_pub_;
   std::shared_ptr<PublisherT> pub_;
   const std::string node_fqn_;
+  bool enable_;
 
   /**
    * t: header stamp
