@@ -217,6 +217,9 @@ class LatencyViewerNode(Node):
             skips[RECT_OUT_EX.format(pos)] = RECT_IN.format(pos)
             skips[RECT_OUT.format(pos)] = RECT_IN.format(pos)
 
+        skips["/sensing/lidar/no_ground/pointcloud"] = \
+            "/sensing/lidar/concatenated/pointcloud"
+
         self.skips = skips
 
     def listener_callback(self, pub_info_msg):
