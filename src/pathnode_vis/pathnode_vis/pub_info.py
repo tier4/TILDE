@@ -83,7 +83,7 @@ class PubInfos(object):
     def add(self, pubinfo):
         out_topic = pubinfo.out_info.topic
         out_stamp = time2str(pubinfo.out_info.stamp)
-        if not out_topic in self.topic_vs_pubinfos.keys():
+        if out_topic not in self.topic_vs_pubinfos.keys():
             self.topic_vs_pubinfos[out_topic] = {}
         infos = self.topic_vs_pubinfos[out_topic]
 
