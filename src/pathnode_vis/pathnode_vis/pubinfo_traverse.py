@@ -9,6 +9,7 @@ import json
 from rclpy.time import Time
 
 from pathnode_vis.pub_info import time2str
+from pathnode_vis.data_as_tree import TreeNode
 
 
 def strstamp2time(strstamp):
@@ -38,9 +39,36 @@ class SolverResult(object):
         self.parent = parent
 
 
+class SolverResultsPrinter(object):
+    @classmethod
+    def as_tree(cls, results):
+        """ Construct array of string to print.
+        This methos returns tree command like expression
+        from output topic to source topics.
+        Multiple input topics are shown by indented listing.
+
+        Example
+        ---------------
+          topic               dur   e2e
+          out_topic:
+            in_topic1         0.1   0.1
+               in_topic1_1    0.2   0.2
+            in_topic2         0.3   0.3
+
+        Parameters
+        ----------
+        results: SolverResults
+
+        Return
+        ------
+        array of string
+        """
+        pass
+
+
 class SolverResults(object):
     def __init__(self):
-        self.data = []
+        self.data = []  # list of Result
 
     def add(self, *args):
         """ Register Result.
@@ -137,6 +165,63 @@ class InputSensorStampSolver(object):
                     parentQ.append(topic)
 
         return ret
+
+    def solve2(self, pubinfos, tgt_topic, tgt_stamp,
+               stops=[]):
+        """Traverse DAG from output to input.
+
+        Parameters
+        ----------
+        pubinfos: pubinfos [PubInfos]
+        tgt_topic: output topic [string]
+        tgt_stamp: output header stamp [string]
+
+        Return
+        ------
+        TreeNode
+        - Tree structure represents topic graph
+        - .name means topic
+        - .data is PubInfo of the topic
+        """
+        skips = self.skips
+        stamp = tgt_stamp
+
+        # dists[topic][stamp]
+        dists = defaultdict(lambda: defaultdict(lambda: -1))
+        queue = deque()
+
+        dists[tgt_topic][tgt_stamp] = 1
+        root_results = TreeNode(tgt_topic)
+
+        queue.append((tgt_topic, tgt_stamp, root_results))
+        while len(queue) != 0:
+            topic, stamp, cresult = queue.popleft()
+            cresult.add_data(pubinfos.get(topic, stamp))
+
+            # NDT-EKF has loop, so stop
+            if topic in stops:
+                continue
+
+            # get next edges
+            next_pubinfo = pubinfos.get(topic, stamp)
+            if not next_pubinfo:
+                continue
+
+            for in_infos in next_pubinfo.in_infos.values():
+                for in_info in in_infos:
+                    nx_topic = in_info.topic
+                    if nx_topic in skips:
+                        nx_topic = skips[nx_topic]
+                    nx_stamp = time2str(in_info.stamp)
+                    if dists[nx_topic][nx_stamp] > 0:
+                        continue
+                    dists[nx_topic][nx_stamp] = dists[topic][stamp] + 1
+                    nresult = cresult.get_child(nx_topic)
+
+                    queue.append((nx_topic, nx_stamp,
+                                  nresult))
+
+        return root_results
 
     def append(self, topic, stamp, sensor_topic, sensor_stamp):
         dic = self.topic_stamp_to_sensor_stamp

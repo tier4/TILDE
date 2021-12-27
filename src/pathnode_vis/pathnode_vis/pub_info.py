@@ -61,8 +61,9 @@ class PubInfo(object):
     def __str__(self):
         s = "PubInfo: \n"
         s += f"  out_info={self.out_info}\n"
-        for _, ti in self.in_infos.items():
-            s += f"  in_infos={ti}\n"
+        for _, infos in self.in_infos.items():
+            for info in infos:
+                s += f"  in_infos={info}\n"
         return s
 
     @property
