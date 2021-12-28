@@ -234,6 +234,7 @@ def update_stat(results):
 
     return results
 
+
 def calc_stat(results):
     """Calcurate statistics
 
