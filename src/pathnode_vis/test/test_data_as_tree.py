@@ -6,6 +6,36 @@ from collections import deque
 from pathnode_vis.data_as_tree import TreeNode
 
 
+def dict2tree(adict):
+    """Convert dictionary to TreeNode.
+
+    Parameters
+    ----------
+    adict: dictionary. If value is a dictionary,
+           then sub tree is created.
+           Otherwise, value are stored on data.
+
+    Return
+    ------
+    TreeNode starts from "root"
+    """
+    Q = deque()
+    root = TreeNode("root")
+    Q.append((root, adict))
+
+    while len(Q) > 0:
+        cnode, subdict = Q.pop()
+
+        for k, v in subdict.items():
+            child = cnode.get_child(k)
+            if isinstance(v, dict):
+                Q.append((child, v))
+            else:
+                child.add_data(v)
+
+    return root
+
+
 def get_complex_tree():
     """Get complex tree.
 
@@ -96,6 +126,48 @@ class TestTreeNode(unittest.TestCase):
                           "c2111_5",
                           "c22_3",
                           "c221_4"])
+
+    def test_merge(self):
+        lhs_dict = {
+            "c1": {
+                "c11": 1,
+                "c13": 2,
+                },
+            "c2": {
+                "c21": 3,
+                },
+            }
+        rhs_dict = {
+            "c1": {
+                "c11": 10,
+                "c12": {
+                    "c121": 11,
+                    },
+                },
+            "c2": 12,
+            }
+        lhs = dict2tree(lhs_dict)
+        rhs = dict2tree(rhs_dict)
+
+        def to_s(tree_node):
+            name = tree_node.name
+            data = tree_node.data
+            return f"{name}: {data}"
+
+        lhs.apply(lambda x: print(to_s(x)))
+        lhs.merge(rhs)
+        lhs.apply(lambda x: print(to_s(x)))
+
+        self.assertEqual(len(lhs.children), 2)
+        c1 = lhs.get_child("c1")
+        self.assertEqual(len(c1.children), 3)
+        self.assertEqual(c1.get_child("c11").data, [1, 10])
+        self.assertEqual(c1.get_child("c12").get_child("c121").data, [11])
+        self.assertEqual(c1.get_child("c13").data, [2])
+
+        c2 = lhs.get_child("c2")
+        self.assertEqual(c2.data, [12])
+        self.assertEqual(c2.get_child("c21").data, [3])
 
 
 if __name__ == '__main__':

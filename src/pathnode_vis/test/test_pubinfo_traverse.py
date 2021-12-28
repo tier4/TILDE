@@ -13,6 +13,7 @@ from pathnode_vis.pubinfo_traverse import (
     )
 from pathnode_vis.latency_viewer import (
     calc_one_hot,
+    update_stat,
     )
 
 
@@ -224,13 +225,10 @@ class TestTreeNode(unittest.TestCase):
         st_steady = t0_steady
 
         # st: 10.0, 10.1, 10.2, ...
-        # 
 
         for i in range(100):
             if i == 75:
                 test_st = Time.from_msg(st.to_msg())
-                print("test_st")
-                print(test_st)
 
             infos = gen_scenario2(st, st_steady, nw_dur, cb_dur)
             for info in infos:
@@ -242,8 +240,6 @@ class TestTreeNode(unittest.TestCase):
         solver = InputSensorStampSolver(graph)
 
         sorted_stamps = sorted(pubinfos.stamps("topic4"))
-        print(sorted_stamps[0])
-        print(sorted_stamps[99])
 
         tgt_stamp = sorted_stamps[75]
         results = solver.solve2(
@@ -292,6 +288,58 @@ class TestTreeNode(unittest.TestCase):
         dur1 = onehot_durs[2]
         self.assertEqual(dur1[1], "topic1")
         self.assertEqual(dur1[3], 22)
+
+    def test_update_stat(self):
+        t = []
+        ts = []
+        nw_dur = []
+        cb_dur = []
+
+        t.append(Time(seconds=10, nanoseconds=0))
+        ts.append(Time(seconds=0, nanoseconds=1,
+                       clock_type=ClockType.STEADY_TIME))
+        nw_dur.append(Duration(nanoseconds=10 * 10**6))
+        cb_dur.append(Duration(nanoseconds=1 * 10**6))
+
+        period1 = Duration(nanoseconds=100 * 10**6)
+        t.append(t[-1] + period1)
+        ts.append(ts[-1] + period1)
+        nw_dur.append(Duration(nanoseconds=20 * 10**6))
+        cb_dur.append(Duration(nanoseconds=2 * 10**6))
+
+        period2 = Duration(nanoseconds=100 * 10**6)
+        t.append(t[-1] + period2)
+        ts.append(ts[-1] + period2)
+        nw_dur.append(Duration(nanoseconds=30 * 10**6))
+        cb_dur.append(Duration(nanoseconds=3 * 10**6))
+
+        pubinfos = PubInfos()
+
+        for i in range(len(t)):
+            infos = gen_scenario2(t[i], ts[i],
+                                  nw_dur[i], cb_dur[i])
+            for info in infos:
+                pubinfos.add(info)
+
+        graph = TopicGraph(pubinfos, skips={})
+        solver = InputSensorStampSolver(graph)
+
+        tgt_stamp = sorted(pubinfos.stamps("topic4"))[-1]
+        results = solver.solve2(
+            pubinfos,
+            "topic4",
+            tgt_stamp)
+        results = update_stat(results)
+
+        self.assertEqual(results.data, [(0, 0)])
+        topic3 = results.get_child("topic3")
+        self.assertEqual(topic3.data, [(33, 33)])
+
+        topic2 = topic3.get_child("topic2")
+        self.assertEqual(topic2.data, [(66, 66)])
+
+        topic1 = topic3.get_child("topic1")
+        self.assertEqual(topic1.data, [(66, 66)])
 
 
 if __name__ == '__main__':

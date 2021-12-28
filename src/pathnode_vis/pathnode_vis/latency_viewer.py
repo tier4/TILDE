@@ -211,6 +211,94 @@ def calc_one_hot(results):
     return results.apply_with_depth(calc)
 
 
+def update_stat(results):
+    """Update results to have durations
+
+    Parameters
+    ----------
+    results: see InputSensorStampSolver.solve2
+
+    Return
+    ------
+    results with
+    results.data: [(dur_ms, dur_ms_steady)]
+    results.data_orig = results.data
+    """
+    last_pub_time = Time.from_msg(
+        results.data[0].out_info.pubsub_stamp)
+    last_pub_time_steady = Time.from_msg(
+        results.data[0].out_info.pubsub_stamp_steady)
+
+    def _update_stat(node):
+        if len(node.data) == 0 or node.data[0] is None:
+            node.data_orig = node.data
+            node.data = [(None, None)]
+            return
+
+        pub_time = Time.from_msg(
+            node.data[0].out_info.pubsub_stamp)
+        dur = last_pub_time - pub_time
+        dur_ms = dur.nanoseconds // (10 ** 6)
+
+        pub_time_steady = Time.from_msg(
+            node.data[0].out_info.pubsub_stamp_steady)
+        dur_steady = last_pub_time_steady - pub_time_steady
+        dur_ms_steady = dur_steady.nanoseconds // (10 ** 6)
+
+        node.data_orig = node.data
+        node.data = [(dur_ms, dur_ms_steady)]
+
+    results.apply(_update_stat)
+
+    return results
+
+def calc_stat(results):
+    """Calcurate statistics
+
+    Parameters
+    ----------
+    results: TreeNode which is updated by update_stat
+
+    Return
+    ------
+    list of dictionary whose keys are:
+      "depth"
+      "name"
+      "dur_min"
+      "dur_mean"
+      "dur_max"
+      "dur_min_steady"
+      "dur_mean_steady"
+      "dur_max_steady"
+    """
+    def _calc_stat(node, depth):
+        durs = []
+        durs_steady = []
+        for d in node.data:
+            if d[0] is not None:
+                durs.append(d[0])
+            if d[1] is not None:
+                durs_steady.append(d[1])
+
+        def _calc(arr, fn):
+            if len(arr) == 0:
+                return None
+            return fn(arr)
+
+        return {
+            "depth": depth,
+            "name": node.name,
+            "dur_min": _calc(durs, min),
+            "dur_mean": _calc(durs, mean),
+            "dur_max": _calc(durs, max),
+            "dur_min_steady": _calc(durs_steady, min),
+            "dur_mean_steady": _calc(durs_steady, mean),
+            "dur_max_steady": _calc(durs_steady, max)
+        }
+
+    return results.apply_with_depth(_calc_stat)
+
+
 class LatencyViewerNode(Node):
     def __init__(self, stdscr=None):
         """Constructor
@@ -328,6 +416,7 @@ class LatencyViewerNode(Node):
 
         Returns
         -------
+        list of string
         """
         pubinfos = self.pub_infos
         target_topic = self.target_topic
@@ -342,14 +431,38 @@ class LatencyViewerNode(Node):
         elif len(stamps) < 3:
             idx = 0
 
-        stats = PerTopicLatencyStat()
+        merged = None
         for target_stamp in stamps[:idx]:
-            results = solver.solve(pubinfos, target_topic, target_stamp,
-                                   stops=stops)
-            for r in results.data:
-                stats.add(r)
+            results = solver.solve2(
+                pubinfos, target_topic, target_stamp,
+                stops=stops)
 
-        stats.print_report(self.printer)
+            results = update_stat(results)
+            if merged is None:
+                merged = results
+            else:
+                merged.merge(results)
+
+        stats = calc_stat(merged)
+
+        logs = []
+        for stat in stats:
+            name = " " * stat["depth"] + stat["name"]
+
+            def p(x):
+                return "NA" if x is None else x
+
+            s = f"{name:80} "
+            s += f"{p(stat['dur_min']):>6} "
+            s += f"{p(stat['dur_mean']):>6} "
+            s += f"{p(stat['dur_max']):>6} "
+            s += f"{p(stat['dur_min_steady']):>6} "
+            s += f"{p(stat['dur_mean_steady']):>6} "
+            s += f"{p(stat['dur_max_steady']):>6} "
+
+            logs.append(s)
+
+        return logs
 
     def handle_one_hot(self, stamps):
         """Report only one message

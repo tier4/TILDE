@@ -69,3 +69,25 @@ class TreeNode(object):
             ret.extend(c.apply_with_depth(fn, depth + 1))
 
         return ret
+
+    def merge(self, rhs):
+        """Merge data of another tree.
+        If self does not have some keys which rhs has,
+        then new nodes are added.
+
+        Parameters
+        ----------
+        rhs: another TreeNode
+        """
+        def _merge(lhs, rhs):
+            """
+            lhs: self sub node
+            rhs: rhs sub node
+            """
+            lhs.data.extend(rhs.data)
+
+            for rhs_c in rhs.children:
+                lhs_c = lhs.get_child(rhs_c.name)
+                _merge(lhs_c, rhs_c)
+
+        _merge(self, rhs)
