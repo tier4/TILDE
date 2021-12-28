@@ -1,4 +1,5 @@
 import curses
+import datetime
 
 
 class Printer(object):
@@ -127,6 +128,8 @@ class NcursesPrinter(object):
         stdscr = self.stdscr
         color = self.CYAN
 
+        t = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+
         mode_str = ""
         if self.mode == self.MODE_RUN:
             mode_str = "press UP/DOWN/PgUp/PgDown/jkdugG to scroll"
@@ -135,4 +138,8 @@ class NcursesPrinter(object):
             mode_str = "scrolling... Press q/F to periodically update"
             color = self.CYAN
 
-        stdscr.addstr(0, 0, mode_str, color)
+        s = mode_str
+        s += " " * (self.x_max - len(mode_str) - len(t))
+        s += t
+
+        stdscr.addstr(0, 0, s, color)
