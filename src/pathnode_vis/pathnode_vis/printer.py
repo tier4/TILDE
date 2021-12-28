@@ -163,35 +163,6 @@ class NcursesPrinter(object):
             stdscr.addstr(i+1, 5, s)
         stdscr.refresh()
 
-    def print_all(self, stdscr, lines):
-        i = 1
-        for s in lines[self.start_line:]:
-            if i == self.y_max - 1:
-                break
-
-            if s[-1] != "\n":
-                s += "\n"
-            lineno = self.start_line + i
-            stdscr.addstr(i, 0, f"{lineno:<3}| ")
-            stdscr.addstr(i, 5, s)
-            i += 1
-
-    def print_filtered(self, stdscr, lines):
-        i = 1
-        for s in lines[self.start_line:]:
-            if i == self.y_max - 1:
-                break
-
-            if not self.search.search(s):
-                continue
-
-            if s[-1] != "\n":
-                s += "\n"
-            lineno = self.start_line + i
-            stdscr.addstr(i, 0, f"{lineno:<3}| ")
-            stdscr.addstr(i, 5, s)
-            i += 1
-
     def print_mode(self):
         stdscr = self.stdscr
         color = self.CYAN
