@@ -54,6 +54,30 @@ STOPS = [
     ]
 
 
+def truncate(s, prelen=20, n=80):
+    """Truncate string.
+
+    Parameters
+    ----------
+    s: string
+    l: first half
+    n: total length
+
+    Return
+    ------
+    truncated string such that "abc...edf"
+    """
+    assert prelen + 5 < n
+
+    if len(s) < n:
+        return s
+
+    pre = s[:prelen]
+    post = s[len(s) - n + prelen + 5:]
+
+    return pre + "..." + post
+
+
 class LatencyStat(object):
     def __init__(self):
         self.dur_ms_list = []
@@ -431,9 +455,17 @@ class LatencyViewerNode(Node):
         logs = []
         for stat in stats:
             name = " " * stat["depth"] + stat["name"]
+            name = truncate(name)
 
-            def p(x):
-                return "NA" if x is None else x
+            def p(v):
+                if v is None:
+                    s = "NA"
+                    return f"{s:>6}"
+                if v > 1000:
+                    s = "inf"
+                    return f"{s:>6}"
+                else:
+                    return f"{v:>6.1f}"
 
             s = f"{name:80} "
             s += f"{p(stat['dur_min']):>6} "
@@ -478,8 +510,7 @@ class LatencyViewerNode(Node):
         onehot_durs = calc_one_hot(results)
         logs = []
         for (depth, name, dur_ms, dur_ms_steady) in onehot_durs:
-            spacer = " " * depth
-            name = spacer + name
+            name = truncate(" " * depth + name)
             if dur_ms is None:
                 dur_ms = "NA"
             if dur_ms_steady is None:
