@@ -453,6 +453,16 @@ class LatencyViewerNode(Node):
         stats = calc_stat(merged)
 
         logs = []
+
+        fmt = "{:80} " + \
+            "{:>6} {:>6} {:>6} " + \
+            "{:>6} {:>6} {:>6}"
+        logs.append(fmt.format(
+            "topic",
+            "e2e", "e2e", "e2e",
+            "e2e_s", "e2e_s", "e2e_s"
+        ))
+
         for stat in stats:
             name = " " * stat["depth"] + stat["name"]
             name = truncate(name)
