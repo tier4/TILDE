@@ -21,6 +21,7 @@ class TreeNode(object):
 
         c = TreeNode(child_name)
         children.append(c)
+        children.sort(key=lambda x: x.name)
         name2child[child_name] = c
 
         return c
