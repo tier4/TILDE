@@ -31,6 +31,10 @@ from pathnode_vis.pub_info import (
     PubInfo as PubInfoObj,
     PubInfos as PubInfosObj
     )
+from pathnode_vis.printer import (
+    Printer,
+    NcursesPrinter
+    )
 
 EXCLUDES_TOPICS = [
     "/diagnostics/info/pub",
@@ -48,28 +52,6 @@ TARGET_TOPIC = "/sensing/lidar/concatenated/pointcloud"
 STOPS = [
     "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias",
     ]
-
-
-class Printer(object):
-    def print(self, lines):
-        for s in lines:
-            print(s)
-
-
-class NcursesPrinter(object):
-    def __init__(self, stdscr):
-        stdscr.scrollok(True)
-        self.stdscr = stdscr
-
-    def print(self, lines):
-        stdscr = self.stdscr
-        stdscr.clear()
-
-        for s in lines:
-            if s[-1] != "\n":
-                s += "\n"
-            stdscr.addstr(s)
-        stdscr.refresh()
 
 
 class LatencyStat(object):
