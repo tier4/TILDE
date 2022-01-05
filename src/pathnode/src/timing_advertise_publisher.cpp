@@ -29,8 +29,9 @@ rclcpp::Time pathnode::get_timestamp(rclcpp::Time t, ...)
 
 TimingAdvertisePublisherBase::TimingAdvertisePublisherBase(
   std::shared_ptr<rclcpp::Clock> clock,
-  std::shared_ptr<rclcpp::Clock> steady_clock)
-: clock_(clock), steady_clock_(steady_clock),
+  std::shared_ptr<rclcpp::Clock> steady_clock,
+  const std::string & node_fqn)
+: clock_(clock), steady_clock_(steady_clock), node_fqn_(node_fqn),
   MAX_SUB_CALLBACK_INFOS_SEC_(2)
 {
 }
@@ -40,6 +41,16 @@ void TimingAdvertisePublisherBase::set_input_info(
   const std::shared_ptr<const InputInfo> p)
 {
   input_infos_[sub_topic] = p;
+  if (sub_topics_.count(sub_topic) == 0) {
+    sub_topics_[sub_topic] = sub_topic;
+    tracepoint(
+      TRACEPOINT_PROVIDER,
+      tilde_subscribe_added,
+      &sub_topics_[sub_topic],
+      node_fqn_.c_str(),
+      sub_topic.c_str()
+    );
+  }
 }
 
 void TimingAdvertisePublisherBase::add_explicit_input_info(
@@ -60,6 +71,17 @@ void TimingAdvertisePublisherBase::add_explicit_input_info(
   info.has_header_stamp = true;
   info.header_stamp = stamp;
   explicit_input_infos_[sub_topic].push_back(info);
+
+  if (sub_topics_.count(sub_topic) == 0) {
+    sub_topics_[sub_topic] = sub_topic;
+    tracepoint(
+      TRACEPOINT_PROVIDER,
+      tilde_subscribe_added,
+      &sub_topics_[sub_topic],
+      node_fqn_.c_str(),
+      sub_topic.c_str()
+    );
+  }
 }
 
 void TimingAdvertisePublisherBase::set_input_info(path_info_msg::msg::PubInfo & info_msg)
