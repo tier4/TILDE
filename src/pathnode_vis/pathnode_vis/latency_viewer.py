@@ -217,6 +217,31 @@ def calc_one_hot(results):
     return results.apply_with_depth(calc)
 
 
+def handle_stat(stamps, pubinfos, target_topic, solver, stops):
+    """Handle stat core
+    """
+    idx = -3
+    if len(stamps) == 0:
+        return
+    elif len(stamps) < 3:
+        idx = 0
+
+    merged = None
+    for target_stamp in stamps[:idx]:
+        results = solver.solve2(
+            pubinfos, target_topic, target_stamp,
+            stops=stops)
+
+        results = update_stat(results)
+        if merged is None:
+            merged = results
+        else:
+            merged.merge(results)
+
+    stats = calc_stat(merged)
+    return stats
+
+
 def update_stat(results):
     """Update results to have durations
 
@@ -430,27 +455,11 @@ class LatencyViewerNode(Node):
         solver = self.solver
         stops = self.stops
 
-        # [-3] has no specific meaning.
-        # But [-1] may not have full info. So we look somewhat old info.
-        idx = -3
-        if len(stamps) == 0:
-            return
-        elif len(stamps) < 3:
-            idx = 0
-
-        merged = None
-        for target_stamp in stamps[:idx]:
-            results = solver.solve2(
-                pubinfos, target_topic, target_stamp,
-                stops=stops)
-
-            results = update_stat(results)
-            if merged is None:
-                merged = results
-            else:
-                merged.merge(results)
-
-        stats = calc_stat(merged)
+        stats = handle_stat(stamps,
+                            pubinfos,
+                            target_topic,
+                            solver,
+                            stops)
 
         logs = []
 
