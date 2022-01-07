@@ -229,6 +229,20 @@ def calc_one_hot(results):
 
 def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
     """Handle stat core
+
+    Parameters
+    ----------
+    stamps:
+    pubinfos:
+    target_topic:
+    solver:
+    stops:
+    dumps:
+
+    Result
+    ------
+    TreeNode.
+    .data: see calc_stat
     """
     idx = -3
     if len(stamps) == 0:
@@ -317,10 +331,12 @@ def calc_stat(results):
       "dur_min_steady"
       "dur_mean_steady"
       "dur_max_steady"
+      "is_leaf"
     """
     def _calc_stat(node, depth):
         durs = []
         durs_steady = []
+        is_leaf = True if node.num_children() == 0 else False
         for d in node.data:
             if d[0] is not None:
                 durs.append(d[0])
@@ -340,7 +356,8 @@ def calc_stat(results):
             "dur_max": _calc(durs, max),
             "dur_min_steady": _calc(durs_steady, min),
             "dur_mean_steady": _calc(durs_steady, mean),
-            "dur_max_steady": _calc(durs_steady, max)
+            "dur_max_steady": _calc(durs_steady, max),
+            "is_leaf": is_leaf
         }
 
     return results.apply_with_depth(_calc_stat)
@@ -507,7 +524,9 @@ class LatencyViewerNode(Node):
         ))
 
         for stat in stats:
-            name = " " * stat["depth"] + stat["name"]
+            name = (" " * stat["depth"] +
+                    stat["name"] +
+                    ("*" if stat["is_leaf"] else ""))
             name = truncate(name)
 
             def p(v):
