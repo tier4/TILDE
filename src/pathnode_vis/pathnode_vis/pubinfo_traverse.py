@@ -179,9 +179,11 @@ class InputSensorStampSolver(object):
         Return
         ------
         TreeNode
-        - Tree structure represents topic graph
+        - Tree structure represents TopicGraph.
+          This means that even if some PubInfos loss in some timing,
+          returned TreeNode preserve entire graph.
         - .name means topic
-        - .data is PubInfo of the topic
+        - .data is PubInfo of the topic. [] whn PubInfo loss
         """
         skips = self.skips
         stamp = tgt_stamp
@@ -196,7 +198,9 @@ class InputSensorStampSolver(object):
         queue.append((tgt_topic, tgt_stamp, root_results))
         while len(queue) != 0:
             topic, stamp, cresult = queue.popleft()
-            cresult.add_data(pubinfos.get(topic, stamp))
+            info = pubinfos.get(topic, stamp)
+            if info:
+                cresult.add_data(info)
 
             # NDT-EKF has loop, so stop
             if topic in stops:
