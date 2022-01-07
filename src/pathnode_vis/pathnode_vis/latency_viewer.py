@@ -15,9 +15,11 @@
 
 import argparse
 import curses
+import os
 import pickle
 import sys
 from statistics import mean
+import time
 
 import rclpy
 from rclpy.node import Node
@@ -25,7 +27,9 @@ from rclpy.time import Time
 
 from builtin_interfaces.msg import Time as TimeMsg
 
-from path_info_msg.msg import PubInfo
+from path_info_msg.msg import (
+    PubInfo,
+    )
 from pathnode_vis.pubinfo_traverse import TopicGraph, InputSensorStampSolver
 from pathnode_vis.pub_info import (
     PubInfo as PubInfoObj,
@@ -34,6 +38,9 @@ from pathnode_vis.pub_info import (
 from pathnode_vis.printer import (
     Printer,
     NcursesPrinter
+    )
+from pathnode_vis.pub_info import (
+    time2str
     )
 
 EXCLUDES_TOPICS = [
@@ -52,6 +59,7 @@ TARGET_TOPIC = "/sensing/lidar/concatenated/pointcloud"
 STOPS = [
     "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias",
     ]
+DUMP_DIR = "dump.d"
 
 
 def truncate(s, prelen=20, n=80):
@@ -217,7 +225,7 @@ def calc_one_hot(results):
     return results.apply_with_depth(calc)
 
 
-def handle_stat(stamps, pubinfos, target_topic, solver, stops):
+def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
     """Handle stat core
     """
     idx = -3
@@ -231,6 +239,11 @@ def handle_stat(stamps, pubinfos, target_topic, solver, stops):
         results = solver.solve2(
             pubinfos, target_topic, target_stamp,
             stops=stops)
+
+        if dumps:
+            pickle.dump(results,
+                        open(f"{DUMP_DIR}/stat_results_{target_stamp}.pkl", "wb"),
+                        protocol=pickle.HIGHEST_PROTOCOL)
 
         results = update_stat(results)
         if merged is None:
@@ -349,6 +362,8 @@ class LatencyViewerNode(Node):
         self.declare_parameter("wait_sec_to_init_graph", 10)
         self.declare_parameter("mode", "stat")
         self.declare_parameter("stops", STOPS)
+        # whether to dump solver.solve() result
+        self.declare_parameter("dumps", False)
 
         print(stdscr)
         if stdscr is not None:
@@ -405,6 +420,12 @@ class LatencyViewerNode(Node):
 
         self.printer.print(logs)
 
+        self.dumps = (
+            self.get_parameter("dumps")
+            .get_parameter_value().bool_value)
+        if self.dumps:
+            os.makedirs(DUMP_DIR, exist_ok=True)
+
     def init_skips(self):
         """
         Definition of skips.
@@ -427,6 +448,9 @@ class LatencyViewerNode(Node):
 
     def listener_callback(self, pub_info_msg):
         output_info = pub_info_msg.output_info
+
+        st = time.time()
+
         pub_info = PubInfoObj(output_info.topic_name,
                               output_info.pub_time,
                               output_info.pub_time_steady,
@@ -438,6 +462,12 @@ class LatencyViewerNode(Node):
                                     input_info.has_header_stamp,
                                     input_info.header_stamp)
         self.pub_infos.add(pub_info)
+
+        et = time.time()
+        topic = output_info.topic_name
+        stamp = time2str(output_info.header_stamp)
+        self.get_logger().debug(
+            f"sub {topic} at {stamp}@ {(et-st) * 1000} [ms]")
 
     def handle_stat(self, stamps):
         """Report statistics
@@ -454,12 +484,14 @@ class LatencyViewerNode(Node):
         target_topic = self.target_topic
         solver = self.solver
         stops = self.stops
+        dumps = self.dumps
 
         stats = handle_stat(stamps,
                             pubinfos,
                             target_topic,
                             solver,
-                            stops)
+                            stops,
+                            dumps=dumps)
 
         logs = []
 
@@ -509,6 +541,7 @@ class LatencyViewerNode(Node):
         -------
         array of strings for log
         """
+        st = time.time()
         pubinfos = self.pub_infos
         target_topic = self.target_topic
         solver = self.solver
@@ -526,6 +559,11 @@ class LatencyViewerNode(Node):
         results = solver.solve2(pubinfos, target_topic, target_stamp,
                                 stops=stops)
 
+        if self.dumps:
+            pickle.dump(results,
+                        open(f"{DUMP_DIR}/onehot_results_{target_stamp}.pkl", "wb"),
+                        protocol=pickle.HIGHEST_PROTOCOL)
+
         onehot_durs = calc_one_hot(results)
         logs = []
         for (depth, name, dur_ms, dur_ms_steady) in onehot_durs:
@@ -537,6 +575,10 @@ class LatencyViewerNode(Node):
 
             s = f"{name:80} {dur_ms:>6} {dur_ms_steady:>6}"
             logs.append(s)
+
+        et = time.time()
+        self.get_logger().debug(
+            f"timer_onehot @ {(et-st) * 1000} [ms]")
 
         return logs
 
