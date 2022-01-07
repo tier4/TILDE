@@ -279,7 +279,7 @@ class TestTopicGraph(unittest.TestCase):
 
 
 class TestTreeNode(unittest.TestCase):
-    def test_straight(self):
+    def test_solve2_straight(self):
         infos = get_scenario1()
         pubinfos = PubInfos()
         for info in infos:
@@ -311,7 +311,7 @@ class TestTreeNode(unittest.TestCase):
         self.assertEqual(len(r1.data), 1)
         self.assertEqual(len(r1.data[0].in_infos.keys()), 0)
 
-    def test_branched(self):
+    def test_solve2_branched(self):
         t0 = Time(seconds=10, nanoseconds=0)
         t0_steady = Time(seconds=0, nanoseconds=1,
                          clock_type=ClockType.STEADY_TIME)
@@ -387,6 +387,62 @@ class TestTreeNode(unittest.TestCase):
         dur1 = onehot_durs[2]
         self.assertEqual(dur1[1], "topic1")
         self.assertEqual(dur1[3], 22)
+
+    def test_solve2_with_loss(self):
+        """Solve with lossy PubInfos
+        """
+        # setup
+        t0 = Time(seconds=10, nanoseconds=0)
+        t0_steady = Time(seconds=0, nanoseconds=1,
+                         clock_type=ClockType.STEADY_TIME)
+        nw_dur = Duration(nanoseconds=1 * 10**6)  # 1 [ms]
+        cb_dur = Duration(nanoseconds=10 * 10**6)  # 10 [ms]
+        period = Duration(seconds=1)
+
+        def init_solver():
+            infos = gen_scenario2(t0, t0_steady, nw_dur, cb_dur)
+            pubinfos = PubInfos()
+            for info in infos:
+                pubinfos.add(info)
+            graph = TopicGraph(pubinfos, skips={})
+            solver = InputSensorStampSolver(graph)
+            return solver
+
+        def get_pubinfos_with_only_topic4():
+            t1 = t0 + period
+            t1_steady = t0_steady + period
+            infos = gen_scenario2(t1, t1_steady, nw_dur, cb_dur)
+            pubinfos = PubInfos()
+            pubinfos.add(infos[-1])
+            return pubinfos
+
+        solver = init_solver()
+        tgt_pubinfos = get_pubinfos_with_only_topic4()
+        tgt_topic = "topic4"
+        tgt_stamps = tgt_pubinfos.stamps(tgt_topic)
+
+        self.assertEqual(len(tgt_stamps), 1)
+        results = solver.solve2(tgt_pubinfos, tgt_topic, tgt_stamps[0])
+
+        # is there full graph?
+        result_topic4 = results
+        self.assertEqual(result_topic4.name, "topic4")
+        self.assertEqual(len(result_topic4.data), 1)
+        self.assertTrue(isinstance(result_topic4.data[0], PubInfo))
+
+        result_topic3 = results.name2child["topic3"]
+        self.assertEqual(result_topic3.name, "topic3")
+        self.assertEqual(len(result_topic3.data), 0)
+        # self.assertTrue(isinstance(result_topic4.data[0], PubInfo))
+
+        # result_topic2 = results.name2child["topic2"]
+        # self.assertEqual(result_topic2.name, "topic2")
+        # print(f"result_topic2.data: {result_topic2.data}")
+
+        # result_topic1 = results.name2child["topic1"]
+        # self.assertEqual(result_topic1.name, "topic1")
+        # print(f"result_topic1.data: {result_topic1.data}")
+
 
     def test_update_stat(self):
         t = []
