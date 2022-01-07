@@ -252,9 +252,9 @@ class TopicGraph(object):
         self.skips = skips
         n = len(self.topics)
 
-        # from sub -> pub
+        # edges from publisher to subscription
         self.topic_edges = [set() for _ in range(n)]
-        # from out -> in
+        # edges from subscription to publisher
         self.rev_edges = [set() for _ in range(n)]
         for out_topic in self.topics:
             in_topics = pubinfos.in_topics(out_topic)
