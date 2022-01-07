@@ -388,10 +388,8 @@ class TestTreeNode(unittest.TestCase):
         self.assertEqual(dur1[1], "topic1")
         self.assertEqual(dur1[3], 22)
 
-    def test_solve2_with_loss(self):
-        """Solve with lossy PubInfos
-        """
-        # setup
+    def setup_only_topic4_scenario(self):
+        """setup lossy scenario"""
         t0 = Time(seconds=10, nanoseconds=0)
         t0_steady = Time(seconds=0, nanoseconds=1,
                          clock_type=ClockType.STEADY_TIME)
@@ -418,6 +416,37 @@ class TestTreeNode(unittest.TestCase):
 
         solver = init_solver()
         tgt_pubinfos = get_pubinfos_with_only_topic4()
+
+        return (solver, tgt_pubinfos)
+
+    def test_solve_empty(self):
+        # setup
+        solver, _ = self.setup_only_topic4_scenario()
+        tgt_topic = "topic4"
+
+        results = solver._solve_empty(tgt_topic)
+
+        result_topic4 = results
+        self.assertEqual(result_topic4.name, "topic4")
+        self.assertEqual(len(result_topic4.data), 0)
+
+        result_topic3 = result_topic4.name2child["topic3"]
+        self.assertEqual(result_topic3.name, "topic3")
+        self.assertEqual(len(result_topic3.data), 0)
+
+        result_topic2 = result_topic3 .name2child["topic2"]
+        self.assertEqual(result_topic2.name, "topic2")
+        self.assertEqual(len(result_topic2.data), 0)
+
+        result_topic1 = result_topic3.name2child["topic1"]
+        self.assertEqual(result_topic1.name, "topic1")
+        self.assertEqual(len(result_topic1.data), 0)
+
+    def test_solve2_with_loss(self):
+        """Solve with lossy PubInfos
+        """
+        solver, tgt_pubinfos = self.setup_only_topic4_scenario()
+
         tgt_topic = "topic4"
         tgt_stamps = tgt_pubinfos.stamps(tgt_topic)
 
@@ -430,19 +459,17 @@ class TestTreeNode(unittest.TestCase):
         self.assertEqual(len(result_topic4.data), 1)
         self.assertTrue(isinstance(result_topic4.data[0], PubInfo))
 
-        result_topic3 = results.name2child["topic3"]
+        result_topic3 = result_topic4.name2child["topic3"]
         self.assertEqual(result_topic3.name, "topic3")
         self.assertEqual(len(result_topic3.data), 0)
-        # self.assertTrue(isinstance(result_topic4.data[0], PubInfo))
 
-        # result_topic2 = results.name2child["topic2"]
-        # self.assertEqual(result_topic2.name, "topic2")
-        # print(f"result_topic2.data: {result_topic2.data}")
+        result_topic2 = result_topic3.name2child["topic2"]
+        self.assertEqual(result_topic2.name, "topic2")
+        self.assertEqual(len(result_topic2.data), 0)
 
-        # result_topic1 = results.name2child["topic1"]
-        # self.assertEqual(result_topic1.name, "topic1")
-        # print(f"result_topic1.data: {result_topic1.data}")
-
+        result_topic1 = result_topic3.name2child["topic1"]
+        self.assertEqual(result_topic1.name, "topic1")
+        self.assertEqual(len(result_topic1.data), 0)
 
     def test_update_stat(self):
         t = []

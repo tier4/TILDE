@@ -86,6 +86,7 @@ class InputSensorStampSolver(object):
         self.topic_stamp_to_sensor_stamp = {}
         self.graph = graph
         self.skips = graph.skips
+        self.empty_results = {}
 
     def solve(self, pubinfos, tgt_topic, tgt_stamp,
               stops=[]):
@@ -175,6 +176,7 @@ class InputSensorStampSolver(object):
         pubinfos: pubinfos [PubInfos]
         tgt_topic: output topic [string]
         tgt_stamp: output header stamp [string]
+        stops: stop list
 
         Return
         ------
@@ -187,6 +189,10 @@ class InputSensorStampSolver(object):
         """
         skips = self.skips
         stamp = tgt_stamp
+        key = tgt_topic + ".".join(stops)
+        if key not in self.empty_results:
+            self.empty_results[key] = self._solve_empty(tgt_topic, stops=stops)
+        empty_results = self.empty_results[key]
 
         # dists[topic][stamp]
         dists = defaultdict(lambda: defaultdict(lambda: -1))
@@ -194,6 +200,7 @@ class InputSensorStampSolver(object):
 
         dists[tgt_topic][tgt_stamp] = 1
         root_results = TreeNode(tgt_topic)
+        root_results.merge(empty_results)  # setup entire graph
 
         queue.append((tgt_topic, tgt_stamp, root_results))
         while len(queue) != 0:
@@ -238,6 +245,41 @@ class InputSensorStampSolver(object):
 
         dic[topic][stamp][sensor_topic].append(sensor_stamp)
 
+    def _solve_empty(self, tgt_topic,
+                     stops=[]):
+        """Get empty results to know graph
+        Parameters
+        ----------
+        tgt_topic: output topic [string]
+        stops: stop list
+
+        Returns
+        -------
+        TreeNode
+        """
+        skips = self.skips
+        graph = self.graph
+
+        queue = deque()
+        root_results = TreeNode(tgt_topic)
+
+        queue.append((tgt_topic, root_results))
+        while len(queue) != 0:
+            topic, cresult = queue.popleft()
+
+            if topic in stops:
+                continue
+
+            rev_topics = graph.rev_topics(topic)
+            for nx_topic in rev_topics:
+                if nx_topic in skips:
+                    nx_topic = skips[nx_topic]
+
+                nresult = cresult.get_child(nx_topic)
+                queue.append((nx_topic, nresult))
+
+        return root_results
+
 
 class TopicGraph(object):
     "Construct topic graph by ignoring stamps"
@@ -245,7 +287,8 @@ class TopicGraph(object):
     def __init__(self, pubinfos, skips={}):
         """
         Parameters
-        ----------
+        ----------        def init_solver():
+
         pubinfos: PubInfos
         skips: skip topics. {downstream: upstream} by input-to-output order
                ex) {"/sensing/lidar/top/rectified/pointcloud_ex":
@@ -285,7 +328,8 @@ class TopicGraph(object):
         get input topics
         return List[Topic]
         """
-        return [self.topics[i] for i in self.rev_edges[i]]
+        out_topic_idx = self.t2i[topic]
+        return [self.topics[i] for i in self.rev_edges[out_topic_idx]]
 
     def dfs_rev(self, start_topic):
         '''

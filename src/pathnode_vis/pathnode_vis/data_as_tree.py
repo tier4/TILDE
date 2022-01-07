@@ -9,6 +9,9 @@ class TreeNode(object):
         self.data = []
         self.value = None
 
+    def num_children(self):
+        return len(self.children)
+
     def get_child(self, child_name):
         """ Get child.
         If not exists, then append.

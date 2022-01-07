@@ -195,11 +195,12 @@ def calc_one_hot(results):
 
     Return
     ------
-    list of (depth, topic name, dur, dur_steady)
+    list of (depth, topic name, dur, dur_steady, is_leaf)
     depth: depth of watched topic
     topic_name: watched topic
     dur: final topic pubtime - pubtime
-    dur_steady
+    dur_steady: steady version of dur
+    is_leaf: leaf of not [bool]
     """
     last_pub_time = Time.from_msg(results.data[0].out_info.pubsub_stamp)
     last_pub_time_steady = Time.from_msg(
@@ -207,9 +208,10 @@ def calc_one_hot(results):
 
     def calc(node, depth):
         name = node.name
+        is_leaf = node.num_children() == 0
 
         if len(node.data) == 0 or node.data[0] is None:
-            return (depth, name, None, None)
+            return (depth, name, None, None, is_leaf)
 
         pub_time = Time.from_msg(node.data[0].out_info.pubsub_stamp)
         dur = last_pub_time - pub_time
@@ -220,7 +222,7 @@ def calc_one_hot(results):
         dur_steady = last_pub_time_steady - pub_time_steady
         dur_ms_steady = dur_steady.nanoseconds // (10 ** 6)
 
-        return (depth, name, dur_ms, dur_ms_steady)
+        return (depth, name, dur_ms, dur_ms_steady, is_leaf)
 
     return results.apply_with_depth(calc)
 
@@ -566,8 +568,8 @@ class LatencyViewerNode(Node):
 
         onehot_durs = calc_one_hot(results)
         logs = []
-        for (depth, name, dur_ms, dur_ms_steady) in onehot_durs:
-            name = truncate(" " * depth + name)
+        for (depth, name, dur_ms, dur_ms_steady, is_leaf) in onehot_durs:
+            name = truncate(" " * depth + name + ("*" if is_leaf else ""))
             if dur_ms is None:
                 dur_ms = "NA"
             if dur_ms_steady is None:
