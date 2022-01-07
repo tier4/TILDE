@@ -179,6 +179,105 @@ def gen_scenario2(
         ]
 
 
+class TestTopicGraph(unittest.TestCase):
+    def test_straight(self):
+        infos = get_scenario1()
+        pubinfos = PubInfos()
+        for info in infos:
+            pubinfos.add(info)
+
+        graph = TopicGraph(pubinfos, skips={})
+
+        self.assertEqual(graph.topics[0], "topic1")
+        self.assertEqual(graph.topics[1], "topic2")
+        self.assertEqual(graph.topics[2], "topic3")
+
+        edges = graph.topic_edges
+        self.assertEqual(edges[0], set([1]))
+        self.assertEqual(edges[1], set([2]))
+        self.assertEqual(edges[2], set())
+
+        rev_edges = graph.rev_edges
+        self.assertEqual(rev_edges[0], set())
+        self.assertEqual(rev_edges[1], set([0]))
+        self.assertEqual(rev_edges[2], set([1]))
+
+    def test_scenario2(self):
+        t0 = Time(seconds=10, nanoseconds=0)
+        t0_steady = Time(seconds=0, nanoseconds=1,
+                         clock_type=ClockType.STEADY_TIME)
+        nw_dur = Duration(nanoseconds=1 * 10**6)  # 1 [ms]
+        cb_dur = Duration(nanoseconds=10 * 10**6)  # 10 [ms]
+
+        infos = gen_scenario2(t0, t0_steady, nw_dur, cb_dur)
+        pubinfos = PubInfos()
+        for info in infos:
+            pubinfos.add(info)
+
+        graph = TopicGraph(pubinfos, skips={})
+
+        self.assertEqual(graph.topics[0], "topic1")
+        self.assertEqual(graph.topics[1], "topic2")
+        self.assertEqual(graph.topics[2], "topic3")
+        self.assertEqual(graph.topics[3], "topic4")
+
+        edges = graph.topic_edges
+        self.assertEqual(edges[0], set([2]))
+        self.assertEqual(edges[1], set([2]))
+        self.assertEqual(edges[2], set([3]))
+        self.assertEqual(edges[3], set())
+
+        rev_edges = graph.rev_edges
+        self.assertEqual(rev_edges[0], set())
+        self.assertEqual(rev_edges[1], set())
+        self.assertEqual(rev_edges[2], set([0, 1]))
+        self.assertEqual(rev_edges[3], set([2]))
+
+    def test_scenario2_with_loss(self):
+        """Graph creation with lossy PubInfos
+        t0: pubinfo only topic1 and topic3
+        t1: only topic2
+        t2: only topic4
+        """
+        t0 = Time(seconds=10, nanoseconds=0)
+        t0_steady = Time(seconds=0, nanoseconds=1,
+                         clock_type=ClockType.STEADY_TIME)
+        nw_dur = Duration(nanoseconds=1 * 10**6)  # 1 [ms]
+        cb_dur = Duration(nanoseconds=10 * 10**6)  # 10 [ms]
+        period = Duration(seconds=1)
+        t1, t1_steady = t0 + period, t0_steady + period
+        t2, t2_steady = t1 + period, t1_steady + period
+
+        infos_t0 = gen_scenario2(t0, t0_steady, nw_dur, cb_dur)
+        infos_t1 = gen_scenario2(t1, t1_steady, nw_dur, cb_dur)
+        infos_t2 = gen_scenario2(t2, t2_steady, nw_dur, cb_dur)
+        pubinfos = PubInfos()
+
+        pubinfos.add(infos_t0[0])
+        pubinfos.add(infos_t0[2])
+        pubinfos.add(infos_t1[1])
+        pubinfos.add(infos_t2[3])
+
+        graph = TopicGraph(pubinfos, skips={})
+
+        self.assertEqual(graph.topics[0], "topic1")
+        self.assertEqual(graph.topics[1], "topic2")
+        self.assertEqual(graph.topics[2], "topic3")
+        self.assertEqual(graph.topics[3], "topic4")
+
+        edges = graph.topic_edges
+        self.assertEqual(edges[0], set([2]))
+        self.assertEqual(edges[1], set([2]))
+        self.assertEqual(edges[2], set([3]))
+        self.assertEqual(edges[3], set())
+
+        rev_edges = graph.rev_edges
+        self.assertEqual(rev_edges[0], set())
+        self.assertEqual(rev_edges[1], set())
+        self.assertEqual(rev_edges[2], set([0, 1]))
+        self.assertEqual(rev_edges[3], set([2]))
+
+
 class TestTreeNode(unittest.TestCase):
     def test_straight(self):
         infos = get_scenario1()
