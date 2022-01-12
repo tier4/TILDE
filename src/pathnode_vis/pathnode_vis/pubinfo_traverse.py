@@ -194,11 +194,8 @@ class InputSensorStampSolver(object):
             self.empty_results[key] = self._solve_empty(tgt_topic, stops=stops)
         empty_results = self.empty_results[key]
 
-        # dists[topic][stamp]
-        dists = defaultdict(lambda: defaultdict(lambda: -1))
         queue = deque()
 
-        dists[tgt_topic][tgt_stamp] = 1
         root_results = TreeNode(tgt_topic)
         root_results.merge(empty_results)  # setup entire graph
 
@@ -224,9 +221,6 @@ class InputSensorStampSolver(object):
                     if nx_topic in skips:
                         nx_topic = skips[nx_topic]
                     nx_stamp = time2str(in_info.stamp)
-                    if dists[nx_topic][nx_stamp] > 0:
-                        continue
-                    dists[nx_topic][nx_stamp] = dists[topic][stamp] + 1
                     nresult = cresult.get_child(nx_topic)
 
                     queue.append((nx_topic, nx_stamp,
