@@ -24,6 +24,9 @@ import time
 import rclpy
 from rclpy.node import Node
 from rclpy.time import Time
+from rclpy.qos import QoSHistoryPolicy
+from rclpy.qos import QoSProfile
+from rclpy.qos import QoSReliabilityPolicy
 
 from builtin_interfaces.msg import Time as TimeMsg
 
@@ -201,6 +204,7 @@ def calc_one_hot(results):
     dur: final topic pubtime - pubtime
     dur_steady: steady version of dur
     is_leaf: leaf of not [bool]
+    stamp: target topic output stamp
     """
     last_pub_time = Time.from_msg(results.data[0].out_info.pubsub_stamp)
     last_pub_time_steady = Time.from_msg(
@@ -211,8 +215,9 @@ def calc_one_hot(results):
         is_leaf = node.num_children() == 0
 
         if len(node.data) == 0 or node.data[0] is None:
-            return (depth, name, None, None, is_leaf)
+            return (depth, name, None, None, is_leaf, None)
 
+        stamp = node.data[0].out_info.stamp
         pub_time = Time.from_msg(node.data[0].out_info.pubsub_stamp)
         dur = last_pub_time - pub_time
         dur_ms = dur.nanoseconds // (10 ** 6)
@@ -222,7 +227,7 @@ def calc_one_hot(results):
         dur_steady = last_pub_time_steady - pub_time_steady
         dur_ms_steady = dur_steady.nanoseconds // (10 ** 6)
 
-        return (depth, name, dur_ms, dur_ms_steady, is_leaf)
+        return (depth, name, dur_ms, dur_ms_steady, is_leaf, stamp)
 
     return results.apply_with_depth(calc)
 
@@ -391,18 +396,27 @@ class LatencyViewerNode(Node):
             self.printer = Printer()
 
         self.subs = {}
+        # topic vs num_messages
+        self.num_messages = {}
+
         excludes_topic = (
             self.get_parameter("excludes_topics")
             .get_parameter_value().string_array_value)
         topics = self.get_pub_info_topics(excludes=excludes_topic)
         logs = []
+
+        qos = QoSProfile(
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            )
         for topic in topics:
             logs.append(topic)
             sub = self.create_subscription(
                 PubInfo,
                 topic,
                 self.listener_callback,
-                1)
+                qos)
             self.subs[topic] = sub
 
         self.solver = None
@@ -487,6 +501,10 @@ class LatencyViewerNode(Node):
         stamp = time2str(output_info.header_stamp)
         self.get_logger().debug(
             f"sub {topic} at {stamp}@ {(et-st) * 1000} [ms]")
+
+        if output_info.topic_name not in self.num_messages.keys():
+            self.num_messages[output_info.topic_name] = 0
+        self.num_messages[output_info.topic_name] += 1
 
     def handle_stat(self, stamps):
         """Report statistics
@@ -587,14 +605,17 @@ class LatencyViewerNode(Node):
 
         onehot_durs = calc_one_hot(results)
         logs = []
-        for (depth, name, dur_ms, dur_ms_steady, is_leaf) in onehot_durs:
+        for (depth, name, dur_ms, dur_ms_steady, is_leaf, stamp) in onehot_durs:
             name = truncate(" " * depth + name + ("*" if is_leaf else ""))
             if dur_ms is None:
                 dur_ms = "NA"
             if dur_ms_steady is None:
                 dur_ms_steady = "NA"
+            stamp_s = "NA"
+            if stamp:
+                stamp_s = time2str(stamp)
 
-            s = f"{name:80} {dur_ms:>6} {dur_ms_steady:>6}"
+            s = f"{name:80} {stamp_s:>20} {dur_ms:>6} {dur_ms_steady:>6}"
             logs.append(s)
 
         et = time.time()
@@ -606,6 +627,7 @@ class LatencyViewerNode(Node):
     def timer_callback(self):
         pubinfos = self.pub_infos
         target_topic = self.target_topic
+        num_messages = self.num_messages
 
         stamps = sorted(pubinfos.stamps(target_topic))
         logs = []
@@ -631,13 +653,16 @@ class LatencyViewerNode(Node):
         else:
             logs.append("unknown mode")
 
-        self.printer.print(logs)
+        for topic in sorted(num_messages.keys()):
+            self.get_logger().debug(f"{topic}: {num_messages[topic]}")
 
         # cleanup PubInfos
         (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split("."))
         until_stamp = TimeMsg(sec=latest_sec - self.keep_info_sec,
                               nanosec=latest_ns)
         pubinfos.erase_until(until_stamp)
+
+        self.printer.print(logs)
 
     def get_pub_info_topics(self, excludes=[]):
         """Get all topic infos
