@@ -1,10 +1,14 @@
 import collections
 
+from rclpy.time import Time
+
+
 def time2str(t):
     """
     t: builtin_interfaces.msg.Time
     """
     return f"{t.sec}.{t.nanosec:09d}"
+
 
 class TopicInfo(object):
     def __init__(self, topic, pubsub_stamp, pubsub_stamp_steady,
@@ -96,13 +100,26 @@ class PubInfos(object):
     def erase_until(self, stamp):
         """
         erase added pubinfo where out_stamp < stamp
-        stamp: rclpy.Time
+        stamp: builtin_interfaces.msg.Time
         """
+        def time_ge(lhs, rhs):
+            """helper function to compare stamps i.e. self.topic_vs_pubinfos[*].keys().
+
+            As stamps are string, it is not appropriate to compare as string.
+            Builtin_msg.msg.Time does not implement `<=>`, we use rclpy.Time,
+            althoght clock_type has no meaning.
+            """
+            [lhs_sec, lhs_nsec] = map(lambda x: int(x), lhs.split("."))
+            [rhs_sec, rhs_nsec] = map(lambda x: int(x), rhs.split("."))
+            lhs_time = Time(seconds=lhs_sec, nanoseconds=lhs_nsec)
+            rhs_time = Time(seconds=rhs_sec, nanoseconds=rhs_nsec)
+            return lhs_time <= rhs_time
+
         thres_stamp = time2str(stamp)
         erases = {}
         for (topic, infos) in self.topic_vs_pubinfos.items():
             for stamp in infos.keys():
-                if thres_stamp <= stamp:
+                if time_ge(thres_stamp, stamp):
                     continue
                 erases.setdefault(topic, []).append(stamp)
 
