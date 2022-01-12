@@ -64,5 +64,38 @@ class TestPubInfos(unittest.TestCase):
                         infos.topic_vs_pubinfos["topic1"].keys())
         self.assertEqual(len(infos.topic_vs_pubinfos["topic2"]), 0)
 
+    def test_erase_until_many(self):
+        infos = PubInfos()
+        for i in range(0, 10):
+            infos.add(PubInfo(
+                "topic1",
+                time_msg(i, 0),
+                time_msg(i, 0),
+                time_msg(i, 0)
+            ))
+
+        infos.erase_until(time_msg(3, 1))
+        self.assertEqual(len(infos.topic_vs_pubinfos["topic1"].keys()), 6)
+        self.assertTrue("0.000000000" not in
+                        infos.topic_vs_pubinfos["topic1"].keys())
+        self.assertTrue("1.000000000" not in
+                        infos.topic_vs_pubinfos["topic1"].keys())
+        self.assertTrue("2.000000000" not in
+                        infos.topic_vs_pubinfos["topic1"].keys())
+        self.assertTrue("3.000000000" not in
+                        infos.topic_vs_pubinfos["topic1"].keys())
+
+        infos.erase_until(time_msg(7, 1))
+        self.assertEqual(len(infos.topic_vs_pubinfos["topic1"].keys()), 2)
+        self.assertTrue("4.000000000" not in
+                        infos.topic_vs_pubinfos["topic1"].keys())
+        self.assertTrue("5.000000000" not in
+                        infos.topic_vs_pubinfos["topic1"].keys())
+        self.assertTrue("6.000000000" not in
+                        infos.topic_vs_pubinfos["topic1"].keys())
+        self.assertTrue("7.000000000" not in
+                        infos.topic_vs_pubinfos["topic1"].keys())
+
+
 if __name__ == '__main__':
     unittest.main()
