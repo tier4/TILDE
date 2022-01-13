@@ -695,6 +695,12 @@ class LatencyViewerNode(Node):
         map
           a list of pubinfo topics
         """
+        # short sleep between node creation and get_topic_names_and_types
+        # https://github.com/ros2/ros2/issues/1057
+        # We need this sleep with autoware,
+        # but don't need in dev environment(i.e. rosbagged PubInfo)
+        time.sleep(0.5)
+
         msg_type = "path_info_msg/msg/PubInfo"
         topic_and_types = self.get_topic_names_and_types()
         filtered_topic_and_types = \
