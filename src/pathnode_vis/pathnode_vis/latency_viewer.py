@@ -48,6 +48,26 @@ from pathnode_vis.pub_info import (
 
 EXCLUDES_TOPICS = [
     "/diagnostics/info/pub",
+    "/control/trajectory_follower/mpc_follower/debug/markers/info/pub",
+    "/control/trajectory_follower/mpc_follower/debug/steering_cmd/info/pub",
+    "/localization/debug/ellipse_marker/info/pub",
+    "/localization/pose_twist_fusion_filter/debug/info/pub",
+    "/localization/pose_twist_fusion_filter/debug/measured_pose/info/pub",
+    "/localization/pose_twist_fusion_filter/debug/stop_flag/info/pub",
+    "/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/drivable_area/info/pub",
+    "/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/markers/info/pub",
+    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/area_with_objects/info/pub",
+    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/clearance_map/info/pub",
+    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/marker/info/pub",
+    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/object_clearance_map/info/pub",
+    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/smoothed_points/info/pub",
+    "/planning/scenario_planning/motion_velocity_smoother/debug/backward_filtered_trajectory/info/pub",
+    "/planning/scenario_planning/motion_velocity_smoother/debug/forward_filtered_trajectory/info/pub",
+    "/planning/scenario_planning/motion_velocity_smoother/debug/merged_filtered_trajectory/info/pub",
+    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_external_velocity_limited/info/pub",
+    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_lateral_acc_filtered/info/pub",
+    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_raw/info/pub",
+    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_time_resampled/info/pub",
     ]
 LEAVES = [
     "/initialpose",
@@ -680,6 +700,7 @@ class LatencyViewerNode(Node):
         filtered_topic_and_types = \
             filter(lambda x: msg_type in x[1], topic_and_types)
         topics = map(lambda x: x[0], filtered_topic_and_types)
+        topics = filter(lambda x: x not in excludes, topics)
 
         return topics
 
