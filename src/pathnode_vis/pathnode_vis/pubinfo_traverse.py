@@ -202,17 +202,16 @@ class InputSensorStampSolver(object):
         queue.append((tgt_topic, tgt_stamp, root_results))
         while len(queue) != 0:
             topic, stamp, cresult = queue.popleft()
-            info = pubinfos.get(topic, stamp)
-            if info:
-                cresult.add_data(info)
+
+            next_pubinfo = pubinfos.get(topic, stamp)
+            if next_pubinfo is not None:
+                cresult.add_data(next_pubinfo)
+            else:
+                # print(f"pubinfo of {topic} {stamp} not found")
+                continue
 
             # NDT-EKF has loop, so stop
             if topic in stops:
-                continue
-
-            # get next edges
-            next_pubinfo = pubinfos.get(topic, stamp)
-            if not next_pubinfo:
                 continue
 
             for in_infos in next_pubinfo.in_infos.values():
