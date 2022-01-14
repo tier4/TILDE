@@ -12,6 +12,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(path_info_msg REQUIRED)
 find_package(rmw REQUIRED)
+find_package(LTTngUST REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -61,10 +62,14 @@ add_library(${PROJECT_NAME} SHARED
   "src/path_node.cpp"
   "src/sub_timing_advertise_node.cpp"
   "src/timing_advertise_publisher.cpp"
+  "src/tp.c"
 )
+target_link_libraries(${PROJECT_NAME} ${LTTNGUST_LIBRARIES})
+
 ament_target_dependencies(${PROJECT_NAME}
   "rclcpp"
   "path_info_msg"
+  LTTngUST
 )
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE "PATHNODE_BUILDING_LIBRARY")

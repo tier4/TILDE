@@ -28,6 +28,10 @@
 
 #include "path_info_msg/msg/pub_info.hpp"
 
+#include "pathnode/tp.h"
+
+#define TILDE_S_TO_NS(seconds) ((seconds) * (1000LL * 1000LL * 1000LL))
+
 namespace pathnode
 {
 
@@ -111,7 +115,8 @@ public:
 
   explicit TimingAdvertisePublisherBase(
     std::shared_ptr<rclcpp::Clock> clock,
-    std::shared_ptr<rclcpp::Clock> steady_clock);
+    std::shared_ptr<rclcpp::Clock> steady_clock,
+    const std::string & node_fqn);
 
   void set_input_info(
     const std::string & sub_topic,
@@ -138,6 +143,10 @@ public:
 protected:
   std::shared_ptr<rclcpp::Clock> clock_;
   std::shared_ptr<rclcpp::Clock> steady_clock_;
+
+  const std::string node_fqn_;
+
+  std::map<std::string, std::string> sub_topics_;
 
 private:
   // parent node subscription topic vs InputInfo
@@ -176,8 +185,10 @@ public:
     std::shared_ptr<rclcpp::Clock> clock,
     std::shared_ptr<rclcpp::Clock> steady_clock,
     bool enable)
-  : TimingAdvertisePublisherBase(clock, steady_clock), info_pub_(info_pub), pub_(pub), node_fqn_(
-      node_fqn), enable_(enable)
+  : TimingAdvertisePublisherBase(clock, steady_clock, node_fqn),
+    info_pub_(info_pub),
+    pub_(pub),
+    enable_(enable)
   {
   }
 
@@ -265,6 +276,22 @@ private:
     msg->output_info.header_stamp = t;
 
     set_input_info(*msg);
+
+    for (auto & input_info : msg->input_infos) {
+      auto pubtime = TILDE_S_TO_NS(msg->output_info.pub_time.sec) +
+        msg->output_info.pub_time.nanosec;
+      auto subtime_steady = TILDE_S_TO_NS(input_info.sub_time_steady.sec) +
+        input_info.sub_time_steady.nanosec;
+      auto sub = &sub_topics_[input_info.topic_name];
+      tracepoint(
+        TRACEPOINT_PROVIDER,
+        tilde_publish,
+        this,
+        pubtime,
+        sub,
+        subtime_steady
+      );
+    }
 
     info_pub_->publish(std::move(msg));
   }

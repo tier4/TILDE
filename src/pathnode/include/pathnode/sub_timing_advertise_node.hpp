@@ -33,6 +33,8 @@
 #include "path_info_msg/msg/pub_info.hpp"
 #include "timing_advertise_publisher.hpp"
 
+#include "pathnode/tp.h"
+
 namespace pathnode
 {
 template<class>
@@ -97,14 +99,24 @@ public:
 
     auto topic_info_name = resolved_topic_name + "/info/sub";
 
+    std::cerr << &callback << std::endl;
     auto topic_info_pub = create_publisher<path_info_msg::msg::TopicInfo>(
       topic_info_name,
       rclcpp::QoS(1));
     topic_info_pubs_[topic_info_name] = topic_info_pub;
     seqs_[topic_info_name] = 0;
 
+    auto callback_addr = &callback;
+
+    tracepoint(
+      TRACEPOINT_PROVIDER,
+      tilde_subscription_init,
+      callback_addr,
+      get_fully_qualified_name(),
+      resolved_topic_name.c_str());
+
     auto main_topic_callback =
-      [this, resolved_topic_name, topic_info_name, callback](
+      [this, resolved_topic_name, topic_info_name, callback, callback_addr](
       CallbackArgT msg,
       const rclcpp::MessageInfo & info) -> void
       {
@@ -114,6 +126,12 @@ public:
           auto subtime_steady = this->steady_clock_->now();
           // publish subscription timing
           auto minfo = info.get_rmw_message_info();
+
+          tracepoint(
+            TRACEPOINT_PROVIDER,
+            tilde_subscribe,
+            callback_addr,
+            subtime_steady.nanoseconds());
 
           auto m = std::make_unique<path_info_msg::msg::TopicInfo>();
           auto & seq = seqs_[topic_info_name];
@@ -212,6 +230,15 @@ public:
       steady_clock_,
       this->enable_tilde);
     timing_advertise_pubs_[info_topic] = ta_pub;
+
+
+    tracepoint(
+      TRACEPOINT_PROVIDER,
+      tilde_publisher_init,
+      ta_pub.get(),
+      get_fully_qualified_name(),
+      pub->get_topic_name());
+
     return ta_pub;
   }
 
