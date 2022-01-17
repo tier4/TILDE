@@ -121,7 +121,6 @@ public:
       const rclcpp::MessageInfo & info) -> void
       {
         if (this->enable_tilde) {
-          std::cout << "tilde enabled" << std::endl;
           auto subtime = this->now();
           auto subtime_steady = this->steady_clock_->now();
           // publish subscription timing
