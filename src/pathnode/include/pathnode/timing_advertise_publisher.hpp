@@ -145,6 +145,7 @@ protected:
   std::shared_ptr<rclcpp::Clock> steady_clock_;
 
   const std::string node_fqn_;
+  int64_t seq_;
 
   std::map<std::string, std::string> sub_topics_;
 
@@ -271,6 +272,8 @@ private:
 
     msg->output_info.topic_name = pub_->get_topic_name();
     msg->output_info.node_fqn = node_fqn_;
+    msg->output_info.seq = seq_;
+    seq_++;
     msg->output_info.pub_time = clock_->now();
     msg->output_info.pub_time_steady = steady_clock_->now();
     msg->output_info.header_stamp = t;

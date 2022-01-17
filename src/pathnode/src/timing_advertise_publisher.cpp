@@ -31,7 +31,8 @@ TimingAdvertisePublisherBase::TimingAdvertisePublisherBase(
   std::shared_ptr<rclcpp::Clock> clock,
   std::shared_ptr<rclcpp::Clock> steady_clock,
   const std::string & node_fqn)
-: clock_(clock), steady_clock_(steady_clock), node_fqn_(node_fqn),
+: clock_(clock), steady_clock_(steady_clock),
+  node_fqn_(node_fqn), seq_(0),
   MAX_SUB_CALLBACK_INFOS_SEC_(2)
 {
 }
