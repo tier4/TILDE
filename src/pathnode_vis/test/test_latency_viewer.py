@@ -2,7 +2,9 @@
 
 import unittest
 
+import rclpy
 from rclpy.time import Time
+from builtin_interfaces.msg import Time as TimeMsg
 
 from pathnode_vis.data_as_tree import TreeNode
 from pathnode_vis.pub_info import (
@@ -11,7 +13,12 @@ from pathnode_vis.pub_info import (
 from pathnode_vis.latency_viewer import (
     calc_stat,
     update_stat,
+    LatencyViewerNode,
     )
+from path_info_msg.msg import (
+    PubInfo as PubInfoMsg,
+    )
+
 
 
 class TestCalcStat(unittest.TestCase):
@@ -111,6 +118,75 @@ class TestUpdateStat(unittest.TestCase):
         topic1_result_data = \
             update_stat_case1.name2child["topic2"].name2child["topic1"].data
         self.assertEqual(topic1_result_data[0], (4, 4))
+
+
+class TestListenerCallback(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        rclpy.init()
+
+    @classmethod
+    def tearDownClass(cls):
+        rclpy.shutdown()
+
+    def test_seq(self):
+        topic_name = "topic"
+        node = LatencyViewerNode()
+        msg = PubInfoMsg()
+        msg.output_info.topic_name = topic_name
+
+        msg.output_info.seq = 0
+        msg.output_info.header_stamp = TimeMsg(sec=10, nanosec=0)
+        node.listener_callback(msg)
+        self.assertTrue(topic_name in node.topic_seq)
+        self.assertEqual(len(node.pub_infos.stamps(topic_name)), 1)
+        self.assertEqual(node.topic_seq[topic_name], 0)
+
+        msg.output_info.seq = 1
+        msg.output_info.header_stamp = TimeMsg(sec=11, nanosec=0)
+        node.listener_callback(msg)
+        self.assertEqual(len(node.pub_infos.stamps(topic_name)), 2)
+        self.assertEqual(node.topic_seq[topic_name], 1)
+
+        msg.output_info.seq = 3
+        msg.output_info.header_stamp = TimeMsg(sec=13, nanosec=0)
+        node.listener_callback(msg)
+        self.assertEqual(len(node.pub_infos.stamps(topic_name)), 3)
+        self.assertEqual(node.topic_seq[topic_name], 3)
+
+        msg.output_info.seq = 2
+        msg.output_info.header_stamp = TimeMsg(sec=12, nanosec=0)
+        node.listener_callback(msg)
+        self.assertEqual(len(node.pub_infos.stamps(topic_name)), 4)
+        self.assertEqual(node.topic_seq[topic_name], 3)
+
+        node.destroy_node()
+
+    def test_seq_non_zero_start(self):
+        topic_name = "topic"
+        node = LatencyViewerNode()
+        msg = PubInfoMsg()
+        msg.output_info.topic_name = topic_name
+
+        msg.output_info.seq = 10
+        msg.output_info.header_stamp = TimeMsg(sec=10, nanosec=0)
+        node.listener_callback(msg)
+        self.assertTrue(topic_name in node.topic_seq)
+        self.assertEqual(node.topic_seq[topic_name], 10)
+
+        msg.output_info.seq = 20
+        msg.output_info.header_stamp = TimeMsg(sec=20, nanosec=0)
+        node.listener_callback(msg)
+        self.assertTrue(topic_name in node.topic_seq)
+        self.assertEqual(node.topic_seq[topic_name], 20)
+
+        msg.output_info.seq = 15
+        msg.output_info.header_stamp = TimeMsg(sec=15, nanosec=0)
+        node.listener_callback(msg)
+        self.assertTrue(topic_name in node.topic_seq)
+        self.assertEqual(node.topic_seq[topic_name], 20)
+
+        node.destroy_node()
 
 
 if __name__ == '__main__':

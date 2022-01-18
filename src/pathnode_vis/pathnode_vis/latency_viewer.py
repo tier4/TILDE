@@ -416,8 +416,8 @@ class LatencyViewerNode(Node):
             self.printer = Printer()
 
         self.subs = {}
-        # topic vs num_messages
-        self.num_messages = {}
+        # topic vs the latest sequence numbers
+        self.topic_seq = {}
 
         excludes_topic = (
             self.get_parameter("excludes_topics")
@@ -500,10 +500,37 @@ class LatencyViewerNode(Node):
         self.skips = skips
 
     def listener_callback(self, pub_info_msg):
+        st = time.time()
         output_info = pub_info_msg.output_info
 
-        st = time.time()
+        topic = output_info.topic_name
+        stamp = time2str(output_info.header_stamp)
 
+        this_seq = output_info.seq
+        if topic not in self.topic_seq.keys():
+            self.topic_seq[topic] = this_seq
+        seq = self.topic_seq[topic]
+
+        if this_seq < seq:  # skew
+            stamps = self.pub_infos.stamps(topic)
+            last_stamp = sorted(stamps)[-1]
+            self.get_logger().info(
+                f"skew topic={topic} " +
+                f"seq={this_seq}({time2str(output_info.header_stamp)}) " +
+                f"saved_seq={seq}({last_stamp})"
+                )
+        elif seq + 1 < this_seq:  # message drop happens
+            stamps = self.pub_infos.stamps(topic)
+            last_stamp = sorted(stamps)[-1]
+            self.get_logger().info(
+                f"may drop topic={topic} between " +
+                f"saved_seq={seq}({last_stamp}) and " +
+                f"msg_seq={this_seq}({time2str(output_info.header_stamp)})")
+            self.topic_seq[topic] = this_seq
+        else:
+            self.topic_seq[topic] = this_seq
+
+        # add pubinfo
         pub_info = PubInfoObj(output_info.topic_name,
                               output_info.pub_time,
                               output_info.pub_time_steady,
@@ -517,14 +544,8 @@ class LatencyViewerNode(Node):
         self.pub_infos.add(pub_info)
 
         et = time.time()
-        topic = output_info.topic_name
-        stamp = time2str(output_info.header_stamp)
         self.get_logger().debug(
             f"sub {topic} at {stamp}@ {(et-st) * 1000} [ms]")
-
-        if output_info.topic_name not in self.num_messages.keys():
-            self.num_messages[output_info.topic_name] = 0
-        self.num_messages[output_info.topic_name] += 1
 
     def handle_stat(self, stamps):
         """Report statistics
@@ -647,7 +668,7 @@ class LatencyViewerNode(Node):
     def timer_callback(self):
         pubinfos = self.pub_infos
         target_topic = self.target_topic
-        num_messages = self.num_messages
+        topic_seq = self.topic_seq
 
         stamps = sorted(pubinfos.stamps(target_topic))
         logs = []
@@ -673,8 +694,8 @@ class LatencyViewerNode(Node):
         else:
             logs.append("unknown mode")
 
-        for topic in sorted(num_messages.keys()):
-            self.get_logger().debug(f"{topic}: {num_messages[topic]}")
+        for topic in sorted(topic_seq.keys()):
+            self.get_logger().debug(f"{topic}: {topic_seq[topic]}")
 
         # cleanup PubInfos
         (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split("."))
