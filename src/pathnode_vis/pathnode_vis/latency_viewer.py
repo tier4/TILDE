@@ -427,7 +427,7 @@ class LatencyViewerNode(Node):
 
         qos = QoSProfile(
             history=QoSHistoryPolicy.KEEP_LAST,
-            depth=1,
+            depth=3,
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             )
         for topic in topics:
@@ -512,20 +512,23 @@ class LatencyViewerNode(Node):
         seq = self.topic_seq[topic]
 
         if this_seq < seq:  # skew
+            s = f"skew topic={topic} " + \
+                f"msg_seq={this_seq}({time2str(output_info.header_stamp)})" + \
+                f" saved_seq={seq}"
             stamps = self.pub_infos.stamps(topic)
-            last_stamp = sorted(stamps)[-1]
-            self.get_logger().info(
-                f"skew topic={topic} " +
-                f"seq={this_seq}({time2str(output_info.header_stamp)}) " +
-                f"saved_seq={seq}({last_stamp})"
-                )
+            if stamps or len(stamps) > 0:
+                last_stamp = sorted(stamps)[-1]
+                s += f"({last_stamp})"
+            self.get_logger().info(s)
         elif seq + 1 < this_seq:  # message drop happens
+            s = f"may drop topic={topic} " + \
+                f"msg_seq={this_seq}({time2str(output_info.header_stamp)})" + \
+                f" saved_seq={seq}"
             stamps = self.pub_infos.stamps(topic)
-            last_stamp = sorted(stamps)[-1]
-            self.get_logger().info(
-                f"may drop topic={topic} between " +
-                f"saved_seq={seq}({last_stamp}) and " +
-                f"msg_seq={this_seq}({time2str(output_info.header_stamp)})")
+            if stamps or len(stamps) > 0:
+                last_stamp = sorted(stamps)[-1]
+                s += f"({last_stamp})"
+            self.get_logger().info(s)
             self.topic_seq[topic] = this_seq
         else:
             self.topic_seq[topic] = this_seq
@@ -544,8 +547,11 @@ class LatencyViewerNode(Node):
         self.pub_infos.add(pub_info)
 
         et = time.time()
-        self.get_logger().debug(
-            f"sub {topic} at {stamp}@ {(et-st) * 1000} [ms]")
+
+        elasped_ms = (et - st) * 1000
+        if elasped_ms > 1:
+            self.get_logger().info(
+                f"sub {topic} at {stamp}@ {elasped_ms} [ms]")
 
     def handle_stat(self, stamps):
         """Report statistics
@@ -621,7 +627,6 @@ class LatencyViewerNode(Node):
         -------
         array of strings for log
         """
-        st = time.time()
         pubinfos = self.pub_infos
         target_topic = self.target_topic
         solver = self.solver
@@ -659,13 +664,10 @@ class LatencyViewerNode(Node):
             s = f"{name:80} {stamp_s:>20} {dur_ms:>6} {dur_ms_steady:>6}"
             logs.append(s)
 
-        et = time.time()
-        self.get_logger().debug(
-            f"timer_onehot @ {(et-st) * 1000} [ms]")
-
         return logs
 
     def timer_callback(self):
+        st = time.time()
         pubinfos = self.pub_infos
         target_topic = self.target_topic
         topic_seq = self.topic_seq
@@ -693,17 +695,23 @@ class LatencyViewerNode(Node):
             logs.extend(self.handle_one_hot(stamps))
         else:
             logs.append("unknown mode")
-
-        for topic in sorted(topic_seq.keys()):
-            self.get_logger().debug(f"{topic}: {topic_seq[topic]}")
+        et1 = time.time()
+        handle_ms = (et1 - st) * 1000
 
         # cleanup PubInfos
         (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split("."))
         until_stamp = TimeMsg(sec=latest_sec - self.keep_info_sec,
                               nanosec=latest_ns)
         pubinfos.erase_until(until_stamp)
+        et2 = time.time()
+        cleanup_ms = (et2 - et1) * 1000
 
         self.printer.print(logs)
+
+        if handle_ms + cleanup_ms > 30:
+            s = f"timer handle_ms={handle_ms}" + \
+                f" cleanup_ms={cleanup_ms}"
+            self.get_logger().info(s)
 
     def get_pub_info_topics(self, excludes=[]):
         """Get all topic infos
