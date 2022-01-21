@@ -25,15 +25,21 @@
      showgrid="false"
      inkscape:zoom="0.79107744"
      inkscape:cx="592.86231"
-     inkscape:cy="652.27495"
+     inkscape:cy="551.14705"
      inkscape:window-width="1918"
      inkscape:window-height="1054"
-     inkscape:window-x="0"
+     inkscape:window-x="1920"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
      id="defs2">
+    <rect
+       x="-25.79104"
+       y="582.50687"
+       width="204.35764"
+       height="214.56032"
+       id="rect23972" />
     <marker
        style="overflow:visible;"
        id="marker98801"
@@ -276,7 +282,7 @@
          id="tspan5292"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
          x="16.628256"
-         y="37.527695">AsensorNode</tspan></text>
+         y="37.527695">SensorNode</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;stroke-width:0.264583"
@@ -316,7 +322,7 @@
          id="tspan5292-9"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
          x="94.742737"
-         y="36.884869">BsensorNode</tspan></text>
+         y="36.884869">SensorNodeB</tspan></text>
     <rect
        style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000;stop-opacity:1"
        id="rect25678"
@@ -395,18 +401,37 @@
        width="44.147453"
        height="13.04745"
        x="58.802376"
-       y="159.02365" />
+       y="159.02365"
+       inkscape:connector-avoid="true" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;stroke-width:0.264583"
-       x="64.306221"
+       x="62.741116"
        y="167.17616"
        id="text30408-3-0"><tspan
          sodipodi:role="line"
          id="tspan37788-3-9"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
-         x="64.306221"
-         y="167.17616">/planing/base</tspan></text>
+         x="62.741116"
+         y="167.17616">/planning/base</tspan></text>
+    <rect
+       style="font-variation-settings:normal;vector-effect:none;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000"
+       id="rect25678-3-3-4"
+       width="44.147453"
+       height="13.04745"
+       x="1.2984153"
+       y="158.49631" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;stroke-width:0.264583"
+       x="4.2616763"
+       y="166.64882"
+       id="text30408-3-0-4"><tspan
+         sodipodi:role="line"
+         id="tspan37788-3-9-44"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
+         x="4.2616763"
+         y="166.64882">/planning/fback</tspan></text>
     <rect
        style="font-variation-settings:normal;vector-effect:none;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000"
        id="rect25678-3-3-2"
@@ -417,14 +442,14 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:0px;stroke-width:0.264583"
-       x="63.072701"
+       x="61.507599"
        y="227.1828"
        id="text30408-3-0-5"><tspan
          sodipodi:role="line"
          id="tspan37788-3-9-4"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
-         x="63.072701"
-         y="227.1828">/planing/refine</tspan></text>
+         x="61.507599"
+         y="227.1828">/planning/refine</tspan></text>
     <ellipse
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.280786"
        id="path846-7-4-2"
@@ -546,7 +571,7 @@
        inkscape:connection-start="#rect25678-3"
        inkscape:connection-end="#path846-8" />
     <path
-       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker98801)"
        d="m 54.907715,114.59634 25.968376,0 v 20.36888"
        id="path98269"
        inkscape:connector-type="orthogonal"
@@ -603,31 +628,31 @@
     <text
        xml:space="preserve"
        style="font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;stroke-width:0.264583"
-       x="4.8476019"
+       x="5.0562878"
        y="197.10577"
        id="text5294-7-3-1"><tspan
          sodipodi:role="line"
          id="tspan5292-6-0-0"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
-         x="4.8476019"
+         x="5.0562878"
          y="197.10577">FeedbackNode</tspan></text>
     <ellipse
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.280786"
        id="path846-7-4-5"
-       cx="24.513937"
+       cx="23.372143"
        cy="195.6586"
        rx="21.058224"
        ry="6.6986752" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 24.513935,195.6586 2e-6,0"
+       d="m 23.943038,195.6586 -0.570895,0"
        id="path98935-1"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
        inkscape:connection-end="#path846-7-4-5" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 24.513937,195.6586 v 0"
+       d="m 23.372143,195.6586 v 0"
        id="path99063-1"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -678,7 +703,7 @@
          id="tspan5292-6-9"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
          x="168.71234"
-         y="35.392597">CSensorNode</tspan></text>
+         y="35.392597">SensorNodeC</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker98801)"
        d="m 111.17636,63.009402 v 78.654488 h -9.24205"
@@ -689,18 +714,12 @@
        inkscape:connection-end="#path846-7" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker98801)"
-       d="M 58.802376,225.55403 H 24.513937 v -23.19675"
+       d="M 58.802376,225.55403 H 23.372143 v -23.19675"
        id="path134721"
        inkscape:connector-type="orthogonal"
        inkscape:connector-curvature="0"
        inkscape:connection-start="#rect25678-3-3-2"
        inkscape:connection-end="#path846-7-4-5" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.21;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;marker-end:url(#marker98801)"
-       d="M 24.475474,188.97373 V 141.65016 H 59.795311"
-       id="path134725"
-       inkscape:connector-type="orthogonal"
-       inkscape:connector-curvature="0" />
     <ellipse
        style="fill:#fffffe;fill-rule:evenodd;stroke:#000000;stroke-width:0.280786;fill-opacity:1"
        id="path846-7"
@@ -719,5 +738,24 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93889px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
          x="63.682823"
          y="143.11107">PlanningNode</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text23970"
+       style="line-height:1.25;font-family:sans-serif;font-size:18.66666985px;letter-spacing:0px;-inkscape-font-specification:'sans-serif, Normal';white-space:pre;shape-inside:url(#rect23972)" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.209175px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker98801)"
+       d="M 23.333419,158.51027 V 141.65015 H 59.215763"
+       id="path25442"
+       inkscape:connector-type="orthogonal"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker98801)"
+       d="m 23.372143,188.95992 -1e-6,-17.41616"
+       id="path25661"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#path846-7-4-5"
+       inkscape:connection-end="#rect25678-3-3-4" />
   </g>
 </svg>
