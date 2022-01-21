@@ -1,4 +1,4 @@
-TILDE - Tilde Is Latency Data Embedding 
+TILDE - Tilde Is Latency Data Embedding
 ===
 
 TILDE はノード間のレイテンシ測定やデッドライン検出の為のフレームワークです。  
@@ -13,13 +13,13 @@ ROS2 のトピック通信は、一般に以下の様な有向グラフ(DAG)を�
 
 
 「センサーの情報がアクチュエーターにいつ反映されるか」つまり「あるトピックはどのタイミングのセンサーの情報を参照したものか」は難しい問いです。
-- DAG は必ずしも一本道では無いため、経路ごとに参照されているセンサーの時刻が異なる可能性があります。  
-  - 例えば PlanningNode は BSernsorNode からの情報を FusionNode 経由で受信する場合と直接受信する場合があります。  
-  - また PlanningNode は FeedbackNode を通じて CSernsorNode の情報を参照しています。  
-- ループが含まれる場合も考える必要があります。 
-  - FeedbackNode を通じて PlanningNode は潜在的には過去全ての ASersorNode, BSensorNode の情報を参照しているとも言えます。
+- DAG は必ずしも一本道では無いため、経路ごとに参照されているセンサーの時刻が異なる可能性があります。
+  - 例えば PlanningNode は SernsorNodeB からの情報を FusionNode 経由で受信する場合と直接受信する場合があります。
+  - また PlanningNode は FeedbackNode を通じて CSernsorNode の情報を参照しています。
+- ループが含まれる場合も考える必要があります。
+  - FeedbackNode を通じて PlanningNode は潜在的には過去全ての SersorNodeA, SensorNodeB の情報を参照しているとも言えます。
 - DAG からは分からないこともあります。
-  - 例えば、ノードによってはメッセージをバッファリングし選択的に入力データを利用している可能性があります。  
+  - 例えば、ノードによってはメッセージをバッファリングし選択的に入力データを利用している可能性があります。
 
 TILDE ではこの様な複雑な問題にも対応できる様、 DAG を解析し、ランタイム時に各トピックがいつのセンサー情報を元に作成されたかを求め、その情報を元にレイテンシ解析やデッドライン検出をすることを目標としています。
 
