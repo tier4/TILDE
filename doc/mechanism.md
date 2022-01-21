@@ -4,7 +4,18 @@ TILDE の動作原理
 TILDE ではメイントピックの publish 時に PubInfo というメタ情報を `<topic名>/info/pub` に publish します。  
 PubInfo は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。  
 
-# PubInfo
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [TILDE の動作原理](#tilde-の動作原理)
+    - [PubInfo](#pubinfo)
+    - [PubInfo の作成](#pubinfo-の作成)
+    - [オーバーヘッド](#オーバーヘッド)
+
+<!-- markdown-toc end -->
+
+
+## PubInfo
 
 PubInfo はメイントピックの publish 時と同時に送信されるメタ情報です。
 `<メイントピック名>/info/pub` に送信されます。
@@ -32,7 +43,7 @@ PubInfo はメイントピックの publish 時と同時に送信されるメタ
 - Header + output_info: 約 80 byte + トピック名やノード名分のバイト数
 - input_infos: 入力トピック一件あたり約 40 byte + トピック名のバイト数
 
-# PubInfo の作成
+## PubInfo の作成
 
 ※ TODO: 大体以下の事を記述する
 
@@ -48,7 +59,7 @@ PubInfo はメイントピックの publish 時と同時に送信されるメタ
   - TILE のカスタム create_subscription により subscription コールバックがフックされる。
   - フック中の処理で TildePublisher に対して入力トピックや header stamp などの情報を登録する。
 
-# オーバーヘッド
+## オーバーヘッド
 
 ※ TODO: 大体以下を記載する。
 
