@@ -12,19 +12,18 @@ TILDE では以下の様なユースケースを想定ユースケースして�
 
 ROS2 のトピック通信は、一般に以下の様な有向グラフ(DAG)を構成します。
 
-![tilde_dag](../images/tilde_dag.png)
+![tilde_dag](images/tilde_dag.png)
 
-TILDE では、各ノードでメインのトピックを publish する際に PubInfo という「メイントピックを構成する入力トピックの情報(トピック)」を同時に publish します。
-TILDE ではメインのトピックに ROS2 の標準ヘッダーである Header フィールドが挿入されている場合 stamp フィールドを元に各ノードの入出力の情報を紐付けます。
+TILDE では、各ノードでメインのトピックを publish する際に PubInfo という「メイントピックを構成する入力トピックの情報(トピック)」を同時に publish します。  
+メッセージの特定の為、ROS2 の [std_msgs/msg/Header](https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/Header.msg) を用います。
 
 例えば FusionNode は以下の様な PubInfo を送信します。
-説明の為、以下 stamp の単位は秒とします。
+stamp はメイントピックの Header stamp で、説明の為単位は秒とします。
 
 - **PubInfo(FusionNode)**: stamp=8 の `/sensor/fusion` は以下のトピックを参照した
   - t=5 に受信した stamp=4 の `/sensor/topic/A`
   - t=7 に受信した stamp=6 の `/sensor/topic/B`
-
-PubInfo には他にもトピックの送信時刻などの情報が記載されています。
+  - 他、トピックの送信時刻などの付属情報
 
 PlanningNode も同様の PubInfo を送信します。
 
@@ -35,7 +34,7 @@ PlanningNode も同様の PubInfo を送信します。
 
 これらの情報から、stamp=10 の `/planning/base` は以下のセンサー情報を元に算出されたと分かります。
 
-- **推論 1**: stamp=10 の `/planning/base` は以下のトピックを参照している
+- **推論**: stamp=10 の `/planning/base` は以下のトピックを参照している
   - `/sensor/topic/A`: stamp=4 のもの(`/sensor/fusion` 経由) 
   - `/sensor/topic/B`: stamp=6 のもの(`/sensor/fusion` 経由) と stamp=3 のもの(直接受信)
 
@@ -45,21 +44,27 @@ PubInfo を元に、DAG を逆向きに遡ってデータの紐付けを行う�
 
 ## オンラインレイテンシ計測
 
-推論 1 から stamp=10 の `/planning/base` は各センサーの最も古い値として以下を参照していることが分かります。
+上記の推論から stamp=10 の `/planning/base` は各センサーの最も古い値として以下を参照していることが分かります。
 
 - `/sensor/topic/A`: stamp=4 のもの(`/sensor/fusion` 経由) 
 - `/sensor/topic/B`: stamp=3 のもの(直接受信)
 
 「センサーの stamp = センサーの計測時刻」と仮定するとこのデータを作るまで **センサー A 取得から 6 秒, センサー B からは 7 秒かかった** と言えます。
 
-他のノードでも同様の推論が可能です。 PubInfo の探索を途中で止めることでノード間にかかった時間も分かります。
+他のノードでも同様の推論が可能です。
+
+また、 PubInfo の探索を途中で止めることでノード間にかかった時間も分かります。  
 例えば 「/sernsor/fusion が送信されてから /control/cmd が送信されるまで X 秒かかった」などの推論ができます。
 
 この様にして TILDE を用いてレンテンシを計測することが可能です。
 
-更に言うと、 PubInfo は topic で送信される為、計測対象のシステムを動かしながら PubInfo を解析することが可能です。
-latency viewer では top や vmstat の様にシステムを動かしながらレンテンシを見ることができます。
-TILDE ではこの様にシステムを動かしながらメトリククを計算できる性質を **オンライン** と呼称しています。
+**オンライン性**
+
+PubInfo は topic で送信される為、計測対象のシステムを動かしながら PubInfo を解析することが可能です。  
+latency viewer では top や vmstat の様にシステムを動かしながらレンテンシを見ることができます。  
+TILDE ではこの様にシステムを動かしながらメトリククを計算できる性質を **オンライン** と呼称しています。  
+
+**オンライン vs オフライン、TILDE と CARET**
 
 [CARET](https://tier4.github.io/CARET_doc/) は LTTng のトレースポイントを用いて計算する為、システムを動かした後に性能を評価します。この様に事後に解析することを、**オフライン** と呼称しています。
 
@@ -78,7 +83,7 @@ NodeA、NodeB はタイマーで動作すると考えます。
 
 ![tilde_deadline](./images/tilde_deadline.svg)
 
-オンラインレイテンシ計測で説明した様に、PubInfo を辿ることで TargetNode は topicA の stamp や送信時間を取得できるため「TargetNode の処理開始時点で topicA 送信から 80 ms 経過している」等の情報を取得することができます。
+上記の通り TILDE により TargetNode は topicA の stamp や送信時間を取得できる為、「TargetNode の処理開始時点で topicA 送信から 80 ms 経過している」等と推論できます。
 
 その他 TILDE の情報を用いることで以下の様な問題を検出することができます。
 
