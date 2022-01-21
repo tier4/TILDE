@@ -14,10 +14,10 @@ ROS2 のトピック通信は、一般に以下の様な有向グラフ(DAG)を�
 
 「センサーの情報がアクチュエーターにいつ反映されるか」つまり「あるトピックはどのタイミングのセンサーの情報を参照したものか」は難しい問いです。
 - DAG は必ずしも一本道では無いため、経路ごとに参照されているセンサーの時刻が異なる可能性があります。
-  - 例えば PlanningNode は SernsorNodeB からの情報を FusionNode 経由で受信する場合と直接受信する場合があります。
-  - また PlanningNode は FeedbackNode を通じて CSernsorNode の情報を参照しています。
+  - 例えば PlanningNode は SensorNodeB からの情報を FusionNode 経由で受信する場合と直接受信する場合があります。
+  - また PlanningNode は FeedbackNode を通じて SensorNodeC の情報を参照しています。
 - ループが含まれる場合も考える必要があります。
-  - FeedbackNode を通じて PlanningNode は潜在的には過去全ての SersorNodeA, SensorNodeB の情報を参照しているとも言えます。
+  - FeedbackNode を通じて PlanningNode は潜在的には過去全ての SensorNodeA, SensorNodeB の情報を参照しているとも言えます。
 - DAG からは分からないこともあります。
   - 例えば、ノードによってはメッセージをバッファリングし選択的に入力データを利用している可能性があります。
 
