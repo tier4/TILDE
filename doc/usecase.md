@@ -12,7 +12,7 @@ TILDE では以下の様なユースケースを想定ユースケースして�
 
 ROS2 のトピック通信は、一般に以下の様な有向グラフ(DAG)を構成します。
 
-![tilde_dag](images/tilde_dag.png)
+![tilde_dag](./images/tilde_dag.svg)
 
 TILDE では、各ノードでメインのトピックを publish する際に PubInfo という「メイントピックを構成する入力トピックの情報(トピック)」を同時に publish します。  
 メッセージの特定の為、ROS2 の [std_msgs/msg/Header](https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/Header.msg) を用います。
