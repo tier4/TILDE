@@ -56,8 +56,6 @@ TILDE ではメイントピックの publish 時に PubInfo というメタ情�
 PubInfo は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。  
 PubInfo の詳細やオーバーヘッドについては [mechanism](./mechanism.md) をご覧下さい。
 
-※ TODO: [TopicInfo v2 (=PubInfo) の PoC 速報値](https://tier4.atlassian.net/wiki/spaces/ISPCOLLABO/pages/2173829123/TopicInfo+v2+PubInfo+PoC) あたりの情報をまとめる
-
 ## API
 
 TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用意しています。  
@@ -76,9 +74,8 @@ TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用�
 - Deadline detection
   - T.B.D.
 
-※ TODO: ↑のリストを各 API のコメントドキュメントへのリンクにする
-※ TODO: ↑のコメントドキュメントに TildeNode のパラメタを載せる
-
+※ TODO: ↑のリストを各 API のコメントドキュメントへのリンクにする  
+※ TODO: ↑のコメントドキュメントに TildeNode のパラメタを載せる  
 ※ TODO: [CARET_demos](https://github.com/tier4/CARET_demos) の様なサンプルプロジェクトを作り、その中のコードを解説する
 
 ## インストール・組み込み
@@ -100,7 +97,7 @@ TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用�
 
 サンプルプロジェクトは以下を参照下さい。
 
-※ TODO: [CARET_demos](https://github.com/tier4/CARET_demos) の様なサンプルプロジェクトを作りリンクする
+※ TODO: [CARET_demos](https://github.com/tier4/CARET_demos) の様なサンプルプロジェクトを作りリンクする  
 
 ## デッドライン検出
 
