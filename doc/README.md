@@ -34,8 +34,6 @@ TILDE では以下の様なユースケースを想定ユースケースして�
 
 詳しくは [usecase](./usecase.md) をご覧下さい。
 
-※ TODO: [topic info v2 検討](https://tier4.atlassian.net/wiki/spaces/ISPCOLLABO/pages/2161607374/topic+info+v2) あたりの情報をまとめる
-
 ## 動作原理
 
 TILDE ではメイントピックの publish 時に PubInfo というメタ情報を `<topic名>/info/pub` に publish します。  
@@ -63,6 +61,7 @@ TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用�
   - T.B.D.
 
 ※ TODO: ↑のリストを各 API のコメントドキュメントへのリンクにする
+※ TODO: ↑のコメントドキュメントに TildeNode のパラメタを載せる
 
 ※ TODO: [CARET_demos](https://github.com/tier4/CARET_demos) の様なサンプルプロジェクトを作り、その中のコードを解説する
 
