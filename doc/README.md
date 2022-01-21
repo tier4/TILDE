@@ -5,6 +5,22 @@ TILDE はノード間のレイテンシ測定やデッドライン検出の為�
 TILDE はノードから出力されたトピックを遡り、元となった入力トピック(センサー)を特定することができます。  
 入力から出力までを辿れる為、レイテンシ計測やはデッドライン検出が可能です。
 
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [TILDE - Tilde Is Latency Data Embedding](#tilde---tilde-is-latency-data-embedding)
+    - [TILDE の目標](#tilde-の目標)
+    - [想定ユースケース](#想定ユースケース)
+    - [動作原理](#動作原理)
+    - [API](#api)
+    - [インストール・組み込み](#インストール組み込み)
+    - [デッドライン検出](#デッドライン検出)
+    - [周辺ツール](#周辺ツール)
+    - [リポジトリ一覧](#リポジトリ一覧)
+
+<!-- markdown-toc end -->
+
+
 ## TILDE の目標
 
 ROS2 のトピック通信は、一般に以下の様な有向グラフ(DAG)を構成します。
@@ -86,9 +102,13 @@ TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用�
 
 ※ TODO: [CARET_demos](https://github.com/tier4/CARET_demos) の様なサンプルプロジェクトを作りリンクする
 
+## デッドライン検出
+
+**2022/01/21 現在本機能は未実装**
+
 ## 周辺ツール
 
-- [latency viewer](./latency_viewer.md)
+- [latency viewer](./latency_viewer.md): オンラインレイテンシ表示ツール
 
 ## リポジトリ一覧
 
