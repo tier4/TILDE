@@ -75,8 +75,8 @@ TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用�
   - T.B.D.
 
 ※ TODO: ↑のリストを各 API のコメントドキュメントへのリンクにする  
-※ TODO: ↑のコメントドキュメントに TildeNode のパラメタを載せる  
-※ TODO: [CARET_demos](https://github.com/tier4/CARET_demos) の様なサンプルプロジェクトを作り、その中のコードを解説する
+※ TODO: TildeNode のパラメタは上記のコメントドキュメントに載せる  
+※ TODO: [CARET_demos](https://github.com/tier4/CARET_demos) の様なサンプルプロジェクトを作り、その中のコードを解説する文書を作成し、リンクする  
 
 ## インストール・組み込み
 
