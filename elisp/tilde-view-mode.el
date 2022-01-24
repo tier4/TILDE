@@ -63,7 +63,7 @@
 
   (setq tilde-view-mode-map (make-keymap))
   (suppress-keymap tilde-view-mode-map)
-  (define-key tilde-view-mode-map "TAB" 'outline-toggle-children )
+  (define-key tilde-view-mode-map (kbd "TAB") 'outline-toggle-children)
   (define-key tilde-view-mode-map "a" 'outline-show-all)
   (define-key tilde-view-mode-map "o" 'outline-hide-sublevels)
 
