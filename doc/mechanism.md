@@ -1,6 +1,8 @@
 TILDE の動作原理
 ===
 
+**best viewed with [mermaid-diagrams](https://chrome.google.com/webstore/detail/mermaid-diagrams/phfcghedmopjadpojhmmaffjmfiakfil/related) or [GitHub + Mermaid](https://chrome.google.com/webstore/detail/github-+-mermaid/goiiopgdnkogdbjmncgedmgpoajilohe)**
+
 TILDE ではメイントピックの publish 時に PubInfo というメタ情報を `<topic名>/info/pub` に publish します。  
 PubInfo は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。  
 
