@@ -93,6 +93,7 @@ TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用�
 - package.xml に tilde を追加
   - `<depend>tilde</depend>`
   - `<depend>tilde_msg</depend>`
+- CMakeLists.txt に tilde, tilde_msg を追加
 - メッセージをバッファしているノードがあれば PubInfo explicit API の呼び出しを追加
 
 サンプルプロジェクトは以下を参照下さい。
