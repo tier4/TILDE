@@ -3,7 +3,7 @@ TILDE の動作原理
 
 **best viewed with [mermaid-diagrams](https://chrome.google.com/webstore/detail/mermaid-diagrams/phfcghedmopjadpojhmmaffjmfiakfil/related) or [GitHub + Mermaid](https://chrome.google.com/webstore/detail/github-+-mermaid/goiiopgdnkogdbjmncgedmgpoajilohe)**
 
-TILDE ではメイントピックの publish 時に PubInfo というメタ情報を `<topic名>/info/pub` に publish します。  
+TILDE ではメイントピックの publish 時に PubInfo というメッセージを `<topic名>/info/pub` に publish します。  
 PubInfo は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。  
 
 ここで **メイントピック** とはアプリケーションが本来やりとりするメッセージです。
@@ -279,9 +279,9 @@ sequenceDiagram
     UserNode-->>TildePublisher: pub.publish(msg)
     activate TildePublisher
     TildePublisher-->TildePublisher: pub_info = get_pub_info()
-    TildePublisher-->>topic: pubinfo_pub_.publish(pub_info);
 
-    TildePublisher-->>topic/info/pub: main_pub_.publish(msg)
+    TildePublisher-->>topic/info/pub: pub_info_pub_.publish(pub_info)
+    TildePublisher-->>topic: main_pub_.publish(msg);
     deactivate TildePublisher
 ```
 
