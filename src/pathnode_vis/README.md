@@ -1,71 +1,127 @@
-pathnode_vis
-====
+# pathnode_vis
 
-# Description
+## Description
 
-Sample application which uses topic info
+Sample application which uses topic info or PubInfo.
 
-# Requirement
+## Requirement
 
-ros2 galactic
+- ros2 galactic
+- pathnode enabled application
 
-# Usage
-
-## General Usage
+## Applications
 
 To use this package, you need the system which uses pathnode::SubTimingAdvertiseNode instead of rclcpp::Node.
 Also you should call `create_timing_advertise_subscription` and `create_timing_advertise_publisher`.
 
 You can use some tools.
 
-- (1) offline analysis tool
+- (1) latency viewer
+  - run your application
+  - run `latency_viewer`
+- (2) pathnode_vis (not well maintained)
   - save `/*/info/pub` to rosbag
   - then, run `pathnode_vis`
-- (2) online analysis tool
-  - run logging simulator
-  - run `latency_viewer`
 
-PubInfo contains the "source" information about the published topic. PubInfo contains:
+## (1) latency viewer
 
-- output_info: about published message information, including the topic name, publishing timestamp, and header stamp.
-- input_info: about the "source" information to create the published message, including topic names, subscribed timestamps, and header stamps.
+### About
 
-## Advanced API
+The latency viewer outputs E2E latency online, just like `vmstat` or `top`.
 
-In general, there are two types of nodes.
+### Run
 
-- (1) no buffer
-  - node subscribes to one or more topics.
-  - when node subscribe topic, it holds only one generation, just like `this->msg_ = msg` in the subscription callback
-- (2) with buffer
-  - node subscribes to one or more topics.
-  - node has many generations, just like `this->msg_buffer_.push_back(msg)` in the subscription callback
+Run the latency viewer **after** running the target application.
+Latency viewer grasps your application topic graph in constructor by discovering and listening `PubInfo` type topics.
 
-TILDE assumes "nodes make publishing message by using the latest subscribed message".
-So TILDE cannot handle type (2) node well in default.
+Latency viewer shows latencies from `target_topic` to source topics.
+Here is the example command.
 
-In such a case, you can use `add_explicit_input_info`.
+``` bash
+# (1) run your application
+ros2 launch ...
 
-``` cpp
-void timercallback()
-{
-  // select from msg1_buffer
-  auto msg1 = take_appropriate_msg(msg1_buffer);
-
-  // tell the publisher that "we use this header.stamp on msg1 topic"
-  pub->add_explicit_input_info(msg1_sub->get_topic_name(), msg1->header.stamp);
-  
-  // then publish output
-  auto output = do_something(msg1, ...);
-  pub->publish(output);
-}
+# (2) run latency viewer
+ros2 run pathnode_vis latency_viewer \
+  --ros-args \
+    -p target_topic:=/localization/pose_twist_fusion_filter/twist_with_covariance
 ```
 
-Be aware you need to call `add_explicit_input_info` to the referenced topics.
+In default, you see output just like `top`. Internally [curses](https://docs.python.org/3/library/curses.html) is used.
+To save the results to a file, use `--batch` option and redirect or `tee` stdout.
 
-# Example
+``` bash
+ros2 run pathnode_vis latency_viewer --batch ...
+```
 
-## pathnode_vis
+### Parameters
+
+**General parameters**
+
+| name                     | values             | about                                      |
+|--------------------------|--------------------|--------------------------------------------|
+| `mode`                   | `onehot` or `stat` | Calcuration rule. See below.               |
+| `wait_sec_to_init_graph` | positive integer   | Initial wait seconds to grasp topic graph. |
+
+- mode
+  - onehot: prints the specific flow latency
+  - stat: calcurates statistics per second
+
+**topic graph specific parameters**
+
+You can use topic graph specific options.
+
+| name              | about                                                                          |
+|-------------------|--------------------------------------------------------------------------------|
+| `excludes_topics` | Topics you don't want to watch, such as `debug` topic.                         |
+| `stops`           | Stop traversal if latency viewer reaches these topics to prevent infinit loop. |
+
+Additionally, you can specify "skip" setting to skip non-TILDE node.
+But you need to directly edit `LatencyViewerNode.init_skips()` to do it.
+
+### Result
+
+You can see the following lines are displayed repeatedly.
+Columns are "topic name", "header stamp", "latency in ROS time", "latency in staedy time".
+
+```
+/control/trajectory_follower/lateral/control_cmd                                 1618559274.549348133      0      0
+ /localization/twist                                                             1618559274.544330488      5      3
+ /planning/scenario_planning/trajectory                                          1618559274.479350019     15     12
+  (snip)
+    /sensing/lidar/concatenated/pointcloud                                       1618559273.951109000    289    288
+     /sensing/lidar/left/outlier_filtered/pointcloud                             1618559274.168087000    305    302
+      /sensing/lidar/left/mirror_cropped/pointcloud_ex                           1618559274.168087000    305    304
+       /sensing/lidar/left/self_cropped/pointcloud_ex                            1618559274.168087000    305    304
+        /sensing/lidar/left/pointcloud_raw_ex*                                                     NA     NA     NA
+     /sensing/lidar/right/outlier_filtered/pointcloud                            1618559274.170810000    300    301
+      /sensing/lidar/right/mirror_cropped/pointcloud_ex                          1618559274.170810000    305    302
+       /sensing/lidar/right/self_cropped/pointcloud_ex                           1618559274.170810000    305    303
+        /sensing/lidar/right/pointcloud_raw_ex*                                                    NA     NA     NA
+     /sensing/lidar/top/outlier_filtered/pointcloud                              1618559273.951109000    334    333
+      /sensing/lidar/top/mirror_cropped/pointcloud_ex                            1618559273.951109000    410    407
+       /sensing/lidar/top/self_cropped/pointcloud_ex                             1618559273.951109000    435    433
+        /sensing/lidar/top/pointcloud_raw_ex*                                                      NA     NA     NA
+     /vehicle/status/twist*                                                                        NA     NA     NA
+```
+
+See [latency_viewer.md](../../doc/latency_viewer.md) in detail (in Japanese).
+
+### key binding in ncurses view
+
+In ncurses view, you can use interactive commands.
+When you enter "move" or "filter" commands, periodic update of view stops.
+Hit 
+
+| keys                | about                                                 |
+|---------------------|-------------------------------------------------------|
+| down/up arrow, j, k | move lines.                                           |
+| d, u                | page up/down.                                         |
+| g, G                | move to top or bottom of lines                        |
+| r, /                | filter lines by regex. Hit Enter for periodic update. |
+| q, F                | stop "move" mode and restart periodic update          |
+
+## (2) pathnode_vis
 
 Here are some examples. We use customized autoware.proj logging simulator where we use pathnode at `/sensing` module.
 
@@ -111,56 +167,3 @@ e2e:   0.0    0.0    0.0
 You can set log level by `LOG_LEVEL=DEBUG`.
 See source codes for parameters.
 
-## latency viewer
-
-The latency viewer outputs E2E latency online, just like `vmstat` or `top`.
-You can run the latency viewer before or after running the target application.
-
-The latency viewer show latencies from `target_topic` to source topics.
-Here is the example command and report.
-
-``` bash
-# (1) run your application
-ros2 launch ...
-
-# (2) run latency viewer
-ros2 run pathnode_vis latency_viewer \
-  --ros-args \
-    -p target_topic:=/localization/pose_twist_fusion_filter/twist_with_covariance
-```
-
-You can see the following lines are displayed repeatedly.
-
-```
-topic                                                                               dur    dur    dur    e2e    e2e    e2e
-/localization/pose_twist_fusion_filter/twist_with_covariance                        0.0    0.0    0.0    0.0    0.0    0.0 False
-/localization/pose_estimator/pose                                                 232.0  289.0  354.0    4.0   51.8  124.0 False
-/localization/pose_estimator/pose_with_covariance                                 232.0  289.0  354.0    4.0   51.8  124.0 False
-(snip)
-/sensing/imu/imu_data                                                               0.0   19.2   71.0    4.0   21.3   74.0 True
-/vehicle/status/twist                                                               5.0   35.9   75.0    9.0   38.5   79.0 True
-(snip)
-/sensing/lidar/top/rectified/pointcloud                                           232.0  289.1  354.0   30.0   89.1  160.0 True
-```
-
-This means:
-
-- `topic` columns:
-  - topics are displayed from `target_topic` to source topics, such as sensors.
-  - latency viewer traverses your application DAG and finds these topics.
-  - Topics forms DAG in general, and topics are listed by BFS order from `target_topic`.
-- dur and e2e columns:
-  - e2e column may be what you want. This is the end-to-end latency from listed topics to `target_topic`.  
-    There are three floating numbers, which mean min, mean, max in order.
-    The definition is `<target_topic publising time> - <listed topic subscription time>)`.  
-    So, you can see it takes 30.0 [ms] from pointcloud subscription to twist_with_covariance publishing in the fastest case.
-
-Other parameter:
-
-- `topics` [string array]
-  - `/*/info/pub` topics list
-- `wait_sec_to_init_graph` [int]
-  - As in above, latency viewer constructs DAG of your application.
-  - Latency viewr listens topics for `wait_sec_to_init_graph` seconds before constructing DAG.
-- and so on
-  - please see latency_viewer.py

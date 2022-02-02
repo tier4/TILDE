@@ -4,6 +4,8 @@ Latency Viewer はあるセンサー入力からのレンテンシの表示ツ�
 PubInfo を利用して DAG を遡ることで、注目しているトピックからセンサーまで全てのパスにおけるレイテンシを確認できます。
 vmstat や top の様に定期的にレイテンシ情報が更新されます。
 
+起動方法やオプションについては [ビシュアライズツールの README](../src/pathnode_vis/README.md) をご覧下さい。
+
 ## 出力例
 
 trajectory_follower を表示した結果は以下の通りです。
@@ -46,18 +48,3 @@ trajectory_follower を表示した結果は以下の通りです。
 - `/planning/scenario_planning/trajectory` に至るまでに concat filter (`/sensing/lidar/concatenated/pointcloud`) がある
   - 最終的に `/sensing/lidar/left/self_cropped/pointcloud_ex` などに辿りつく.
   - `/sensing/lidar/left/pointcloud_raw_ex` は終端(センサー)だが、TILDE 非対応の為、レイテンシ等は NA になっている
-
-
-### memo
-
-※ TODO: 大体以下の内容を記載する
-
-- 起動方法
-- オプション
-  - 起動オプション
-  - パラメータ
-- 設定
-  - トピックのスキップや再帰探索禁止などの現状ハードコーディングされている設定項目(将来的には外部ファイル化予定だが)
-- 出力の見方
-  - stat, onehot 両方について説明する
-  - 出力例の見方
