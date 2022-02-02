@@ -285,6 +285,33 @@ sequenceDiagram
     deactivate TildePublisher
 ```
 
+## Explicit API
+
+[NodeC の PubInfo](#nodec-の-pubinfo) では「メインメッセージ送信前に受信した最新のメッセージ」に紐付けられると記述しました。
+受信メッセージを内部でバッファして選択的に利用する等、必ずしも最新のメッセージを使わないノードでは explicit API を使って明示的に紐付け情報を設定することが可能です。
+
+下図は 4 入力、 1 出力のノードの例です。
+それぞれの入力はバッファされ publish 時に選択的に利用されます。
+この図では `/left` は L1-L3 の 3 世代あり、 L2 が使われています。
+
+```
+             入力をバッファ    callback の中でバッファの中から
+			                   利用するデータを選択
+               buffer       +- callback-+
+/left    -->  L1 L2 L3  ->  | L2        |
+                            |           |
+/right   -->  R1 R2     ->  | R1        |  --> /cancate
+                            |           |
+/top     -->  T1 T2 T3  ->  | T2        |
+                            |           |
+/twist   -->  W1 W2 W3  ->  | W2 W3     |
+                            +-----------+
+              ^
+              TILDE では「最も最近受信した stamp」しか覚えていない為、正確な PubInfo を作成できない
+```
+
+Explicit API では「`/concate` を作成するのに `/left` の L2、`/right` の R1 (以下略)を使った」という指定ができます。
+
 ## オーバーヘッド
 
 ※ TODO: 大体以下を記載する。
