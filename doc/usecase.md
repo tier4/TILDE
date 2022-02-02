@@ -25,10 +25,22 @@ ROS2 のトピック通信は、一般に以下の様な有向グラフ(DAG)を�
 ![tilde_dag](./images/tilde_dag.svg)
 
 TILDE では、各ノードでメインのトピックを publish する際に PubInfo という「メイントピックを構成する入力トピックの情報(トピック)」を同時に publish します。  
-メッセージの特定の為、ROS2 の [std_msgs/msg/Header](https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/Header.msg) を用います。
+メッセージの特定の為、メインのトピックは ROS2 の [std_msgs/msg/Header](https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/Header.msg) フィールドを持ち stamp フィールドに適切な値を設定している必要があります。
 
-例えば FusionNode は以下の様な PubInfo を送信します。
+以下の図の様なケースを考えます。
 stamp はメイントピックの Header stamp で、説明の為単位は秒とします。
+
+```mermaid
+graph LR
+  /sernsor/topic/A --stamp=4--> FusionNode((FusionNode))
+  /sernsor/topic/B --stamp=6--> FusionNode
+  FusionNode --stamp=8-->/sernsor/fusion
+  /sernsor/fusion --stamp=8--> PlanningNode((PlanningNode))
+  /sernsor/topic/B --stamp=3--> PlanningNode
+  PlanningNode --stamp=10-->/planning/base
+```
+
+FusionNode は以下の様な PubInfo を送信します。
 
 - **PubInfo(FusionNode)**: stamp=8 の `/sensor/fusion` は以下のトピックを参照した
   - t=5 に受信した stamp=4 の `/sensor/topic/A`
