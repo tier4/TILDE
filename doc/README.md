@@ -71,12 +71,15 @@ TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用�
   - tilde::Node::create_tilde_subscription()
 - PubInfo explicit API
   - tilde::TildePublisherBase::set_explicit_input_info()
+  - tilde::TildePublisherBase::set_max_sub_callback_infos_sec() ★ parameter も
 - Deadline detection
   - T.B.D.
+
 
 ※ TODO: ↑のリストを各 API のコメントドキュメントへのリンクにする  
 ※ TODO: TildeNode のパラメタは上記のコメントドキュメントに載せる  
 ※ TODO: [CARET_demos](https://github.com/tier4/CARET_demos) の様なサンプルプロジェクトを作り、その中のコードを解説する文書を作成し、リンクする  
+※ TODO: multi-thread reentrant 時が未対応 →  input info のガード
 
 ## インストール・組み込み
 
