@@ -1,9 +1,8 @@
-TILDE の動作原理
-===
+# TILDE の動作原理
 
 **best viewed with [mermaid-diagrams](https://chrome.google.com/webstore/detail/mermaid-diagrams/phfcghedmopjadpojhmmaffjmfiakfil/related) or [GitHub + Mermaid](https://chrome.google.com/webstore/detail/github-+-mermaid/goiiopgdnkogdbjmncgedmgpoajilohe)**
 
-TILDE ではメイントピックの publish 時に PubInfo というメッセージを `<topic名>/info/pub` に publish します。  
+TILDE は、ユーザプログラムがメイントピックを publish するのに併せて PubInfo というトピックを `<topic名>/info/pub` に publish します。  
 PubInfo は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。  
 
 ここで **メイントピック** とはアプリケーションが本来やりとりするメッセージです。
@@ -13,18 +12,19 @@ TILDE が PubInfo という付加的なトピックをやりとりする為、�
 **Table of Contents**
 
 - [TILDE の動作原理](#tilde-の動作原理)
-    - [PubInfo](#pubinfo)
-    - [例](#例)
-        - [DAG と動作概要](#dag-と動作概要)
-        - [stamp](#stamp)
-        - [NodeC の PubInfo](#nodec-の-pubinfo)
-    - [PubInfo の作成メカニズム](#pubinfo-の作成メカニズム)
-        - [概要](#概要)
-        - [class](#class)
-        - [create_tilde_publisher](#create_tilde_publisher)
-        - [create_tilde_subscription](#create_tilde_subscription)
-        - [publish](#publish)
-    - [オーバーヘッド](#オーバーヘッド)
+  - [PubInfo](#pubinfo)
+  - [例](#例)
+    - [DAG と動作概要](#dag-と動作概要)
+    - [stamp](#stamp)
+    - [NodeC の PubInfo](#nodec-の-pubinfo)
+  - [PubInfo の作成メカニズム](#pubinfo-の作成メカニズム)
+    - [概要](#概要)
+    - [class](#class)
+    - [create_tilde_publisher](#create_tilde_publisher)
+    - [create_tilde_subscription](#create_tilde_subscription)
+    - [publish](#publish)
+  - [Explicit API](#explicit-api)
+  - [オーバーヘッド](#オーバーヘッド)
 
 <!-- markdown-toc end -->
 
@@ -43,7 +43,7 @@ PubInfo はメイントピックの publish 時と同時に送信されるメタ
 [PubInfo.msg](../src/path_info_msg/msg/PubInfo.msg)
 
 - Header:
-  - header 
+  - header
   - シーケンス番号
   - 送信者情報(node 名や publisher ID)
 - `output_info`: 出力トピックに関する情報
@@ -57,8 +57,8 @@ PubInfo はメイントピックの publish 時と同時に送信されるメタ
 
 トピック名やノード名の長さにもよりますがデータサイズは以下の通りです。送信周波数はメイントピックと同じです。
 
-- Header + output_info: 約 80 byte + トピック名やノード名分のバイト数
-- input_infos: 入力トピック一件あたり約 40 byte + トピック名のバイト数
+- Header + output_info: 約 80バイト + トピック名やノード名分のバイト数
+- input_infos: (入力トピック数 * 約 40バイト) + トピック名のバイト数
 
 ## 例
 
@@ -204,7 +204,7 @@ classDiagram
   class Subscription~T~ {
   }
   class UserNode {
-	  +subscription_callback(T msg)
+    +subscription_callback(T msg)
       -pub_: TildePublisher<T>
   }
 ```
@@ -221,9 +221,9 @@ sequenceDiagram
     activate TildeNode
     TildeNode-->TildeNode: tilde_pub_ = new TildePublisher
     TildeNode-->topic: tilde_pub_.main_pub_ = create_publisher<T>(topic, ...)
-		note over topic: topic created
+    note over topic: topic created
     TildeNode-->topic/info/pub: tilde_pub.pub_info_pub_ = create_publisher<PubInfo>(topic + "/info/pub", ...)
-		note over topic/info/pub: topic created
+    note over topic/info/pub: topic created
     TildeNode-->>UserNode: tilde_pub
     deactivate TildeNode
 ```
@@ -263,7 +263,7 @@ sequenceDiagram
   topic-->>Executor: msg
   Executor-->>+UserNode: tilde_callback(msg)
   UserNode-->>UserNode: register input_info
-	activate UserNode
+  activate UserNode
   UserNode-->>UserNode: cb(msg) = user defined callback
   deactivate UserNode
   UserNode-->-Executor: ret
@@ -288,7 +288,7 @@ sequenceDiagram
 ## Explicit API
 
 [NodeC の PubInfo](#nodec-の-pubinfo) では「メインメッセージ送信前に受信した最新のメッセージ」に紐付けられると記述しました。
-受信メッセージを内部でバッファして選択的に利用する等、必ずしも最新のメッセージを使わないノードでは explicit API を使って明示的に紐付け情報を設定することが可能です。
+受信メッセージを内部でバッファして選択的に利用している、あるいは入力トピックが複数ありそれぞれバッファリングしている等、入力トピックと出力トピックが明示的に紐付かないノードでは explicit API を使って明示的に紐付け情報を設定することが可能です。
 
 下図は 4 入力、 1 出力のノードの例です。
 それぞれの入力はバッファされ publish 時に選択的に利用されます。
