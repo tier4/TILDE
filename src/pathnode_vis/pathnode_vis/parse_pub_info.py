@@ -37,7 +37,9 @@ def run(args):
 
     skip_topic_vs_count = {}
 
-    while reader.has_next() and cnt <= args.cnt:
+    while reader.has_next():
+        if 0 <= args.cnt and args.cnt < cnt:
+            break
         (topic, data, t) = reader.read_next()
         # TODO: need more accurate check
         if not "/info/pub" in topic:
@@ -57,7 +59,7 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("bag_path")
-    parser.add_argument("--cnt", type=int, default=10)
+    parser.add_argument("--cnt", type=int, default=-1)
     args = parser.parse_args()
 
     run(args)
