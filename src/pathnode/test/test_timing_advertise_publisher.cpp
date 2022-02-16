@@ -249,3 +249,87 @@ TEST_F(TestTimingAdvertisePublisher, set_multiple_topic) {
   EXPECT_EQ(msg.input_infos[idx2].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[idx2].header_stamp, stamp_base2);
 }
+
+TEST_F(TestTimingAdvertisePublisher, no_explcit_after_add_explicit) {
+  auto clock = std::make_shared<rclcpp::Clock>();
+  auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
+  TimingAdvertisePublisherBase pub(clock, steady_clock, "node_name");
+  pub.set_max_sub_callback_infos_sec(100);  // large value to prevent cleanup
+
+  const std::string TOPIC = "sample_topic";
+
+  auto now = clock->now();
+  auto now_steady = steady_clock->now();
+  auto stamp_base = now;
+
+  // (1) use explicit API
+  /// TOPIC subscription
+  {
+    auto input_info = std::make_shared<InputInfo>();
+    input_info->sub_time = now;
+    input_info->sub_time_steady = now_steady;
+    input_info->has_header_stamp = true;
+    input_info->header_stamp = stamp_base;
+
+    pub.set_input_info(TOPIC, input_info);
+    pub.set_explicit_subtime(
+        TOPIC, input_info);
+  }
+
+  /// use explicit API
+  pub.add_explicit_input_info(
+    TOPIC,
+    stamp_base);
+
+  /// publish
+  {
+    path_info_msg::msg::PubInfo msg;
+    pub.set_input_info(msg);
+
+    /// check
+    EXPECT_EQ(msg.input_infos.size(), 1ul);
+    EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
+    EXPECT_EQ(msg.input_infos[0].sub_time, now);
+    EXPECT_EQ(msg.input_infos[0].sub_time_steady, now_steady);
+    EXPECT_EQ(msg.input_infos[0].has_header_stamp, true);
+    EXPECT_EQ(msg.input_infos[0].header_stamp, stamp_base);
+  }
+
+  // (test case1) pulish without subscription
+  /// publish
+  {
+    path_info_msg::msg::PubInfo msg;
+    pub.set_input_info(msg);
+    /// check
+    EXPECT_EQ(msg.input_infos.size(), 0ul);
+  }
+
+  // (test case2) pulish after subscription but no explicit API
+  auto now2 = now + rclcpp::Duration(5, 0);
+  auto now_steady2 = now_steady + rclcpp::Duration(5, 0);
+  auto stamp_base2 = now2;
+
+  /// sub
+  {
+    auto input_info = std::make_shared<InputInfo>();
+    input_info->sub_time = now2;
+    input_info->sub_time_steady = now_steady2;
+    input_info->has_header_stamp = true;
+    input_info->header_stamp = stamp_base2;
+
+    pub.set_explicit_subtime(
+        TOPIC, input_info);
+
+    pub.set_input_info(TOPIC, input_info);
+    pub.set_explicit_subtime(
+        TOPIC, input_info);
+  }
+
+  /// publish
+  {
+    path_info_msg::msg::PubInfo msg;
+    pub.set_input_info(msg);
+    /// check
+    EXPECT_EQ(msg.input_infos.size(), 0ul);
+  }
+}

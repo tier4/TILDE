@@ -33,6 +33,7 @@ TimingAdvertisePublisherBase::TimingAdvertisePublisherBase(
   const std::string & node_fqn)
 : clock_(clock), steady_clock_(steady_clock),
   node_fqn_(node_fqn), seq_(0),
+  is_explicit_(false),
   MAX_SUB_CALLBACK_INFOS_SEC_(2)
 {
 }
@@ -59,6 +60,10 @@ void TimingAdvertisePublisherBase::add_explicit_input_info(
   const rclcpp::Time & stamp)
 {
   InputInfo info;
+
+  if(!is_explicit_) {
+    is_explicit_ = true;
+  }
 
   // find sub callback time info and fill info
   auto it = explicit_sub_time_infos_.find(sub_topic);
@@ -89,7 +94,7 @@ void TimingAdvertisePublisherBase::set_input_info(path_info_msg::msg::PubInfo & 
 {
   info_msg.input_infos.clear();
 
-  if (explicit_input_infos_.size() == 0) {
+  if (!is_explicit_) {
     info_msg.input_infos.resize(input_infos_.size());
 
     size_t i = 0;
