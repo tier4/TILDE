@@ -155,6 +155,7 @@ private:
 
   // explicit InputInfo
   // If this is set, FW creates PubInfo only by this info
+  bool is_explicit_;
   std::map<std::string, std::vector<InputInfo>> explicit_input_infos_;
   // topic, header stamp vs sub callback time
   std::map<std::string,
