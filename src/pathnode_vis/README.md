@@ -16,10 +16,14 @@ Also you should call `create_timing_advertise_subscription` and `create_timing_a
 
 You can use some tools.
 
-- (1) latency viewer
+- (1) latency viewer: online latency viewer
   - run your application
   - run `latency_viewer`
-- (2) pathnode_vis (not well maintained)
+- (2) parse_pub_info & ipython: analyze latency from rosbag
+  - run your application and record rosbag2
+  - run `parse_pub_info` to get PubInfo pkl.
+  - run ipython and do what you want
+- (3) pathnode_vis (not well maintained)
   - save `/*/info/pub` to rosbag
   - then, run `pathnode_vis`
 
@@ -121,7 +125,22 @@ Hit
 | r, /                | filter lines by regex. Hit Enter for periodic update. |
 | q, F                | stop "move" mode and restart periodic update          |
 
-## (2) pathnode_vis
+## (2) parse_pub_info
+
+### About
+
+Read rosbag2 file, and create pkl file.
+
+### Run
+
+``` bash
+ros2 run pathnode_vis parse_pub_info <path/to/rosbag/dbfile>
+```
+
+`topic_infos.pkl` is created.
+You can get `pub_info.PubInfos` by reading this pkl file.
+
+## (3) pathnode_vis
 
 Here are some examples. We use customized autoware.proj logging simulator where we use pathnode at `/sensing` module.
 

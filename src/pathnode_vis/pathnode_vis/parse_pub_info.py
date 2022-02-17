@@ -37,7 +37,9 @@ def run(args):
 
     skip_topic_vs_count = {}
 
-    while reader.has_next() and cnt <= args.cnt:
+    while reader.has_next():
+        if 0 <= args.cnt and args.cnt < cnt:
+            break
         (topic, data, t) = reader.read_next()
         # TODO: need more accurate check
         if not "/info/pub" in topic:
@@ -46,27 +48,7 @@ def run(args):
         msg_type = get_message(type_map[topic])
         msg = deserialize_message(data, msg_type)
 
-        out_topic = msg.output_info.topic_name
-        out_stamp = msg.output_info.header_stamp
-        out_stamp_s = time2str(out_stamp)
-
-        pub_info = PubInfo(out_topic, out_stamp)
-
-        for input_info in msg.input_infos:
-            in_topic = input_info.topic_name
-            in_has_stamp = input_info.has_header_stamp
-            if not in_has_stamp:
-                if in_topic not in skip_topic_vs_count.keys():
-                    print(f"skip {in_topic} as no header.stamp, out_topic = {out_topic}")
-                    skip_topic_vs_count[in_topic] = 1
-                else:
-                    skip_topic_vs_count[in_topic] += 1
-                continue
-            in_stamp = input_info.header_stamp
-            in_stamp_s = time2str(in_stamp)
-
-            pub_info.add_input_info(in_topic, in_has_stamp, in_stamp)
-
+        pub_info = PubInfo.fromMsg(msg)
         out_per_topic.add(pub_info)
 
     pickle.dump(out_per_topic, open("topic_infos.pkl", "wb"), protocol=pickle.HIGHEST_PROTOCOL)
@@ -77,7 +59,7 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("bag_path")
-    parser.add_argument("--cnt", type=int, default=10)
+    parser.add_argument("--cnt", type=int, default=-1)
     args = parser.parse_args()
 
     run(args)

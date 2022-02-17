@@ -2,7 +2,6 @@ import collections
 
 from rclpy.time import Time
 
-
 def time2str(t):
     """
     t: builtin_interfaces.msg.Time
@@ -73,6 +72,31 @@ class PubInfo(object):
     @property
     def out_topic(self):
         return self.out_info.topic
+
+    @staticmethod
+    def fromMsg(pub_info_msg):
+        """
+        Parameters
+        ----------
+        pub_info_msg: PubInfoMsg
+
+        Returns
+        -------
+        PubInfo
+        """
+        output_info = pub_info_msg.output_info
+        pub_info = PubInfo(output_info.topic_name,
+                           output_info.pub_time,
+                           output_info.pub_time_steady,
+                           output_info.header_stamp)
+        for input_info in pub_info_msg.input_infos:
+            pub_info.add_input_info(input_info.topic_name,
+                                    input_info.sub_time,
+                                    input_info.sub_time_steady,
+                                    input_info.has_header_stamp,
+                                    input_info.header_stamp)
+        return pub_info
+
 
 class PubInfos(object):
     '''
