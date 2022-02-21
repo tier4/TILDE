@@ -26,11 +26,11 @@
 #include "pathnode/timing_advertise_publisher.hpp"
 #include "path_info_msg/msg/pub_info.hpp"
 
-using pathnode::SubTimingAdvertiseNode;
+using pathnode::TildeNode;
 using pathnode::InputInfo;
 using path_info_msg::msg::PubInfo;
 
-class TestSubTimingAdvertiseNode : public ::testing::Test
+class TestTildeNode : public ::testing::Test
 {
 public:
   void SetUp() override
@@ -53,11 +53,11 @@ std::string str(const builtin_interfaces::msg::Time & time)
   return s;
 }
 
-TEST_F(TestSubTimingAdvertiseNode, simple_case) {
+TEST_F(TestTildeNode, simple_case) {
   rclcpp::NodeOptions options;
   options.append_parameter_override("use_sim_time", true);
   auto sensor_node = std::make_shared<rclcpp::Node>("sensorNode", options);
-  auto main_node = std::make_shared<SubTimingAdvertiseNode>("pubNode", options);
+  auto main_node = std::make_shared<TildeNode>("pubNode", options);
   auto checker_node = std::make_shared<rclcpp::Node>("checkerNode", options);
 
   auto sensor_pub = sensor_node->create_publisher<sensor_msgs::msg::PointCloud2>(

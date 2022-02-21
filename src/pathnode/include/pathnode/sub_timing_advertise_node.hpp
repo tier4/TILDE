@@ -41,27 +41,27 @@ template<class>
 inline constexpr bool always_false_v = false;
 
 /// PoC of `every sub talks sub timing`
-class SubTimingAdvertiseNode : public rclcpp::Node
+class TildeNode : public rclcpp::Node
 {
   using TopicInfoPublisher = rclcpp::Publisher<path_info_msg::msg::TopicInfo>::SharedPtr;
 
 public:
-  RCLCPP_SMART_PTR_DEFINITIONS(SubTimingAdvertiseNode)
+  RCLCPP_SMART_PTR_DEFINITIONS(TildeNode)
 
 
   RCLCPP_PUBLIC
-  explicit SubTimingAdvertiseNode(
+  explicit TildeNode(
     const std::string & node_name,
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   RCLCPP_PUBLIC
-  explicit SubTimingAdvertiseNode(
+  explicit TildeNode(
     const std::string & node_name,
     const std::string & namespace_,
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   RCLCPP_PUBLIC
-  virtual ~SubTimingAdvertiseNode();
+  virtual ~TildeNode();
 
   /// create custom subscription
   /**

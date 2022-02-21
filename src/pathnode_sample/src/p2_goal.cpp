@@ -31,11 +31,11 @@ namespace pathnode_sample
 {
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
-class P2Goal : public pathnode::SubTimingAdvertiseNode
+class P2Goal : public pathnode::TildeNode
 {
 public:
   explicit P2Goal(const rclcpp::NodeOptions & options)
-  : SubTimingAdvertiseNode("talker", options)
+  : TildeNode("talker", options)
   {
     rclcpp::QoS qos(rclcpp::KeepLast(7));
 

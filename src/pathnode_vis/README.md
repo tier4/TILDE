@@ -11,7 +11,7 @@ Sample application which uses topic info or PubInfo.
 
 ## Applications
 
-To use this package, you need the system which uses pathnode::SubTimingAdvertiseNode instead of rclcpp::Node.
+To use this package, you need the system which uses pathnode::TildeNode instead of rclcpp::Node.
 Also you should call `create_timing_advertise_subscription` and `create_timing_advertise_publisher`.
 
 You can use some tools.

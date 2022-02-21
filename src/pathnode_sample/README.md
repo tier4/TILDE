@@ -2,7 +2,7 @@
 
 Simple publisher, relay and listener samples.
 
-### pathnode::SubTimingAdvertiseNode children
+### pathnode::TildeNode children
 
 #### files
 

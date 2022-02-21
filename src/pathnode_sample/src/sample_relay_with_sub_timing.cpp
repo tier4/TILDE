@@ -30,11 +30,11 @@ namespace pathnode_sample
 {
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
-class RelayWithSubTiming : public pathnode::SubTimingAdvertiseNode
+class RelayWithSubTiming : public pathnode::TildeNode
 {
 public:
   explicit RelayWithSubTiming(const rclcpp::NodeOptions & options)
-  : SubTimingAdvertiseNode("relay", options)
+  : TildeNode("relay", options)
   {
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     auto callback =

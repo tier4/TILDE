@@ -3,7 +3,7 @@
 | name                               | about                                                                |
 |------------------------------------|----------------------------------------------------------------------|
 | pathnode::PathNode                 | BUGGY. Node with custom `create_subscription`. **Should be deleted** |
-| pathnode::SubTimingAdvertiseNode   | Successor of PathNode which also has custom `create_publisher`.      |
+| pathnode::TildeNode                | Successor of PathNode which also has custom `create_publisher`.      |
 | pathnode::TimingAdvertisePublisher | custom publisher                                                     |
 
 ## TimingAdvertisePublisher

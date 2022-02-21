@@ -16,9 +16,9 @@
 
 #include "pathnode/sub_timing_advertise_node.hpp"
 
-using pathnode::SubTimingAdvertiseNode;
+using pathnode::TildeNode;
 
-SubTimingAdvertiseNode::SubTimingAdvertiseNode(
+TildeNode::TildeNode(
   const std::string & node_name,
   const rclcpp::NodeOptions & options)
 : Node(node_name, options)
@@ -29,7 +29,7 @@ SubTimingAdvertiseNode::SubTimingAdvertiseNode(
   this->get_parameter("enable_tilde", enable_tilde);
 }
 
-SubTimingAdvertiseNode::SubTimingAdvertiseNode(
+TildeNode::TildeNode(
   const std::string & node_name,
   const std::string & namespace_,
   const rclcpp::NodeOptions & options)
@@ -41,6 +41,6 @@ SubTimingAdvertiseNode::SubTimingAdvertiseNode(
   this->get_parameter("enable_tilde", enable_tilde);
 }
 
-SubTimingAdvertiseNode::~SubTimingAdvertiseNode()
+TildeNode::~TildeNode()
 {
 }
