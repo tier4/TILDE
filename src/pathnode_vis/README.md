@@ -26,6 +26,8 @@ You can use some tools.
 - (3) pathnode_vis (not well maintained)
   - save `/*/info/pub` to rosbag
   - then, run `pathnode_vis`
+- (4) visualization by CARET
+  - you can visualize message flows by CARET jupyter notebook
 
 ## (1) latency viewer
 
@@ -186,3 +188,7 @@ e2e:   0.0    0.0    0.0
 You can set log level by `LOG_LEVEL=DEBUG`.
 See source codes for parameters.
 
+## (4) visualization by CARET
+
+You can draw message flows from a rosbag file.
+Run pathnode_vis/caret_vis_tilde in a CARET jupyter notebook.
