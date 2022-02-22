@@ -83,7 +83,7 @@ public:
     >
   >
   std::shared_ptr<SubscriptionT>
-  create_timing_advertise_subscription(
+  create_tile_subscription(
     const std::string & topic_name,
     const rclcpp::QoS & qos,
     CallbackT && callback,

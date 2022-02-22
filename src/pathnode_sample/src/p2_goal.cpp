@@ -46,7 +46,7 @@ public:
         (void) msg;
         RCLCPP_INFO(this->get_logger(), "recieved");
       };
-    sub_pc_ = this->create_timing_advertise_subscription<sensor_msgs::msg::PointCloud2>(
+    sub_pc_ = this->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
       "in", qos, sub_callback);
   }
 
