@@ -23,7 +23,7 @@
 
 #include "sensor_msgs/msg/point_cloud2.hpp"
 
-#include "pathnode/sub_timing_advertise_node.hpp"
+#include "pathnode/tilde_node.hpp"
 #include "pathnode/timing_advertise_publisher.hpp"
 
 using namespace std::chrono_literals;

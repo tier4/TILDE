@@ -23,7 +23,7 @@
 
 #include "std_msgs/msg/string.hpp"
 
-#include "pathnode/sub_timing_advertise_node.hpp"
+#include "pathnode/tilde_node.hpp"
 #include "pathnode/timing_advertise_publisher.hpp"
 
 using namespace std::chrono_literals;

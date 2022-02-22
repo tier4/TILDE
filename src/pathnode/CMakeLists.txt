@@ -38,15 +38,15 @@ if(BUILD_TESTING)
     "rclcpp"
     "path_info_msg")
 
-  ament_add_gtest(test_sub_timing_advertise_node
-    test/test_sub_timing_advertise_node.cpp)
-  target_include_directories(test_sub_timing_advertise_node
+  ament_add_gtest(test_tilde_node
+    test/test_tilde_node.cpp)
+  target_include_directories(test_tilde_node
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
-  target_link_libraries(test_sub_timing_advertise_node
+  target_link_libraries(test_tilde_node
     ${PROJECT_NAME})
-  ament_target_dependencies(test_sub_timing_advertise_node
+  ament_target_dependencies(test_tilde_node
     "rclcpp"
     "path_info_msg"
     "sensor_msgs")
@@ -60,7 +60,7 @@ install(
 
 add_library(${PROJECT_NAME} SHARED
   "src/path_node.cpp"
-  "src/sub_timing_advertise_node.cpp"
+  "src/tilde_node.cpp"
   "src/timing_advertise_publisher.cpp"
   "src/tp.c"
 )
