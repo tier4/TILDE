@@ -26,15 +26,15 @@ if(BUILD_TESTING)
   # set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
-  ament_add_gtest(test_timing_advertise_publisher
-    test/test_timing_advertise_publisher.cpp)
-  target_include_directories(test_timing_advertise_publisher
+  ament_add_gtest(test_tilde_publisher
+    test/test_tilde_publisher.cpp)
+  target_include_directories(test_tilde_publisher
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
-  target_link_libraries(test_timing_advertise_publisher
+  target_link_libraries(test_tilde_publisher
     ${PROJECT_NAME})
-  ament_target_dependencies(test_timing_advertise_publisher
+  ament_target_dependencies(test_tilde_publisher
     "rclcpp"
     "path_info_msg")
 
@@ -61,7 +61,7 @@ install(
 add_library(${PROJECT_NAME} SHARED
   "src/path_node.cpp"
   "src/tilde_node.cpp"
-  "src/timing_advertise_publisher.cpp"
+  "src/tilde_publisher.cpp"
   "src/tp.c"
 )
 target_link_libraries(${PROJECT_NAME} ${LTTNGUST_LIBRARIES})

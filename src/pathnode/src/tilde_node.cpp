@@ -14,7 +14,7 @@
 
 #include <string>
 
-#include "pathnode/sub_timing_advertise_node.hpp"
+#include "pathnode/tilde_node.hpp"
 
 using pathnode::TildeNode;
 

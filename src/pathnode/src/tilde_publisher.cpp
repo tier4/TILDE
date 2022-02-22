@@ -15,7 +15,7 @@
 #include <memory>
 #include <string>
 
-#include "pathnode/timing_advertise_publisher.hpp"
+#include "pathnode/tilde_publisher.hpp"
 #include "path_info_msg/msg/sub_topic_time_info.hpp"
 
 using pathnode::TimingAdvertisePublisherBase;

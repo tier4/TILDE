@@ -24,7 +24,7 @@
 #include "std_msgs/msg/string.hpp"
 
 #include "pathnode/tilde_node.hpp"
-#include "pathnode/timing_advertise_publisher.hpp"
+#include "pathnode/tilde_publisher.hpp"
 
 using namespace std::chrono_literals;
 

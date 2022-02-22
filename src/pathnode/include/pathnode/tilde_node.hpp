@@ -31,7 +31,7 @@
 
 #include "path_info_msg/msg/topic_info.hpp"
 #include "path_info_msg/msg/pub_info.hpp"
-#include "timing_advertise_publisher.hpp"
+#include "tilde_publisher.hpp"
 
 #include "pathnode/tp.h"
 
@@ -83,7 +83,7 @@ public:
     >
   >
   std::shared_ptr<SubscriptionT>
-  create_tile_subscription(
+  create_tilde_subscription(
     const std::string & topic_name,
     const rclcpp::QoS & qos,
     CallbackT && callback,

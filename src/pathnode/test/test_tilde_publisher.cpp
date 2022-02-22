@@ -19,7 +19,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "pathnode/timing_advertise_publisher.hpp"
+#include "pathnode/tilde_publisher.hpp"
 #include "path_info_msg/msg/pub_info.hpp"
 
 using pathnode::TimingAdvertisePublisherBase;

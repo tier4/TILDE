@@ -22,8 +22,8 @@
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "rosgraph_msgs/msg/clock.hpp"
 
-#include "pathnode/sub_timing_advertise_node.hpp"
-#include "pathnode/timing_advertise_publisher.hpp"
+#include "pathnode/tilde_node.hpp"
+#include "pathnode/tilde_publisher.hpp"
 #include "path_info_msg/msg/pub_info.hpp"
 
 using pathnode::TildeNode;
