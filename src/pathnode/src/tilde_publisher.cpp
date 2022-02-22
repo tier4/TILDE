@@ -18,7 +18,7 @@
 #include "pathnode/tilde_publisher.hpp"
 #include "path_info_msg/msg/sub_topic_time_info.hpp"
 
-using pathnode::TimingAdvertisePublisherBase;
+using pathnode::TildePublisherBase;
 
 rclcpp::Time pathnode::get_timestamp(rclcpp::Time t, ...)
 {
@@ -27,7 +27,7 @@ rclcpp::Time pathnode::get_timestamp(rclcpp::Time t, ...)
 }
 
 
-TimingAdvertisePublisherBase::TimingAdvertisePublisherBase(
+TildePublisherBase::TildePublisherBase(
   std::shared_ptr<rclcpp::Clock> clock,
   std::shared_ptr<rclcpp::Clock> steady_clock,
   const std::string & node_fqn)
@@ -38,7 +38,7 @@ TimingAdvertisePublisherBase::TimingAdvertisePublisherBase(
 {
 }
 
-void TimingAdvertisePublisherBase::set_input_info(
+void TildePublisherBase::set_input_info(
   const std::string & sub_topic,
   const std::shared_ptr<const InputInfo> p)
 {
@@ -55,7 +55,7 @@ void TimingAdvertisePublisherBase::set_input_info(
   }
 }
 
-void TimingAdvertisePublisherBase::add_explicit_input_info(
+void TildePublisherBase::add_explicit_input_info(
   const std::string & sub_topic,
   const rclcpp::Time & stamp)
 {
@@ -90,7 +90,7 @@ void TimingAdvertisePublisherBase::add_explicit_input_info(
   }
 }
 
-void TimingAdvertisePublisherBase::set_input_info(path_info_msg::msg::PubInfo & info_msg)
+void TildePublisherBase::set_input_info(path_info_msg::msg::PubInfo & info_msg)
 {
   info_msg.input_infos.clear();
 
@@ -122,7 +122,7 @@ void TimingAdvertisePublisherBase::set_input_info(path_info_msg::msg::PubInfo & 
   }
 }
 
-void TimingAdvertisePublisherBase::set_explicit_subtime(
+void TildePublisherBase::set_explicit_subtime(
   const std::string & sub_topic,
   const std::shared_ptr<const InputInfo> p)
 {
@@ -144,7 +144,7 @@ void TimingAdvertisePublisherBase::set_explicit_subtime(
   }
 }
 
-void TimingAdvertisePublisherBase::set_max_sub_callback_infos_sec(size_t sec)
+void TildePublisherBase::set_max_sub_callback_infos_sec(size_t sec)
 {
   MAX_SUB_CALLBACK_INFOS_SEC_ = sec;
 }

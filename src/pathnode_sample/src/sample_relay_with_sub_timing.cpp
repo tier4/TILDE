@@ -51,7 +51,7 @@ public:
   }
 
 private:
-  std::shared_ptr<pathnode::TimingAdvertisePublisher<std_msgs::msg::String>> pub_;
+  std::shared_ptr<pathnode::TildePublisher<std_msgs::msg::String>> pub_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_;
 };
 

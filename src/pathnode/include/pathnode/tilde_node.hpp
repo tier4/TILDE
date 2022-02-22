@@ -209,8 +209,8 @@ public:
     typename MessageT,
     typename AllocatorT = std::allocator<void>,
     typename PublisherT = rclcpp::Publisher<MessageT, AllocatorT>,
-    typename TimingAdvertisePublisherT = TimingAdvertisePublisher<MessageT, AllocatorT>>
-  std::shared_ptr<TimingAdvertisePublisherT>
+    typename TildePublisherT = TildePublisher<MessageT, AllocatorT>>
+  std::shared_ptr<TildePublisherT>
   create_tilde_publisher(
     const std::string & topic_name,
     const rclcpp::QoS & qos,
@@ -220,10 +220,10 @@ public:
   {
     auto pub = create_publisher<MessageT, AllocatorT, PublisherT>(topic_name, qos, options);
     auto info_topic = std::string(pub->get_topic_name()) + "/info/pub";
-    auto info_pub = create_publisher<TimingAdvertisePublisherBase::InfoMsg>(
+    auto info_pub = create_publisher<TildePublisherBase::InfoMsg>(
       info_topic, rclcpp::QoS(1), options);
 
-    auto ta_pub = std::make_shared<TimingAdvertisePublisherT>(
+    auto ta_pub = std::make_shared<TildePublisherT>(
       info_pub, pub, get_fully_qualified_name(),
       this->get_clock(),
       steady_clock_,
@@ -244,8 +244,8 @@ public:
 private:
   /// topic info name vs TopicInfoPublisher (subscriber side)
   std::map<std::string, TopicInfoPublisher> topic_info_pubs_;
-  /// topic info name vs TimingAdvertisePublisher (pub side)
-  std::map<std::string, std::shared_ptr<TimingAdvertisePublisherBase>> timing_advertise_pubs_;
+  /// topic info name vs TildePublisher (pub side)
+  std::map<std::string, std::shared_ptr<TildePublisherBase>> timing_advertise_pubs_;
   /// topic info name vs seq
   std::map<std::string, int64_t> seqs_;
   /// node clock may be simulation time

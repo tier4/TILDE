@@ -68,7 +68,7 @@ public:
 private:
   size_t count_ = 1;
   std::unique_ptr<sensor_msgs::msg::PointCloud2> msg_pc_;
-  pathnode::TimingAdvertisePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_pc_;
+  pathnode::TildePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_pc_;
   rclcpp::TimerBase::SharedPtr timer_;
 };
 

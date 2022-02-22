@@ -94,7 +94,7 @@ public:
 private:
   std::vector<std::unique_ptr<sensor_msgs::msg::PointCloud2>> msg_pcs_;
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_pc_;
-  pathnode::TimingAdvertisePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_pc_;
+  pathnode::TildePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_pc_;
   rclcpp::TimerBase::SharedPtr timer_;
 };
 

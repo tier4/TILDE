@@ -1,12 +1,12 @@
 ## classes
 
-| name                               | about                                                                |
-|------------------------------------|----------------------------------------------------------------------|
-| pathnode::PathNode                 | BUGGY. Node with custom `create_subscription`. **Should be deleted** |
-| pathnode::TildeNode                | Successor of PathNode which also has custom `create_publisher`.      |
-| pathnode::TimingAdvertisePublisher | custom publisher                                                     |
+| name                     | about                                                                |
+|--------------------------|----------------------------------------------------------------------|
+| pathnode::PathNode       | BUGGY. Node with custom `create_subscription`. **Should be deleted** |
+| pathnode::TildeNode      | Successor of PathNode which also has custom `create_publisher`.      |
+| pathnode::TildePublisher | custom publisher                                                     |
 
-## TimingAdvertisePublisher
+## TildePublisher
 
 
 

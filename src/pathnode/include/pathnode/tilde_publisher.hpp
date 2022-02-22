@@ -108,12 +108,12 @@ auto get_timestamp(rclcpp::Time t, T * a)->decltype(rclcpp::Time(a->header.stamp
 
 rclcpp::Time get_timestamp(rclcpp::Time t, ...);
 
-class TimingAdvertisePublisherBase
+class TildePublisherBase
 {
 public:
   using InfoMsg = path_info_msg::msg::PubInfo;
 
-  explicit TimingAdvertisePublisherBase(
+  explicit TildePublisherBase(
     std::shared_ptr<rclcpp::Clock> clock,
     std::shared_ptr<rclcpp::Clock> steady_clock,
     const std::string & node_fqn);
@@ -168,7 +168,7 @@ private:
 
 template<typename MessageT,
   typename AllocatorT = std::allocator<void>>
-class TimingAdvertisePublisher : public TimingAdvertisePublisherBase
+class TildePublisher : public TildePublisherBase
 {
 private:
   using MessageAllocatorTraits = rclcpp::allocator::AllocRebind<MessageT, AllocatorT>;
@@ -178,16 +178,16 @@ private:
   using PubInfoPublisher = rclcpp::Publisher<InfoMsg>;
 
 public:
-  RCLCPP_SMART_PTR_DEFINITIONS(TimingAdvertisePublisher)
+  RCLCPP_SMART_PTR_DEFINITIONS(TildePublisher)
 
-  TimingAdvertisePublisher(
+  TildePublisher(
     std::shared_ptr<PubInfoPublisher> info_pub,
     std::shared_ptr<PublisherT> pub,
     const std::string & node_fqn,
     std::shared_ptr<rclcpp::Clock> clock,
     std::shared_ptr<rclcpp::Clock> steady_clock,
     bool enable)
-  : TimingAdvertisePublisherBase(clock, steady_clock, node_fqn),
+  : TildePublisherBase(clock, steady_clock, node_fqn),
     info_pub_(info_pub),
     pub_(pub),
     enable_(enable)

@@ -22,11 +22,11 @@
 #include "pathnode/tilde_publisher.hpp"
 #include "path_info_msg/msg/pub_info.hpp"
 
-using pathnode::TimingAdvertisePublisherBase;
+using pathnode::TildePublisherBase;
 using pathnode::InputInfo;
 using path_info_msg::msg::PubInfo;
 
-class TestTimingAdvertisePublisher : public ::testing::Test
+class TestTildePublisher : public ::testing::Test
 {
 public:
   void SetUp()
@@ -43,11 +43,11 @@ void expect_near(
   EXPECT_NEAR(lhs.nanoseconds(), rhs.nanoseconds(), thres_ns);
 }
 
-TEST_F(TestTimingAdvertisePublisher, set_input_info) {
+TEST_F(TestTildePublisher, set_input_info) {
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
 
-  TimingAdvertisePublisherBase pub(clock, steady_clock, "node_name");
+  TildePublisherBase pub(clock, steady_clock, "node_name");
   auto info = std::make_shared<pathnode::InputInfo>();
   info->sub_time = rclcpp::Time(1, 0);
   info->sub_time_steady = steady_clock->now();
@@ -72,12 +72,12 @@ TEST_F(TestTimingAdvertisePublisher, set_input_info) {
   EXPECT_EQ(msg.input_infos[0].header_stamp, rclcpp::Time(0, 1));
 }
 
-TEST_F(TestTimingAdvertisePublisher, add_explicit_input_info_subtime_not_found) {
+TEST_F(TestTildePublisher, add_explicit_input_info_subtime_not_found) {
   // set input_info & explicit_input_info
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
 
-  TimingAdvertisePublisherBase pub(clock, steady_clock, "node_name");
+  TildePublisherBase pub(clock, steady_clock, "node_name");
   auto now = clock->now();
   auto info_stamp = now - rclcpp::Duration(1, 0);
   auto search_stamp = now - rclcpp::Duration(2, 0);
@@ -107,11 +107,11 @@ TEST_F(TestTimingAdvertisePublisher, add_explicit_input_info_subtime_not_found) 
   EXPECT_EQ(msg.input_infos[0].header_stamp, search_stamp);
 }
 
-TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime_sucess_then_purged) {
+TEST_F(TestTildePublisher, set_explicit_subtime_sucess_then_purged) {
   // set input_info & explicit_input_info
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
-  TimingAdvertisePublisherBase pub(clock, steady_clock, "node_name");
+  TildePublisherBase pub(clock, steady_clock, "node_name");
 
   const std::string TOPIC = "sample_topic";
   auto now = clock->now();
@@ -185,10 +185,10 @@ TEST_F(TestTimingAdvertisePublisher, set_explicit_subtime_sucess_then_purged) {
   EXPECT_EQ(msg.input_infos[0].header_stamp, stamp_base);
 }
 
-TEST_F(TestTimingAdvertisePublisher, set_multiple_topic) {
+TEST_F(TestTildePublisher, set_multiple_topic) {
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
-  TimingAdvertisePublisherBase pub(clock, steady_clock, "node_name");
+  TildePublisherBase pub(clock, steady_clock, "node_name");
   const std::string TOPIC1 = "sample_topic1";
   const std::string TOPIC2 = "sample_topic2";
 
@@ -250,10 +250,10 @@ TEST_F(TestTimingAdvertisePublisher, set_multiple_topic) {
   EXPECT_EQ(msg.input_infos[idx2].header_stamp, stamp_base2);
 }
 
-TEST_F(TestTimingAdvertisePublisher, no_explcit_after_add_explicit) {
+TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
-  TimingAdvertisePublisherBase pub(clock, steady_clock, "node_name");
+  TildePublisherBase pub(clock, steady_clock, "node_name");
   pub.set_max_sub_callback_infos_sec(100);  // large value to prevent cleanup
 
   const std::string TOPIC = "sample_topic";
