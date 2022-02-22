@@ -31,12 +31,7 @@ endif()
 include_directories(include)
 
 add_library(pathnode_sample SHARED
-  src/sample_publisher.cpp
   src/sample_publish_header.cpp
-  src/sample_subscriber.cpp
-  src/sample_relay.cpp
-  src/sample_relay_with_path.cpp
-  src/sample_relay_with_path2.cpp
   src/sample_relay_with_sub_timing.cpp
   src/sample_multi_callback.cpp
   src/p2_sample_pub.cpp

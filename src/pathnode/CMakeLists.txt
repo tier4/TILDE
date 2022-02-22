@@ -59,7 +59,6 @@ install(
   DESTINATION include)
 
 add_library(${PROJECT_NAME} SHARED
-  "src/path_node.cpp"
   "src/tilde_node.cpp"
   "src/tilde_publisher.cpp"
   "src/tp.c"

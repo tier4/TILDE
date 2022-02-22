@@ -46,15 +46,3 @@ $ ros2 topic list
 
 - `sample_multi_callback.cpp`
   - sample code for multiple callback group
-
-### [BUGGY nodes] pathnode::PathNode children
-
-- publisher node
-  - `sample_publisher.cpp`
-- trial and error of relay node
-  - `sample_relay.cpp`
-  - `sample_relay_with_path.cpp`
-  - `sample_relay_with_path2.cpp`
-- subscription node
-  - `sample_subscriber.cpp`
-
