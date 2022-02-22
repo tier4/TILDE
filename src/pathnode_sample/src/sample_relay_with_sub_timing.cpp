@@ -47,7 +47,7 @@ public:
     // Create a publisher with a custom Quality of Service profile.
     rclcpp::QoS qos(rclcpp::KeepLast(7));
     sub_ = this->create_tilde_subscription<std_msgs::msg::String>("in", qos, callback);
-    pub_ = this->create_timing_advertise_publisher<std_msgs::msg::String>("out", qos);
+    pub_ = this->create_tilde_publisher<std_msgs::msg::String>("out", qos);
   }
 
 private:

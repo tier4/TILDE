@@ -75,7 +75,7 @@ TEST_F(TestTildeNode, simple_case) {
   rclcpp::spin_some(main_node);
 
   // prepare pub/sub
-  auto main_pub = main_node->create_timing_advertise_publisher<sensor_msgs::msg::PointCloud2>(
+  auto main_pub = main_node->create_tilde_publisher<sensor_msgs::msg::PointCloud2>(
     "out_topic", 1);
   auto main_sub = main_node->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
     "in_topic", 1,

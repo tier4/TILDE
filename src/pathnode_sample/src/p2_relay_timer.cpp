@@ -82,7 +82,7 @@ public:
       };
 
     // Create a publisher with a custom Quality of Service profile.
-    pub_pc_ = this->create_timing_advertise_publisher<sensor_msgs::msg::PointCloud2>("out", qos);
+    pub_pc_ = this->create_tilde_publisher<sensor_msgs::msg::PointCloud2>("out", qos);
 
     // Use a timer to schedule periodic message publishing.
     auto timer_dur = std::chrono::duration<int64_t, std::milli>(timer_ms);

@@ -211,7 +211,7 @@ public:
     typename PublisherT = rclcpp::Publisher<MessageT, AllocatorT>,
     typename TimingAdvertisePublisherT = TimingAdvertisePublisher<MessageT, AllocatorT>>
   std::shared_ptr<TimingAdvertisePublisherT>
-  create_timing_advertise_publisher(
+  create_tilde_publisher(
     const std::string & topic_name,
     const rclcpp::QoS & qos,
     const rclcpp::PublisherOptionsWithAllocator<AllocatorT> & options =
