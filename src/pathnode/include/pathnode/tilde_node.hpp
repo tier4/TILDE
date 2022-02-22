@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PATHNODE__SUB_TIMING_ADVERTISE_NODE_HPP_
-#define PATHNODE__SUB_TIMING_ADVERTISE_NODE_HPP_
+#ifndef PATHNODE__TILDE_NODE_HPP_
+#define PATHNODE__TILDE_NODE_HPP_
 
 #include <map>
 #include <memory>
@@ -258,4 +258,4 @@ private:
 
 }  // namespace pathnode
 
-#endif  // PATHNODE__SUB_TIMING_ADVERTISE_NODE_HPP_
+#endif  // PATHNODE__TILDE_NODE_HPP_
