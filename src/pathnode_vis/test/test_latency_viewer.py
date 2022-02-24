@@ -15,7 +15,7 @@ from pathnode_vis.latency_viewer import (
     update_stat,
     LatencyViewerNode,
     )
-from path_info_msg.msg import (
+from tilde_msg.msg import (
     PubInfo as PubInfoMsg,
     )
 

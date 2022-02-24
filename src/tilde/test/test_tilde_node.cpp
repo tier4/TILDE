@@ -24,11 +24,11 @@
 
 #include "tilde/tilde_node.hpp"
 #include "tilde/tilde_publisher.hpp"
-#include "path_info_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/pub_info.hpp"
 
 using tilde::TildeNode;
 using tilde::InputInfo;
-using path_info_msg::msg::PubInfo;
+using tilde_msg::msg::PubInfo;
 
 class TestTildeNode : public ::testing::Test
 {
@@ -87,9 +87,9 @@ TEST_F(TestTildeNode, simple_case) {
     });
 
   bool checker_sub_called = false;
-  auto checker_sub = checker_node->create_subscription<path_info_msg::msg::PubInfo>(
+  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::PubInfo>(
     "out_topic/info/pub", 1,
-    [&checker_sub_called, clock_msg](path_info_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
+    [&checker_sub_called, clock_msg](tilde_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
     {
       checker_sub_called = true;
       std::cout << "checker_sub_callback" << std::endl;

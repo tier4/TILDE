@@ -20,11 +20,11 @@
 #include "rclcpp/rclcpp.hpp"
 
 #include "tilde/tilde_publisher.hpp"
-#include "path_info_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/pub_info.hpp"
 
 using tilde::TildePublisherBase;
 using tilde::InputInfo;
-using path_info_msg::msg::PubInfo;
+using tilde_msg::msg::PubInfo;
 
 class TestTildePublisher : public ::testing::Test
 {
@@ -59,7 +59,7 @@ TEST_F(TestTildePublisher, set_input_info) {
     TOPIC,
     info);
 
-  path_info_msg::msg::PubInfo msg;
+  tilde_msg::msg::PubInfo msg;
   pub.set_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
@@ -96,7 +96,7 @@ TEST_F(TestTildePublisher, add_explicit_input_info_subtime_not_found) {
   pub.add_explicit_input_info(
     TOPIC, search_stamp);
 
-  path_info_msg::msg::PubInfo msg;
+  tilde_msg::msg::PubInfo msg;
   pub.set_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
@@ -136,7 +136,7 @@ TEST_F(TestTildePublisher, set_explicit_subtime_sucess_then_purged) {
     TOPIC,
     stamp_base + rclcpp::Duration(5, 0));
 
-  path_info_msg::msg::PubInfo msg;
+  tilde_msg::msg::PubInfo msg;
   pub.set_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
@@ -226,7 +226,7 @@ TEST_F(TestTildePublisher, set_multiple_topic) {
     TOPIC2,
     stamp_base2);
 
-  path_info_msg::msg::PubInfo msg;
+  tilde_msg::msg::PubInfo msg;
   pub.set_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 2ul);
@@ -283,7 +283,7 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
 
   /// publish
   {
-    path_info_msg::msg::PubInfo msg;
+    tilde_msg::msg::PubInfo msg;
     pub.set_input_info(msg);
 
     /// check
@@ -298,7 +298,7 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
   // (test case1) pulish without subscription
   /// publish
   {
-    path_info_msg::msg::PubInfo msg;
+    tilde_msg::msg::PubInfo msg;
     pub.set_input_info(msg);
     /// check
     EXPECT_EQ(msg.input_infos.size(), 0ul);
@@ -327,7 +327,7 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
 
   /// publish
   {
-    path_info_msg::msg::PubInfo msg;
+    tilde_msg::msg::PubInfo msg;
     pub.set_input_info(msg);
     /// check
     EXPECT_EQ(msg.input_infos.size(), 0ul);

@@ -30,7 +30,7 @@ from rclpy.qos import QoSReliabilityPolicy
 
 from builtin_interfaces.msg import Time as TimeMsg
 
-from path_info_msg.msg import (
+from tilde_msg.msg import (
     PubInfo,
     )
 from pathnode_vis.pubinfo_traverse import TopicGraph, InputSensorStampSolver
@@ -730,7 +730,7 @@ class LatencyViewerNode(Node):
         # but don't need in dev environment(i.e. rosbagged PubInfo)
         time.sleep(0.5)
 
-        msg_type = "path_info_msg/msg/PubInfo"
+        msg_type = "tilde_msg/msg/PubInfo"
         topic_and_types = self.get_topic_names_and_types()
         filtered_topic_and_types = \
             filter(lambda x: msg_type in x[1], topic_and_types)

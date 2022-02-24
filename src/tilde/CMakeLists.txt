@@ -10,7 +10,7 @@ find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 find_package(rclcpp REQUIRED)
-find_package(path_info_msg REQUIRED)
+find_package(tilde_msg REQUIRED)
 find_package(rmw REQUIRED)
 find_package(LTTngUST REQUIRED)
 
@@ -36,7 +36,7 @@ if(BUILD_TESTING)
     ${PROJECT_NAME})
   ament_target_dependencies(test_tilde_publisher
     "rclcpp"
-    "path_info_msg")
+    "tilde_msg")
 
   ament_add_gtest(test_tilde_node
     test/test_tilde_node.cpp)
@@ -48,7 +48,7 @@ if(BUILD_TESTING)
     ${PROJECT_NAME})
   ament_target_dependencies(test_tilde_node
     "rclcpp"
-    "path_info_msg"
+    "tilde_msg"
     "sensor_msgs")
 endif()
 
@@ -67,7 +67,7 @@ target_link_libraries(${PROJECT_NAME} ${LTTNGUST_LIBRARIES})
 
 ament_target_dependencies(${PROJECT_NAME}
   "rclcpp"
-  "path_info_msg"
+  "tilde_msg"
   LTTngUST
 )
 target_compile_definitions(${PROJECT_NAME}

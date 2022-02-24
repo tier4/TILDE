@@ -29,8 +29,8 @@
 
 #include "rmw/types.h"
 
-#include "path_info_msg/msg/topic_info.hpp"
-#include "path_info_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/topic_info.hpp"
+#include "tilde_msg/msg/pub_info.hpp"
 #include "tilde_publisher.hpp"
 
 #include "tilde/tp.h"
@@ -43,7 +43,7 @@ inline constexpr bool always_false_v = false;
 /// PoC of `every sub talks sub timing`
 class TildeNode : public rclcpp::Node
 {
-  using TopicInfoPublisher = rclcpp::Publisher<path_info_msg::msg::TopicInfo>::SharedPtr;
+  using TopicInfoPublisher = rclcpp::Publisher<tilde_msg::msg::TopicInfo>::SharedPtr;
 
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(TildeNode)
@@ -100,7 +100,7 @@ public:
     auto topic_info_name = resolved_topic_name + "/info/sub";
 
     std::cerr << &callback << std::endl;
-    auto topic_info_pub = create_publisher<path_info_msg::msg::TopicInfo>(
+    auto topic_info_pub = create_publisher<tilde_msg::msg::TopicInfo>(
       topic_info_name,
       rclcpp::QoS(1));
     topic_info_pubs_[topic_info_name] = topic_info_pub;
@@ -132,7 +132,7 @@ public:
             callback_addr,
             subtime_steady.nanoseconds());
 
-          auto m = std::make_unique<path_info_msg::msg::TopicInfo>();
+          auto m = std::make_unique<tilde_msg::msg::TopicInfo>();
           auto & seq = seqs_[topic_info_name];
           m->seq = seq;
           seq++;

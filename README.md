@@ -11,7 +11,7 @@ PoC of deadline detection framework
 |-----------------|------------------------------------------------------|
 | tilde           | deadline detection framework                         |
 | pathnode_sample | samples including talker, relay, listener and so on. |
-| path_info_msg   | FW internal msg                                      |
+| tilde_msg       | FW internal msg                                      |
 
 ## Build
 

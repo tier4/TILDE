@@ -23,7 +23,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.time import Time
 
-from path_info_msg.msg import TopicInfo
+from tilde_msg.msg import TopicInfo
 
 basicConfig(level=os.getenv('LOG_LEVEL', 'INFO'))
 logger = getLogger(__name__)

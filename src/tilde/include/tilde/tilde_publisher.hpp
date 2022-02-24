@@ -26,7 +26,7 @@
 #include "rclcpp/clock.hpp"
 #include "rclcpp/macros.hpp"
 
-#include "path_info_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/pub_info.hpp"
 
 #include "tilde/tp.h"
 
@@ -111,7 +111,7 @@ rclcpp::Time get_timestamp(rclcpp::Time t, ...);
 class TildePublisherBase
 {
 public:
-  using InfoMsg = path_info_msg::msg::PubInfo;
+  using InfoMsg = tilde_msg::msg::PubInfo;
 
   explicit TildePublisherBase(
     std::shared_ptr<rclcpp::Clock> clock,
@@ -136,7 +136,7 @@ public:
     const std::string & sub_topic,
     const rclcpp::Time & stamp);
 
-  void set_input_info(path_info_msg::msg::PubInfo & info_msg);
+  void set_input_info(tilde_msg::msg::PubInfo & info_msg);
 
   void set_max_sub_callback_infos_sec(size_t sec);
 
@@ -267,7 +267,7 @@ private:
    */
   void publish_info(rclcpp::Time && t)
   {
-    auto msg = std::make_unique<path_info_msg::msg::PubInfo>();
+    auto msg = std::make_unique<tilde_msg::msg::PubInfo>();
     msg->header.stamp = clock_->now();
     // msg->header.frame_id  // Nothing todo
 

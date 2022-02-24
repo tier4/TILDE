@@ -16,7 +16,7 @@
 #include <string>
 
 #include "tilde/tilde_publisher.hpp"
-#include "path_info_msg/msg/sub_topic_time_info.hpp"
+#include "tilde_msg/msg/sub_topic_time_info.hpp"
 
 using tilde::TildePublisherBase;
 
@@ -90,7 +90,7 @@ void TildePublisherBase::add_explicit_input_info(
   }
 }
 
-void TildePublisherBase::set_input_info(path_info_msg::msg::PubInfo & info_msg)
+void TildePublisherBase::set_input_info(tilde_msg::msg::PubInfo & info_msg)
 {
   info_msg.input_infos.clear();
 
@@ -109,7 +109,7 @@ void TildePublisherBase::set_input_info(path_info_msg::msg::PubInfo & info_msg)
   } else {
     for (const auto &[topic, input_infos] : explicit_input_infos_) {
       for (const auto & input_info : input_infos) {
-        path_info_msg::msg::SubTopicTimeInfo info;
+        tilde_msg::msg::SubTopicTimeInfo info;
         info.topic_name = topic;
         info.sub_time = input_info.sub_time;
         info.sub_time_steady = input_info.sub_time_steady;

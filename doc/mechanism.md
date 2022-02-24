@@ -40,7 +40,7 @@ PubInfo はメイントピックの publish 時と同時に送信されるメタ
 メッセージ定義は以下の通りです。
 ※ TODO: ファイル名やデータ構造はリファクタ予定
 
-[PubInfo.msg](../src/path_info_msg/msg/PubInfo.msg)
+[PubInfo.msg](../src/tilde_msg/msg/PubInfo.msg)
 
 - Header:
   - header
