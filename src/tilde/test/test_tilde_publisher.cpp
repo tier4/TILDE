@@ -273,7 +273,7 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
 
     pub.set_input_info(TOPIC, input_info);
     pub.set_explicit_subtime(
-        TOPIC, input_info);
+      TOPIC, input_info);
   }
 
   /// use explicit API
@@ -318,11 +318,11 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
     input_info->header_stamp = stamp_base2;
 
     pub.set_explicit_subtime(
-        TOPIC, input_info);
+      TOPIC, input_info);
 
     pub.set_input_info(TOPIC, input_info);
     pub.set_explicit_subtime(
-        TOPIC, input_info);
+      TOPIC, input_info);
   }
 
   /// publish
