@@ -3,7 +3,7 @@
 import unittest
 from collections import deque
 
-from pathnode_vis.data_as_tree import TreeNode
+from tilde_vis.data_as_tree import TreeNode
 
 
 def dict2tree(adict):

@@ -6,7 +6,7 @@ import rosbag2_py
 from rosidl_runtime_py.utilities import get_message
 from rclpy.serialization import deserialize_message
 
-from pathnode_vis.pub_info import time2str, PubInfo, PubInfos
+from tilde_vis.pub_info import time2str, PubInfo, PubInfos
 
 def get_rosbag_options(path, serialization_format='cdr'):
     storage_options = rosbag2_py.StorageOptions(uri=path, storage_id='sqlite3')

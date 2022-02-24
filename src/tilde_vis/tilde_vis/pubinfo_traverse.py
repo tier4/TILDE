@@ -8,8 +8,8 @@ import json
 
 from rclpy.time import Time
 
-from pathnode_vis.pub_info import time2str
-from pathnode_vis.data_as_tree import TreeNode
+from tilde_vis.pub_info import time2str
+from tilde_vis.data_as_tree import TreeNode
 
 
 def strstamp2time(strstamp):

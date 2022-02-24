@@ -6,12 +6,12 @@ from rclpy.clock import ClockType
 from rclpy.time import Time
 from rclpy.duration import Duration
 
-from pathnode_vis.pub_info import PubInfo, PubInfos
-from pathnode_vis.pubinfo_traverse import (
+from tilde_vis.pub_info import PubInfo, PubInfos
+from tilde_vis.pubinfo_traverse import (
     InputSensorStampSolver,
     TopicGraph,
     )
-from pathnode_vis.latency_viewer import (
+from tilde_vis.latency_viewer import (
     calc_one_hot,
     update_stat,
     )

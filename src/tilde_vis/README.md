@@ -1,4 +1,4 @@
-# pathnode_vis
+# tilde_vis
 
 ## Description
 
@@ -7,7 +7,7 @@ Sample application which uses topic info or PubInfo.
 ## Requirement
 
 - ros2 galactic
-- pathnode enabled application
+- tilde enabled application
 
 ## Applications
 
@@ -23,9 +23,9 @@ You can use some tools.
   - run your application and record rosbag2
   - run `parse_pub_info` to get PubInfo pkl.
   - run ipython and do what you want
-- (3) pathnode_vis (not well maintained)
+- (3) tilde_vis (not well maintained)
   - save `/*/info/pub` to rosbag
-  - then, run `pathnode_vis`
+  - then, run `tilde_vis`
 - (4) visualization by CARET
   - you can visualize message flows by CARET jupyter notebook
 
@@ -48,7 +48,7 @@ Here is the example command.
 ros2 launch ...
 
 # (2) run latency viewer
-ros2 run pathnode_vis latency_viewer \
+ros2 run tilde_vis latency_viewer \
   --ros-args \
     -p target_topic:=/localization/pose_twist_fusion_filter/twist_with_covariance
 ```
@@ -57,7 +57,7 @@ In default, you see output just like `top`. Internally [curses](https://docs.pyt
 To save the results to a file, use `--batch` option and redirect or `tee` stdout.
 
 ``` bash
-ros2 run pathnode_vis latency_viewer --batch ...
+ros2 run tilde_vis latency_viewer --batch ...
 ```
 
 ### Parameters
@@ -136,22 +136,22 @@ Read rosbag2 file, and create pkl file.
 ### Run
 
 ``` bash
-ros2 run pathnode_vis parse_pub_info <path/to/rosbag/dbfile>
+ros2 run tilde_vis parse_pub_info <path/to/rosbag/dbfile>
 ```
 
 `topic_infos.pkl` is created.
 You can get `pub_info.PubInfos` by reading this pkl file.
 
-## (3) pathnode_vis
+## (3) tilde_vis
 
-Here are some examples. We use customized autoware.proj logging simulator where we use pathnode at `/sensing` module.
+Here are some examples. We use customized autoware.proj logging simulator where we use tilde at `/sensing` module.
 
 (1) Print subscribers topic info.
 
-There are five topics, so pathnode_vis shows four per-callback latencies(from some subscription callback to the nexe subscription callback) and e2e latency.
+There are five topics, so tilde_vis shows four per-callback latencies(from some subscription callback to the nexe subscription callback) and e2e latency.
 
 ```bash
-$ ros2 run pathnode_vis pathnode_vis
+$ ros2 run tilde_vis tilde_vis
 
 /sensing/lidar/top/self_cropped/pointcloud_ex -> /sensing/lidar/top/rectified/pointcloud_ex -> /sensing/lidar/top/outlier_filtered/pointcloud -> /sensing/lidar/concatenated/pointcloud -> /sensing/lidar/measurement_range_cropped/pointcloud
 max:  65.2   39.9   15.0   10.0
@@ -171,7 +171,7 @@ In the publisher topic info, timestamp means published topic header timestamp.
 /sensing nodes conveys the lidar timestamp, we get latency is 0.0.
 
 ```
-$ ros2 run pathnode_vis pathnode_vis --ros-args -p watches_pub:=True
+$ ros2 run tilde_vis tilde_vis --ros-args -p watches_pub:=True
 
 /sensing/lidar/top/self_cropped/pointcloud_ex -> /sensing/lidar/top/mirror_cropped/pointcloud_ex -> /sensing/lidar/top/outlier_filtered/pointcloud -> /sensing/lidar/concatenated/pointcloud -> /sensing/lidar/measurement_range_cropped/pointcloud
 max:   0.0    0.0    0.0    0.0
@@ -191,4 +191,4 @@ See source codes for parameters.
 ## (4) visualization by CARET
 
 You can draw message flows from a rosbag file.
-Run pathnode_vis/caret_vis_tilde in a CARET jupyter notebook.
+Run tilde_vis/caret_vis_tilde in a CARET jupyter notebook.

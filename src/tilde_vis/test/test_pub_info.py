@@ -4,7 +4,7 @@ import unittest
 
 from rclpy.time import Time
 
-from pathnode_vis.pub_info import (
+from tilde_vis.pub_info import (
     PubInfo,
     PubInfos
     )

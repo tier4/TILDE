@@ -4,7 +4,7 @@ import curses
 import sys
 import time
 
-from pathnode_vis.printer import (
+from tilde_vis.printer import (
     NcursesPrinter
     )
 

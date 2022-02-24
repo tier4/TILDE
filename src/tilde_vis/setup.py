@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'pathnode_vis'
+package_name = 'tilde_vis'
 
 setup(
     name=package_name,
@@ -20,10 +20,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'pathnode_vis = pathnode_vis.pathnode_vis:main',
-            'latency_viewer = pathnode_vis.latency_viewer:main',
-            'pubinfo_traverse = pathnode_vis.pubinfo_traverse:main',
-            'parse_pub_info = pathnode_vis.parse_pub_info:main',
+            'tilde_vis = tilde_vis.tilde_vis:main',
+            'latency_viewer = tilde_vis.latency_viewer:main',
+            'pubinfo_traverse = tilde_vis.pubinfo_traverse:main',
+            'parse_pub_info = tilde_vis.parse_pub_info:main',
         ],
     },
 )

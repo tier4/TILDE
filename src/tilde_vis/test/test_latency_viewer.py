@@ -6,11 +6,11 @@ import rclpy
 from rclpy.time import Time
 from builtin_interfaces.msg import Time as TimeMsg
 
-from pathnode_vis.data_as_tree import TreeNode
-from pathnode_vis.pub_info import (
+from tilde_vis.data_as_tree import TreeNode
+from tilde_vis.pub_info import (
     PubInfo
     )
-from pathnode_vis.latency_viewer import (
+from tilde_vis.latency_viewer import (
     calc_stat,
     update_stat,
     LatencyViewerNode,

@@ -33,16 +33,16 @@ from builtin_interfaces.msg import Time as TimeMsg
 from tilde_msg.msg import (
     PubInfo,
     )
-from pathnode_vis.pubinfo_traverse import TopicGraph, InputSensorStampSolver
-from pathnode_vis.pub_info import (
+from tilde_vis.pubinfo_traverse import TopicGraph, InputSensorStampSolver
+from tilde_vis.pub_info import (
     PubInfo as PubInfoObj,
     PubInfos as PubInfosObj
     )
-from pathnode_vis.printer import (
+from tilde_vis.printer import (
     Printer,
     NcursesPrinter
     )
-from pathnode_vis.pub_info import (
+from tilde_vis.pub_info import (
     time2str
     )
 

@@ -7,11 +7,11 @@ from bokeh.models import CrosshairTool
 import pandas as pd
 import numpy as np
 
-from pathnode_vis.pub_info import (
+from tilde_vis.pub_info import (
     PubInfos,
     PubInfo
 )
-from pathnode_vis.pubinfo_traverse import (
+from tilde_vis.pubinfo_traverse import (
     InputSensorStampSolver,
     TopicGraph
 )
