@@ -39,7 +39,6 @@ namespace tilde
 template<class>
 inline constexpr bool always_false_v = false;
 
-/// PoC of `every sub talks sub timing`
 class TildeNode : public rclcpp::Node
 {
 public:
@@ -61,9 +60,6 @@ public:
   virtual ~TildeNode();
 
   /// create custom subscription
-  /**
-   * This is the implementation of `first node only send path_info` strategy.
-   */
   template<
     typename MessageT,
     typename CallbackT,
@@ -160,10 +156,10 @@ public:
 
           // TODO(y-okumura-isp): consider race condition in multi threaded executor.
           // i.e. subA comes when subB callback which uses topicA is running
-          for (auto &[topic, tap] : timing_advertise_pubs_) {
-            tap->set_input_info(resolved_topic_name, input_info);
+          for (auto &[topic, tp] : tilde_pubs_) {
+            tp->set_input_info(resolved_topic_name, input_info);
             if (input_info->has_header_stamp) {
-              tap->set_explicit_subtime(resolved_topic_name, input_info);
+              tp->set_explicit_subtime(resolved_topic_name, input_info);
             }
           }
         }
@@ -198,12 +194,12 @@ public:
     auto info_pub = create_publisher<TildePublisherBase::InfoMsg>(
       info_topic, rclcpp::QoS(1), options);
 
-    auto ta_pub = std::make_shared<TildePublisherT>(
+    auto tilde_pub = std::make_shared<TildePublisherT>(
       info_pub, pub, get_fully_qualified_name(),
       this->get_clock(),
       steady_clock_,
       this->enable_tilde);
-    timing_advertise_pubs_[info_topic] = ta_pub;
+    tilde_pubs_[info_topic] = tilde_pub;
 
     tracepoint(
       TRACEPOINT_PROVIDER,
@@ -216,8 +212,8 @@ public:
   }
 
 private:
-  /// topic info name vs TildePublisher (pub side)
-  std::map<std::string, std::shared_ptr<TildePublisherBase>> timing_advertise_pubs_;
+  /// topic vs publishers
+  std::map<std::string, std::shared_ptr<TildePublisherBase>> tilde_pubs_;
   /// node clock may be simulation time
   std::shared_ptr<rclcpp::Clock> steady_clock_;
 
