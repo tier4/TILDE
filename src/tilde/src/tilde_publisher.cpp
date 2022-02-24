@@ -61,7 +61,7 @@ void TildePublisherBase::add_explicit_input_info(
 {
   InputInfo info;
 
-  if(!is_explicit_) {
+  if (!is_explicit_) {
     is_explicit_ = true;
   }
 

@@ -54,20 +54,20 @@ EXCLUDES_TOPICS = [
     "/localization/pose_twist_fusion_filter/debug/info/pub",
     "/localization/pose_twist_fusion_filter/debug/measured_pose/info/pub",
     "/localization/pose_twist_fusion_filter/debug/stop_flag/info/pub",
-    "/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/drivable_area/info/pub",
-    "/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/markers/info/pub",
-    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/area_with_objects/info/pub",
-    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/clearance_map/info/pub",
-    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/marker/info/pub",
-    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/object_clearance_map/info/pub",
-    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/smoothed_points/info/pub",
-    "/planning/scenario_planning/motion_velocity_smoother/debug/backward_filtered_trajectory/info/pub",
-    "/planning/scenario_planning/motion_velocity_smoother/debug/forward_filtered_trajectory/info/pub",
-    "/planning/scenario_planning/motion_velocity_smoother/debug/merged_filtered_trajectory/info/pub",
-    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_external_velocity_limited/info/pub",
-    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_lateral_acc_filtered/info/pub",
-    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_raw/info/pub",
-    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_time_resampled/info/pub",
+    "/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/drivable_area/info/pub",  # noqa: #501
+    "/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/markers/info/pub",  # noqa: #501
+    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/area_with_objects/info/pub",  # noqa: #501
+    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/clearance_map/info/pub",  # noqa: #501
+    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/marker/info/pub",  # noqa: #501
+    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/object_clearance_map/info/pub",  # noqa: #501
+    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/smoothed_points/info/pub",  # noqa: #501
+    "/planning/scenario_planning/motion_velocity_smoother/debug/backward_filtered_trajectory/info/pub",  # noqa: #501
+    "/planning/scenario_planning/motion_velocity_smoother/debug/forward_filtered_trajectory/info/pub",  # noqa: #501
+    "/planning/scenario_planning/motion_velocity_smoother/debug/merged_filtered_trajectory/info/pub",  # noqa: #501
+    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_external_velocity_limited/info/pub",  # noqa: #501
+    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_lateral_acc_filtered/info/pub",  # noqa: #501
+    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_raw/info/pub",  # noqa: #501
+    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_time_resampled/info/pub",  # noqa: #501
     ]
 LEAVES = [
     "/initialpose",
@@ -80,7 +80,7 @@ PUB_INFO = "topic_infos.pkl"
 TIMER_SEC = 1.0
 TARGET_TOPIC = "/sensing/lidar/concatenated/pointcloud"
 STOPS = [
-    "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias",
+    "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias",  # noqa: #501
     ]
 DUMP_DIR = "dump.d"
 
@@ -646,12 +646,14 @@ class LatencyViewerNode(Node):
 
         if self.dumps:
             pickle.dump(results,
-                        open(f"{DUMP_DIR}/onehot_results_{target_stamp}.pkl", "wb"),
+                        open(f"{DUMP_DIR}/onehot_results_{target_stamp}.pkl",
+                             "wb"),
                         protocol=pickle.HIGHEST_PROTOCOL)
 
         onehot_durs = calc_one_hot(results)
         logs = []
-        for (depth, name, dur_ms, dur_ms_steady, is_leaf, stamp) in onehot_durs:
+        for e in onehot_durs:
+            (depth, name, dur_ms, dur_ms_steady, is_leaf, stamp) = e
             name = truncate(" " * depth + name + ("*" if is_leaf else ""))
             if dur_ms is None:
                 dur_ms = "NA"
@@ -670,11 +672,11 @@ class LatencyViewerNode(Node):
         st = time.time()
         pubinfos = self.pub_infos
         target_topic = self.target_topic
-        topic_seq = self.topic_seq
 
         stamps = sorted(pubinfos.stamps(target_topic))
         logs = []
-        logs.append(f"stamps: {len(stamps)}, {stamps[0] if len(stamps) > 0 else ''}")
+        str_stamp = stamps[0] if len(stamps) > 0 else ''
+        logs.append(f"stamps: {len(stamps)}, {str_stamp}")
         if len(stamps) == 0:
             self.printer.print(logs)
             return

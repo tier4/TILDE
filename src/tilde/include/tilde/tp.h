@@ -13,9 +13,9 @@
 // limitations under the License.
 
 // Provide fake header guard for cpplint
-#undef TILDE_TP_H_
-#ifndef TILDE_TP_H_
-#define TILDE_TP_H_
+#undef TILDE__TP_H_
+#ifndef TILDE__TP_H_
+#define TILDE__TP_H_
 
 #undef TRACEPOINT_PROVIDER
 #define TRACEPOINT_PROVIDER ros2_caret
@@ -106,4 +106,4 @@ TRACEPOINT_EVENT(
 
 #include <lttng/tracepoint-event.h>
 
-#endif  // TILDE_TP_H_
+#endif  // TILDE__TP_H_
