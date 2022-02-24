@@ -9,7 +9,7 @@ PoC of deadline detection framework
 
 | src/            | about                                                |
 |-----------------|------------------------------------------------------|
-| pathnode        | deadline detection framework                         |
+| tilde           | deadline detection framework                         |
 | pathnode_sample | samples including talker, relay, listener and so on. |
 | path_info_msg   | FW internal msg                                      |
 

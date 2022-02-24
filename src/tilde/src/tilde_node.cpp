@@ -14,9 +14,9 @@
 
 #include <string>
 
-#include "pathnode/tilde_node.hpp"
+#include "tilde/tilde_node.hpp"
 
-using pathnode::TildeNode;
+using tilde::TildeNode;
 
 TildeNode::TildeNode(
   const std::string & node_name,

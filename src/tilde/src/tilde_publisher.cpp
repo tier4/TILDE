@@ -15,12 +15,12 @@
 #include <memory>
 #include <string>
 
-#include "pathnode/tilde_publisher.hpp"
+#include "tilde/tilde_publisher.hpp"
 #include "path_info_msg/msg/sub_topic_time_info.hpp"
 
-using pathnode::TildePublisherBase;
+using tilde::TildePublisherBase;
 
-rclcpp::Time pathnode::get_timestamp(rclcpp::Time t, ...)
+rclcpp::Time tilde::get_timestamp(rclcpp::Time t, ...)
 {
   std::cout << "get rclcpp::Time t" << std::endl;
   return t;

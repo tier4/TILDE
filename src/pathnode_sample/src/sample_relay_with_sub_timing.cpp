@@ -22,7 +22,7 @@
 
 #include "std_msgs/msg/string.hpp"
 
-#include "pathnode/tilde_node.hpp"
+#include "tilde/tilde_node.hpp"
 
 using namespace std::chrono_literals;
 
@@ -30,7 +30,7 @@ namespace pathnode_sample
 {
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
-class RelayWithSubTiming : public pathnode::TildeNode
+class RelayWithSubTiming : public tilde::TildeNode
 {
 public:
   explicit RelayWithSubTiming(const rclcpp::NodeOptions & options)
@@ -51,7 +51,7 @@ public:
   }
 
 private:
-  std::shared_ptr<pathnode::TildePublisher<std_msgs::msg::String>> pub_;
+  std::shared_ptr<tilde::TildePublisher<std_msgs::msg::String>> pub_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_;
 };
 

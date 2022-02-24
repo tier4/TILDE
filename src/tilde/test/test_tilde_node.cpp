@@ -22,12 +22,12 @@
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "rosgraph_msgs/msg/clock.hpp"
 
-#include "pathnode/tilde_node.hpp"
-#include "pathnode/tilde_publisher.hpp"
+#include "tilde/tilde_node.hpp"
+#include "tilde/tilde_publisher.hpp"
 #include "path_info_msg/msg/pub_info.hpp"
 
-using pathnode::TildeNode;
-using pathnode::InputInfo;
+using tilde::TildeNode;
+using tilde::InputInfo;
 using path_info_msg::msg::PubInfo;
 
 class TestTildeNode : public ::testing::Test

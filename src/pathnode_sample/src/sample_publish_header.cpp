@@ -23,8 +23,8 @@
 
 #include "std_msgs/msg/string.hpp"
 
-#include "pathnode/tilde_node.hpp"
-#include "pathnode/tilde_publisher.hpp"
+#include "tilde/tilde_node.hpp"
+#include "tilde/tilde_publisher.hpp"
 
 using namespace std::chrono_literals;
 
@@ -32,7 +32,7 @@ namespace pathnode_sample
 {
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
-class TalkerWithHeader : public pathnode::TildeNode
+class TalkerWithHeader : public tilde::TildeNode
 {
 public:
   explicit TalkerWithHeader(const rclcpp::NodeOptions & options)
@@ -67,8 +67,8 @@ private:
   size_t count_ = 1;
   std::unique_ptr<std_msgs::msg::String> msg_;
   std::unique_ptr<sensor_msgs::msg::PointCloud2> msg_pc_;
-  pathnode::TildePublisher<std_msgs::msg::String>::SharedPtr pub_;
-  pathnode::TildePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_pc_;
+  tilde::TildePublisher<std_msgs::msg::String>::SharedPtr pub_;
+  tilde::TildePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_pc_;
   rclcpp::TimerBase::SharedPtr timer_;
 };
 

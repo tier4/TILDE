@@ -21,7 +21,7 @@
 #define TRACEPOINT_PROVIDER ros2_caret
 
 #undef TRACEPOINT_INCLUDE
-#define TRACEPOINT_INCLUDE "pathnode/tp.h"
+#define TRACEPOINT_INCLUDE "tilde/tp.h"
 
 #if !defined(_TP_H) || defined(TRACEPOINT_HEADER_MULTI_READ)
 #define _TP_H

@@ -2,7 +2,7 @@
 
 Simple publisher, relay and listener samples.
 
-### pathnode::TildeNode children
+### tilde::TildeNode children
 
 #### files
 

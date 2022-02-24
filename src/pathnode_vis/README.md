@@ -11,7 +11,7 @@ Sample application which uses topic info or PubInfo.
 
 ## Applications
 
-To use this package, you need the system which uses pathnode::TildeNode instead of rclcpp::Node.
+To use this package, you need the system which uses tilde::TildeNode instead of rclcpp::Node.
 Also you should call `create_tilde_subscription` and `create_tilde_publisher`.
 
 You can use some tools.

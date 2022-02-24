@@ -28,11 +28,11 @@
 
 #include "path_info_msg/msg/pub_info.hpp"
 
-#include "pathnode/tp.h"
+#include "tilde/tp.h"
 
 #define TILDE_S_TO_NS(seconds) ((seconds) * (1000LL * 1000LL * 1000LL))
 
-namespace pathnode
+namespace tilde
 {
 
 /*

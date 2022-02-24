@@ -14,7 +14,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
-find_package(pathnode REQUIRED)
+find_package(tilde REQUIRED)
 find_package(path_info_msg REQUIRED)
 
 if(BUILD_TESTING)
@@ -42,7 +42,7 @@ ament_target_dependencies(pathnode_sample
     "rclcpp"
     "rclcpp_components"
     "std_msgs"
-    "pathnode"
+    "tilde"
     "path_info_msg"
     "sensor_msgs")
 

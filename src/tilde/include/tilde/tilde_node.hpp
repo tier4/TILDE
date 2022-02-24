@@ -33,9 +33,9 @@
 #include "path_info_msg/msg/pub_info.hpp"
 #include "tilde_publisher.hpp"
 
-#include "pathnode/tp.h"
+#include "tilde/tp.h"
 
-namespace pathnode
+namespace tilde
 {
 template<class>
 inline constexpr bool always_false_v = false;

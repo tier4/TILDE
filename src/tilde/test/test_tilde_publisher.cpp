@@ -19,11 +19,11 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "pathnode/tilde_publisher.hpp"
+#include "tilde/tilde_publisher.hpp"
 #include "path_info_msg/msg/pub_info.hpp"
 
-using pathnode::TildePublisherBase;
-using pathnode::InputInfo;
+using tilde::TildePublisherBase;
+using tilde::InputInfo;
 using path_info_msg::msg::PubInfo;
 
 class TestTildePublisher : public ::testing::Test
@@ -48,7 +48,7 @@ TEST_F(TestTildePublisher, set_input_info) {
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
 
   TildePublisherBase pub(clock, steady_clock, "node_name");
-  auto info = std::make_shared<pathnode::InputInfo>();
+  auto info = std::make_shared<tilde::InputInfo>();
   info->sub_time = rclcpp::Time(1, 0);
   info->sub_time_steady = steady_clock->now();
   info->has_header_stamp = true;
@@ -82,7 +82,7 @@ TEST_F(TestTildePublisher, add_explicit_input_info_subtime_not_found) {
   auto info_stamp = now - rclcpp::Duration(1, 0);
   auto search_stamp = now - rclcpp::Duration(2, 0);
 
-  auto info = std::make_shared<pathnode::InputInfo>();
+  auto info = std::make_shared<tilde::InputInfo>();
   info->sub_time = now;
   info->sub_time_steady = steady_clock->now();
   info->has_header_stamp = true;
