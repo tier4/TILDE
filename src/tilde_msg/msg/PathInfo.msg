@@ -1,3 +1,0 @@
-string path_name
-builtin_interfaces/Time path_start
-builtin_interfaces/Time callback_start
