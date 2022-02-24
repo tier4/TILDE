@@ -27,7 +27,7 @@
 
 using namespace std::chrono_literals;
 
-namespace pathnode_sample
+namespace tilde_sample
 {
 
 const char REENTRANT[] = "reentrant";
@@ -156,6 +156,6 @@ private:
 };
 
 
-}  // namespace pathnode_sample
+}  // namespace tilde_sample
 
-RCLCPP_COMPONENTS_REGISTER_NODE(pathnode_sample::SampleMultiCallback)
+RCLCPP_COMPONENTS_REGISTER_NODE(tilde_sample::SampleMultiCallback)

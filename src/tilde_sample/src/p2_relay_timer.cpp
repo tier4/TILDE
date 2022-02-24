@@ -28,7 +28,7 @@
 
 using namespace std::chrono_literals;
 
-namespace pathnode_sample
+namespace tilde_sample
 {
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
@@ -96,6 +96,6 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 };
 
-}  // namespace pathnode_sample
+}  // namespace tilde_sample
 
-RCLCPP_COMPONENTS_REGISTER_NODE(pathnode_sample::P2RelayTimer)
+RCLCPP_COMPONENTS_REGISTER_NODE(tilde_sample::P2RelayTimer)

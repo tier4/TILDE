@@ -30,7 +30,7 @@ endif()
 
 include_directories(include)
 
-add_library(pathnode_sample SHARED
+add_library(tilde_sample SHARED
   src/sample_publish_header.cpp
   src/sample_relay_with_sub_timing.cpp
   src/sample_multi_callback.cpp
@@ -38,7 +38,7 @@ add_library(pathnode_sample SHARED
   src/p2_relay_timer.cpp
   src/p2_relay_timer_with_buffer.cpp
   src/p2_goal.cpp)
-ament_target_dependencies(pathnode_sample
+ament_target_dependencies(tilde_sample
     "rclcpp"
     "rclcpp_components"
     "std_msgs"
@@ -46,49 +46,49 @@ ament_target_dependencies(pathnode_sample
     "tilde_msg"
     "sensor_msgs")
 
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::Talker"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::Talker"
   EXECUTABLE talker)
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::TalkerWithHeader"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::TalkerWithHeader"
   EXECUTABLE talker_with_header)
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::Listener"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::Listener"
   EXECUTABLE listener)
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::Relay"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::Relay"
   EXECUTABLE relay)
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::RelayWithPath"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::RelayWithPath"
   EXECUTABLE relay_with_path)
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::RelayWithPath2"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::RelayWithPath2"
   EXECUTABLE relay_with_path2)
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::RelayWithSubTiming"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::RelayWithSubTiming"
   EXECUTABLE relay_with_sub_timing)
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::SampleMultiCallback"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::SampleMultiCallback"
   EXECUTABLE sample_multi_callback)
 
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::P2Publisher"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::P2Publisher"
   EXECUTABLE p2_publisher)
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::P2RelayTimer"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::P2RelayTimer"
   EXECUTABLE p2_relaytimer)
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::P2RelayTimerWithBuffer"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::P2RelayTimerWithBuffer"
   EXECUTABLE p2_relaytimer_with_buffer)
-rclcpp_components_register_node(pathnode_sample
-  PLUGIN "pathnode_sample::P2Goal"
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::P2Goal"
   EXECUTABLE p2_goal)
 
 
 install(TARGETS
-  pathnode_sample)
+  tilde_sample)
 install(
-  TARGETS pathnode_sample EXPORT pathnode_sample
+  TARGETS tilde_sample EXPORT tilde_sample
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

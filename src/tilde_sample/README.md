@@ -15,11 +15,11 @@ Simple publisher, relay and listener samples.
 
 ``` bash
 # publisher
-ros2 component standalone pathnode_sample pathnode_sample::TalkerWithHeader -r chatter:=talker
+ros2 component standalone tilde_sample tilde_sample::TalkerWithHeader -r chatter:=talker
 
 # relay
-ros2 component standalone pathnode_sample pathnode_sample::RelayWithSubTiming -r in:=talker -r out:=relay1
-ros2 component standalone pathnode_sample pathnode_sample::RelayWithSubTiming -r in:=relay1 -r out:=relay2
+ros2 component standalone tilde_sample tilde_sample::RelayWithSubTiming -r in:=talker -r out:=relay1
+ros2 component standalone tilde_sample tilde_sample::RelayWithSubTiming -r in:=relay1 -r out:=relay2
 
 # listener - not implemented yet
 ```
