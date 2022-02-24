@@ -1,4 +1,4 @@
-PathNode sample
+TildeNode sample
 ===
 
 ## Description
@@ -7,11 +7,11 @@ PoC of deadline detection framework
 
 ## Contents
 
-| src/            | about                                                |
-|-----------------|------------------------------------------------------|
-| pathnode        | deadline detection framework                         |
-| pathnode_sample | samples including talker, relay, listener and so on. |
-| path_info_msg   | FW internal msg                                      |
+| src/         | about                                                |
+|--------------|------------------------------------------------------|
+| tilde        | deadline detection framework                         |
+| tilde_sample | samples including talker, relay, listener and so on. |
+| tilde_msg    | FW internal msg                                      |
 
 ## Build
 
@@ -22,7 +22,7 @@ colcon build --symlink-install
 
 ## Run samples
 
-The pathnode_samples are implemented as ROS2 components.
+The tilde_samples are implemented as ROS2 components.
 
 ### simple relay
 
@@ -30,22 +30,22 @@ Typical sample is the topic flow such as `/talker -> /relay1 -> /relay2 -> /list
 
 ```
 # term1: talker talks to `/talker`
-ros2 component standalone pathnode_sample pathnode_sample::Talker -r chatter:=talker
+ros2 component standalone tilde_sample tilde_sample::Talker -r chatter:=talker
 
 # term2: relay `/talker` -> `/relay1`
-ros2 component standalone pathnode_sample pathnode_sample::Relay -r in:=talker -r out:=relay1
+ros2 component standalone tilde_sample tilde_sample::Relay -r in:=talker -r out:=relay1
   # (no output)
 
 # term3: relay: `relay1` -> `relay2`
-ros2 component standalone pathnode_sample pathnode_sample::Relay -r in:=relay1 -r out:=relay2
+ros2 component standalone tilde_sample tilde_sample::Relay -r in:=relay1 -r out:=relay2
   # (no output)
 
 # term4: relay: `relay2` -> `listener`
-ros2 component standalone pathnode_sample pathnode_sample::Relay -r in:=relay2 -r out:=listener
+ros2 component standalone tilde_sample tilde_sample::Relay -r in:=relay2 -r out:=listener
   # (no output)
 
 # term5: listener subscribes `/listener`
-ros2 component standalone pathnode_sample pathnode_sample::Listener -r chatter:=listener
+ros2 component standalone tilde_sample tilde_sample::Listener -r chatter:=listener
   # [INFO] [1631063086.571361319] [listener]: I heard: [Hello World: 32]
   # [INFO] [1631063087.571401747] [listener]: I heard: [Hello World: 33]
 ```
@@ -80,10 +80,10 @@ Optionally, each callback can sleep for `wait_msec` [ms].
 
 ```
 # talker
-ros2 component standalone pathnode_sample pathnode_sample::Talker -r chatter:=talker
+ros2 component standalone tilde_sample tilde_sample::Talker -r chatter:=talker
 
 # relay_node1
-ros2 component standalone pathnode_sample pathnode_sample::RelayWithPath \
+ros2 component standalone tilde_sample tilde_sample::RelayWithPath \
    -r __node:=relay_node1 \
    -r in:=talker -r out:=relay1 \
    -p is_first:=true \
@@ -95,7 +95,7 @@ ros2 component standalone pathnode_sample pathnode_sample::RelayWithPath \
 
 
 # relay_node22
-ros2 component standalone pathnode_sample pathnode_sample::RelayWithPath \
+ros2 component standalone tilde_sample tilde_sample::RelayWithPath \
    -r __node:=relay_node2 \
    -r in:=relay1 -r out:=relay2 \
    -p is_first:=false \
@@ -106,7 +106,7 @@ ros2 component standalone pathnode_sample pathnode_sample::RelayWithPath \
    -p wait_msec:=0
 
 # relay_node3
-ros2 component standalone pathnode_sample pathnode_sample::RelayWithPath \
+ros2 component standalone tilde_sample tilde_sample::RelayWithPath \
    -r __node:=relay_node3 \
    -r in:=relay2 -r out:=listener \
    -p is_first:=false \
@@ -117,12 +117,12 @@ ros2 component standalone pathnode_sample pathnode_sample::RelayWithPath \
    -p wait_msec:=0
 
 # listener
-ros2 component standalone pathnode_sample pathnode_sample::Listener -r chatter:=listener
+ros2 component standalone tilde_sample tilde_sample::Listener -r chatter:=listener
 ```
 
 ## Test of long callbacks
 
-To check executor behaviors, we can use `pathnode_sample::SampleMultiCallback`.
+To check executor behaviors, we can use `tilde_sample::SampleMultiCallback`.
 
 It has the following callbacks:
 - three subscription callbacks `sub1` - `sub3`
@@ -142,14 +142,14 @@ In default, all subscription callbacks and timers wake up every 1[s] and send me
 
 ```
 # talker
-ros2 component standalone pathnode_sample pathnode_sample::Talker -r chatter:=sub1
-ros2 component standalone pathnode_sample pathnode_sample::Talker -r chatter:=sub2
-ros2 component standalone pathnode_sample pathnode_sample::Talker -r chatter:=sub3
+ros2 component standalone tilde_sample tilde_sample::Talker -r chatter:=sub1
+ros2 component standalone tilde_sample tilde_sample::Talker -r chatter:=sub2
+ros2 component standalone tilde_sample tilde_sample::Talker -r chatter:=sub3
 
 # sample_multi_callback
 ros2 run rclcpp_components component_container_mt
 
-ros2 component load /ComponentManager pathnode_sample pathnode_sample::SampleMultiCallback \
+ros2 component load /ComponentManager tilde_sample tilde_sample::SampleMultiCallback \
   -p sub1_wait_ms:=5000
 
 # If you want check each callback pub, do like these

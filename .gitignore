@@ -1,8 +1,6 @@
-/src/pathnode_vis/pathnode_vis/__pycache__/
+__pycache__
 /build/
 /install/
 /log/
 /*npy
 /*/*npy
-/src/analysis/__pycache__/
-/src/pathnode_vis/test/__pycache__/
