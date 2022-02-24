@@ -29,7 +29,6 @@
 
 #include "rmw/types.h"
 
-#include "tilde_msg/msg/topic_info.hpp"
 #include "tilde_msg/msg/pub_info.hpp"
 #include "tilde_publisher.hpp"
 
@@ -43,8 +42,6 @@ inline constexpr bool always_false_v = false;
 /// PoC of `every sub talks sub timing`
 class TildeNode : public rclcpp::Node
 {
-  using TopicInfoPublisher = rclcpp::Publisher<tilde_msg::msg::TopicInfo>::SharedPtr;
-
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(TildeNode)
 
@@ -97,14 +94,7 @@ public:
     auto node_topics_interface = get_node_topics_interface(this);
     auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
 
-    auto topic_info_name = resolved_topic_name + "/info/sub";
-
     std::cerr << &callback << std::endl;
-    auto topic_info_pub = create_publisher<tilde_msg::msg::TopicInfo>(
-      topic_info_name,
-      rclcpp::QoS(1));
-    topic_info_pubs_[topic_info_name] = topic_info_pub;
-    seqs_[topic_info_name] = 0;
 
     auto callback_addr = &callback;
 
@@ -116,33 +106,18 @@ public:
       resolved_topic_name.c_str());
 
     auto main_topic_callback =
-      [this, resolved_topic_name, topic_info_name, callback, callback_addr](
-      CallbackArgT msg,
-      const rclcpp::MessageInfo & info) -> void
+      [this, resolved_topic_name, callback, callback_addr](
+      CallbackArgT msg) -> void
       {
         if (this->enable_tilde) {
           auto subtime = this->now();
           auto subtime_steady = this->steady_clock_->now();
-          // publish subscription timing
-          auto minfo = info.get_rmw_message_info();
 
           tracepoint(
             TRACEPOINT_PROVIDER,
             tilde_subscribe,
             callback_addr,
             subtime_steady.nanoseconds());
-
-          auto m = std::make_unique<tilde_msg::msg::TopicInfo>();
-          auto & seq = seqs_[topic_info_name];
-          m->seq = seq;
-          seq++;
-          m->node_fqn = get_fully_qualified_name();
-          m->topic_name = resolved_topic_name;
-          for (size_t i = 0; i < RMW_GID_STORAGE_SIZE; i++) {
-            m->publisher_gid[i] = minfo.publisher_gid.data[i];
-          }
-          m->callback_start = now();
-          topic_info_pubs_[topic_info_name]->publish(std::move(m));
 
           // prepare InputInfo
           using ConstRef = const MessageT &;
@@ -230,7 +205,6 @@ public:
       this->enable_tilde);
     timing_advertise_pubs_[info_topic] = ta_pub;
 
-
     tracepoint(
       TRACEPOINT_PROVIDER,
       tilde_publisher_init,
@@ -242,12 +216,8 @@ public:
   }
 
 private:
-  /// topic info name vs TopicInfoPublisher (subscriber side)
-  std::map<std::string, TopicInfoPublisher> topic_info_pubs_;
   /// topic info name vs TildePublisher (pub side)
   std::map<std::string, std::shared_ptr<TildePublisherBase>> timing_advertise_pubs_;
-  /// topic info name vs seq
-  std::map<std::string, int64_t> seqs_;
   /// node clock may be simulation time
   std::shared_ptr<rclcpp::Clock> steady_clock_;
 
