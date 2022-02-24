@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PATHNODE__TILDE_NODE_HPP_
-#define PATHNODE__TILDE_NODE_HPP_
+#ifndef TILDE__TILDE_NODE_HPP_
+#define TILDE__TILDE_NODE_HPP_
 
 #include <map>
 #include <memory>
@@ -256,6 +256,6 @@ private:
   bool enable_tilde;
 };
 
-}  // namespace pathnode
+}  // namespace tilde
 
-#endif  // PATHNODE__TILDE_NODE_HPP_
+#endif  // TILDE__TILDE_NODE_HPP_

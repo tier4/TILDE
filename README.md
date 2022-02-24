@@ -1,4 +1,4 @@
-PathNode sample
+TildeNode sample
 ===
 
 ## Description
