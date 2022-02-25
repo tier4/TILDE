@@ -157,7 +157,7 @@ public:
           // TODO(y-okumura-isp): consider race condition in multi threaded executor.
           // i.e. subA comes when subB callback which uses topicA is running
           for (auto &[topic, tp] : tilde_pubs_) {
-            tp->set_input_info(resolved_topic_name, input_info);
+            tp->set_implicit_input_info(resolved_topic_name, input_info);
             if (input_info->has_header_stamp) {
               tp->set_explicit_subtime(resolved_topic_name, input_info);
             }
@@ -204,11 +204,11 @@ public:
     tracepoint(
       TRACEPOINT_PROVIDER,
       tilde_publisher_init,
-      ta_pub.get(),
+      tilde_pub.get(),
       get_fully_qualified_name(),
       pub->get_topic_name());
 
-    return ta_pub;
+    return tilde_pub;
   }
 
 private:

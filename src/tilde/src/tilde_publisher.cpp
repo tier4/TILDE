@@ -38,7 +38,7 @@ TildePublisherBase::TildePublisherBase(
 {
 }
 
-void TildePublisherBase::set_input_info(
+void TildePublisherBase::set_implicit_input_info(
   const std::string & sub_topic,
   const std::shared_ptr<const InputInfo> p)
 {
@@ -90,7 +90,7 @@ void TildePublisherBase::add_explicit_input_info(
   }
 }
 
-void TildePublisherBase::set_input_info(tilde_msg::msg::PubInfo & info_msg)
+void TildePublisherBase::fill_input_info(tilde_msg::msg::PubInfo & info_msg)
 {
   info_msg.input_infos.clear();
 
