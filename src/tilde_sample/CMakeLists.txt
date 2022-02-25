@@ -33,7 +33,6 @@ include_directories(include)
 add_library(tilde_sample SHARED
   src/sample_publish_header.cpp
   src/sample_relay_with_sub_timing.cpp
-  src/sample_multi_callback.cpp
   src/p2_sample_pub.cpp
   src/p2_relay_timer.cpp
   src/p2_relay_timer_with_buffer.cpp
@@ -47,29 +46,11 @@ ament_target_dependencies(tilde_sample
     "sensor_msgs")
 
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::Talker"
-  EXECUTABLE talker)
-rclcpp_components_register_node(tilde_sample
   PLUGIN "tilde_sample::TalkerWithHeader"
   EXECUTABLE talker_with_header)
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::Listener"
-  EXECUTABLE listener)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::Relay"
-  EXECUTABLE relay)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::RelayWithPath"
-  EXECUTABLE relay_with_path)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::RelayWithPath2"
-  EXECUTABLE relay_with_path2)
-rclcpp_components_register_node(tilde_sample
   PLUGIN "tilde_sample::RelayWithSubTiming"
   EXECUTABLE relay_with_sub_timing)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::SampleMultiCallback"
-  EXECUTABLE sample_multi_callback)
 
 rclcpp_components_register_node(tilde_sample
   PLUGIN "tilde_sample::P2Publisher"
