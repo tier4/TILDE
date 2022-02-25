@@ -43,7 +43,7 @@ void expect_near(
   EXPECT_NEAR(lhs.nanoseconds(), rhs.nanoseconds(), thres_ns);
 }
 
-TEST_F(TestTildePublisher, set_input_info) {
+TEST_F(TestTildePublisher, set_implicit_and_fill_input_info) {
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
 
@@ -55,12 +55,12 @@ TEST_F(TestTildePublisher, set_input_info) {
   info->header_stamp = rclcpp::Time(0, 1);
   const std::string TOPIC = "sample_topic";
 
-  pub.set_input_info(
+  pub.set_implicit_input_info(
     TOPIC,
     info);
 
   tilde_msg::msg::PubInfo msg;
-  pub.set_input_info(msg);
+  pub.fill_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
@@ -90,14 +90,16 @@ TEST_F(TestTildePublisher, add_explicit_input_info_subtime_not_found) {
   const std::string TOPIC = "sample_topic";
 
   // they should be ignored
-  pub.set_input_info(TOPIC, info);
-  pub.set_input_info(TOPIC + "2", info);
+  pub.set_implicit_input_info(TOPIC, info);
+  pub.set_implicit_input_info(TOPIC + "2", info);
 
+  // use TOPIC + search_stamp explicit info
+  // although correponding explicit subtime doesn't exist
   pub.add_explicit_input_info(
     TOPIC, search_stamp);
 
   tilde_msg::msg::PubInfo msg;
-  pub.set_input_info(msg);
+  pub.fill_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
@@ -137,7 +139,7 @@ TEST_F(TestTildePublisher, set_explicit_subtime_sucess_then_purged) {
     stamp_base + rclcpp::Duration(5, 0));
 
   tilde_msg::msg::PubInfo msg;
-  pub.set_input_info(msg);
+  pub.fill_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
@@ -151,7 +153,7 @@ TEST_F(TestTildePublisher, set_explicit_subtime_sucess_then_purged) {
     TOPIC,
     stamp_base);
 
-  pub.set_input_info(msg);
+  pub.fill_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
@@ -174,7 +176,7 @@ TEST_F(TestTildePublisher, set_explicit_subtime_sucess_then_purged) {
     TOPIC,
     stamp_base);
 
-  pub.set_input_info(msg);
+  pub.fill_input_info(msg);
 
   // check explicit info is deleted
   EXPECT_EQ(msg.input_infos.size(), 1ul);
@@ -227,7 +229,7 @@ TEST_F(TestTildePublisher, set_multiple_topic) {
     stamp_base2);
 
   tilde_msg::msg::PubInfo msg;
-  pub.set_input_info(msg);
+  pub.fill_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 2ul);
   int idx1 = 0;
@@ -271,7 +273,7 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
     input_info->has_header_stamp = true;
     input_info->header_stamp = stamp_base;
 
-    pub.set_input_info(TOPIC, input_info);
+    pub.set_implicit_input_info(TOPIC, input_info);
     pub.set_explicit_subtime(
       TOPIC, input_info);
   }
@@ -284,7 +286,7 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
   /// publish
   {
     tilde_msg::msg::PubInfo msg;
-    pub.set_input_info(msg);
+    pub.fill_input_info(msg);
 
     /// check
     EXPECT_EQ(msg.input_infos.size(), 1ul);
@@ -299,7 +301,7 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
   /// publish
   {
     tilde_msg::msg::PubInfo msg;
-    pub.set_input_info(msg);
+    pub.fill_input_info(msg);
     /// check
     EXPECT_EQ(msg.input_infos.size(), 0ul);
   }
@@ -320,7 +322,7 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
     pub.set_explicit_subtime(
       TOPIC, input_info);
 
-    pub.set_input_info(TOPIC, input_info);
+    pub.set_implicit_input_info(TOPIC, input_info);
     pub.set_explicit_subtime(
       TOPIC, input_info);
   }
@@ -328,7 +330,7 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
   /// publish
   {
     tilde_msg::msg::PubInfo msg;
-    pub.set_input_info(msg);
+    pub.fill_input_info(msg);
     /// check
     EXPECT_EQ(msg.input_infos.size(), 0ul);
   }

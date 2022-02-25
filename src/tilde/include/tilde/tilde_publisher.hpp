@@ -118,12 +118,24 @@ public:
     std::shared_ptr<rclcpp::Clock> steady_clock,
     const std::string & node_fqn);
 
-  void set_input_info(
+  /// Set implicit input info
+  /**
+   * This is a TILDE internal API for connecting input and output.
+   *
+   * \param[in] sub_topic Subscribed topic name
+   * \param[in] p InputInfo to set
+   */
+  void set_implicit_input_info(
     const std::string & sub_topic,
     const std::shared_ptr<const InputInfo> p);
 
-  /** Set sub callback time information for explicit API.
-   * It's a FW API, so your code should not call this.
+  // Explicit API helper
+  /**
+   * It's a TILDE internal API for connecting input and output by holding
+   * "sub_topic + stamp" vs InputInfo.
+   *
+   * \param[in] sub_topic Subscribed topic name
+   * \param[in] p InputInfo
    */
   void set_explicit_subtime(
     const std::string & sub_topic,
@@ -136,7 +148,14 @@ public:
     const std::string & sub_topic,
     const rclcpp::Time & stamp);
 
-  void set_input_info(tilde_msg::msg::PubInfo & info_msg);
+  /// Fill input info field of the argument message
+  /**
+   * Fill intput info field according to implicit and explicit info.
+   * Explicit info is cleared after calling this.
+   *
+   * \param[out] info_msg Target message
+   */
+  void fill_input_info(tilde_msg::msg::PubInfo & info_msg);
 
   void set_max_sub_callback_infos_sec(size_t sec);
 
@@ -279,7 +298,7 @@ private:
     msg->output_info.pub_time_steady = steady_clock_->now();
     msg->output_info.header_stamp = t;
 
-    set_input_info(*msg);
+    fill_input_info(*msg);
 
     for (auto & input_info : msg->input_infos) {
       auto pubtime = TILDE_S_TO_NS(msg->output_info.pub_time.sec) +
