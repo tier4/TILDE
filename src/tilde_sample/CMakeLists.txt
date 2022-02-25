@@ -31,8 +31,6 @@ endif()
 include_directories(include)
 
 add_library(tilde_sample SHARED
-  src/sample_publish_header.cpp
-  src/sample_relay_with_sub_timing.cpp
   src/p2_sample_pub.cpp
   src/p2_relay_timer.cpp
   src/p2_relay_timer_with_buffer.cpp
@@ -44,13 +42,6 @@ ament_target_dependencies(tilde_sample
     "tilde"
     "tilde_msg"
     "sensor_msgs")
-
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::TalkerWithHeader"
-  EXECUTABLE talker_with_header)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::RelayWithSubTiming"
-  EXECUTABLE relay_with_sub_timing)
 
 rclcpp_components_register_node(tilde_sample
   PLUGIN "tilde_sample::P2Publisher"
