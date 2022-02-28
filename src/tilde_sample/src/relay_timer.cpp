@@ -32,10 +32,10 @@ namespace tilde_sample
 {
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
-class P2RelayTimer : public tilde::TildeNode
+class RelayTimer : public tilde::TildeNode
 {
 public:
-  explicit P2RelayTimer(const rclcpp::NodeOptions & options)
+  explicit RelayTimer(const rclcpp::NodeOptions & options)
   : TildeNode("talker", options)
   {
     const std::string TIMER_MS = "timer_ms";
@@ -98,4 +98,4 @@ private:
 
 }  // namespace tilde_sample
 
-RCLCPP_COMPONENTS_REGISTER_NODE(tilde_sample::P2RelayTimer)
+RCLCPP_COMPONENTS_REGISTER_NODE(tilde_sample::RelayTimer)

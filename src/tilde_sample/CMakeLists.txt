@@ -31,10 +31,10 @@ endif()
 include_directories(include)
 
 add_library(tilde_sample SHARED
-  src/p2_sample_pub.cpp
-  src/p2_relay_timer.cpp
-  src/p2_relay_timer_with_buffer.cpp
-  src/p2_goal.cpp)
+  src/sample_publisher.cpp
+  src/relay_timer.cpp
+  src/relay_timer_with_buffer.cpp
+  src/goal.cpp)
 ament_target_dependencies(tilde_sample
     "rclcpp"
     "rclcpp_components"
@@ -44,17 +44,17 @@ ament_target_dependencies(tilde_sample
     "sensor_msgs")
 
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::P2Publisher"
-  EXECUTABLE p2_publisher)
+  PLUGIN "tilde_sample::Publisher"
+  EXECUTABLE publisher)
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::P2RelayTimer"
-  EXECUTABLE p2_relaytimer)
+  PLUGIN "tilde_sample::RelayTimer"
+  EXECUTABLE relaytimer)
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::P2RelayTimerWithBuffer"
-  EXECUTABLE p2_relaytimer_with_buffer)
+  PLUGIN "tilde_sample::RelayTimerWithBuffer"
+  EXECUTABLE relaytimer_with_buffer)
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::P2Goal"
-  EXECUTABLE p2_goal)
+  PLUGIN "tilde_sample::Goal"
+  EXECUTABLE goal)
 
 
 install(TARGETS

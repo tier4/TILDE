@@ -31,10 +31,10 @@ namespace tilde_sample
 {
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
-class P2Goal : public tilde::TildeNode
+class Goal : public tilde::TildeNode
 {
 public:
-  explicit P2Goal(const rclcpp::NodeOptions & options)
+  explicit Goal(const rclcpp::NodeOptions & options)
   : TildeNode("talker", options)
   {
     rclcpp::QoS qos(rclcpp::KeepLast(7));
@@ -56,4 +56,4 @@ private:
 
 }  // namespace tilde_sample
 
-RCLCPP_COMPONENTS_REGISTER_NODE(tilde_sample::P2Goal)
+RCLCPP_COMPONENTS_REGISTER_NODE(tilde_sample::Goal)

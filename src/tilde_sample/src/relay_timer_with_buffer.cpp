@@ -15,8 +15,9 @@
 #include <chrono>
 #include <cstdio>
 #include <memory>
-#include <string>
 #include <utility>
+#include <string>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
@@ -32,46 +33,71 @@ namespace tilde_sample
 {
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
-class P2Publisher : public tilde::TildeNode
+class RelayTimerWithBuffer : public tilde::TildeNode
 {
 public:
-  explicit P2Publisher(const rclcpp::NodeOptions & options)
+  explicit RelayTimerWithBuffer(const rclcpp::NodeOptions & options)
   : TildeNode("talker", options)
   {
     const std::string TIMER_MS = "timer_ms";
+    const std::string PROC_MS = "proc_ms";
 
     declare_parameter<int64_t>(TIMER_MS, (int64_t) 10);
+    declare_parameter<int64_t>(PROC_MS, (int64_t) 20);
     auto timer_ms = get_parameter(TIMER_MS).get_value<int64_t>();
-    std::cout << "timer_ms: " << timer_ms << std::endl;
+    auto proc_ms = get_parameter(PROC_MS).get_value<int64_t>();
+
+    rclcpp::QoS qos(rclcpp::KeepLast(7));
+
+    auto sub_callback =
+      [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
+      {
+        RCLCPP_INFO(this->get_logger(), "RelayTimer sub callback");
+        msg_pcs_.push_back(std::move(msg));
+      };
+    sub_pc_ = this->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
+      "in", qos,
+      sub_callback);
 
     // Create a function for when messages are to be sent.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-    auto publish_message =
-      [this]() -> void
+    auto proc_dur = std::chrono::duration<int64_t, std::milli>(proc_ms);
+    auto timer_callback =
+      [this, proc_dur]() -> void
       {
-        RCLCPP_INFO(this->get_logger(), "Publishing: '%ld'", count_);
-        count_++;
+        if (msg_pcs_.size() == 0) {return;}
 
-        msg_pc_ = std::make_unique<sensor_msgs::msg::PointCloud2>();
-        msg_pc_->header.stamp = this->now();
-        pub_pc_->publish(std::move(msg_pc_));
+        // TODO(y-okumura-isp) wait
+        std::this_thread::sleep_for(proc_dur);
+
+        RCLCPP_INFO(this->get_logger(), "RelayTimer publish");
+
+        auto msg = std::move(this->msg_pcs_.back());
+        msg_pcs_.pop_back();
+
+        pub_pc_->add_explicit_input_info(
+          this->sub_pc_->get_topic_name(),
+          msg->header.stamp
+        );
+
+        pub_pc_->publish(std::move(msg));
       };
+
     // Create a publisher with a custom Quality of Service profile.
-    rclcpp::QoS qos(rclcpp::KeepLast(7));
     pub_pc_ = this->create_tilde_publisher<sensor_msgs::msg::PointCloud2>("out", qos);
 
     // Use a timer to schedule periodic message publishing.
-    auto dur = std::chrono::duration<int64_t, std::milli>(timer_ms);
-    timer_ = this->create_wall_timer(dur, publish_message);
+    auto timer_dur = std::chrono::duration<int64_t, std::milli>(timer_ms);
+    timer_ = this->create_wall_timer(timer_dur, timer_callback);
   }
 
 private:
-  size_t count_ = 1;
-  std::unique_ptr<sensor_msgs::msg::PointCloud2> msg_pc_;
+  std::vector<std::unique_ptr<sensor_msgs::msg::PointCloud2>> msg_pcs_;
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_pc_;
   tilde::TildePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_pc_;
   rclcpp::TimerBase::SharedPtr timer_;
 };
 
 }  // namespace tilde_sample
 
-RCLCPP_COMPONENTS_REGISTER_NODE(tilde_sample::P2Publisher)
+RCLCPP_COMPONENTS_REGISTER_NODE(tilde_sample::RelayTimerWithBuffer)
