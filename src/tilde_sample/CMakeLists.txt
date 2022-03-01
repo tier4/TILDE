@@ -44,14 +44,17 @@ ament_target_dependencies(tilde_sample
     "sensor_msgs")
 
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::Publisher"
-  EXECUTABLE publisher)
+  PLUGIN "tilde_sample::SamplePublisherWithStamp"
+  EXECUTABLE publisher_with_stamp)
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::SamplePublisherWithoutStamp"
+  EXECUTABLE publisher_without_stamp)
 rclcpp_components_register_node(tilde_sample
   PLUGIN "tilde_sample::RelayTimer"
-  EXECUTABLE relaytimer)
+  EXECUTABLE relay_timer)
 rclcpp_components_register_node(tilde_sample
   PLUGIN "tilde_sample::RelayTimerWithBuffer"
-  EXECUTABLE relaytimer_with_buffer)
+  EXECUTABLE relay_timer_with_buffer)
 rclcpp_components_register_node(tilde_sample
   PLUGIN "tilde_sample::Goal"
   EXECUTABLE goal)
@@ -65,5 +68,10 @@ install(
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 
 ament_package()
