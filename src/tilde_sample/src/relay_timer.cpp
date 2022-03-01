@@ -60,10 +60,11 @@ public:
       "topic_with_stamp", qos,
       [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
       {
-        RCLCPP_INFO(this->get_logger(),
-                    "RelayTimer sub PointCloud2 seq: %s stamp: %lu",
-                    msg->header.frame_id.c_str(),
-                    nanoseconds(msg->header.stamp));
+        RCLCPP_INFO(
+          this->get_logger(),
+          "RelayTimer sub PointCloud2 seq: %s stamp: %lu",
+          msg->header.frame_id.c_str(),
+          nanoseconds(msg->header.stamp));
         msg_pc_ = std::move(msg);
       });
 
@@ -71,9 +72,10 @@ public:
       "topic_without_stamp", qos,
       [this](std_msgs::msg::String::UniquePtr msg) -> void
       {
-        RCLCPP_INFO(this->get_logger(),
-                    "RelayTimer sub String seq: %s",
-                    msg->data.c_str());
+        RCLCPP_INFO(
+          this->get_logger(),
+          "RelayTimer sub String seq: %s",
+          msg->data.c_str());
         msg_str_ = std::move(msg);
       });
 
@@ -96,10 +98,11 @@ public:
             msg_pc_->header.stamp = stamp;
           }
 
-          RCLCPP_INFO(this->get_logger(),
-                      "RelayTimer pub PointCloud2 seq: %s stamp: %lu",
-                      msg_pc_->header.frame_id.c_str(),
-                      nanoseconds(msg_pc_->header.stamp));
+          RCLCPP_INFO(
+            this->get_logger(),
+            "RelayTimer pub PointCloud2 seq: %s stamp: %lu",
+            msg_pc_->header.frame_id.c_str(),
+            nanoseconds(msg_pc_->header.stamp));
 
           pub_pc_->publish(std::move(msg_pc_));
           msg_pc_.reset(nullptr);
@@ -108,9 +111,10 @@ public:
         if (msg_str_) {
           // We omit the explicit API. See `if(msg_pc_)` sentence above.
 
-          RCLCPP_INFO(this->get_logger(),
-                      "RelayTimer pub String seq: %s",
-                      msg_str_->data.c_str());
+          RCLCPP_INFO(
+            this->get_logger(),
+            "RelayTimer pub String seq: %s",
+            msg_str_->data.c_str());
 
           pub_str_->publish(std::move(msg_str_));
           msg_str_.reset(nullptr);
@@ -137,7 +141,7 @@ private:
 
   rclcpp::TimerBase::SharedPtr timer_;
 
-  uint64_t nanoseconds(const builtin_interfaces::msg::Time &time_msg)
+  uint64_t nanoseconds(const builtin_interfaces::msg::Time & time_msg)
   {
     rclcpp::Time time(time_msg);
     return time.nanoseconds();

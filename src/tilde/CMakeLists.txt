@@ -18,6 +18,7 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_lint_auto REQUIRED)
   find_package(sensor_msgs REQUIRED)
+  find_package(std_msgs REQUIRED)
   # the following line skips the linter which checks for copyrights
   # uncomment the line when a copyright and license is not present in all source files
   set(ament_cmake_copyright_FOUND TRUE)
@@ -49,7 +50,22 @@ if(BUILD_TESTING)
   ament_target_dependencies(test_tilde_node
     "rclcpp"
     "tilde_msg"
-    "sensor_msgs")
+    "sensor_msgs"
+    "std_msgs")
+
+  ament_add_gtest(test_stamp_processor
+    test/test_stamp_processor.cpp)
+  target_include_directories(test_stamp_processor
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+  target_link_libraries(test_stamp_processor
+    ${PROJECT_NAME})
+  ament_target_dependencies(test_stamp_processor
+    "rclcpp"
+    "sensor_msgs"
+    "std_msgs")
+
 endif()
 
 include_directories(include)

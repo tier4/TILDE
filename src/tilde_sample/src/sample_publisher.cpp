@@ -62,9 +62,10 @@ public:
         msg_pc_->header.frame_id = std::to_string(count_);
         pub_pc_->publish(std::move(msg_pc_));
 
-        RCLCPP_INFO(this->get_logger(), "Publishing PointCloud2: %ld stamp: %lu",
-                    count_,
-                    time_now.nanoseconds());
+        RCLCPP_INFO(
+          this->get_logger(), "Publishing PointCloud2: %ld stamp: %lu",
+          count_,
+          time_now.nanoseconds());
 
         count_++;
       };
@@ -113,9 +114,10 @@ public:
         msg_string_->data = std::to_string(count_);
         pub_string_->publish(std::move(msg_string_));
 
-        RCLCPP_INFO(this->get_logger(), "Publishing String: '%ld' at '%lu'",
-                    count_,
-                    time_now.nanoseconds());
+        RCLCPP_INFO(
+          this->get_logger(), "Publishing String: '%ld' at '%lu'",
+          count_,
+          time_now.nanoseconds());
 
         count_++;
       };

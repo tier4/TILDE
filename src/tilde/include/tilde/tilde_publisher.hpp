@@ -65,14 +65,14 @@ struct HasHeader<M, decltype((void) M::header)>: std::true_type {};
 template<typename M, typename Enable = void>
 struct Process
 {
-  static rclcpp::Time get_timestamp2(rclcpp::Time t, M * m)
+  static rclcpp::Time get_timestamp(rclcpp::Time t, M * m)
   {
     // std::cout << "rclcpp::Time2" << std::endl;
     (void) m;
     return t;
   }
 
-  static rclcpp::Time get_timestamp3(rclcpp::Time t, const M * m)
+  static rclcpp::Time get_timestamp_from_const(rclcpp::Time t, const M * m)
   {
     // std::cout << "rclcpp::Time3" << std::endl;
     (void) m;
@@ -83,14 +83,14 @@ struct Process
 template<typename M>
 struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
 {
-  static rclcpp::Time get_timestamp2(rclcpp::Time t, M * m)
+  static rclcpp::Time get_timestamp(rclcpp::Time t, M * m)
   {
     // std::cout << "header Time2" << std::endl;
     (void) t;
     return m->header.stamp;
   }
 
-  static rclcpp::Time get_timestamp3(rclcpp::Time t, const M * m)
+  static rclcpp::Time get_timestamp_from_const(rclcpp::Time t, const M * m)
   {
     // std::cout << "header Time3" << std::endl;
     (void) t;
@@ -217,7 +217,9 @@ public:
   publish(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
     if (enable_) {
-      publish_info(Process<MessageT>::get_timestamp2(clock_->now(), msg.get()));
+      rclcpp::Time t(0, 100, clock_->get_clock_type());
+      auto stamp = Process<MessageT>::get_timestamp(t, msg.get());
+      publish_info((t != stamp), std::move(stamp));
     }
     pub_->publish(std::move(msg));
   }
@@ -226,7 +228,9 @@ public:
   publish(const MessageT & msg)
   {
     if (enable_) {
-      publish_info(Process<MessageT>::get_timestamp3(clock_->now(), &msg));
+      rclcpp::Time t(0, 100, clock_->get_clock_type());
+      auto stamp = Process<MessageT>::get_timestamp_from_const(t, &msg);
+      publish_info((t != stamp), std::move(stamp));
     }
     pub_->publish(msg);
   }
@@ -280,11 +284,12 @@ private:
   const std::string node_fqn_;
   bool enable_;
 
+  /// Publish PubInfo
   /**
-   * t: header stamp
-   * TODO: we cannot distinguish t is header.stamp or now in current implementation
+   * \param has_header_stamp whether main message has header.stamp
+   * \param t header stamp
    */
-  void publish_info(rclcpp::Time && t)
+  void publish_info(bool has_header_stamp, rclcpp::Time && t)
   {
     auto msg = std::make_unique<tilde_msg::msg::PubInfo>();
     msg->header.stamp = clock_->now();
@@ -296,7 +301,10 @@ private:
     seq_++;
     msg->output_info.pub_time = clock_->now();
     msg->output_info.pub_time_steady = steady_clock_->now();
-    msg->output_info.header_stamp = t;
+    msg->output_info.has_header_stamp = has_header_stamp;
+    if (has_header_stamp) {
+      msg->output_info.header_stamp = t;
+    }
 
     fill_input_info(*msg);
 
