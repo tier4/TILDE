@@ -128,19 +128,19 @@ public:
           using S = std::decay_t<decltype(msg)>;
           if constexpr (std::is_same_v<S, ConstRef>) {
             // std::cout << "visit: ConstRef\n";
-            header_stamp = Process<MessageT>::get_timestamp3(t, &msg);
+            header_stamp = Process<MessageT>::get_timestamp_from_const(t, &msg);
           } else if constexpr (std::is_same_v<S, UniquePtr>) {
             // std::cout << "visit: UniquePtr\n";
-            header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
+            header_stamp = Process<MessageT>::get_timestamp_from_const(t, msg.get());
           } else if constexpr (std::is_same_v<S, SharedConstPtr>) {
             // std::cout << "visit: SharedConstPtr\n";
-            header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
+            header_stamp = Process<MessageT>::get_timestamp_from_const(t, msg.get());
           } else if constexpr (std::is_same_v<S, ConstRefSharedConstPtr>) {
             // std::cout << "visit: ConstRefSharedPtr\n";
-            header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
+            header_stamp = Process<MessageT>::get_timestamp_from_const(t, msg.get());
           } else if constexpr (std::is_same_v<S, SharedPtr>) {
             // std::cout << "visit: SharedPtr\n";
-            header_stamp = Process<MessageT>::get_timestamp3(t, msg.get());
+            header_stamp = Process<MessageT>::get_timestamp_from_const(t, msg.get());
           } else {
             static_assert(always_false_v<S>, "non-exhaustive visitor!");
           }

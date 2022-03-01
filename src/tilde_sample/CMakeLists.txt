@@ -31,13 +31,10 @@ endif()
 include_directories(include)
 
 add_library(tilde_sample SHARED
-  src/sample_publish_header.cpp
-  src/sample_relay_with_sub_timing.cpp
-  src/sample_multi_callback.cpp
-  src/p2_sample_pub.cpp
-  src/p2_relay_timer.cpp
-  src/p2_relay_timer_with_buffer.cpp
-  src/p2_goal.cpp)
+  src/sample_publisher.cpp
+  src/relay_timer.cpp
+  src/relay_timer_with_buffer.cpp
+  src/goal.cpp)
 ament_target_dependencies(tilde_sample
     "rclcpp"
     "rclcpp_components"
@@ -47,42 +44,20 @@ ament_target_dependencies(tilde_sample
     "sensor_msgs")
 
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::Talker"
-  EXECUTABLE talker)
+  PLUGIN "tilde_sample::SamplePublisherWithStamp"
+  EXECUTABLE publisher_with_stamp)
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::TalkerWithHeader"
-  EXECUTABLE talker_with_header)
+  PLUGIN "tilde_sample::SamplePublisherWithoutStamp"
+  EXECUTABLE publisher_without_stamp)
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::Listener"
-  EXECUTABLE listener)
+  PLUGIN "tilde_sample::RelayTimer"
+  EXECUTABLE relay_timer)
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::Relay"
-  EXECUTABLE relay)
+  PLUGIN "tilde_sample::RelayTimerWithBuffer"
+  EXECUTABLE relay_timer_with_buffer)
 rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::RelayWithPath"
-  EXECUTABLE relay_with_path)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::RelayWithPath2"
-  EXECUTABLE relay_with_path2)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::RelayWithSubTiming"
-  EXECUTABLE relay_with_sub_timing)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::SampleMultiCallback"
-  EXECUTABLE sample_multi_callback)
-
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::P2Publisher"
-  EXECUTABLE p2_publisher)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::P2RelayTimer"
-  EXECUTABLE p2_relaytimer)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::P2RelayTimerWithBuffer"
-  EXECUTABLE p2_relaytimer_with_buffer)
-rclcpp_components_register_node(tilde_sample
-  PLUGIN "tilde_sample::P2Goal"
-  EXECUTABLE p2_goal)
+  PLUGIN "tilde_sample::Goal"
+  EXECUTABLE goal)
 
 
 install(TARGETS
@@ -93,5 +68,10 @@ install(
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 
 ament_package()
