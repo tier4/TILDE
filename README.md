@@ -1,17 +1,15 @@
-TildeNode sample
-===
+# TILDE - Tilde Is Latency Data Embedding
 
-## Description
-
-PoC of deadline detection framework
+[README(ja)](./doc/README.md)
 
 ## Contents
 
 | src/         | about                                                |
 |--------------|------------------------------------------------------|
-| tilde        | deadline detection framework                         |
+| tilde        | TILDE main code                                      |
 | tilde_sample | samples including talker, relay, listener and so on. |
-| tilde_msg    | FW internal msg                                      |
+| tilde_msg    | TILDE internal msg                                   |
+| tilde_vis    | TILDE results visualization                          |
 
 ## Build
 
