@@ -60,28 +60,33 @@ TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用�
 ご自分のアプリケーションに取り込む際は rclcpp::Node を tilde::TildeNode に置換するなど、機械的な置換で利用可能です。
 
 - Node
-  - tilde::TildeNode
+  - [tilde::TildeNode](../src/tilde/include/tilde/tilde_node.hpp). 下記も参照。
 - Publisher
-  - tilde::Node::create_tilde_publisher()
-  - tilde::TildePublisherBase
-  - tilde::TildePublisher
+  - [tilde::Node::create_tilde_publisher()](../src/tilde/include/tilde/tilde_node.hpp)
+  - [tilde::TildePublisher](../src/tilde/include/tilde/tilde_publisher.hpp)
+  - [tilde::TildePublisher::publish()](../src/tilde/include/tilde/tilde_publisher.hpp)
 - Subscription
-  - tilde::Node::create_tilde_subscription()
+  - [tilde::Node::create_tilde_subscription()](../src/tilde/include/tilde/tilde_node.hpp)
 - PubInfo explicit API
-  - tilde::TildePublisherBase::set_explicit_input_info()
-  - tilde::TildePublisherBase::set_max_sub_callback_infos_sec() ★ parameter も
+  - [tilde::TildePublisherBase::set_explicit_input_info()](../src/tilde/include/tilde/tilde_publisher.hpp)
+  - [tilde::TildePublisherBase::set_max_sub_callback_infos_sec()](../src/tilde/include/tilde/tilde_publisher.hpp)
 - Deadline detection
   - T.B.D.
 
-※ TODO: ↑のリストを各 API のコメントドキュメントへのリンクにする  
-※ TODO: TildeNode のパラメタは上記のコメントドキュメントに載せる  
-※ TODO: [CARET_demos](https://github.com/tier4/CARET_demos) の様なサンプルプロジェクトを作り、その中のコードを解説する文書を作成し、リンクする  
-※ TODO: multi-thread reentrant 時が未対応 →  input info のガード
+### tilde::TildeNode
+
+rclcpp::Node の子クラスです。
+以下の Parameter を持ちます。
+
+- `enable_tilde`
+  - boolean. 
+  - false の場合 TILDE の機能がオフになる。つまり Subscription callback でのフックや publish 時の PubInfo 送信が抑制される。
+  - 2022/03/02 現在初期化時のみ指定可能。
 
 ## インストール・組み込み
 
 既存のアプリケーションに TILDE を組み込む際は以下の流れになります。
-※ TODO: TILDEライブラリ（*.a）の取込み手順
+※ TODO: TILDEライブラリ（*.so）の取込み手順
 
 - rclcpp::Node, rclcpp::Node::create_publisher, rclcpp::Node::create_subscription に代わり tilde の各 API の利用
   - rclcpp::Node とコンストラクタを tilde::TildeNode に置換
@@ -97,9 +102,18 @@ TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用�
 - CMakeLists.txt に tilde, tilde_msg を追加
 - メッセージをバッファしているノードがあれば PubInfo explicit API の呼び出しを追加
 
-サンプルプロジェクトは以下を参照下さい。
+サンプルプロジェクトは [tilde_sample](../src/tilde_sample) をご覧下さい。
 
-※ TODO: [CARET_demos](https://github.com/tier4/CARET_demos) の様なサンプルプロジェクトを作りリンクする  
+- sample_publisher.cpp
+  - ros2/demos の talker.cpp 相当のプログラムです
+  - メイントピックの header.stamp の有無が異なる 2 サンプルがあります。
+  - `TildeNode`, `create_tilde_publisher` の例です。
+- relay_timer.cpp
+  - sample_publisher.cpp のトピックを受信・転送するプログラムです。
+  - `create_tilde_subscription` の例です。
+- relay_timer_with_buffer.cpp
+  - relay_timer.cpp で buffer がある例です。
+  - relay_timer.cpp に加え explicit API を用いています。
 
 ## デッドライン検出
 

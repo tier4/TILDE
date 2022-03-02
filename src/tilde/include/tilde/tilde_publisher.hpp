@@ -35,15 +35,7 @@
 namespace tilde
 {
 
-/*
-template <class T>
-auto get_timestamp(rclcpp::Time t, T a) -> decltype(a.header.timestamp, t)
-{
-  std::cout << "T a: true" << std::endl;
-  return a.header.timestamp;
-}
-*/
-
+/// Internal class to hold input message information
 class InputInfo
 {
 public:
@@ -56,43 +48,71 @@ public:
   : has_header_stamp(false) {}
 };
 
+/// SFINEs to detect header field, not found case
 template<typename M, typename = void>
 struct HasHeader : public std::false_type {};
 
+/// SFINEs to detect header field, found case
 template<typename M>
 struct HasHeader<M, decltype((void) M::header)>: std::true_type {};
 
+/// SFINEs to get header.stamp, not found case
 template<typename M, typename Enable = void>
 struct Process
 {
+  /// stamp getter for non-const pointer without header field
+  /**
+   * Return dummy stamp as M has no header field.
+   *
+   * \param[in] t dummy stamp
+   * \param[in] m message
+   */
   static rclcpp::Time get_timestamp(rclcpp::Time t, M * m)
   {
-    // std::cout << "rclcpp::Time2" << std::endl;
     (void) m;
     return t;
   }
 
+  /// stamp getter for const pointer without header field
+  /**
+   * Return dummy stamp as M has no header field.
+   *
+   * \param[in] t dummy stamp
+   * \param[in] m message
+   */
   static rclcpp::Time get_timestamp_from_const(rclcpp::Time t, const M * m)
   {
-    // std::cout << "rclcpp::Time3" << std::endl;
     (void) m;
     return t;
   }
 };
 
+/// SFINEs to get header.stamp, found case
 template<typename M>
 struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
 {
+  /// stamp getter for non-const pointer with header field
+  /**
+   * Return header.stamp
+   *
+   * \param[in] t dummy stamp
+   * \param[in] m message
+   */
   static rclcpp::Time get_timestamp(rclcpp::Time t, M * m)
   {
-    // std::cout << "header Time2" << std::endl;
     (void) t;
     return m->header.stamp;
   }
 
+  /// stamp getter for const pointer with header field
+  /**
+   * Return header.stamp
+   *
+   * \param[in] t dummy stamp
+   * \param[in] m message
+   */
   static rclcpp::Time get_timestamp_from_const(rclcpp::Time t, const M * m)
   {
-    // std::cout << "header Time3" << std::endl;
     (void) t;
     return m->header.stamp;
   }
@@ -113,6 +133,12 @@ class TildePublisherBase
 public:
   using InfoMsg = tilde_msg::msg::PubInfo;
 
+  /// Constructor
+  /**
+   * \param[in] clock for RCL_ROS_TIME
+   * \param[in] clock for RCL_STEADY_TIME
+   * \param[in] node_fqn a node name
+   */
   explicit TildePublisherBase(
     std::shared_ptr<rclcpp::Clock> clock,
     std::shared_ptr<rclcpp::Clock> steady_clock,
@@ -129,7 +155,7 @@ public:
     const std::string & sub_topic,
     const std::shared_ptr<const InputInfo> p);
 
-  // Explicit API helper
+  /// Explicit API helper
   /**
    * It's a TILDE internal API for connecting input and output by holding
    * "sub_topic + stamp" vs InputInfo.
@@ -141,8 +167,17 @@ public:
     const std::string & sub_topic,
     const std::shared_ptr<const InputInfo> p);
 
+  /// Explicit API
   /**
-   * assume set_explicit_subtime is already called
+   * Declare input messages explicitly.
+   * Specify all messages you use before publishing the message.
+   *
+   * TildePublisher gets corresponding InputInfo from topic name + stamp.
+   * If not found, input_info.header_stamp in PubInfo is filled
+   * but sub_time and sub_time_steady are zero cleared.
+   *
+   * \param[in] sub_topic used topic
+   * \param[in] stamp header.stamp of the used message
    */
   void add_explicit_input_info(
     const std::string & sub_topic,
@@ -150,6 +185,7 @@ public:
 
   /// Fill input info field of the argument message
   /**
+   * It's a TILDE internal API.
    * Fill intput info field according to implicit and explicit info.
    * Explicit info is cleared after calling this.
    *
@@ -157,6 +193,16 @@ public:
    */
   void fill_input_info(tilde_msg::msg::PubInfo & info_msg);
 
+  /// Set how long to hold InputInfo
+  /**
+   * TildePublisher holds InputInfo of every message just a seconds to
+   * fill in sub_time and sub_time_steady fields of PubInfo
+   * for explicit API.
+   * You can adjust how many seconds to hold InputInfo.
+   * The default is 2 seconds.
+   *
+   * \param[in] sec how many seconds to hold InputInfo
+   */
   void set_max_sub_callback_infos_sec(size_t sec);
 
 protected:
@@ -184,7 +230,7 @@ private:
   size_t MAX_SUB_CALLBACK_INFOS_SEC_;
 };
 
-
+/// rclcpp::Publisher TILDE version
 template<typename MessageT,
   typename AllocatorT = std::allocator<void>>
 class TildePublisher : public TildePublisherBase
@@ -199,6 +245,7 @@ private:
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(TildePublisher)
 
+  /// Default constructor
   TildePublisher(
     std::shared_ptr<PubInfoPublisher> info_pub,
     std::shared_ptr<PublisherT> pub,
@@ -235,25 +282,37 @@ public:
     pub_->publish(msg);
   }
 
+  /**
+   * publish() variant
+   * can send a main message but cannot send the corresponding PubInfo
+   */
   void
   publish(const rcl_serialized_message_t & serialized_msg)
   {
-    std::cout << "TAP publish serialized message (not supported)" << std::endl;
+    std::cout << "publish serialized message (not supported)" << std::endl;
     // publish_info(get_timestamp(clock_->now(), msg.get()));
     pub_->publish(serialized_msg);
   }
 
+  /**
+   * publish() variant
+   * can send a main message but cannot send the corresponding PubInfo
+   */
   void
   publish(const rclcpp::SerializedMessage & serialized_msg)
   {
-    std::cout << "TAP publish SerializedMessage (not supported)" << std::endl;
+    std::cout << "publish SerializedMessage (not supported)" << std::endl;
     pub_->publish(serialized_msg);
   }
 
+  /**
+   * publish() variant
+   * can send a main message but cannot send the corresponding PubInfo
+   */
   void
   publish(rclcpp::LoanedMessage<MessageT, AllocatorT> && loaned_msg)
   {
-    std::cout << "TAP publish LoanedMessage (not supported)" << std::endl;
+    std::cout << "publish LoanedMessage (not supported)" << std::endl;
     pub_->publish(loaned_msg);
   }
 

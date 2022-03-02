@@ -39,17 +39,19 @@ namespace tilde
 template<class>
 inline constexpr bool always_false_v = false;
 
+/// Use TildeNode instead of rclcpp::Node and its create_* methods
 class TildeNode : public rclcpp::Node
 {
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(TildeNode)
 
-
+  /// see corresponding rclcpp::Node constructor
   RCLCPP_PUBLIC
   explicit TildeNode(
     const std::string & node_name,
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
+  /// see corresponding rclcpp::Node constructor
   RCLCPP_PUBLIC
   explicit TildeNode(
     const std::string & node_name,
