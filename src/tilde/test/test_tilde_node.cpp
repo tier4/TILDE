@@ -192,3 +192,63 @@ TEST_F(TestTildeNode, no_header_case) {
   rclcpp::spin_some(checker_node);
   EXPECT_TRUE(checker_sub_called);
 }
+
+TEST_F(TestTildeNode, enable_tilde) {
+  rclcpp::NodeOptions options;
+  options.append_parameter_override("use_sim_time", true);
+  options.append_parameter_override("enable_tilde", false);
+
+  auto sensor_node = std::make_shared<rclcpp::Node>("sensorNode", options);
+  auto main_node = std::make_shared<TildeNode>("pubNode", options);
+  auto checker_node = std::make_shared<rclcpp::Node>("checkerNode", options);
+
+  bool enable_tilde = true;
+  main_node->get_parameter("enable_tilde", enable_tilde);
+  EXPECT_EQ(enable_tilde, false);
+
+  auto sensor_pub = sensor_node->create_publisher<sensor_msgs::msg::PointCloud2>(
+    "in_topic", 1);
+  auto clock_pub = sensor_node->create_publisher<rosgraph_msgs::msg::Clock>(
+    "/clock", 1);
+
+  // apply "/clock"
+  rosgraph_msgs::msg::Clock clock_msg;
+  clock_msg.clock.sec = 123;
+  clock_msg.clock.nanosec = 456;
+
+  clock_pub->publish(clock_msg);
+  rclcpp::spin_some(sensor_node);
+  rclcpp::spin_some(main_node);
+
+  // prepare pub/sub
+  auto main_pub = main_node->create_tilde_publisher<sensor_msgs::msg::PointCloud2>(
+    "out_topic", 1);
+  auto main_sub = main_node->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
+    "in_topic", 1,
+    [&main_pub](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
+    {
+      std::cout << "main_sub_callback" << std::endl;
+      (void)msg;
+      main_pub->publish(std::move(msg));
+    });
+
+  bool checker_sub_called = false;
+  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::PubInfo>(
+    "out_topic/info/pub", 1,
+    [&checker_sub_called, clock_msg](tilde_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
+    {
+      (void) pub_info_msg;
+      checker_sub_called = true;
+      EXPECT_TRUE(false);  // expect never comes here
+    });
+
+  // do scenario
+  auto sensor_msg = std::make_unique<sensor_msgs::msg::PointCloud2>();
+  sensor_msg->header.stamp = sensor_node->now();
+  sensor_pub->publish(std::move(sensor_msg));
+
+  rclcpp::spin_some(sensor_node);
+  rclcpp::spin_some(main_node);
+  rclcpp::spin_some(checker_node);
+  EXPECT_EQ(checker_sub_called, false);
+}
