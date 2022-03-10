@@ -100,8 +100,7 @@ rclcpp::Node の子クラスです。
   - `#include "tilde/tilde_publisher.hpp"`
 - package.xml に tilde を追加
   - `<depend>tilde</depend>`
-  - `<depend>tilde_msg</depend>`
-- CMakeLists.txt に tilde, tilde_msg を追加
+- CMakeLists.txt に tilde を追加
 - メッセージをバッファしているノードがあれば PubInfo explicit API の呼び出しを追加
 
 サンプルプロジェクトは [tilde_sample](../src/tilde_sample) をご覧下さい。

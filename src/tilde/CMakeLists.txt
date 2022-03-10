@@ -90,7 +90,7 @@ target_compile_definitions(${PROJECT_NAME}
   PRIVATE "TILDE_BUILDING_LIBRARY")
 ament_export_targets(${PROJECT_NAME})
 ament_export_libraries(${PROJECT_NAME})
-ament_export_dependencies(rclcpp)
+ament_export_dependencies(rclcpp tilde_msg)
 
 install(
   TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}
