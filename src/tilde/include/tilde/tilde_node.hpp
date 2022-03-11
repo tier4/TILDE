@@ -92,8 +92,6 @@ public:
     auto node_topics_interface = get_node_topics_interface(this);
     auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
 
-    std::cerr << &callback << std::endl;
-
     auto callback_addr = &callback;
 
     tracepoint(
