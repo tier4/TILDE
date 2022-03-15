@@ -15,7 +15,6 @@ find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
 find_package(tilde REQUIRED)
-find_package(tilde_msg REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -40,7 +39,6 @@ ament_target_dependencies(tilde_sample
     "rclcpp_components"
     "std_msgs"
     "tilde"
-    "tilde_msg"
     "sensor_msgs")
 
 rclcpp_components_register_node(tilde_sample
