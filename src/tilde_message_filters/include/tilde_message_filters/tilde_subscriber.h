@@ -19,11 +19,13 @@ public:
 
   TildeSubscriber(NodePtr node, const std::string& topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
   {
+    subscribe(node, topic, qos, rclcpp::SubscriptionOptions());
     subscriber_.subscribe(node, topic, qos);
   }
 
   TildeSubscriber(NodeType * node, const std::string& topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
   {
+    subscribe(node, topic, qos, rclcpp::SubscriptionOptions());
     subscriber_.subscribe(node, topic, qos);
   }
 
@@ -31,11 +33,13 @@ public:
 
   void subscribe(NodePtr node, const std::string& topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
   {
+    subscribe(node, topic, qos, rclcpp::SubscriptionOptions());
     subscriber_.subscribe(node, topic, qos);
   }
 
   void subscribe(NodeType * node, const std::string& topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
   {
+    subscribe(node, topic, qos, rclcpp::SubscriptionOptions());
     subscriber_.subscribe(node, topic, qos);
   }
 
@@ -45,6 +49,7 @@ public:
     const rmw_qos_profile_t qos,
     rclcpp::SubscriptionOptions options)
   {
+    node_shared_ = node;
     subscriber_.subscribe(node, topic, qos, options);
   }
 
@@ -54,6 +59,7 @@ public:
     const rmw_qos_profile_t qos,
     rclcpp::SubscriptionOptions options)
   {
+    node_raw_ = node;
     subscriber_.subscribe(node, topic, qos, options);
   }
 
@@ -137,6 +143,9 @@ public:
   }
 
 private:
+  NodePtr node_shared_;
+  NodeType * node_raw_ {nullptr};
+
   message_filters::Subscriber<M> subscriber_;
 };
 }  // namespace tilde_message_filters
