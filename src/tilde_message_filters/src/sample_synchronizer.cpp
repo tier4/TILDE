@@ -16,35 +16,39 @@ typedef std::shared_ptr<sensor_msgs::msg::PointCloud2> MsgPtr;
 
 namespace sample_tilde_message_filter
 {
-class SampleSynchronizer : public tilde::TildeNode
+class SampleSynchronizer2 : public tilde::TildeNode
 {
   using SyncPolicy = message_filters::sync_policies::ExactTime<Msg, Msg>;
   using Sync = tilde_message_filters::TildeSynchronizer<SyncPolicy>;
+  using Subscriber = message_filters::Subscriber<Msg>;
 
 public:
-  explicit SampleSynchronizer(const rclcpp::NodeOptions & options)
-  : TildeNode("sub_with_header", options)
+  explicit SampleSynchronizer2(const rclcpp::NodeOptions & options)
+  : TildeNode("sample_sync2", options)
   {
     std::cout << "hee" << std::endl;
 
     rclcpp::QoS qos(rclcpp::KeepLast(7));
-    sub_pc1_.subscribe(this, "in1", qos.get_rmw_qos_profile());
-    sub_pc2_.subscribe(this, "in2", qos.get_rmw_qos_profile());
+    auto rmw_qos = qos.get_rmw_qos_profile();
 
-    sync_ptr_ = std::make_shared<Sync>(SyncPolicy(5), sub_pc1_, sub_pc2_);
+    sub_pc1_.subscribe(this, "in1", rmw_qos);
+    sub_pc2_.subscribe(this, "in2", rmw_qos);
+
+    sync_ptr_ = std::make_shared<Sync>(
+        SyncPolicy(5),
+        sub_pc1_,
+        sub_pc2_);
 
     // registerCallback(const C& callback) version:
     // <- (const C&) can bind rvalue
     sync_ptr_->registerCallback(
-        std::bind(&SampleSynchronizer::sub_callback, this,
+        std::bind(&SampleSynchronizer2::sub_callback, this,
                   std::placeholders::_1, std::placeholders::_2));
     std::cout << "hoo" << std::endl;
   }
 
 private:
-  tilde_message_filters::TildeSubscriber<Msg> sub_pc1_, sub_pc2_;
-  MsgPtr msg_;
-
+  Subscriber sub_pc1_, sub_pc2_;
   std::shared_ptr<Sync> sync_ptr_;
 
   void sub_callback(const MsgConstPtr &msg1,
@@ -54,8 +58,60 @@ private:
     (void) msg2;
     std::cout << "sub_callback" << std::endl;
   }
-
 };
+
+class SampleSynchronizer3 : public tilde::TildeNode
+{
+  using SyncPolicy = message_filters::sync_policies::ExactTime<Msg, Msg, Msg>;
+  using Sync = tilde_message_filters::TildeSynchronizer<SyncPolicy>;
+  using Subscriber = message_filters::Subscriber<Msg>;
+
+public:
+  explicit SampleSynchronizer3(const rclcpp::NodeOptions & options)
+  : TildeNode("sample_sync3", options)
+  {
+    std::cout << "hee" << std::endl;
+
+    rclcpp::QoS qos(rclcpp::KeepLast(7));
+    auto rmw_qos = qos.get_rmw_qos_profile();
+
+    sub_pc1_.subscribe(this, "in1", rmw_qos);
+    sub_pc2_.subscribe(this, "in2", rmw_qos);
+    sub_pc3_.subscribe(this, "in3", rmw_qos);
+
+    sync_ptr_ = std::make_shared<Sync>(
+        SyncPolicy(5),
+        sub_pc1_,
+        sub_pc2_,
+        sub_pc3_);
+
+    // registerCallback(const C& callback) version:
+    // <- (const C&) can bind rvalue
+    sync_ptr_->registerCallback(
+        std::bind(&SampleSynchronizer3::sub_callback, this,
+                  std::placeholders::_1,
+                  std::placeholders::_2,
+                  std::placeholders::_3
+                  ));
+    std::cout << "hoo" << std::endl;
+  }
+
+private:
+  Subscriber sub_pc1_, sub_pc2_, sub_pc3_;
+  std::shared_ptr<Sync> sync_ptr_;
+
+  void sub_callback(const MsgConstPtr &msg1,
+                    const MsgConstPtr &msg2,
+                    const MsgConstPtr &msg3)
+  {
+    (void) msg1;
+    (void) msg2;
+    (void) msg3;
+    std::cout << "sub_callback" << std::endl;
+  }
+};
+
 }  // sample_tilde_message_filter
 
-RCLCPP_COMPONENTS_REGISTER_NODE(sample_tilde_message_filter::SampleSynchronizer)
+RCLCPP_COMPONENTS_REGISTER_NODE(sample_tilde_message_filter::SampleSynchronizer2)
+RCLCPP_COMPONENTS_REGISTER_NODE(sample_tilde_message_filter::SampleSynchronizer3)

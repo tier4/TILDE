@@ -33,8 +33,11 @@ rclcpp_components_register_node(sample_tilde_message_filter
   PLUGIN "sample_tilde_message_filter::SampleSubscriberWithHeader"
   EXECUTABLE subscriber_with_header)
 rclcpp_components_register_node(sample_tilde_message_filter
-  PLUGIN "sample_tilde_message_filter::SampleSynchronizer"
-  EXECUTABLE sample_synchronizer)
+  PLUGIN "sample_tilde_message_filter::SampleSynchronizer2"
+  EXECUTABLE sample_synchronizer2)
+rclcpp_components_register_node(sample_tilde_message_filter
+  PLUGIN "sample_tilde_message_filter::SampleSynchronizer3"
+  EXECUTABLE sample_synchronizer3)
 rclcpp_components_register_node(sample_tilde_message_filter
   PLUGIN "sample_tilde_message_filter::SamplePublisherWithHeader"
   EXECUTABLE publisher_with_header)
