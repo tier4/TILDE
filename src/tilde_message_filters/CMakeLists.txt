@@ -20,7 +20,9 @@ include_directories(include)
 ament_export_include_directories(include)
 
 add_library(sample_tilde_message_filter SHARED
-  src/sample_tilde_subscriber.cpp)
+  src/sample_tilde_subscriber.cpp
+  src/sample_synchronizer.cpp
+  src/sample_sync_publisher.cpp)
 ament_target_dependencies(sample_tilde_message_filter
   "tilde"
   "message_filters"
@@ -30,6 +32,13 @@ ament_target_dependencies(sample_tilde_message_filter
 rclcpp_components_register_node(sample_tilde_message_filter
   PLUGIN "sample_tilde_message_filter::SampleSubscriberWithHeader"
   EXECUTABLE subscriber_with_header)
+rclcpp_components_register_node(sample_tilde_message_filter
+  PLUGIN "sample_tilde_message_filter::SampleSynchronizer"
+  EXECUTABLE sample_synchronizer)
+rclcpp_components_register_node(sample_tilde_message_filter
+  PLUGIN "sample_tilde_message_filter::SamplePublisherWithHeader"
+  EXECUTABLE publisher_with_header)
+
 
 install(TARGETS
   sample_tilde_message_filter)
