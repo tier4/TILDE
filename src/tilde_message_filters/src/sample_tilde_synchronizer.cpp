@@ -16,15 +16,16 @@ typedef std::shared_ptr<sensor_msgs::msg::PointCloud2> MsgPtr;
 
 namespace sample_tilde_message_filter
 {
-class SampleSynchronizer2 : public tilde::TildeNode
+// 2 means the callback argc to simplify the template programming
+class SampleTildeSynchronizer2 : public tilde::TildeNode
 {
   using SyncPolicy = message_filters::sync_policies::ExactTime<Msg, Msg>;
   using Sync = tilde_message_filters::TildeSynchronizer<SyncPolicy>;
   using Subscriber = message_filters::Subscriber<Msg>;
 
 public:
-  explicit SampleSynchronizer2(const rclcpp::NodeOptions & options)
-  : TildeNode("sample_sync2", options)
+  explicit SampleTildeSynchronizer2(const rclcpp::NodeOptions & options)
+  : TildeNode("sample_tilde_sync2", options)
   {
     std::cout << "hee" << std::endl;
 
@@ -42,7 +43,7 @@ public:
     // registerCallback(const C& callback) version:
     // <- (const C&) can bind rvalue
     sync_ptr_->registerCallback(
-        std::bind(&SampleSynchronizer2::sub_callback, this,
+        std::bind(&SampleTildeSynchronizer2::sub_callback, this,
                   std::placeholders::_1, std::placeholders::_2));
     std::cout << "hoo" << std::endl;
   }
@@ -60,15 +61,16 @@ private:
   }
 };
 
-class SampleSynchronizer3 : public tilde::TildeNode
+// 3 means the callback argc to simplify the template programming
+class SampleTildeSynchronizer3 : public tilde::TildeNode
 {
   using SyncPolicy = message_filters::sync_policies::ExactTime<Msg, Msg, Msg>;
   using Sync = tilde_message_filters::TildeSynchronizer<SyncPolicy>;
   using Subscriber = message_filters::Subscriber<Msg>;
 
 public:
-  explicit SampleSynchronizer3(const rclcpp::NodeOptions & options)
-  : TildeNode("sample_sync3", options)
+  explicit SampleTildeSynchronizer3(const rclcpp::NodeOptions & options)
+  : TildeNode("sample_tilde_sync3", options)
   {
     std::cout << "hee" << std::endl;
 
@@ -88,7 +90,7 @@ public:
     // registerCallback(const C& callback) version:
     // <- (const C&) can bind rvalue
     sync_ptr_->registerCallback(
-        std::bind(&SampleSynchronizer3::sub_callback, this,
+        std::bind(&SampleTildeSynchronizer3::sub_callback, this,
                   std::placeholders::_1,
                   std::placeholders::_2,
                   std::placeholders::_3
@@ -113,5 +115,5 @@ private:
 
 }  // sample_tilde_message_filter
 
-RCLCPP_COMPONENTS_REGISTER_NODE(sample_tilde_message_filter::SampleSynchronizer2)
-RCLCPP_COMPONENTS_REGISTER_NODE(sample_tilde_message_filter::SampleSynchronizer3)
+RCLCPP_COMPONENTS_REGISTER_NODE(sample_tilde_message_filter::SampleTildeSynchronizer2)
+RCLCPP_COMPONENTS_REGISTER_NODE(sample_tilde_message_filter::SampleTildeSynchronizer3)
