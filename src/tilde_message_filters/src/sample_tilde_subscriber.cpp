@@ -65,7 +65,8 @@ public:
 
     sub_pc_.subscribe(this, "topic_with_stamp", qos.get_rmw_qos_profile());
 
-    // registerCallback(const C& callback)
+    // lambda lvalue
+    // registerCallback(const C& callback) with C = sample_tilde_message_filter::..::(lambda)...
     auto sub_callback =
       [this](MsgConstPtr msg) -> void
       {
@@ -74,17 +75,35 @@ public:
       };
     sub_pc_.registerCallback(sub_callback);
 
-    // registerCallback(const std::function<void(P)>& callback)
-    std::function<void(MsgConstPtr)> f = std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1);
-    sub_pc_.registerCallback(f);
+    // lambda rvalue
+    // const C& callback (be aware `C& callback` not defined)
+    sub_pc_.registerCallback(
+        [this](MsgConstPtr msg) -> void
+        {
+          (void) msg;
+          RCLCPP_INFO(this->get_logger(), "rvalue lambda");
+        });
 
-    NonConstHelper h;
+    // std::function
+    // registerCallback(const std::function<void(P)>& callback)
+    std::function<void(MsgConstPtr)> stdfunc = std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1);
+    sub_pc_.registerCallback(stdfunc);
+
+    // std::bind rvalue
+    // const C& callback
+    sub_pc_.registerCallback(std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1));
+
+    // std::bind lvalue but use auto
+    // const C& callback.  => with C = std::_Bind<void ....>
+    auto autofunc = std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1);
+    sub_pc_.registerCallback(autofunc);
 
     // registerCallback(void(*callback)(P))
+    // void(*callback)(P)
     sub_pc_.registerCallback(callback_fn);
 
     // registerCallback(void(T::*callback)(P), T* t)
-
+    NonConstHelper h;
     sub_pc_.registerCallback(&NonConstHelper::cb, &h);
   }
 
