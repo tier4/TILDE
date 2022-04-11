@@ -36,6 +36,7 @@ public:
     sub_pc2_.subscribe(this, "in2", rmw_qos);
 
     sync_ptr_ = std::make_shared<Sync>(
+        this,
         SyncPolicy(5),
         sub_pc1_,
         sub_pc2_);
@@ -82,6 +83,7 @@ public:
     sub_pc3_.subscribe(this, "in3", rmw_qos);
 
     sync_ptr_ = std::make_shared<Sync>(
+        this,
         SyncPolicy(5),
         sub_pc1_,
         sub_pc2_,

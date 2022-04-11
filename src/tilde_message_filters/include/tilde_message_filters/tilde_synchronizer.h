@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include "tilde/tilde_node.hpp"
+
 #include "message_filters/time_synchronizer.h"
 #include "message_filters/time_synchronizer.h"
 
@@ -15,25 +17,29 @@ class TildeSynchronizer
 
 public:
   template<class F0, class F1>
-  TildeSynchronizer(F0& f0, F1& f1)
+  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1)
+      : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(f0, f1);
   }
 
   template<class F0, class F1>
-  TildeSynchronizer(const Policy& policy, F0& f0, F1& f1)
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1)
+      : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(policy, f0, f1);
   }
 
   template<class F0, class F1, class F2>
-  TildeSynchronizer(F0& f0, F1& f1, F2& f2)
+  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2)
+      : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(f0, f1, f2);
   }
 
   template<class F0, class F1, class F2>
-  TildeSynchronizer(const Policy& policy, F0& f0, F1& f1, F2& f2)
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2)
+      : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2);
   }
@@ -129,6 +135,7 @@ public:
 
 private:
   std::shared_ptr<Sync> sync_ptr_;
+  tilde::TildeNode *node_;
 };
 
 

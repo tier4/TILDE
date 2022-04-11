@@ -140,7 +140,7 @@ public:
 
           MessageT *pmsg;
           TILDE_NODE_GET_PTR(MessageT, msg, pmsg);
-          register_message_to_publishers(
+          register_message_as_input(
               pmsg,
               resolved_topic_name,
               subtime_steady);
@@ -194,7 +194,7 @@ public:
 
   template<typename MessageT,
            typename MessageDeleter = std::default_delete<MessageT>>
-  void register_message_to_publishers(
+  void register_message_as_input(
       const MessageT *pmsg,
       const std::string& resolved_topic_name,
       const rclcpp::Time &subtime_steady)
@@ -225,6 +225,11 @@ public:
         tp->set_explicit_subtime(resolved_topic_name, input_info);
       }
     }
+  }
+
+  rclcpp::Time get_steady_time()
+  {
+    return steady_clock_->now();
   }
 
 private:

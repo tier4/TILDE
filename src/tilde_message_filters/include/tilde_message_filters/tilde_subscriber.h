@@ -11,6 +11,9 @@
 
 namespace tilde_message_filters
 {
+template<class>
+inline constexpr bool always_false_v = false;
+
 template<class M, class NodeType = tilde::TildeNode>
 class TildeSubscriber
 {
@@ -53,7 +56,7 @@ public:
 
   std::string getTopic() const
   {
-    return subscriber_->getTopic();
+    return subscriber_.getTopic();
   }
 
   template<typename C,
@@ -63,23 +66,54 @@ public:
   message_filters::Connection registerCallback(const C& callback)
   {
     std::cout << "ptn1" << std::endl;
+    const auto topic = getTopic();
     auto new_callback =
-        [this, callback](CallbackArgT msg) -> void
+        [this, callback, topic](CallbackArgT msg) -> void
         {
           std::cout << "hooked1!" << std::endl;
+          auto pnode = get_node();
+          auto subtime_steady = pnode->get_steady_time();
+
+          // Be aware we can use msg.get() because
+          // message_filters::simple_filter assumes typename C sholud be
+          // compatible with std::function<void(const MConstPtr&)>,
+          // and MConstPtr is std::shared_ptr<M const>.
+          pnode->register_message_as_input(
+              msg.get(),
+              topic,
+              subtime_steady);
+
           callback(msg);
         };
     return subscriber_.registerCallback(new_callback);
   }
 
-  template<typename P>
+  template<typename P,
+           typename MessageDeleter = std::default_delete<M>>
   message_filters::Connection registerCallback(const std::function<void(P)>& callback)
   {
     std::cout << "ptn2" << std::endl;
+    const auto topic = getTopic();
+    // As std::function use vtable, we use auto type,
+    // not std::function<void(P)> new_callback = ...
+    // https://stackoverflow.com/questions/25848690/should-i-use-stdfunction-or-a-function-pointer-in-c
     auto new_callback =
-        [this, callback](P msg) -> void
+        [this, callback, topic](P msg) -> void
         {
           std::cout << "hooked2!" << std::endl;
+
+          auto pnode = get_node();
+          auto subtime_steady = pnode->get_steady_time();
+
+          // we use msg.get() because
+          // even in this pattern,
+          // P looks to be const shared_ptr (see message_filters::MessageEvent).
+          // TODO(y-okumura-isp): Is ConstRef also possible??
+          pnode->register_message_as_input(
+              msg.get(),
+              topic,
+              subtime_steady);
+
           callback(msg);
         };
     return subscriber_.registerCallback(new_callback);
@@ -89,10 +123,27 @@ public:
   message_filters::Connection registerCallback(void(*callback)(P))
   {
     std::cout << "ptn3" << std::endl;
+    const auto topic = getTopic();
+    // We use lambda not original function pointer
+    // because we cannot convert captured lambda to function pointer.
+    // https://stackoverflow.com/questions/28746744/passing-capturing-lambda-as-function-pointer
     auto new_callback =
-        [this, callback](P msg) -> void
+        [this, callback, topic](P msg) -> void
         {
           std::cout << "hooked3!" << std::endl;
+
+          auto pnode = get_node();
+          auto subtime_steady = pnode->get_steady_time();
+
+          // we use msg.get() because
+          // even in this pattern,
+          // P looks to be const shared_ptr (see message_filters::MessageEvent).
+          // TODO(y-okumura-isp): Is ConstRef also possible??
+          pnode->register_message_as_input(
+              msg.get(),
+              topic,
+              subtime_steady);
+
           callback(msg);
         };
     return subscriber_.registerCallback(new_callback);
@@ -102,12 +153,25 @@ public:
   message_filters::Connection registerCallback(void(T::*callback)(P), T* t)
   {
     std::cout << "ptn4" << std::endl;
-    auto f = std::bind(callback, t, std::placeholders::_1);
+    const auto topic = getTopic();
+    auto bind_callback = std::bind(callback, t, std::placeholders::_1);
     auto new_callback =
-        [this, f](P msg) -> void
+        [this, bind_callback, topic](P msg) -> void
         {
           std::cout << "hooked4!" << std::endl;
-          f(msg);
+          auto pnode = get_node();
+          auto subtime_steady = pnode->get_steady_time();
+
+          // we use msg.get() because
+          // even in this pattern,
+          // P looks to be const shared_ptr (see message_filters::MessageEvent).
+          // TODO(y-okumura-isp): Is ConstRef also possible??
+          pnode->register_message_as_input(
+              msg.get(),
+              topic,
+              subtime_steady);
+
+          bind_callback(msg);
         };
     // We need to wrap new_callback bacause P is sometimes non MConstPtr.
     // If P is non MConstPtr, `registerCallback(const C& callback)` is called and
@@ -123,6 +187,16 @@ public:
 private:
   NodePtr node_shared_;
   NodeType * node_raw_ {nullptr};
+
+  NodeType * get_node()
+  {
+    if(node_shared_) {
+      return node_shared_.get();
+    } else {
+      return node_raw_;
+    }
+  }
+
 
   message_filters::Subscriber<M> subscriber_;
 };
