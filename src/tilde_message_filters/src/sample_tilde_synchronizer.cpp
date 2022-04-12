@@ -22,6 +22,7 @@ class SampleTildeSynchronizer2 : public tilde::TildeNode
   using SyncPolicy = message_filters::sync_policies::ExactTime<Msg, Msg>;
   using Sync = tilde_message_filters::TildeSynchronizer<SyncPolicy>;
   using Subscriber = message_filters::Subscriber<Msg>;
+  using Publisher = tilde::TildePublisher<Msg>::SharedPtr;
 
 public:
   explicit SampleTildeSynchronizer2(const rclcpp::NodeOptions & options)
@@ -41,6 +42,8 @@ public:
         sub_pc1_,
         sub_pc2_);
 
+    pub_ = create_tilde_publisher<Msg>("out2", 1);
+
     // registerCallback(const C& callback) version:
     // <- (const C&) can bind rvalue
     sync_ptr_->registerCallback(
@@ -52,13 +55,14 @@ public:
 private:
   Subscriber sub_pc1_, sub_pc2_;
   std::shared_ptr<Sync> sync_ptr_;
+  Publisher pub_;
 
   void sub_callback(const MsgConstPtr &msg1,
                     const MsgConstPtr &msg2)
   {
-    (void) msg1;
     (void) msg2;
     std::cout << "sub_callback" << std::endl;
+    pub_->publish(*msg1);
   }
 };
 
