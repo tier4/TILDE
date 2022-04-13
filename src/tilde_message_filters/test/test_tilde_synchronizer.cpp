@@ -31,6 +31,8 @@ using PointCloud2 = sensor_msgs::msg::PointCloud2;
 using PointCloud2Ptr = std::shared_ptr<PointCloud2>;
 using PointCloud2ConstPtr = std::shared_ptr<PointCloud2 const>;
 using Clock = rosgraph_msgs::msg::Clock;
+using PubInfo = tilde_msg::msg::PubInfo;
+using PubInfoPtr = PubInfo::UniquePtr;
 
 class TestSynchronizer : public ::testing::Test
 {
@@ -49,34 +51,77 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
   rclcpp::NodeOptions options;
   options.append_parameter_override("use_sim_time", true);
 
-  auto pub_node = std::make_shared<Node>("pub_node", options);
-  auto pub1 = pub_node->create_publisher<PointCloud2>("in1", 1);
-  auto pub2 = pub_node->create_publisher<PointCloud2>("in2", 1);
-  auto clock_pub = pub_node->create_publisher<Clock>("/clock", 1);
+  rclcpp::QoS qos(rclcpp::KeepLast(10));
 
+  // setup pub_node
+  auto pub_node = std::make_shared<Node>("pub_node", options);
+  auto pub1 = pub_node->create_publisher<PointCloud2>("in1", qos);
+  auto pub2 = pub_node->create_publisher<PointCloud2>("in2", qos);
+  auto clock_pub = pub_node->create_publisher<Clock>("/clock", qos);
+
+  // setup sub_node
   auto sub_node = std::make_shared<TildeNode>("sub_node", options);
   Subscriber<PointCloud2> sub1, sub2;
-  rclcpp::QoS qos(rclcpp::KeepLast(1));
   sub1.subscribe(sub_node, "in1", qos.get_rmw_qos_profile());
   sub2.subscribe(sub_node, "in2", qos.get_rmw_qos_profile());
+  auto out_pub = sub_node->create_tilde_publisher<PointCloud2>("out", qos);
 
+  // setup sub_node synchronizer
   using SyncPolicy = sync_policies::ExactTime<PointCloud2, PointCloud2>;
   using Sync = TildeSynchronizer<SyncPolicy>;
-  auto sync = std::make_shared<Sync>(
-      sub_node.get(),
-      SyncPolicy(5),
-      sub1,
-      sub2);
+  auto sync = std::make_shared<Sync>(sub_node.get(), SyncPolicy(5), sub1, sub2);
+
   bool sync_callback_called = false;
   sync->registerCallback(
-      [&sync_callback_called](const PointCloud2ConstPtr &msg1,
+      [&sync_callback_called, out_pub](const PointCloud2ConstPtr &msg1,
          const PointCloud2ConstPtr &msg2) -> void
       {
         (void) msg1;
         (void) msg2;
         sync_callback_called = true;
+        out_pub->publish(*msg1);
       });
 
+  // validation node
+  auto val_node = std::make_shared<Node>("val_node", options);
+  bool val_callback_called = false;
+  auto val_sub = val_node->create_subscription<PubInfo>(
+      "out/info/pub", qos,
+      [&val_callback_called](PubInfoPtr pi) -> void
+      {
+        val_callback_called = true;
+        EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
+        EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
+        EXPECT_EQ(pi->input_infos.size(), 2u);
+
+        std::map<std::string, size_t> topic2idx;
+        for(size_t i=0; i<pi->input_infos.size(); i++) {
+          topic2idx[pi->input_infos[i].topic_name] = i;
+        }
+
+        EXPECT_EQ(topic2idx.size(), 2u);
+        for(size_t i=1; i<=2; i++) {
+          auto topic = std::string("/in") + std::to_string(i);
+          auto idx = topic2idx[topic];
+          const auto& in_info = pi->input_infos[idx];
+
+          switch(i) {
+            case 1:
+              EXPECT_EQ(in_info.sub_time.sec, 123);
+              EXPECT_EQ(in_info.sub_time.nanosec, 456u);
+              break;
+            case 2:
+              EXPECT_EQ(in_info.sub_time.sec, 234);
+              EXPECT_EQ(in_info.sub_time.nanosec, 567u);
+              break;
+            default:
+              // never comes here
+              EXPECT_TRUE(false);
+          }
+        }
+      });
+
+  // utilities
   auto send_clock =
       [clock_pub](int32_t sec, uint32_t nsec) -> void
       {
@@ -87,10 +132,11 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
       };
 
   auto spin =
-      [pub_node, sub_node]() -> void
+      [pub_node, sub_node, val_node]() -> void
       {
         rclcpp::spin_some(pub_node);
         rclcpp::spin_some(sub_node);
+        rclcpp::spin_some(val_node);
       };
 
   // apply "/clock"
@@ -119,4 +165,5 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
 
   // varify
   EXPECT_TRUE(sync_callback_called);
+  EXPECT_TRUE(val_callback_called);
 }
