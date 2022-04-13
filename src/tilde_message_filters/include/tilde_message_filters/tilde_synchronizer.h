@@ -25,15 +25,12 @@ constexpr bool is_subscriber() {
   return false_v<F, M>;
 }
 
-
 template<typename Policy>
 class TildeSynchronizer
 {
   using Sync = message_filters::Synchronizer<Policy>;
 
   typedef typename Policy::Messages Messages;
-  typedef typename Policy::Events Events;
-  typedef typename Policy::Signal Signal;
 
   typedef typename std::tuple_element<0, Messages>::type M0;
   typedef typename std::tuple_element<1, Messages>::type M1;
@@ -51,15 +48,8 @@ public:
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(f0, f1);
-
-    if constexpr (std::is_same_v<F0, message_filters::Subscriber<M0>>) {
-       using rclcpp::node_interfaces::get_node_topics_interface;
-       auto node_topics_interface = get_node_topics_interface(node);
-       auto topic_name = f0.getTopic();
-       auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
-       std::cout << "topic_name[0]: " << resolved_topic_name << std::endl;
-       topic_names_[0] = resolved_topic_name;
-    }
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
   }
 
   template<class F0, class F1>
@@ -67,15 +57,8 @@ public:
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(policy, f0, f1);
-
-    if constexpr (std::is_same_v<F0, message_filters::Subscriber<M0>>) {
-       using rclcpp::node_interfaces::get_node_topics_interface;
-       auto node_topics_interface = get_node_topics_interface(node);
-       auto topic_name = f0.getTopic();
-       auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
-       std::cout << "topic_name[0]: " << resolved_topic_name << std::endl;
-       topic_names_[0] = resolved_topic_name;
-    }
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
   }
 
   template<class F0, class F1, class F2>
@@ -83,6 +66,9 @@ public:
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(f0, f1, f2);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
   }
 
   template<class F0, class F1, class F2>
@@ -90,6 +76,187 @@ public:
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+  }
+
+  template<class F0, class F1, class F2, class F3>
+  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(f0, f1, f2, f3);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+  }
+
+  template<class F0, class F1, class F2, class F3>
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2, f3);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+  }
+
+  template<class F0, class F1, class F2, class F3, class F4>
+  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(f0, f1, f2, f3, f4);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+    init_topic_name<4, M4>(f4);
+  }
+
+  template<class F0, class F1, class F2, class F3, class F4>
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2, f3, f4);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+    init_topic_name<4, M4>(f4);
+  }
+
+  template<class F0, class F1, class F2, class F3, class F4,
+           class F5>
+  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+                    F5& f5)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(f0, f1, f2, f3, f4, f5);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+    init_topic_name<4, M4>(f4);
+    init_topic_name<5, M5>(f5);
+  }
+
+  template<class F0, class F1, class F2, class F3, class F4,
+           class F5>
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+                    F5& f5)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2, f3, f4, f5);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+    init_topic_name<4, M4>(f4);
+    init_topic_name<5, M5>(f5);
+  }
+
+  template<class F0, class F1, class F2, class F3, class F4,
+           class F5, class F6>
+  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+                    F5& f5, F6& f6)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(f0, f1, f2, f3, f4, f5, f6);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+    init_topic_name<4, M4>(f4);
+    init_topic_name<5, M5>(f5);
+    init_topic_name<6, M6>(f6);
+  }
+
+  template<class F0, class F1, class F2, class F3, class F4,
+           class F5, class F6>
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+                    F5& f5, F6& f6)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2, f3, f4, f5, f6);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+    init_topic_name<4, M4>(f4);
+    init_topic_name<5, M5>(f5);
+    init_topic_name<6, M6>(f6);
+  }
+
+  template<class F0, class F1, class F2, class F3, class F4,
+           class F5, class F6, class F7>
+  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+                    F5& f5, F6& f6, F7& f7)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(f0, f1, f2, f3, f4, f5, f6, f7);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+    init_topic_name<4, M4>(f4);
+    init_topic_name<5, M5>(f5);
+    init_topic_name<6, M6>(f6);
+    init_topic_name<7, M7>(f7);
+  }
+
+  template<class F0, class F1, class F2, class F3, class F4,
+           class F5, class F6, class F7>
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+                    F5& f5, F6& f6, F7& f7)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2, f3, f4, f5, f6, f7);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+    init_topic_name<4, M4>(f4);
+    init_topic_name<5, M5>(f5);
+    init_topic_name<6, M6>(f6);
+    init_topic_name<7, M7>(f7);
+  }
+
+  template<class F0, class F1, class F2, class F3, class F4,
+           class F5, class F6, class F7, class F8>
+  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+                    F5& f5, F6& f6, F7& f7, F8& f8)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(f0, f1, f2, f3, f4, f5, f6, f7, f8);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+    init_topic_name<4, M4>(f4);
+    init_topic_name<5, M5>(f5);
+    init_topic_name<6, M6>(f6);
+    init_topic_name<7, M7>(f7);
+    init_topic_name<8, M8>(f8);
+  }
+
+  template<class F0, class F1, class F2, class F3, class F4,
+           class F5, class F6, class F7, class F8>
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+                    F5& f5, F6& f6, F7& f7, F8& f8)
+      : node_(node)
+  {
+    sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2, f3, f4, f5, f6, f7, f8);
+    init_topic_name<0, M0>(f0);
+    init_topic_name<1, M1>(f1);
+    init_topic_name<2, M2>(f2);
+    init_topic_name<3, M3>(f3);
+    init_topic_name<4, M4>(f4);
+    init_topic_name<5, M5>(f5);
+    init_topic_name<6, M6>(f6);
+    init_topic_name<7, M7>(f7);
+    init_topic_name<8, M8>(f8);
   }
 
   template<class C,
@@ -142,8 +309,14 @@ public:
             CallbackArgT1 msg1,
             CallbackArgT2 msg2) {
             std::cout << "hooked3" << std::endl;
+
+            register_ith_message_as_input<0>(msg0);
+            register_ith_message_as_input<1>(msg1);
+            register_ith_message_as_input<2>(msg2);
+
             callback(msg0, msg1, msg2);
           };
+
     return sync_ptr_->registerCallback(
         std::bind(new_callback_lambda,
                   std::placeholders::_1,
@@ -151,7 +324,6 @@ public:
                   std::placeholders::_3));
   }
 
-  /*
   template<class C,
            std::size_t Arity = 4,
            typename std::enable_if<
@@ -162,7 +334,7 @@ public:
            typename CallbackArgT1 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
            typename CallbackArgT2 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
            typename CallbackArgT3 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<3>
            >
@@ -173,8 +345,14 @@ public:
             CallbackArgT0 msg0,
             CallbackArgT1 msg1,
             CallbackArgT2 msg2,
-            CallbackArgT2 msg3) {
+            CallbackArgT3 msg3) {
             std::cout << "hooked4" << std::endl;
+
+            register_ith_message_as_input<0>(msg0);
+            register_ith_message_as_input<1>(msg1);
+            register_ith_message_as_input<2>(msg2);
+            register_ith_message_as_input<3>(msg3);
+
             callback(msg0, msg1, msg2, msg3);
           };
     return sync_ptr_->registerCallback(
@@ -184,8 +362,305 @@ public:
                   std::placeholders::_3,
                   std::placeholders::_4));
   }
-  */
 
+  template<class C,
+           std::size_t Arity = 5,
+           typename std::enable_if<
+             rclcpp::function_traits::arity_comparator<Arity, C>::value
+             >::type * = nullptr,
+           typename CallbackArgT0 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
+           typename CallbackArgT1 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
+           typename CallbackArgT2 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
+           typename CallbackArgT3 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>,
+           typename CallbackArgT4 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<4>
+           >
+  message_filters::Connection registerCallback(const C& callback)
+  {
+    auto new_callback_lambda
+        = [this, callback](
+            CallbackArgT0 msg0,
+            CallbackArgT1 msg1,
+            CallbackArgT2 msg2,
+            CallbackArgT3 msg3,
+            CallbackArgT4 msg4) {
+            std::cout << "hooked5" << std::endl;
+
+            register_ith_message_as_input<0>(msg0);
+            register_ith_message_as_input<1>(msg1);
+            register_ith_message_as_input<2>(msg2);
+            register_ith_message_as_input<3>(msg3);
+            register_ith_message_as_input<4>(msg4);
+
+            callback(msg0, msg1, msg2, msg3, msg4);
+          };
+    return sync_ptr_->registerCallback(
+        std::bind(new_callback_lambda,
+                  std::placeholders::_1,
+                  std::placeholders::_2,
+                  std::placeholders::_3,
+                  std::placeholders::_4,
+                  std::placeholders::_5));
+  }
+
+  template<class C,
+           std::size_t Arity = 6,
+           typename std::enable_if<
+             rclcpp::function_traits::arity_comparator<Arity, C>::value
+             >::type * = nullptr,
+           typename CallbackArgT0 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
+           typename CallbackArgT1 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
+           typename CallbackArgT2 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
+           typename CallbackArgT3 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>,
+           typename CallbackArgT4 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<4>,
+           typename CallbackArgT5 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<5>
+           >
+  message_filters::Connection registerCallback(const C& callback)
+  {
+    auto new_callback_lambda
+        = [this, callback](
+            CallbackArgT0 msg0,
+            CallbackArgT1 msg1,
+            CallbackArgT2 msg2,
+            CallbackArgT3 msg3,
+            CallbackArgT4 msg4,
+            CallbackArgT5 msg5) {
+            std::cout << "hooked6" << std::endl;
+
+            register_ith_message_as_input<0>(msg0);
+            register_ith_message_as_input<1>(msg1);
+            register_ith_message_as_input<2>(msg2);
+            register_ith_message_as_input<3>(msg3);
+            register_ith_message_as_input<4>(msg4);
+            register_ith_message_as_input<5>(msg5);
+
+            callback(msg0, msg1, msg2, msg3, msg4, msg5);
+          };
+    return sync_ptr_->registerCallback(
+        std::bind(new_callback_lambda,
+                  std::placeholders::_1,
+                  std::placeholders::_2,
+                  std::placeholders::_3,
+                  std::placeholders::_4,
+                  std::placeholders::_5,
+                  std::placeholders::_6));
+  }
+
+  template<class C,
+           std::size_t Arity = 7,
+           typename std::enable_if<
+             rclcpp::function_traits::arity_comparator<Arity, C>::value
+             >::type * = nullptr,
+           typename CallbackArgT0 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
+           typename CallbackArgT1 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
+           typename CallbackArgT2 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
+           typename CallbackArgT3 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>,
+           typename CallbackArgT4 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<4>,
+           typename CallbackArgT5 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<5>,
+           typename CallbackArgT6 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<6>
+           >
+  message_filters::Connection registerCallback(const C& callback)
+  {
+    auto new_callback_lambda
+        = [this, callback](
+            CallbackArgT0 msg0,
+            CallbackArgT1 msg1,
+            CallbackArgT2 msg2,
+            CallbackArgT3 msg3,
+            CallbackArgT4 msg4,
+            CallbackArgT5 msg5,
+            CallbackArgT6 msg6) {
+            std::cout << "hooked7" << std::endl;
+
+            register_ith_message_as_input<0>(msg0);
+            register_ith_message_as_input<1>(msg1);
+            register_ith_message_as_input<2>(msg2);
+            register_ith_message_as_input<3>(msg3);
+            register_ith_message_as_input<4>(msg4);
+            register_ith_message_as_input<5>(msg5);
+            register_ith_message_as_input<6>(msg6);
+
+            callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6);
+          };
+    return sync_ptr_->registerCallback(
+        std::bind(new_callback_lambda,
+                  std::placeholders::_1,
+                  std::placeholders::_2,
+                  std::placeholders::_3,
+                  std::placeholders::_4,
+                  std::placeholders::_5,
+                  std::placeholders::_6,
+                  std::placeholders::_7));
+  }
+
+  template<class C,
+           std::size_t Arity = 8,
+           typename std::enable_if<
+             rclcpp::function_traits::arity_comparator<Arity, C>::value
+             >::type * = nullptr,
+           typename CallbackArgT0 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
+           typename CallbackArgT1 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
+           typename CallbackArgT2 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
+           typename CallbackArgT3 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>,
+           typename CallbackArgT4 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<4>,
+           typename CallbackArgT5 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<5>,
+           typename CallbackArgT6 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<6>,
+           typename CallbackArgT7 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<7>
+           >
+  message_filters::Connection registerCallback(const C& callback)
+  {
+    auto new_callback_lambda
+        = [this, callback](
+            CallbackArgT0 msg0,
+            CallbackArgT1 msg1,
+            CallbackArgT2 msg2,
+            CallbackArgT3 msg3,
+            CallbackArgT4 msg4,
+            CallbackArgT5 msg5,
+            CallbackArgT6 msg6,
+            CallbackArgT7 msg7) {
+            std::cout << "hooked8" << std::endl;
+
+            register_ith_message_as_input<0>(msg0);
+            register_ith_message_as_input<1>(msg1);
+            register_ith_message_as_input<2>(msg2);
+            register_ith_message_as_input<3>(msg3);
+            register_ith_message_as_input<4>(msg4);
+            register_ith_message_as_input<5>(msg5);
+            register_ith_message_as_input<6>(msg6);
+            register_ith_message_as_input<7>(msg7);
+
+            callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7);
+          };
+    return sync_ptr_->registerCallback(
+        std::bind(new_callback_lambda,
+                  std::placeholders::_1,
+                  std::placeholders::_2,
+                  std::placeholders::_3,
+                  std::placeholders::_4,
+                  std::placeholders::_5,
+                  std::placeholders::_6,
+                  std::placeholders::_7,
+                  std::placeholders::_8));
+  }
+
+  template<class C,
+           std::size_t Arity = 9,
+           typename std::enable_if<
+             rclcpp::function_traits::arity_comparator<Arity, C>::value
+             >::type * = nullptr,
+           typename CallbackArgT0 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
+           typename CallbackArgT1 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
+           typename CallbackArgT2 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
+           typename CallbackArgT3 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>,
+           typename CallbackArgT4 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<4>,
+           typename CallbackArgT5 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<5>,
+           typename CallbackArgT6 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<6>,
+           typename CallbackArgT7 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<7>,
+           typename CallbackArgT8 =
+           typename rclcpp::function_traits::function_traits<C>::template argument_type<8>
+           >
+  message_filters::Connection registerCallback(const C& callback)
+  {
+    auto new_callback_lambda
+        = [this, callback](
+            CallbackArgT0 msg0,
+            CallbackArgT1 msg1,
+            CallbackArgT2 msg2,
+            CallbackArgT3 msg3,
+            CallbackArgT4 msg4,
+            CallbackArgT5 msg5,
+            CallbackArgT6 msg6,
+            CallbackArgT7 msg7,
+            CallbackArgT8 msg8) {
+            std::cout << "hooked9" << std::endl;
+
+            register_ith_message_as_input<0>(msg0);
+            register_ith_message_as_input<1>(msg1);
+            register_ith_message_as_input<2>(msg2);
+            register_ith_message_as_input<3>(msg3);
+            register_ith_message_as_input<4>(msg4);
+            register_ith_message_as_input<5>(msg5);
+            register_ith_message_as_input<6>(msg6);
+            register_ith_message_as_input<7>(msg7);
+            register_ith_message_as_input<8>(msg8);
+
+            callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8);
+          };
+    return sync_ptr_->registerCallback(
+        std::bind(new_callback_lambda,
+                  std::placeholders::_1,
+                  std::placeholders::_2,
+                  std::placeholders::_3,
+                  std::placeholders::_4,
+                  std::placeholders::_5,
+                  std::placeholders::_6,
+                  std::placeholders::_7,
+                  std::placeholders::_8,
+                  std::placeholders::_9));
+  }
+
+ private:
+  std::shared_ptr<Sync> sync_ptr_;
+  tilde::TildeNode *node_;
+  // message id vs topic name.
+  // 9 means the number of max messages.
+  std::vector<std::string> topic_names_{9};
+
+
+  // helper function for topic name initialization.
+  // I: the index of message
+  // F: filter class such as Subscriber<PointCloud2>
+  // M: message type such as PointCloud2
+  template<std::size_t I,
+           typename M,
+           typename F>
+  void init_topic_name(F& f) {
+    if constexpr (std::is_same_v<F, message_filters::Subscriber<M>>) {
+       using rclcpp::node_interfaces::get_node_topics_interface;
+       auto node_topics_interface = get_node_topics_interface(node_);
+       auto topic_name = f.getTopic();
+       auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
+       std::cout << "topic_name[ " << I << "]: "<< resolved_topic_name << std::endl;
+       topic_names_[I] = resolved_topic_name;
+    }
+  }
+
+
+  // helper function for node->register_message_as_input
   template<std::size_t I,
            class CallbackArgT>
   void register_ith_message_as_input(
@@ -202,13 +677,6 @@ public:
         topic,
         subtime_steady);
   }
-
-private:
-  std::shared_ptr<Sync> sync_ptr_;
-  tilde::TildeNode *node_;
-  // message id vs topic name.
-  // 9 means the number of max messages.
-  std::vector<std::string> topic_names_{9};
 };
 
 
