@@ -42,7 +42,6 @@ rclcpp_components_register_node(sample_tilde_message_filter
   PLUGIN "sample_tilde_message_filter::SamplePublisherWithHeader"
   EXECUTABLE publisher_with_header)
 
-
 install(TARGETS
   sample_tilde_message_filter)
 install(
@@ -52,9 +51,14 @@ install(
   RUNTIME DESTINATION bin
 )
 
-
 if(BUILD_TESTING)
+  find_package(tilde)
+  find_package(message_filters REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_lint_auto REQUIRED)
+  find_package(sensor_msgs REQUIRED)
+  find_package(std_msgs REQUIRED)
+
   # the following line skips the linter which checks for copyrights
   # uncomment the line when a copyright and license is not present in all source files
   #set(ament_cmake_copyright_FOUND TRUE)
@@ -62,6 +66,18 @@ if(BUILD_TESTING)
   # uncomment the line when this package is not in a git repo
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  ament_add_gtest(test_tilde_synchronizer
+    test/test_tilde_synchronizer.cpp)
+    target_include_directories(test_tilde_synchronizer
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+  ament_target_dependencies(test_tilde_synchronizer
+    "tilde"
+    "message_filters"
+    "sensor_msgs"
+    "std_msgs")
 endif()
 
 ament_package()
