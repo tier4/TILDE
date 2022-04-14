@@ -649,7 +649,8 @@ public:
            typename M,
            typename F>
   void init_topic_name(F& f) {
-    if constexpr (std::is_same_v<F, message_filters::Subscriber<M>>) {
+    // if constexpr (std::is_same_v<F, message_filters::Subscriber<M>>) {
+    if constexpr (std::is_same_v<F, tilde_message_filters::TildeSubscriber<M>>) {
        using rclcpp::node_interfaces::get_node_topics_interface;
        auto node_topics_interface = get_node_topics_interface(node_);
        auto topic_name = f.getTopic();
@@ -659,7 +660,6 @@ public:
     }
   }
 
-
   // helper function for node->register_message_as_input
   template<std::size_t I,
            class CallbackArgT>
@@ -668,18 +668,20 @@ public:
   {
     static_assert(I < 9);
 
-    auto subtime_steady = node_->get_steady_time();
     const auto& topic = topic_names_[I];
     if(topic.empty()) return;
 
+    rclcpp::Time subtime, subtime_steady;
+    node_->find_subtime(
+        msg.get(), topic,
+        subtime, subtime_steady);
+
+    // update implicit input info
     node_->register_message_as_input(
-        msg.get(),
-        topic,
-        subtime_steady);
+        msg.get(), topic,
+        subtime, subtime_steady);
   }
 };
-
-
 
 }  // tilde_message_filters
 

@@ -19,6 +19,17 @@
 #include "tilde_msg/msg/sub_topic_time_info.hpp"
 
 using tilde::TildePublisherBase;
+using tilde::InputInfo;
+
+bool InputInfo::operator==(const InputInfo &rhs) const
+{
+  return (
+      sub_time == rhs.sub_time &&
+      sub_time_steady == rhs.sub_time_steady &&
+      has_header_stamp == rhs.has_header_stamp &&
+      header_stamp == rhs.header_stamp
+          );
+}
 
 rclcpp::Time tilde::get_timestamp(rclcpp::Time t, ...)
 {
@@ -147,4 +158,24 @@ void TildePublisherBase::set_explicit_subtime(
 void TildePublisherBase::set_max_sub_callback_infos_sec(size_t sec)
 {
   MAX_SUB_CALLBACK_INFOS_SEC_ = sec;
+}
+
+bool TildePublisherBase::get_input_info(
+    const std::string & topic,
+    const rclcpp::Time & header_stamp,
+    InputInfo & info)
+{
+  auto hs2ii_it = explicit_sub_time_infos_.find(topic);
+  if(hs2ii_it == explicit_sub_time_infos_.end()) {
+    return false;
+  }
+
+  auto header_stamp2input_info = hs2ii_it->second;
+  auto it = header_stamp2input_info.find(header_stamp);
+  if(it == header_stamp2input_info.end()) {
+    return false;
+  }
+
+  info = *(it->second);
+  return true;
 }

@@ -335,3 +335,58 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
     EXPECT_EQ(msg.input_infos.size(), 0ul);
   }
 }
+
+TEST_F(TestTildePublisher, get_input_info) {
+  auto clock = std::make_shared<rclcpp::Clock>();
+  auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
+  TildePublisherBase pub(clock, steady_clock, "node_name");
+  pub.set_max_sub_callback_infos_sec(1000);  // large value to prevent cleanup
+
+  const std::string TOPIC = "sample_topic";
+
+  // register [TOPIC][stamp_base]
+  auto now = clock->now();
+  auto now_steady = steady_clock->now();
+  auto stamp_base = now;
+
+  auto input_info = std::make_shared<InputInfo>();
+  input_info->sub_time = now;
+  input_info->sub_time_steady = now_steady;
+  input_info->has_header_stamp = true;
+  input_info->header_stamp = stamp_base;
+
+  pub.set_implicit_input_info(TOPIC, input_info);
+  pub.set_explicit_subtime(TOPIC, input_info);
+
+  // register [TOPIC][stamp_base2]
+  rclcpp::Duration dur(1, 2);
+  auto now2 = now + dur;
+  auto now_steady2 = now_steady + dur;
+  auto stamp_base2 = now + dur;
+
+  auto input_info2 = std::make_shared<InputInfo>();
+  input_info2->sub_time = now2;
+  input_info2->sub_time_steady = now_steady2;
+  input_info2->has_header_stamp = true;
+  input_info2->header_stamp = stamp_base2;
+
+  pub.set_implicit_input_info(TOPIC, input_info2);
+  pub.set_explicit_subtime(TOPIC, input_info2);
+
+  // topic not found
+  InputInfo out;
+  EXPECT_FALSE(pub.get_input_info("topic", stamp_base, out));
+  EXPECT_FALSE(out.has_header_stamp);
+
+  // topic found but stamp not found
+  EXPECT_FALSE(pub.get_input_info(TOPIC, clock->now(), out));
+  EXPECT_FALSE(out.has_header_stamp);
+
+  // found [TOPIC][stamp_base]
+  EXPECT_TRUE(pub.get_input_info(TOPIC, stamp_base, out));
+  EXPECT_EQ(out, *input_info);
+
+  // found [TOPIC][stamp_base2]
+  EXPECT_TRUE(pub.get_input_info(TOPIC, stamp_base2, out));
+  EXPECT_EQ(out, *input_info2);
+}

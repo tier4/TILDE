@@ -46,6 +46,8 @@ public:
 
   InputInfo()
   : has_header_stamp(false) {}
+
+  bool operator==(const InputInfo &rhs) const;
 };
 
 /// SFINEs to detect header field, not found case
@@ -205,7 +207,20 @@ public:
    */
   void set_max_sub_callback_infos_sec(size_t sec);
 
-protected:
+  /// Get input info
+  /**
+   * \param[in] topic fully qualified topic name
+   * \param[in] header_stamp target header.stamp
+   * \param[out] info output data
+   *
+   * \return true if found else false
+   */
+  bool get_input_info(
+      const std::string & topic,
+      const rclcpp::Time & header_stamp,
+      InputInfo & info);
+
+ protected:
   std::shared_ptr<rclcpp::Clock> clock_;
   std::shared_ptr<rclcpp::Clock> steady_clock_;
 

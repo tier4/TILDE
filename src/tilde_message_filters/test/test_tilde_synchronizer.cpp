@@ -33,6 +33,7 @@ using PointCloud2ConstPtr = std::shared_ptr<PointCloud2 const>;
 using Clock = rosgraph_msgs::msg::Clock;
 using PubInfo = tilde_msg::msg::PubInfo;
 using PubInfoPtr = PubInfo::UniquePtr;
+using TimeMsg = builtin_interfaces::msg::Time;
 
 class TestSynchronizer : public ::testing::Test
 {
@@ -46,6 +47,14 @@ class TestSynchronizer : public ::testing::Test
     rclcpp::shutdown();
   }
 };
+
+void EXPECT_CLOCK(rclcpp::Time time, int sec, uint32_t nsec)
+{
+  TimeMsg t = time;
+  EXPECT_EQ(t.sec, sec);
+  EXPECT_EQ(t.nanosec, nsec);
+}
+
 
 TEST_F(TestSynchronizer, exact_policy_2msgs) {
   rclcpp::NodeOptions options;
@@ -61,7 +70,7 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
 
   // setup sub_node
   auto sub_node = std::make_shared<TildeNode>("sub_node", options);
-  Subscriber<PointCloud2> sub1, sub2;
+  TildeSubscriber<PointCloud2> sub1, sub2;
   sub1.subscribe(sub_node, "in1", qos.get_rmw_qos_profile());
   sub2.subscribe(sub_node, "in2", qos.get_rmw_qos_profile());
   auto out_pub = sub_node->create_tilde_publisher<PointCloud2>("out", qos);
@@ -99,6 +108,11 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
           topic2idx[pi->input_infos[i].topic_name] = i;
         }
 
+        for(auto ii :pi->input_infos) {
+          std::cout << ii.topic_name << std::endl;
+          std::cout << ii.sub_time.sec << std::endl;
+        }
+
         EXPECT_EQ(topic2idx.size(), 2u);
         for(size_t i=1; i<=2; i++) {
           auto topic = std::string("/in") + std::to_string(i);
@@ -107,12 +121,14 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
 
           switch(i) {
             case 1:
+              EXPECT_EQ(in_info.topic_name, "/in1");
               EXPECT_EQ(in_info.sub_time.sec, 123);
               EXPECT_EQ(in_info.sub_time.nanosec, 456u);
               break;
             case 2:
-              EXPECT_EQ(in_info.sub_time.sec, 234);
-              EXPECT_EQ(in_info.sub_time.nanosec, 567u);
+              EXPECT_EQ(in_info.topic_name, "/in2");
+              EXPECT_EQ(in_info.sub_time.sec, 124);
+              EXPECT_EQ(in_info.sub_time.nanosec, 321u);
               break;
             default:
               // never comes here
@@ -142,6 +158,7 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
   // apply "/clock"
   send_clock(123, 456);
   spin();
+  EXPECT_CLOCK(sub_node->now(), 123, 456u);
 
   // PointCloud2 message to publish
   PointCloud2 msg;
@@ -153,17 +170,17 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
   spin();
 
   // update clock
-  send_clock(234, 567);
+  send_clock(124, 321);
   spin();
+  EXPECT_CLOCK(sub_node->now(), 124, 321);
 
   // pub2
+  EXPECT_FALSE(val_callback_called);
   msg.header.frame_id = 2;
   pub2->publish(msg);
   spin();
 
-  // update clock
-
-  // varify
+  // verify
   EXPECT_TRUE(sync_callback_called);
   EXPECT_TRUE(val_callback_called);
 }
