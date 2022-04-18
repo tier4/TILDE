@@ -53,7 +53,7 @@ public:
 
     // setup pub node
     pub_node = std::make_shared<Node>("pub_node", options);
-    for(auto i=0u; i<9u; i++) {
+    for(auto i=0u; i<subs.size(); i++) {
       auto topic = std::string("in") + std::to_string(i + 1);
       pubs.push_back(pub_node->create_publisher<PointCloud2>(topic, qos));
     }
@@ -61,7 +61,7 @@ public:
 
     // setup sub node
     sub_node = std::make_shared<TildeNode>("sub_node", options);
-    for(auto i=0u; i<9u; i++) {
+    for(auto i=0u; i<subs.size(); i++) {
       auto topic = std::string("in") + std::to_string(i + 1);
       subs[i].subscribe(sub_node, topic, qos.get_rmw_qos_profile());
     }
