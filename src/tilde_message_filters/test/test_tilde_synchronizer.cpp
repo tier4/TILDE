@@ -30,10 +30,16 @@ using Node = rclcpp::Node;
 using PointCloud2 = sensor_msgs::msg::PointCloud2;
 using PointCloud2Ptr = std::shared_ptr<PointCloud2>;
 using PointCloud2ConstPtr = std::shared_ptr<PointCloud2 const>;
+
 using Clock = rosgraph_msgs::msg::Clock;
 using PubInfo = tilde_msg::msg::PubInfo;
 using PubInfoPtr = PubInfo::UniquePtr;
 using TimeMsg = builtin_interfaces::msg::Time;
+
+using PointCloudPublisher = std::shared_ptr<rclcpp::Publisher<PointCloud2>>;
+using PointCloudPublishers = std::vector<PointCloudPublisher>;
+using PointCloudTildeSubscriber = TildeSubscriber<PointCloud2>;
+using PointCloudTildeSubscribers = std::vector<PointCloudTildeSubscriber>;
 
 class TestSynchronizer : public ::testing::Test
 {
@@ -47,14 +53,18 @@ public:
 
     // setup pub node
     pub_node = std::make_shared<Node>("pub_node", options);
-    pub1 = pub_node->create_publisher<PointCloud2>("in1", qos);
-    pub2 = pub_node->create_publisher<PointCloud2>("in2", qos);
+    for(auto i=0u; i<9u; i++) {
+      auto topic = std::string("in") + std::to_string(i + 1);
+      pubs.push_back(pub_node->create_publisher<PointCloud2>(topic, qos));
+    }
     clock_pub = pub_node->create_publisher<Clock>("/clock", qos);
 
     // setup sub node
     sub_node = std::make_shared<TildeNode>("sub_node", options);
-    sub1.subscribe(sub_node, "in1", qos.get_rmw_qos_profile());
-    sub2.subscribe(sub_node, "in2", qos.get_rmw_qos_profile());
+    for(auto i=0u; i<9u; i++) {
+      auto topic = std::string("in") + std::to_string(i + 1);
+      subs[i].subscribe(sub_node, topic, qos.get_rmw_qos_profile());
+    }
     out_pub = sub_node->create_tilde_publisher<PointCloud2>("out", qos);
 
     // setup val node
@@ -93,11 +103,11 @@ public:
   rclcpp::QoS qos{10};
 
   std::shared_ptr<Node> pub_node;
-  std::shared_ptr<rclcpp::Publisher<PointCloud2>> pub1, pub2;
+  PointCloudPublishers pubs;
   std::shared_ptr<rclcpp::Publisher<Clock>> clock_pub;
 
   std::shared_ptr<TildeNode> sub_node;
-  TildeSubscriber<PointCloud2> sub1, sub2;
+  PointCloudTildeSubscribers subs{9};
   std::shared_ptr<TildePublisher<PointCloud2>> out_pub;
 
   std::shared_ptr<Node> val_node;
@@ -110,8 +120,12 @@ void EXPECT_CLOCK(rclcpp::Time time, int sec, uint32_t nsec)
   EXPECT_EQ(t.nanosec, nsec);
 }
 
-
 TEST_F(TestSynchronizer, exact_policy_2msgs) {
+  auto pub1 = pubs[0];
+  auto pub2 = pubs[1];
+  auto& sub1 = subs[0];
+  auto& sub2 = subs[1];
+
   // setup sub_node synchronizer
   using SyncPolicy = sync_policies::ExactTime<PointCloud2, PointCloud2>;
   using Sync = TildeSynchronizer<SyncPolicy>;
@@ -207,3 +221,4 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
   EXPECT_TRUE(sync_callback_called);
   EXPECT_TRUE(val_callback_called);
 }
+
