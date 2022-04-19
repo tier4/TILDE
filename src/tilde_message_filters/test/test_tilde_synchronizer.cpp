@@ -228,6 +228,7 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
   EXPECT_TRUE(val_callback_called);
 }
 
+/// TildeSynchronizer only collaborates with TildeSynchronizer
 TEST_F(TestSynchronizer, sub_and_tilde_sub)
 {
   auto pub1 = pubs[0];
@@ -265,9 +266,6 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
 
         for(const auto &in_info: pi->input_infos) {
           if(in_info.topic_name == "/in1") {
-            EXPECT_EQ(in_info.sub_time.sec, 123);
-            EXPECT_EQ(in_info.sub_time.nanosec, 456u);
-          } else if(in_info.topic_name == "/in2") {
             EXPECT_EQ(in_info.sub_time.sec, 123);
             EXPECT_EQ(in_info.sub_time.nanosec, 456u);
           } else {
@@ -311,3 +309,5 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
   EXPECT_TRUE(sync_callback_called);
   EXPECT_TRUE(val_callback_called);
 }
+
+
