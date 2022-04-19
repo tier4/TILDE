@@ -655,7 +655,7 @@ public:
        auto node_topics_interface = get_node_topics_interface(node_);
        auto topic_name = f.getTopic();
        auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
-       std::cout << "topic_name[ " << I << "]: "<< resolved_topic_name << std::endl;
+       // std::cout << "topic_name[ " << I << "]: "<< resolved_topic_name << std::endl;
        topic_names_[I] = resolved_topic_name;
     }
   }
