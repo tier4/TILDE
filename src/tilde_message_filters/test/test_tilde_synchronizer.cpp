@@ -61,10 +61,7 @@ public:
 
     // setup sub node
     sub_node = std::make_shared<TildeNode>("sub_node", options);
-    for(auto i=0u; i<subs.size(); i++) {
-      auto topic = std::string("in") + std::to_string(i + 1);
-      subs[i].subscribe(sub_node, topic, qos.get_rmw_qos_profile());
-    }
+    // skip init subs. Get subs via init_and_get_sub().
     out_pub = sub_node->create_tilde_publisher<PointCloud2>("out", qos);
 
     // setup val node
@@ -99,6 +96,15 @@ public:
     rclcpp::spin_some(val_node);
   }
 
+  template<std::size_t I>
+  PointCloudTildeSubscriber & init_and_get_sub()
+  {
+    static_assert(I < 9);
+    auto topic = std::string("in") + std::to_string(I + 1);
+    subs[I].subscribe(sub_node, topic, qos.get_rmw_qos_profile());
+    return subs[I];
+  }
+
   rclcpp::NodeOptions options;
   rclcpp::QoS qos{10};
 
@@ -123,8 +129,8 @@ void EXPECT_CLOCK(rclcpp::Time time, int sec, uint32_t nsec)
 TEST_F(TestSynchronizer, exact_policy_2msgs) {
   auto pub1 = pubs[0];
   auto pub2 = pubs[1];
-  auto& sub1 = subs[0];
-  auto& sub2 = subs[1];
+  auto& sub1 = init_and_get_sub<0>();
+  auto& sub2 = init_and_get_sub<1>();
 
   // setup sub_node synchronizer
   using SyncPolicy = sync_policies::ExactTime<PointCloud2, PointCloud2>;
@@ -222,3 +228,86 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
   EXPECT_TRUE(val_callback_called);
 }
 
+TEST_F(TestSynchronizer, sub_and_tilde_sub)
+{
+  auto pub1 = pubs[0];
+  auto pub2 = pubs[1];
+  auto& sub1 = init_and_get_sub<0>();
+  Subscriber<PointCloud2> sub2;
+  sub2.subscribe(sub_node, "in2", qos.get_rmw_qos_profile());
+
+  // setup sub_node synchronizer
+  using SyncPolicy = sync_policies::ExactTime<PointCloud2, PointCloud2>;
+  using Sync = TildeSynchronizer<SyncPolicy>;
+  auto sync = std::make_shared<Sync>(sub_node.get(), SyncPolicy(5), sub1, sub2);
+
+  bool sync_callback_called = false;
+  sync->registerCallback(
+      [this, &sync_callback_called](const PointCloud2ConstPtr &msg1,
+         const PointCloud2ConstPtr &msg2) -> void
+      {
+        (void) msg1;
+        (void) msg2;
+        sync_callback_called = true;
+        out_pub->publish(*msg1);
+      });
+
+  // validation node
+  bool val_callback_called = false;
+  auto val_sub = val_node->create_subscription<PubInfo>(
+      "out/info/pub", qos,
+      [this, &val_callback_called](PubInfoPtr pi) -> void
+      {
+        val_callback_called = true;
+        EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
+        EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
+        EXPECT_EQ(pi->input_infos.size(), 1u);
+
+        for(const auto &in_info: pi->input_infos) {
+          if(in_info.topic_name == "/in1") {
+            EXPECT_EQ(in_info.sub_time.sec, 123);
+            EXPECT_EQ(in_info.sub_time.nanosec, 456u);
+          } else if(in_info.topic_name == "/in2") {
+            EXPECT_EQ(in_info.sub_time.sec, 123);
+            EXPECT_EQ(in_info.sub_time.nanosec, 456u);
+          } else {
+            // never comes here
+            FAIL() << "invalid topic: " << in_info.topic_name;
+          }
+        }
+      });
+
+  // apply "/clock"
+  std::cout << "clock\n";
+  send_clock(123, 456);
+  spin();
+  EXPECT_CLOCK(sub_node->now(), 123, 456u);
+  std::cout << "clock\n";
+
+  // PointCloud2 message to publish
+  PointCloud2 msg;
+  msg.header.stamp = pub_node->now();
+
+  // pub1 & sub
+  msg.header.frame_id = 1;
+  pub1->publish(msg);
+  spin();
+  std::cout << "pub1\n";
+
+  // update clock
+  send_clock(124, 321);
+  spin();
+  EXPECT_CLOCK(sub_node->now(), 124, 321);
+  std::cout << "clock2\n";
+
+  // pub2
+  EXPECT_FALSE(val_callback_called);
+  msg.header.frame_id = 2;
+  pub2->publish(msg);
+  spin();
+  std::cout << "pub2\n";
+
+  // verify
+  EXPECT_TRUE(sync_callback_called);
+  EXPECT_TRUE(val_callback_called);
+}

@@ -274,7 +274,6 @@ private:
     auto subtime = pnode->now();
     auto subtime_steady = pnode->get_steady_time();
 
-    std::cout << "TilSub callback: " << topic << std::endl;
     pnode->register_message_as_input(
         msg.get(), topic,
         subtime, subtime_steady);
