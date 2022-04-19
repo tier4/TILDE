@@ -179,3 +179,27 @@ bool TildePublisherBase::get_input_info(
   info = *(it->second);
   return true;
 }
+
+void TildePublisherBase::print_input_infos()
+{
+  auto time2str =
+      [](const rclcpp::Time &rt) -> std::string
+      {
+        builtin_interfaces::msg::Time t = rt;
+        return std::string("sec: ") +
+            std::to_string(t.sec) +
+            " nsec: " +
+            std::to_string(t.nanosec);
+      };
+
+  std::cout << "print_input_infos\n";
+  for(auto & [topic, pinfo]: input_infos_) {
+    std::cout << "  " << topic << "\n";
+    std::cout << "  subtime: "
+              << time2str(pinfo->sub_time)
+              << "\n  stamp: "
+              << time2str(pinfo->header_stamp)
+              << std::endl;
+  }
+
+}

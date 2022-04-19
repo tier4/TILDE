@@ -220,7 +220,9 @@ public:
       const rclcpp::Time & header_stamp,
       InputInfo & info);
 
- protected:
+  void print_input_infos();
+
+protected:
   std::shared_ptr<rclcpp::Clock> clock_;
   std::shared_ptr<rclcpp::Clock> steady_clock_;
 
