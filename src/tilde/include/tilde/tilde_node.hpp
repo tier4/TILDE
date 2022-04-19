@@ -215,6 +215,7 @@ public:
     // prepare InputInfo
 
     rclcpp::Time header_stamp;
+    // TODO(y-okumura-isp): introduce has_timestamp()
     rclcpp::Time t(0, 100, this->now().get_clock_type());
 
     header_stamp = Process<MessageT>::get_timestamp_from_const(t, pmsg);
