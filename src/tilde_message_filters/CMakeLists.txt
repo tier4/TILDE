@@ -67,6 +67,18 @@ if(BUILD_TESTING)
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
+  ament_add_gtest(test_tilde_subscriber
+    test/test_tilde_subscriber.cpp)
+    target_include_directories(test_tilde_subscriber
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+  ament_target_dependencies(test_tilde_subscriber
+    "tilde"
+    "message_filters"
+    "sensor_msgs"
+    "std_msgs")
+
   ament_add_gtest(test_tilde_synchronizer
     test/test_tilde_synchronizer.cpp)
     target_include_directories(test_tilde_synchronizer
