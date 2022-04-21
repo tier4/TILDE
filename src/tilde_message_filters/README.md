@@ -20,7 +20,7 @@ See bellow to know how to maintenance.
 
 #### test_subscriber.cpp
 
-- Mnually copy & rename corresponding files
+- Manually copy & rename corresponding files
 - Prepare TildeSubscriber
   - replace `#include "message_filters/subscriber.h"` to
     `#include "tilde_message_filters/tilde_subscriber.h"`
@@ -32,3 +32,23 @@ See bellow to know how to maintenance.
 - Comment tests using LifecycleNode
   - `TEST(TildeSubscriber, lifecycle)` on 20220421
 
+#### test_synchronizer.cpp
+
+- Manually copy & rename corresponding files
+- Prepare TildeSynchronizer
+  - replace `#include "message_filters/synchronizer.h"` to
+    `#include "tilde_message_filters/tilde_synchronizer.h"`
+  - add `using namespace tilde_message_filters;`
+  - replace `Synchronizer` to `TildeSynchronizer` of TEST
+    - don't change `typedef Synchronizer<NullPolicy> Sync;` in `struct NullPolicy`
+  - Add `TildeNode` to TildeSynchronizer construstors
+    - `nullptr` may work
+    - non-null instance is needed for message handling tests.
+      (add2, add3, and so on)
+      If null, SEGV occurs.
+
+- Use `tilde::TildeNode` instead of `rclcpp::Node`
+  - add `#include "tilde/tilde_node.hpp"`
+  - replace `rclcpp::Node` to `tilde::TildeNode`
+- Comment tests using LifecycleNode
+  - `TEST(TildeSubscriber, lifecycle)` on 20220421
