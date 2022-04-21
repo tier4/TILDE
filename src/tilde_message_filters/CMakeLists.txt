@@ -18,6 +18,9 @@ find_package(sensor_msgs REQUIRED)
 
 include_directories(include)
 ament_export_include_directories(include)
+install(
+  DIRECTORY include/
+  DESTINATION include)
 
 add_library(sample_tilde_message_filter SHARED
   src/sample_tilde_subscriber.cpp
