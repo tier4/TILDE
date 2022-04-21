@@ -90,6 +90,18 @@ if(BUILD_TESTING)
     "message_filters"
     "sensor_msgs"
     "std_msgs")
+
+  ament_add_gtest(test_from_original_subscriber
+    test/test_from_original_subscriber.cpp)
+    target_include_directories(test_from_original_subscriber
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+  ament_target_dependencies(test_from_original_subscriber
+    "tilde"
+    "message_filters"
+    "sensor_msgs"
+    "std_msgs")
 endif()
 
 ament_package()

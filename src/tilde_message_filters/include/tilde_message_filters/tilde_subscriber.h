@@ -34,7 +34,7 @@ class TildeSubscriber
 {
   using NodePtr = std::shared_ptr<NodeType>;
   using MConstPtr = std::shared_ptr<M const>;
-
+  using EventType = message_filters::MessageEvent<M const>;
 
 public:
   TildeSubscriber(NodePtr node, const std::string& topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
@@ -77,6 +77,19 @@ public:
   std::string getTopic() const
   {
     return subscriber_.getTopic();
+  }
+
+  /// \sa message_filters::Subscriber::add()
+  void add(const EventType& e)
+  {
+    (void)e;
+  }
+
+  /// \sa message_filters::Subscriber::connectInput()
+  template<typename F>
+  void connectInput(F& f)
+  {
+    (void)f;
   }
 
   /*
@@ -150,7 +163,7 @@ public:
     std::cout << "ptn2" << std::endl;
 
     // We may use SFINAE instead of if constexpr to shorten this function.
-    // But entry point is clear by `if constexpr`.
+    // But SFINAE may change the entry point. On the other hand, `if constexpr` does not change it.
     if constexpr (!is_subscription_message<P, M, MessageDeleter>()) {
         return subscriber_.registerCallback(callback);
     } else {
