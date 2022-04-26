@@ -268,6 +268,8 @@ TEST(TildeSynchronizer, compileMethod8)
 }
 */
 
+/// add() or cb() are called internally,
+/// so we can skip these tests
 /*
 TEST(TildeSynchronizer, add2)
 {
