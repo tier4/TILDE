@@ -39,7 +39,7 @@
   using ConstRef = const MessageT &; \
   using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>; \
   using SharedConstPtr = std::shared_ptr<const MessageT>; \
-  using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&; \
+  using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;  \
   using SharedPtr = std::shared_ptr<MessageT>; \
   \
     if constexpr (std::is_same_v<S, ConstRef>) {                   \
@@ -139,7 +139,7 @@ public:
             callback_addr,
             subtime_steady.nanoseconds());
 
-          MessageT *pmsg;
+          const MessageT *pmsg;
           TILDE_NODE_GET_PTR(MessageT, msg, pmsg);
           register_message_as_input(
               pmsg,
