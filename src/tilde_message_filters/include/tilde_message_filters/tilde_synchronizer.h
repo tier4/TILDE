@@ -1024,24 +1024,18 @@ public:
   }
 
   // (const C& callback, T* t)
-  template<class C, typename T>
-  message_filters::Connection registerCallback(const C& callback, T* t)
-  {
-    return sync_ptr_->registerCallback(callback, t);
-  }
-
-  /*
-  template<class C, typename T,
+  template<typename ReturnTypeT, typename... Args, typename T,
+           typename C = ReturnTypeT(Args...),
            std::size_t Arity = 2,
            typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
+             sizeof...(Args) == Arity,
+             bool>::type = true,
            typename CallbackArgT0 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
            typename CallbackArgT1 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<1>
            >
-  message_filters::Connection registerCallback(const C& callback, T* t)
+  message_filters::Connection registerCallback(ReturnTypeT(T::*callback)(Args...), T* t)
   {
     auto bind_callback = std::bind(callback, t,
                                    std::placeholders::_1,
@@ -1059,19 +1053,18 @@ public:
             bind_callback(msg0, msg1);
           };
 
-    std::function<void(CallbackArgT0, CallbackArgT1)> new_callback =
+    return sync_ptr_->registerCallback(
         std::bind(new_callback_lambda,
                   std::placeholders::_1,
-                  std::placeholders::_2);
-
-    return sync_ptr_->registerCallback(new_callback);
+                  std::placeholders::_2));
   }
 
-  template<class C, typename T,
+  template<typename ReturnTypeT, typename... Args, typename T,
+           typename C = ReturnTypeT(Args...),
            std::size_t Arity = 3,
            typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
+             sizeof...(Args) == Arity,
+             bool>::type = true,
            typename CallbackArgT0 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
            typename CallbackArgT1 =
@@ -1079,7 +1072,7 @@ public:
            typename CallbackArgT2 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<2>
            >
-  message_filters::Connection registerCallback(const C& callback, T* t)
+  message_filters::Connection registerCallback(ReturnTypeT(T::*callback)(Args...), T* t)
   {
     auto bind_callback = std::bind(callback, t,
                                    std::placeholders::_1,
@@ -1089,7 +1082,8 @@ public:
         = [this, bind_callback](
             CallbackArgT0 msg0,
             CallbackArgT1 msg1,
-            CallbackArgT2 msg2) {
+            CallbackArgT2 msg2) -> void
+          {
             std::cout << "hooked3" << std::endl;
 
             register_ith_message_as_input<0>(msg0);
@@ -1106,11 +1100,12 @@ public:
                   std::placeholders::_3));
   }
 
-  template<class C, typename T,
+  template<typename ReturnTypeT, typename... Args, typename T,
+           typename C = ReturnTypeT(Args...),
            std::size_t Arity = 4,
            typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
+             sizeof...(Args) == Arity,
+             bool>::type = true,
            typename CallbackArgT0 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
            typename CallbackArgT1 =
@@ -1120,7 +1115,7 @@ public:
            typename CallbackArgT3 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<3>
            >
-  message_filters::Connection registerCallback(const C& callback, T* t)
+  message_filters::Connection registerCallback(ReturnTypeT(T::*callback)(Args...), T* t)
   {
     auto bind_callback = std::bind(callback, t,
                                    std::placeholders::_1,
@@ -1132,7 +1127,8 @@ public:
             CallbackArgT0 msg0,
             CallbackArgT1 msg1,
             CallbackArgT2 msg2,
-            CallbackArgT3 msg3) {
+            CallbackArgT3 msg3) -> void
+          {
             std::cout << "hooked4" << std::endl;
 
             register_ith_message_as_input<0>(msg0);
@@ -1142,6 +1138,7 @@ public:
 
             bind_callback(msg0, msg1, msg2, msg3);
           };
+
     return sync_ptr_->registerCallback(
         std::bind(new_callback_lambda,
                   std::placeholders::_1,
@@ -1150,11 +1147,12 @@ public:
                   std::placeholders::_4));
   }
 
-  template<class C, typename T,
+  template<typename ReturnTypeT, typename... Args, typename T,
+           typename C = ReturnTypeT(Args...),
            std::size_t Arity = 5,
            typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
+             sizeof...(Args) == Arity,
+             bool>::type = true,
            typename CallbackArgT0 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
            typename CallbackArgT1 =
@@ -1166,7 +1164,7 @@ public:
            typename CallbackArgT4 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<4>
            >
-  message_filters::Connection registerCallback(const C& callback, T* t)
+  message_filters::Connection registerCallback(ReturnTypeT(T::*callback)(Args...), T* t)
   {
     auto bind_callback = std::bind(callback, t,
                                    std::placeholders::_1,
@@ -1180,7 +1178,8 @@ public:
             CallbackArgT1 msg1,
             CallbackArgT2 msg2,
             CallbackArgT3 msg3,
-            CallbackArgT4 msg4) {
+            CallbackArgT4 msg4) -> void
+          {
             std::cout << "hooked5" << std::endl;
 
             register_ith_message_as_input<0>(msg0);
@@ -1191,6 +1190,7 @@ public:
 
             bind_callback(msg0, msg1, msg2, msg3, msg4);
           };
+
     return sync_ptr_->registerCallback(
         std::bind(new_callback_lambda,
                   std::placeholders::_1,
@@ -1200,11 +1200,12 @@ public:
                   std::placeholders::_5));
   }
 
-  template<class C, typename T,
+  template<typename ReturnTypeT, typename... Args, typename T,
+           typename C = ReturnTypeT(Args...),
            std::size_t Arity = 6,
            typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
+             sizeof...(Args) == Arity,
+             bool>::type = true,
            typename CallbackArgT0 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
            typename CallbackArgT1 =
@@ -1218,7 +1219,7 @@ public:
            typename CallbackArgT5 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<5>
            >
-  message_filters::Connection registerCallback(const C& callback, T* t)
+  message_filters::Connection registerCallback(ReturnTypeT(T::*callback)(Args...), T* t)
   {
     auto bind_callback = std::bind(callback, t,
                                    std::placeholders::_1,
@@ -1227,7 +1228,6 @@ public:
                                    std::placeholders::_4,
                                    std::placeholders::_5,
                                    std::placeholders::_6);
-
     auto new_callback_lambda
         = [this, bind_callback](
             CallbackArgT0 msg0,
@@ -1235,7 +1235,8 @@ public:
             CallbackArgT2 msg2,
             CallbackArgT3 msg3,
             CallbackArgT4 msg4,
-            CallbackArgT5 msg5) {
+            CallbackArgT5 msg5) -> void
+          {
             std::cout << "hooked6" << std::endl;
 
             register_ith_message_as_input<0>(msg0);
@@ -1247,6 +1248,7 @@ public:
 
             bind_callback(msg0, msg1, msg2, msg3, msg4, msg5);
           };
+
     return sync_ptr_->registerCallback(
         std::bind(new_callback_lambda,
                   std::placeholders::_1,
@@ -1257,11 +1259,12 @@ public:
                   std::placeholders::_6));
   }
 
-  template<class C, typename T,
+  template<typename ReturnTypeT, typename... Args, typename T,
+           typename C = ReturnTypeT(Args...),
            std::size_t Arity = 7,
            typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
+             sizeof...(Args) == Arity,
+             bool>::type = true,
            typename CallbackArgT0 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
            typename CallbackArgT1 =
@@ -1277,7 +1280,7 @@ public:
            typename CallbackArgT6 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<6>
            >
-  message_filters::Connection registerCallback(const C& callback, T* t)
+  message_filters::Connection registerCallback(ReturnTypeT(T::*callback)(Args...), T* t)
   {
     auto bind_callback = std::bind(callback, t,
                                    std::placeholders::_1,
@@ -1287,7 +1290,6 @@ public:
                                    std::placeholders::_5,
                                    std::placeholders::_6,
                                    std::placeholders::_7);
-
     auto new_callback_lambda
         = [this, bind_callback](
             CallbackArgT0 msg0,
@@ -1296,7 +1298,8 @@ public:
             CallbackArgT3 msg3,
             CallbackArgT4 msg4,
             CallbackArgT5 msg5,
-            CallbackArgT6 msg6) {
+            CallbackArgT6 msg6) -> void
+          {
             std::cout << "hooked7" << std::endl;
 
             register_ith_message_as_input<0>(msg0);
@@ -1309,6 +1312,7 @@ public:
 
             bind_callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6);
           };
+
     return sync_ptr_->registerCallback(
         std::bind(new_callback_lambda,
                   std::placeholders::_1,
@@ -1320,11 +1324,12 @@ public:
                   std::placeholders::_7));
   }
 
-  template<class C, typename T,
+  template<typename ReturnTypeT, typename... Args, typename T,
+           typename C = ReturnTypeT(Args...),
            std::size_t Arity = 8,
            typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
+             sizeof...(Args) == Arity,
+             bool>::type = true,
            typename CallbackArgT0 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
            typename CallbackArgT1 =
@@ -1342,7 +1347,7 @@ public:
            typename CallbackArgT7 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<7>
            >
-  message_filters::Connection registerCallback(const C& callback, T* t)
+  message_filters::Connection registerCallback(ReturnTypeT(T::*callback)(Args...), T* t)
   {
     auto bind_callback = std::bind(callback, t,
                                    std::placeholders::_1,
@@ -1353,7 +1358,6 @@ public:
                                    std::placeholders::_6,
                                    std::placeholders::_7,
                                    std::placeholders::_8);
-
     auto new_callback_lambda
         = [this, bind_callback](
             CallbackArgT0 msg0,
@@ -1363,7 +1367,8 @@ public:
             CallbackArgT4 msg4,
             CallbackArgT5 msg5,
             CallbackArgT6 msg6,
-            CallbackArgT7 msg7) {
+            CallbackArgT7 msg7) -> void
+          {
             std::cout << "hooked8" << std::endl;
 
             register_ith_message_as_input<0>(msg0);
@@ -1377,6 +1382,7 @@ public:
 
             bind_callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7);
           };
+
     return sync_ptr_->registerCallback(
         std::bind(new_callback_lambda,
                   std::placeholders::_1,
@@ -1389,11 +1395,12 @@ public:
                   std::placeholders::_8));
   }
 
-  template<class C, typename T,
+  template<typename ReturnTypeT, typename... Args, typename T,
+           typename C = ReturnTypeT(Args...),
            std::size_t Arity = 9,
            typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
+             sizeof...(Args) == Arity,
+             bool>::type = true,
            typename CallbackArgT0 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
            typename CallbackArgT1 =
@@ -1413,7 +1420,7 @@ public:
            typename CallbackArgT8 =
            typename rclcpp::function_traits::function_traits<C>::template argument_type<8>
            >
-  message_filters::Connection registerCallback(const C& callback, T* t)
+  message_filters::Connection registerCallback(ReturnTypeT(T::*callback)(Args...), T* t)
   {
     auto bind_callback = std::bind(callback, t,
                                    std::placeholders::_1,
@@ -1425,7 +1432,6 @@ public:
                                    std::placeholders::_7,
                                    std::placeholders::_8,
                                    std::placeholders::_9);
-
     auto new_callback_lambda
         = [this, bind_callback](
             CallbackArgT0 msg0,
@@ -1436,7 +1442,8 @@ public:
             CallbackArgT5 msg5,
             CallbackArgT6 msg6,
             CallbackArgT7 msg7,
-            CallbackArgT8 msg8) {
+            CallbackArgT8 msg8) -> void
+          {
             std::cout << "hooked9" << std::endl;
 
             register_ith_message_as_input<0>(msg0);
@@ -1451,6 +1458,7 @@ public:
 
             bind_callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8);
           };
+
     return sync_ptr_->registerCallback(
         std::bind(new_callback_lambda,
                   std::placeholders::_1,
@@ -1463,447 +1471,9 @@ public:
                   std::placeholders::_8,
                   std::placeholders::_9));
   }
-  */
 
   // (C& callback, T* t)
-  template<class C, typename T>
-  message_filters::Connection registerCallback(C& callback, T* t)
-  {
-    return sync_ptr_->registerCallback(callback, t);
-  }
-
-  /*
-  template<class C, typename T,
-           std::size_t Arity = 2,
-           typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
-           typename CallbackArgT0 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
-           typename CallbackArgT1 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>
-           >
-  message_filters::Connection registerCallback(C& callback, T* t)
-  {
-    auto bind_callback = std::bind(callback, t,
-                                   std::placeholders::_1,
-                                   std::placeholders::_2);
-
-    auto new_callback_lambda
-        = [this, bind_callback](
-            CallbackArgT0 msg0,
-            CallbackArgT1 msg1) {
-            std::cout << "hooked2" << std::endl;
-
-            register_ith_message_as_input<0>(msg0);
-            register_ith_message_as_input<1>(msg1);
-
-            bind_callback(msg0, msg1);
-          };
-
-    return sync_ptr_->registerCallback(
-        std::bind(new_callback_lambda,
-                  std::placeholders::_1,
-                  std::placeholders::_2));
-  }
-
-  template<class C, typename T,
-           std::size_t Arity = 3,
-           typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
-           typename CallbackArgT0 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
-           typename CallbackArgT1 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
-           typename CallbackArgT2 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>
-           >
-  message_filters::Connection registerCallback(C& callback, T* t)
-  {
-    auto bind_callback = std::bind(callback, t,
-                                   std::placeholders::_1,
-                                   std::placeholders::_2,
-                                   std::placeholders::_3);
-    auto new_callback_lambda
-        = [this, bind_callback](
-            CallbackArgT0 msg0,
-            CallbackArgT1 msg1,
-            CallbackArgT2 msg2) {
-            std::cout << "hooked3" << std::endl;
-
-            register_ith_message_as_input<0>(msg0);
-            register_ith_message_as_input<1>(msg1);
-            register_ith_message_as_input<2>(msg2);
-
-            bind_callback(msg0, msg1, msg2);
-          };
-
-    return sync_ptr_->registerCallback(
-        std::bind(new_callback_lambda,
-                  std::placeholders::_1,
-                  std::placeholders::_2,
-                  std::placeholders::_3));
-  }
-
-  template<class C, typename T,
-           std::size_t Arity = 4,
-           typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
-           typename CallbackArgT0 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
-           typename CallbackArgT1 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
-           typename CallbackArgT2 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
-           typename CallbackArgT3 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>
-           >
-  message_filters::Connection registerCallback(C& callback, T* t)
-  {
-    auto bind_callback = std::bind(callback, t,
-                                   std::placeholders::_1,
-                                   std::placeholders::_2,
-                                   std::placeholders::_3,
-                                   std::placeholders::_4);
-    auto new_callback_lambda
-        = [this, bind_callback](
-            CallbackArgT0 msg0,
-            CallbackArgT1 msg1,
-            CallbackArgT2 msg2,
-            CallbackArgT3 msg3) {
-            std::cout << "hooked4" << std::endl;
-
-            register_ith_message_as_input<0>(msg0);
-            register_ith_message_as_input<1>(msg1);
-            register_ith_message_as_input<2>(msg2);
-            register_ith_message_as_input<3>(msg3);
-
-            bind_callback(msg0, msg1, msg2, msg3);
-          };
-    return sync_ptr_->registerCallback(
-        std::bind(new_callback_lambda,
-                  std::placeholders::_1,
-                  std::placeholders::_2,
-                  std::placeholders::_3,
-                  std::placeholders::_4));
-  }
-
-  template<class C, typename T,
-           std::size_t Arity = 5,
-           typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
-           typename CallbackArgT0 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
-           typename CallbackArgT1 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
-           typename CallbackArgT2 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
-           typename CallbackArgT3 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>,
-           typename CallbackArgT4 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<4>
-           >
-  message_filters::Connection registerCallback(C& callback, T* t)
-  {
-    auto bind_callback = std::bind(callback, t,
-                                   std::placeholders::_1,
-                                   std::placeholders::_2,
-                                   std::placeholders::_3,
-                                   std::placeholders::_4,
-                                   std::placeholders::_5);
-
-    auto new_callback_lambda
-        = [this, callback](
-            CallbackArgT0 msg0,
-            CallbackArgT1 msg1,
-            CallbackArgT2 msg2,
-            CallbackArgT3 msg3,
-            CallbackArgT4 msg4) {
-            std::cout << "hooked5" << std::endl;
-
-            register_ith_message_as_input<0>(msg0);
-            register_ith_message_as_input<1>(msg1);
-            register_ith_message_as_input<2>(msg2);
-            register_ith_message_as_input<3>(msg3);
-            register_ith_message_as_input<4>(msg4);
-
-            callback(msg0, msg1, msg2, msg3, msg4);
-          };
-    return sync_ptr_->registerCallback(
-        std::bind(new_callback_lambda,
-                  std::placeholders::_1,
-                  std::placeholders::_2,
-                  std::placeholders::_3,
-                  std::placeholders::_4,
-                  std::placeholders::_5));
-  }
-
-  template<class C, typename T,
-           std::size_t Arity = 6,
-           typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
-           typename CallbackArgT0 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
-           typename CallbackArgT1 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
-           typename CallbackArgT2 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
-           typename CallbackArgT3 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>,
-           typename CallbackArgT4 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<4>,
-           typename CallbackArgT5 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<5>
-           >
-  message_filters::Connection registerCallback(C& callback, T* t)
-  {
-    auto bind_callback = std::bind(callback, t,
-                                   std::placeholders::_1,
-                                   std::placeholders::_2,
-                                   std::placeholders::_3,
-                                   std::placeholders::_4,
-                                   std::placeholders::_5,
-                                   std::placeholders::_6);
-
-    auto new_callback_lambda
-        = [this, bind_callback](
-            CallbackArgT0 msg0,
-            CallbackArgT1 msg1,
-            CallbackArgT2 msg2,
-            CallbackArgT3 msg3,
-            CallbackArgT4 msg4,
-            CallbackArgT5 msg5) {
-            std::cout << "hooked6" << std::endl;
-
-            register_ith_message_as_input<0>(msg0);
-            register_ith_message_as_input<1>(msg1);
-            register_ith_message_as_input<2>(msg2);
-            register_ith_message_as_input<3>(msg3);
-            register_ith_message_as_input<4>(msg4);
-            register_ith_message_as_input<5>(msg5);
-
-            bind_callback(msg0, msg1, msg2, msg3, msg4, msg5);
-          };
-    return sync_ptr_->registerCallback(
-        std::bind(new_callback_lambda,
-                  std::placeholders::_1,
-                  std::placeholders::_2,
-                  std::placeholders::_3,
-                  std::placeholders::_4,
-                  std::placeholders::_5,
-                  std::placeholders::_6));
-  }
-
-  template<class C, typename T,
-           std::size_t Arity = 7,
-           typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
-           typename CallbackArgT0 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
-           typename CallbackArgT1 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
-           typename CallbackArgT2 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
-           typename CallbackArgT3 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>,
-           typename CallbackArgT4 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<4>,
-           typename CallbackArgT5 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<5>,
-           typename CallbackArgT6 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<6>
-           >
-  message_filters::Connection registerCallback(C& callback, T* t)
-  {
-    auto bind_callback = std::bind(callback, t,
-                                   std::placeholders::_1,
-                                   std::placeholders::_2,
-                                   std::placeholders::_3,
-                                   std::placeholders::_4,
-                                   std::placeholders::_5,
-                                   std::placeholders::_6,
-                                   std::placeholders::_7);
-
-    auto new_callback_lambda
-        = [this, bind_callback](
-            CallbackArgT0 msg0,
-            CallbackArgT1 msg1,
-            CallbackArgT2 msg2,
-            CallbackArgT3 msg3,
-            CallbackArgT4 msg4,
-            CallbackArgT5 msg5,
-            CallbackArgT6 msg6) {
-            std::cout << "hooked7" << std::endl;
-
-            register_ith_message_as_input<0>(msg0);
-            register_ith_message_as_input<1>(msg1);
-            register_ith_message_as_input<2>(msg2);
-            register_ith_message_as_input<3>(msg3);
-            register_ith_message_as_input<4>(msg4);
-            register_ith_message_as_input<5>(msg5);
-            register_ith_message_as_input<6>(msg6);
-
-            bind_callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6);
-          };
-    return sync_ptr_->registerCallback(
-        std::bind(new_callback_lambda,
-                  std::placeholders::_1,
-                  std::placeholders::_2,
-                  std::placeholders::_3,
-                  std::placeholders::_4,
-                  std::placeholders::_5,
-                  std::placeholders::_6,
-                  std::placeholders::_7));
-  }
-
-  template<class C, typename T,
-           std::size_t Arity = 8,
-           typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
-           typename CallbackArgT0 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
-           typename CallbackArgT1 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
-           typename CallbackArgT2 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
-           typename CallbackArgT3 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>,
-           typename CallbackArgT4 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<4>,
-           typename CallbackArgT5 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<5>,
-           typename CallbackArgT6 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<6>,
-           typename CallbackArgT7 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<7>
-           >
-  message_filters::Connection registerCallback(C& callback, T* t)
-  {
-    auto bind_callback = std::bind(callback, t,
-                                   std::placeholders::_1,
-                                   std::placeholders::_2,
-                                   std::placeholders::_3,
-                                   std::placeholders::_4,
-                                   std::placeholders::_5,
-                                   std::placeholders::_6,
-                                   std::placeholders::_7,
-                                   std::placeholders::_8);
-    auto new_callback_lambda
-        = [this, bind_callback](
-            CallbackArgT0 msg0,
-            CallbackArgT1 msg1,
-            CallbackArgT2 msg2,
-            CallbackArgT3 msg3,
-            CallbackArgT4 msg4,
-            CallbackArgT5 msg5,
-            CallbackArgT6 msg6,
-            CallbackArgT7 msg7) {
-            std::cout << "hooked8" << std::endl;
-
-            register_ith_message_as_input<0>(msg0);
-            register_ith_message_as_input<1>(msg1);
-            register_ith_message_as_input<2>(msg2);
-            register_ith_message_as_input<3>(msg3);
-            register_ith_message_as_input<4>(msg4);
-            register_ith_message_as_input<5>(msg5);
-            register_ith_message_as_input<6>(msg6);
-            register_ith_message_as_input<7>(msg7);
-
-            bind_callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7);
-          };
-    return sync_ptr_->registerCallback(
-        std::bind(new_callback_lambda,
-                  std::placeholders::_1,
-                  std::placeholders::_2,
-                  std::placeholders::_3,
-                  std::placeholders::_4,
-                  std::placeholders::_5,
-                  std::placeholders::_6,
-                  std::placeholders::_7,
-                  std::placeholders::_8));
-  }
-
-  template<class C, typename T,
-           std::size_t Arity = 9,
-           typename std::enable_if<
-             rclcpp::function_traits::arity_comparator<Arity, C>::value
-             >::type * = nullptr,
-           typename CallbackArgT0 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<0>,
-           typename CallbackArgT1 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<1>,
-           typename CallbackArgT2 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<2>,
-           typename CallbackArgT3 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<3>,
-           typename CallbackArgT4 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<4>,
-           typename CallbackArgT5 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<5>,
-           typename CallbackArgT6 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<6>,
-           typename CallbackArgT7 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<7>,
-           typename CallbackArgT8 =
-           typename rclcpp::function_traits::function_traits<C>::template argument_type<8>
-           >
-  message_filters::Connection registerCallback(C& callback, T* t)
-  {
-    auto bind_callback = std::bind(callback, t,
-                                   std::placeholders::_1,
-                                   std::placeholders::_2,
-                                   std::placeholders::_3,
-                                   std::placeholders::_4,
-                                   std::placeholders::_5,
-                                   std::placeholders::_6,
-                                   std::placeholders::_7,
-                                   std::placeholders::_8,
-                                   std::placeholders::_9);
-
-    auto new_callback_lambda
-        = [this, bind_callback](
-            CallbackArgT0 msg0,
-            CallbackArgT1 msg1,
-            CallbackArgT2 msg2,
-            CallbackArgT3 msg3,
-            CallbackArgT4 msg4,
-            CallbackArgT5 msg5,
-            CallbackArgT6 msg6,
-            CallbackArgT7 msg7,
-            CallbackArgT8 msg8) {
-            std::cout << "hooked9" << std::endl;
-
-            register_ith_message_as_input<0>(msg0);
-            register_ith_message_as_input<1>(msg1);
-            register_ith_message_as_input<2>(msg2);
-            register_ith_message_as_input<3>(msg3);
-            register_ith_message_as_input<4>(msg4);
-            register_ith_message_as_input<5>(msg5);
-            register_ith_message_as_input<6>(msg6);
-            register_ith_message_as_input<7>(msg7);
-            register_ith_message_as_input<8>(msg8);
-
-            bind_callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8);
-          };
-    return sync_ptr_->registerCallback(
-        std::bind(new_callback_lambda,
-                  std::placeholders::_1,
-                  std::placeholders::_2,
-                  std::placeholders::_3,
-                  std::placeholders::_4,
-                  std::placeholders::_5,
-                  std::placeholders::_6,
-                  std::placeholders::_7,
-                  std::placeholders::_8,
-                  std::placeholders::_9));
-  }
-  */
+  // TODO(y-okumura-isp): implement me
 
  private:
   std::shared_ptr<Sync> sync_ptr_;

@@ -223,7 +223,6 @@ TEST(TildeSynchronizer, compileMethod2)
   sync.registerCallback(&MethodHelper::method2, &h);
 }
 
-/*
 TEST(TildeSynchronizer, compileMethod3)
 {
   MethodHelper h;
@@ -259,6 +258,8 @@ TEST(TildeSynchronizer, compileMethod7)
   sync.registerCallback(&MethodHelper::method7, &h);
 }
 
+/// cannot build this. too many placehodlers?
+/*
 TEST(TildeSynchronizer, compileMethod8)
 {
   MethodHelper h;
@@ -266,7 +267,6 @@ TEST(TildeSynchronizer, compileMethod8)
   sync.registerCallback(&MethodHelper::method8, &h);
 }
 */
-
 
 /*
 TEST(TildeSynchronizer, add2)
