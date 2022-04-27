@@ -21,14 +21,14 @@
 using tilde::TildePublisherBase;
 using tilde::InputInfo;
 
-bool InputInfo::operator==(const InputInfo &rhs) const
+bool InputInfo::operator==(const InputInfo & rhs) const
 {
-  return (
-      sub_time == rhs.sub_time &&
-      sub_time_steady == rhs.sub_time_steady &&
-      has_header_stamp == rhs.has_header_stamp &&
-      header_stamp == rhs.header_stamp
-          );
+  return
+    sub_time == rhs.sub_time &&
+    sub_time_steady == rhs.sub_time_steady &&
+    has_header_stamp == rhs.has_header_stamp &&
+    header_stamp == rhs.header_stamp
+  ;
 }
 
 rclcpp::Time tilde::get_timestamp(rclcpp::Time t, ...)
@@ -161,18 +161,18 @@ void TildePublisherBase::set_max_sub_callback_infos_sec(size_t sec)
 }
 
 bool TildePublisherBase::get_input_info(
-    const std::string & topic,
-    const rclcpp::Time & header_stamp,
-    InputInfo & info)
+  const std::string & topic,
+  const rclcpp::Time & header_stamp,
+  InputInfo & info)
 {
   auto hs2ii_it = explicit_sub_time_infos_.find(topic);
-  if(hs2ii_it == explicit_sub_time_infos_.end()) {
+  if (hs2ii_it == explicit_sub_time_infos_.end()) {
     return false;
   }
 
   auto header_stamp2input_info = hs2ii_it->second;
   auto it = header_stamp2input_info.find(header_stamp);
-  if(it == header_stamp2input_info.end()) {
+  if (it == header_stamp2input_info.end()) {
     return false;
   }
 
@@ -183,23 +183,22 @@ bool TildePublisherBase::get_input_info(
 void TildePublisherBase::print_input_infos()
 {
   auto time2str =
-      [](const rclcpp::Time &rt) -> std::string
-      {
-        builtin_interfaces::msg::Time t = rt;
-        return std::string("sec: ") +
-            std::to_string(t.sec) +
-            " nsec: " +
-            std::to_string(t.nanosec);
-      };
+    [](const rclcpp::Time & rt) -> std::string
+    {
+      builtin_interfaces::msg::Time t = rt;
+      return std::string("sec: ") +
+             std::to_string(t.sec) +
+             " nsec: " +
+             std::to_string(t.nanosec);
+    };
 
   std::cout << "print_input_infos\n";
-  for(auto & [topic, pinfo]: input_infos_) {
+  for (auto & [topic, pinfo] : input_infos_) {
     std::cout << "  " << topic << "\n";
-    std::cout << "  subtime: "
-              << time2str(pinfo->sub_time)
-              << "\n  stamp: "
-              << time2str(pinfo->header_stamp)
-              << std::endl;
+    std::cout << "  subtime: " <<
+      time2str(pinfo->sub_time) <<
+      "\n  stamp: " <<
+      time2str(pinfo->header_stamp) <<
+      std::endl;
   }
-
 }

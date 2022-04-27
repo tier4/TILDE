@@ -310,8 +310,8 @@ TEST_F(TestTildeNode, register_message_as_input_find_subtime) {
   // check
   rclcpp::Time subtime, subtime_steady;
   auto found = main_node->find_subtime(
-      &sensor_msg1, "/in_topic",
-      subtime, subtime_steady);
+    &sensor_msg1, "/in_topic",
+    subtime, subtime_steady);
   EXPECT_TRUE(found);
   builtin_interfaces::msg::Time subtime_msg = subtime;
   EXPECT_EQ(subtime_msg.sec, clock_msg1.clock.sec);

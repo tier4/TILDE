@@ -47,7 +47,7 @@ public:
   InputInfo()
   : has_header_stamp(false) {}
 
-  bool operator==(const InputInfo &rhs) const;
+  bool operator==(const InputInfo & rhs) const;
 };
 
 /// SFINEs to detect header field, not found case
@@ -216,9 +216,9 @@ public:
    * \return true if found else false
    */
   bool get_input_info(
-      const std::string & topic,
-      const rclcpp::Time & header_stamp,
-      InputInfo & info);
+    const std::string & topic,
+    const rclcpp::Time & header_stamp,
+    InputInfo & info);
 
   void print_input_infos();
 

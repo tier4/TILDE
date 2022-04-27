@@ -39,22 +39,22 @@
   using ConstRef = const MessageT &; \
   using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>; \
   using SharedConstPtr = std::shared_ptr<const MessageT>; \
-  using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;  \
+  using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&; \
   using SharedPtr = std::shared_ptr<MessageT>; \
-  \
-    if constexpr (std::is_same_v<S, ConstRef>) {                   \
-      (out) = &(msg);                                              \
-    } else if constexpr (std::is_same_v<S, UniquePtr>) {           \
-      (out) = (msg).get();                                         \
-    } else if constexpr (std::is_same_v<S, SharedConstPtr>) {      \
-      (out) = (msg).get();                                         \
-    } else if constexpr (std::is_same_v<S, ConstRefSharedConstPtr>) { \
-      (out) = (msg).get();                                            \
-    } else if constexpr (std::is_same_v<S, SharedPtr>) { \
-      (out) = (msg).get();                               \
-    } else { \
-      static_assert(always_false_v<S>, "non-exhaustive visitor!"); \
-    }
+ \
+  if constexpr (std::is_same_v<S, ConstRef>) { \
+    (out) = &(msg); \
+  } else if constexpr (std::is_same_v<S, UniquePtr>) { \
+    (out) = (msg).get(); \
+  } else if constexpr (std::is_same_v<S, SharedConstPtr>) { \
+    (out) = (msg).get(); \
+  } else if constexpr (std::is_same_v<S, ConstRefSharedConstPtr>) { \
+    (out) = (msg).get(); \
+  } else if constexpr (std::is_same_v<S, SharedPtr>) { \
+    (out) = (msg).get(); \
+  } else { \
+    static_assert(always_false_v<S>, "non-exhaustive visitor!"); \
+  }
 
 namespace tilde
 {
@@ -139,13 +139,13 @@ public:
             callback_addr,
             subtime_steady.nanoseconds());
 
-          const MessageT *pmsg;
+          const MessageT * pmsg;
           TILDE_NODE_GET_PTR(MessageT, msg, pmsg);
           register_message_as_input(
-              pmsg,
-              resolved_topic_name,
-              subtime,
-              subtime_steady);
+            pmsg,
+            resolved_topic_name,
+            subtime,
+            subtime_steady);
         }
         // finally, call original function
         callback(std::forward<CallbackArgT>(msg));
@@ -205,12 +205,12 @@ public:
    * \param subtime subscription time on steady clock
    */
   template<typename MessageT,
-           typename MessageDeleter = std::default_delete<MessageT>>
+    typename MessageDeleter = std::default_delete<MessageT>>
   void register_message_as_input(
-      const MessageT *pmsg,
-      const std::string& resolved_topic_name,
-      const rclcpp::Time &subtime,
-      const rclcpp::Time &subtime_steady)
+    const MessageT * pmsg,
+    const std::string & resolved_topic_name,
+    const rclcpp::Time & subtime,
+    const rclcpp::Time & subtime_steady)
   {
     // prepare InputInfo
 
@@ -253,12 +253,12 @@ public:
    * \sa register_message_as_input
    */
   template<typename MessageT,
-           typename MessageDeleter = std::default_delete<MessageT>>
+    typename MessageDeleter = std::default_delete<MessageT>>
   bool find_subtime(
-      const MessageT *pmsg,
-      const std::string& resolved_topic_name,
-      rclcpp::Time & subtime,
-      rclcpp::Time & subtime_steady)
+    const MessageT * pmsg,
+    const std::string & resolved_topic_name,
+    rclcpp::Time & subtime,
+    rclcpp::Time & subtime_steady)
   {
     // get header stamp
     rclcpp::Time header_stamp;
@@ -274,12 +274,12 @@ public:
     }
 
     bool found = false;
-    if(header_stamp != t && tilde_pubs_.size() > 0) {
+    if (header_stamp != t && tilde_pubs_.size() > 0) {
       auto pub = tilde_pubs_.begin()->second;
       found = pub->get_input_info(resolved_topic_name, header_stamp, input_info);
     }
 
-    if(found) {
+    if (found) {
       subtime = input_info.sub_time;
       subtime_steady = input_info.sub_time_steady;
     }
