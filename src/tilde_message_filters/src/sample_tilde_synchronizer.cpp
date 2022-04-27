@@ -21,8 +21,8 @@
 
 #include "message_filters/sync_policies/exact_time.h"
 
-#include "tilde_message_filters/tilde_subscriber.h"
-#include "tilde_message_filters/tilde_synchronizer.h"
+#include "tilde_message_filters/tilde_subscriber.hpp"
+#include "tilde_message_filters/tilde_synchronizer.hpp"
 
 typedef sensor_msgs::msg::PointCloud2 Msg;
 typedef std::shared_ptr<sensor_msgs::msg::PointCloud2 const> MsgConstPtr;

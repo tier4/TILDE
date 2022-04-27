@@ -54,7 +54,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include "tilde/tilde_node.hpp"
-#include "tilde_message_filters/tilde_subscriber.h"
+#include "tilde_message_filters/tilde_subscriber.hpp"
 #include "message_filters/chain.h"
 #include "sensor_msgs/msg/imu.hpp"
 

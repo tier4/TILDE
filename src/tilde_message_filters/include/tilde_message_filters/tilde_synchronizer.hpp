@@ -22,7 +22,7 @@
 #include "message_filters/time_synchronizer.h"
 #include "message_filters/subscriber.h"
 
-#include "tilde_message_filters/tilde_subscriber.h"
+#include "tilde_message_filters/tilde_subscriber.hpp"
 
 namespace tilde_message_filters
 {

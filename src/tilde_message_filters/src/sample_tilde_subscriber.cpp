@@ -24,7 +24,7 @@
 
 #include "sensor_msgs/msg/point_cloud2.hpp"
 
-#include "tilde_message_filters/tilde_subscriber.h"
+#include "tilde_message_filters/tilde_subscriber.hpp"
 
 using namespace std::chrono_literals;
 

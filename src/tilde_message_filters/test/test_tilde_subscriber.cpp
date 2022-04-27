@@ -19,7 +19,7 @@
 #include "std_msgs/msg/string.hpp"
 #include "rosgraph_msgs/msg/clock.hpp"
 
-#include "tilde_message_filters/tilde_subscriber.h"
+#include "tilde_message_filters/tilde_subscriber.hpp"
 
 using namespace tilde;
 using namespace message_filters;

@@ -21,8 +21,8 @@
 
 #include <message_filters/pass_through.h>
 
-#include "tilde_message_filters/tilde_subscriber.h"
-#include "tilde_message_filters/tilde_synchronizer.h"
+#include "tilde_message_filters/tilde_subscriber.hpp"
+#include "tilde_message_filters/tilde_synchronizer.hpp"
 
 using namespace tilde;
 using namespace message_filters;

@@ -22,8 +22,7 @@ See bellow to know how to maintenance.
 
 - Manually copy & rename corresponding files
 - Prepare TildeSubscriber
-  - replace `#include "message_filters/subscriber.h"` to
-    `#include "tilde_message_filters/tilde_subscriber.h"`
+  - add `#include "tilde_message_filters/tilde_subscriber.hpp"`
   - add `using namespace tilde_message_filters;`
   - replace `Subscriber` to `TildeSubscriber`
 - Use `tilde::TildeNode` instead of `rclcpp::Node`
@@ -36,8 +35,7 @@ See bellow to know how to maintenance.
 
 - Manually copy & rename corresponding files
 - Prepare TildeSynchronizer
-  - replace `#include "message_filters/synchronizer.h"` to
-    `#include "tilde_message_filters/tilde_synchronizer.h"`
+  - add `#include "tilde_message_filters/tilde_synchronizer.hpp"`
   - add `using namespace tilde_message_filters;`
   - replace `Synchronizer` to `TildeSynchronizer` of TEST
     - don't change `typedef Synchronizer<NullPolicy> Sync;` in `struct NullPolicy`

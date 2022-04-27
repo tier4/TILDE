@@ -48,7 +48,7 @@
 #include <gtest/gtest.h>
 
 #include <rclcpp/rclcpp.hpp>
-#include "tilde_message_filters/tilde_synchronizer.h"
+#include "tilde_message_filters/tilde_synchronizer.hpp"
 #include <array>
 
 using namespace message_filters;
