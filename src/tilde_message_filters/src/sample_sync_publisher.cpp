@@ -41,7 +41,7 @@ class SamplePublisherWithHeader : public rclcpp::Node
 {
   using PublisherPtr = rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr;
 
- public:
+public:
   explicit SamplePublisherWithHeader(const rclcpp::NodeOptions & options)
   : Node("talker_with_header", options)
   {
@@ -59,7 +59,7 @@ class SamplePublisherWithHeader : public rclcpp::Node
 
     // Create a publisher with a custom Quality of Service profile.
     rclcpp::QoS qos(rclcpp::KeepLast(7));
-    for(auto i = 0; i < n_publishers_; i++) {
+    for (auto i = 0; i < n_publishers_; i++) {
       std::string topic = "in";
       topic += std::to_string(i);
       pub_pcs_.push_back(this->create_publisher<sensor_msgs::msg::PointCloud2>(topic, qos));
@@ -76,7 +76,7 @@ class SamplePublisherWithHeader : public rclcpp::Node
         msg_pc.header.stamp = time_now;
         msg_pc.header.frame_id = std::to_string(count_);
 
-        for(const auto &pub : pub_pcs_) {
+        for (const auto & pub : pub_pcs_) {
           pub->publish(msg_pc);
         }
 

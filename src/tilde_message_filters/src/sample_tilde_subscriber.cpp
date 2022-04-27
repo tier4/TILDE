@@ -36,8 +36,8 @@ namespace sample_tilde_message_filter
 {
 struct NonConstHelper
 {
-  explicit NonConstHelper(std::shared_ptr<tilde::TildePublisher<Msg>> pub):
-      pub_(pub) {}
+  explicit NonConstHelper(std::shared_ptr<tilde::TildePublisher<Msg>> pub)
+  : pub_(pub) {}
 
   void cb(const MsgPtr msg)
   {
@@ -57,7 +57,7 @@ void callback_fn(MsgConstPtr msg)
   g_pub_callback_fn_->publish(*msg);
 }
 
-template <typename CallbackT>
+template<typename CallbackT>
 void func(CallbackT && callback)  // add [[deprecated]] to show deduced type
 {
   auto callback_addr = &callback;
@@ -95,11 +95,11 @@ public:
     // const C& callback (be aware `C& callback` not defined)
     pub_lambda_rvalue_ = create_tilde_publisher<Msg>("out_lambda_rvalue", 1);
     sub_pc_.registerCallback(
-        [this](MsgConstPtr msg) -> void
-        {
-          RCLCPP_INFO(this->get_logger(), "rvalue lambda");
-          pub_lambda_rvalue_->publish(*msg);
-        });
+      [this](MsgConstPtr msg) -> void
+      {
+        RCLCPP_INFO(this->get_logger(), "rvalue lambda");
+        pub_lambda_rvalue_->publish(*msg);
+      });
 
     /* type check
     std::cout << &sub_callback << std::endl;
@@ -120,7 +120,7 @@ public:
     // registerCallback(const std::function<void(P)>& callback)
     pub_callback2_ = create_tilde_publisher<Msg>("out_std_function_lvalue", 1);
     std::function<void(MsgConstPtr)> stdfunc =
-        std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1);
+      std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1);
     sub_pc_.registerCallback(stdfunc);
 
     /*
@@ -134,7 +134,7 @@ public:
     // std::bind rvalue
     // const C& callback
     sub_pc_.registerCallback(
-        std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1));
+      std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1));
 
     // std::bind lvalue but use auto
     // const C& callback.  => with C = std::_Bind<void ....>

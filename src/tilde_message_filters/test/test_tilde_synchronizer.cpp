@@ -68,7 +68,7 @@ public:
 
     // setup pub node
     pub_node = std::make_shared<Node>("pub_node", options);
-    for(auto i = 0u; i < subs.size(); i++) {
+    for (auto i = 0u; i < subs.size(); i++) {
       auto topic = std::string("in") + std::to_string(i + 1);
       pubs.push_back(pub_node->create_publisher<PointCloud2>(topic, qos));
     }
@@ -95,14 +95,14 @@ public:
     clock_msg.clock.nanosec = nsec;
     clock_pub->publish(clock_msg);
     return clock_msg;
-  };
+  }
 
   Clock send_clock_and_spin(int32_t sec, uint32_t nsec)
   {
     auto clock = send_clock(sec, nsec);
     spin();
     return clock;
-  };
+  }
 
   void spin()
   {
@@ -144,8 +144,8 @@ void EXPECT_CLOCK(rclcpp::Time time, int sec, uint32_t nsec)
 TEST_F(TestSynchronizer, exact_policy_2msgs) {
   auto pub1 = pubs[0];
   auto pub2 = pubs[1];
-  auto& sub1 = init_and_get_sub<0>();
-  auto& sub2 = init_and_get_sub<1>();
+  auto & sub1 = init_and_get_sub<0>();
+  auto & sub2 = init_and_get_sub<1>();
 
   // setup sub_node synchronizer
   using SyncPolicy = message_filters::sync_policies::ExactTime<PointCloud2, PointCloud2>;
@@ -154,54 +154,54 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
 
   bool sync_callback_called = false;
   sync->registerCallback(
-      [this, &sync_callback_called](const PointCloud2ConstPtr &msg1,
-         const PointCloud2ConstPtr &msg2) -> void
-      {
-        (void) msg1;
-        (void) msg2;
-        sync_callback_called = true;
-        out_pub->publish(*msg1);
-      });
+    [this, &sync_callback_called](const PointCloud2ConstPtr & msg1,
+    const PointCloud2ConstPtr & msg2) -> void
+    {
+      (void) msg1;
+      (void) msg2;
+      sync_callback_called = true;
+      out_pub->publish(*msg1);
+    });
 
   // validation node
   bool val_callback_called = false;
   auto val_sub = val_node->create_subscription<PubInfo>(
-      "out/info/pub", qos,
-      [this, &val_callback_called](PubInfoPtr pi) -> void
-      {
-        val_callback_called = true;
-        EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
-        EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
-        EXPECT_EQ(pi->input_infos.size(), 2u);
+    "out/info/pub", qos,
+    [this, &val_callback_called](PubInfoPtr pi) -> void
+    {
+      val_callback_called = true;
+      EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
+      EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
+      EXPECT_EQ(pi->input_infos.size(), 2u);
 
-        std::map<std::string, size_t> topic2idx;
-        for(size_t i = 0; i < pi->input_infos.size(); i++) {
-          topic2idx[pi->input_infos[i].topic_name] = i;
+      std::map<std::string, size_t> topic2idx;
+      for (size_t i = 0; i < pi->input_infos.size(); i++) {
+        topic2idx[pi->input_infos[i].topic_name] = i;
+      }
+
+      EXPECT_EQ(topic2idx.size(), 2u);
+      for (size_t i = 1; i <= 2; i++) {
+        auto topic = std::string("/in") + std::to_string(i);
+        auto idx = topic2idx[topic];
+        const auto & in_info = pi->input_infos[idx];
+
+        switch (i) {
+          case 1:
+            EXPECT_EQ(in_info.topic_name, "/in1");
+            EXPECT_EQ(in_info.sub_time.sec, 123);
+            EXPECT_EQ(in_info.sub_time.nanosec, 456u);
+            break;
+          case 2:
+            EXPECT_EQ(in_info.topic_name, "/in2");
+            EXPECT_EQ(in_info.sub_time.sec, 124);
+            EXPECT_EQ(in_info.sub_time.nanosec, 321u);
+            break;
+          default:
+            // never comes here
+            EXPECT_TRUE(false);
         }
-
-        EXPECT_EQ(topic2idx.size(), 2u);
-        for(size_t i = 1; i <= 2; i++) {
-          auto topic = std::string("/in") + std::to_string(i);
-          auto idx = topic2idx[topic];
-          const auto& in_info = pi->input_infos[idx];
-
-          switch(i) {
-            case 1:
-              EXPECT_EQ(in_info.topic_name, "/in1");
-              EXPECT_EQ(in_info.sub_time.sec, 123);
-              EXPECT_EQ(in_info.sub_time.nanosec, 456u);
-              break;
-            case 2:
-              EXPECT_EQ(in_info.topic_name, "/in2");
-              EXPECT_EQ(in_info.sub_time.sec, 124);
-              EXPECT_EQ(in_info.sub_time.nanosec, 321u);
-              break;
-            default:
-              // never comes here
-              EXPECT_TRUE(false);
-          }
-        }
-      });
+      }
+    });
 
   // apply "/clock"
   send_clock(123, 456);
@@ -238,7 +238,7 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
 {
   auto pub1 = pubs[0];
   auto pub2 = pubs[1];
-  auto& sub1 = init_and_get_sub<0>();
+  auto & sub1 = init_and_get_sub<0>();
   Subscriber<PointCloud2> sub2;
   sub2.subscribe(sub_node, "in2", qos.get_rmw_qos_profile());
 
@@ -249,36 +249,36 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
 
   bool sync_callback_called = false;
   sync->registerCallback(
-      [this, &sync_callback_called](const PointCloud2ConstPtr &msg1,
-         const PointCloud2ConstPtr &msg2) -> void
-      {
-        (void) msg1;
-        (void) msg2;
-        sync_callback_called = true;
-        out_pub->publish(*msg1);
-      });
+    [this, &sync_callback_called](const PointCloud2ConstPtr & msg1,
+    const PointCloud2ConstPtr & msg2) -> void
+    {
+      (void) msg1;
+      (void) msg2;
+      sync_callback_called = true;
+      out_pub->publish(*msg1);
+    });
 
   // validation node
   bool val_callback_called = false;
   auto val_sub = val_node->create_subscription<PubInfo>(
-      "out/info/pub", qos,
-      [this, &val_callback_called](PubInfoPtr pi) -> void
-      {
-        val_callback_called = true;
-        EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
-        EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
-        EXPECT_EQ(pi->input_infos.size(), 1u);
+    "out/info/pub", qos,
+    [this, &val_callback_called](PubInfoPtr pi) -> void
+    {
+      val_callback_called = true;
+      EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
+      EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
+      EXPECT_EQ(pi->input_infos.size(), 1u);
 
-        for(const auto &in_info : pi->input_infos) {
-          if(in_info.topic_name == "/in1") {
-            EXPECT_EQ(in_info.sub_time.sec, 123);
-            EXPECT_EQ(in_info.sub_time.nanosec, 456u);
-          } else {
-            // never comes here
-            FAIL() << "invalid topic: " << in_info.topic_name;
-          }
+      for (const auto & in_info : pi->input_infos) {
+        if (in_info.topic_name == "/in1") {
+          EXPECT_EQ(in_info.sub_time.sec, 123);
+          EXPECT_EQ(in_info.sub_time.nanosec, 456u);
+        } else {
+          // never comes here
+          FAIL() << "invalid topic: " << in_info.topic_name;
         }
-      });
+      }
+    });
 
   // apply "/clock"
   send_clock(123, 456);
@@ -315,13 +315,13 @@ TEST_F(TestSynchronizer, work_with_passthrough)
 {
   // passthrough msg1 to msg2
   auto pub1 = pubs[0];
-  auto& sub1 = init_and_get_sub<0>();
+  auto & sub1 = init_and_get_sub<0>();
   PassThrough<PointCloud2> passthrough;
   sub1.registerCallback(
-      [this, &passthrough](const PointCloud2ConstPtr msg) -> void
-      {
-        passthrough.add(msg);
-      });
+    [this, &passthrough](const PointCloud2ConstPtr msg) -> void
+    {
+      passthrough.add(msg);
+    });
 
   // setup sub_node synchronizer
   using SyncPolicy = message_filters::sync_policies::ExactTime<PointCloud2, PointCloud2>;
@@ -330,36 +330,36 @@ TEST_F(TestSynchronizer, work_with_passthrough)
 
   bool sync_callback_called = false;
   sync->registerCallback(
-      [this, &sync_callback_called](const PointCloud2ConstPtr &msg1,
-         const PointCloud2ConstPtr &msg2) -> void
-      {
-        (void) msg1;
-        (void) msg2;
-        sync_callback_called = true;
-        out_pub->publish(*msg1);
-      });
+    [this, &sync_callback_called](const PointCloud2ConstPtr & msg1,
+    const PointCloud2ConstPtr & msg2) -> void
+    {
+      (void) msg1;
+      (void) msg2;
+      sync_callback_called = true;
+      out_pub->publish(*msg1);
+    });
 
   // validation node
   bool val_callback_called = false;
   auto val_sub = val_node->create_subscription<PubInfo>(
-      "out/info/pub", qos,
-      [this, &val_callback_called](PubInfoPtr pi) -> void
-      {
-        val_callback_called = true;
-        EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
-        EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
-        EXPECT_EQ(pi->input_infos.size(), 1u);
+    "out/info/pub", qos,
+    [this, &val_callback_called](PubInfoPtr pi) -> void
+    {
+      val_callback_called = true;
+      EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
+      EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
+      EXPECT_EQ(pi->input_infos.size(), 1u);
 
-        for(const auto &in_info : pi->input_infos) {
-          if(in_info.topic_name == "/in1") {
-            EXPECT_EQ(in_info.sub_time.sec, 123);
-            EXPECT_EQ(in_info.sub_time.nanosec, 456u);
-          } else {
-            // never comes here
-            FAIL() << "invalid topic: " << in_info.topic_name;
-          }
+      for (const auto & in_info : pi->input_infos) {
+        if (in_info.topic_name == "/in1") {
+          EXPECT_EQ(in_info.sub_time.sec, 123);
+          EXPECT_EQ(in_info.sub_time.nanosec, 456u);
+        } else {
+          // never comes here
+          FAIL() << "invalid topic: " << in_info.topic_name;
         }
-      });
+      }
+    });
 
   // apply "/clock"
   send_clock(123, 456);
@@ -390,8 +390,8 @@ TEST_F(TestSynchronizer, order_inversion)
 {
   auto pub1 = pubs[0];
   auto pub2 = pubs[1];
-  auto& sub1 = init_and_get_sub<0>();
-  auto& sub2 = init_and_get_sub<1>();
+  auto & sub1 = init_and_get_sub<0>();
+  auto & sub2 = init_and_get_sub<1>();
 
   // time
   const int32_t t1_sec{1}, t2_sec{1}, t3_sec{2};
@@ -404,39 +404,39 @@ TEST_F(TestSynchronizer, order_inversion)
 
   bool sync_callback_called = false;
   sync->registerCallback(
-      [this, &sync_callback_called](const PointCloud2ConstPtr &msg1,
-         const PointCloud2ConstPtr &msg2) -> void
-      {
-        (void) msg1;
-        (void) msg2;
-        sync_callback_called = true;
-        out_pub->publish(*msg1);
-      });
+    [this, &sync_callback_called](const PointCloud2ConstPtr & msg1,
+    const PointCloud2ConstPtr & msg2) -> void
+    {
+      (void) msg1;
+      (void) msg2;
+      sync_callback_called = true;
+      out_pub->publish(*msg1);
+    });
 
   bool val_callback_called = false;
   auto val_sub = val_node->create_subscription<PubInfo>(
-      "out/info/pub", qos,
-      [this, &val_callback_called,
-       t1_sec, t2_sec, t3_sec,
-       t1_nsec, t2_nsec, t3_nsec](PubInfoPtr pi) -> void
-      {
-        val_callback_called = true;
-        EXPECT_EQ(pi->output_info.header_stamp.sec, t2_sec);
-        EXPECT_EQ(pi->output_info.header_stamp.nanosec, t2_nsec);
-        EXPECT_EQ(pi->input_infos.size(), 2u);
+    "out/info/pub", qos,
+    [this, &val_callback_called,
+    t1_sec, t2_sec, t3_sec,
+    t1_nsec, t2_nsec, t3_nsec](PubInfoPtr pi) -> void
+    {
+      val_callback_called = true;
+      EXPECT_EQ(pi->output_info.header_stamp.sec, t2_sec);
+      EXPECT_EQ(pi->output_info.header_stamp.nanosec, t2_nsec);
+      EXPECT_EQ(pi->input_infos.size(), 2u);
 
-        for(const auto & in_info : pi->input_infos) {
-          if(in_info.topic_name == "/in1") {
-            EXPECT_EQ(in_info.sub_time.sec, t1_sec);
-            EXPECT_EQ(in_info.sub_time.nanosec, t1_nsec);
-          } else if(in_info.topic_name == "/in2") {
-            EXPECT_EQ(in_info.sub_time.sec, t3_sec);
-            EXPECT_EQ(in_info.sub_time.nanosec, t3_nsec);
-          } else {
-            FAIL() << "invalid topic" << in_info.topic_name;
-          }
+      for (const auto & in_info : pi->input_infos) {
+        if (in_info.topic_name == "/in1") {
+          EXPECT_EQ(in_info.sub_time.sec, t1_sec);
+          EXPECT_EQ(in_info.sub_time.nanosec, t1_nsec);
+        } else if (in_info.topic_name == "/in2") {
+          EXPECT_EQ(in_info.sub_time.sec, t3_sec);
+          EXPECT_EQ(in_info.sub_time.nanosec, t3_nsec);
+        } else {
+          FAIL() << "invalid topic" << in_info.topic_name;
         }
-      });
+      }
+    });
 
   // PointCloud2 message to publish
   PointCloud2 msg;

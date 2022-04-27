@@ -53,18 +53,19 @@ public:
     sub_pc2_.subscribe(this, "in2", rmw_qos);
 
     sync_ptr_ = std::make_shared<Sync>(
-        this,
-        SyncPolicy(5),
-        sub_pc1_,
-        sub_pc2_);
+      this,
+      SyncPolicy(5),
+      sub_pc1_,
+      sub_pc2_);
 
     pub_ = create_tilde_publisher<Msg>("out2", 1);
 
     // registerCallback(const C& callback) version:
     // <- (const C&) can bind rvalue
     sync_ptr_->registerCallback(
-        std::bind(&SampleTildeSynchronizer2::sub_callback, this,
-                  std::placeholders::_1, std::placeholders::_2));
+      std::bind(
+        &SampleTildeSynchronizer2::sub_callback, this,
+        std::placeholders::_1, std::placeholders::_2));
     std::cout << "hoo" << std::endl;
   }
 
@@ -73,8 +74,9 @@ private:
   std::shared_ptr<Sync> sync_ptr_;
   Publisher pub_;
 
-  void sub_callback(const MsgConstPtr &msg1,
-                    const MsgConstPtr &msg2)
+  void sub_callback(
+    const MsgConstPtr & msg1,
+    const MsgConstPtr & msg2)
   {
     (void) msg2;
     std::cout << "sub_callback" << std::endl;
@@ -103,20 +105,21 @@ public:
     sub_pc3_.subscribe(this, "in3", rmw_qos);
 
     sync_ptr_ = std::make_shared<Sync>(
-        this,
-        SyncPolicy(5),
-        sub_pc1_,
-        sub_pc2_,
-        sub_pc3_);
+      this,
+      SyncPolicy(5),
+      sub_pc1_,
+      sub_pc2_,
+      sub_pc3_);
 
     // registerCallback(const C& callback) version:
     // <- (const C&) can bind rvalue
     sync_ptr_->registerCallback(
-        std::bind(&SampleTildeSynchronizer3::sub_callback, this,
-                  std::placeholders::_1,
-                  std::placeholders::_2,
-                  std::placeholders::_3
-                  ));
+      std::bind(
+        &SampleTildeSynchronizer3::sub_callback, this,
+        std::placeholders::_1,
+        std::placeholders::_2,
+        std::placeholders::_3
+    ));
     std::cout << "hoo" << std::endl;
   }
 
@@ -124,9 +127,10 @@ private:
   Subscriber sub_pc1_, sub_pc2_, sub_pc3_;
   std::shared_ptr<Sync> sync_ptr_;
 
-  void sub_callback(const MsgConstPtr &msg1,
-                    const MsgConstPtr &msg2,
-                    const MsgConstPtr &msg3)
+  void sub_callback(
+    const MsgConstPtr & msg1,
+    const MsgConstPtr & msg2,
+    const MsgConstPtr & msg3)
   {
     (void) msg1;
     (void) msg2;

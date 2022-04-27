@@ -58,7 +58,7 @@ public:
 
     // setup pub node
     pub_node = std::make_shared<Node>("pub_node", options);
-    for(auto i = 0u; i < pubs.size(); i++) {
+    for (auto i = 0u; i < pubs.size(); i++) {
       auto topic = std::string("in") + std::to_string(i + 1);
       pubs[i] = pub_node->create_publisher<PointCloud2>(topic, qos);
     }
@@ -73,7 +73,7 @@ public:
     val_node = std::make_shared<Node>("val_node", options);
   }
 
-    void TearDown() override
+  void TearDown() override
   {
     rclcpp::shutdown();
   }
@@ -85,14 +85,14 @@ public:
     clock_msg.clock.nanosec = nsec;
     clock_pub->publish(clock_msg);
     return clock_msg;
-  };
+  }
 
   Clock send_clock_and_spin(int32_t sec, uint32_t nsec)
   {
     auto clock = send_clock(sec, nsec);
     spin();
     return clock;
-  };
+  }
 
   void spin()
   {
@@ -124,7 +124,7 @@ void EXPECT_CLOCK(rclcpp::Time time, int sec, uint32_t nsec)
 
 TEST_F(TestTildeSubscriber, hold_subtime)
 {
-  auto &pub1 = pubs[0];
+  auto & pub1 = pubs[0];
   sub.subscribe(sub_node, "in1", qos.get_rmw_qos_profile());
 
   // time
@@ -154,11 +154,10 @@ TEST_F(TestTildeSubscriber, hold_subtime)
   // check
   rclcpp::Time subtime, subtime_steady;
   sub_node->find_subtime(
-      &msg,
-      "/in1",
-      subtime,
-      subtime_steady);
+    &msg,
+    "/in1",
+    subtime,
+    subtime_steady);
   (void) subtime_steady;
   EXPECT_CLOCK(subtime, t1_sec, t1_nsec);
 }
-
