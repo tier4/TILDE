@@ -36,7 +36,7 @@ namespace sample_tilde_message_filter
 {
 struct NonConstHelper
 {
-  NonConstHelper(std::shared_ptr<tilde::TildePublisher<Msg>> pub):
+  explicit NonConstHelper(std::shared_ptr<tilde::TildePublisher<Msg>> pub):
       pub_(pub) {}
 
   void cb(const MsgPtr msg)
@@ -86,7 +86,8 @@ public:
       [this](MsgConstPtr msg) -> void
       {
         RCLCPP_INFO(this->get_logger(), "sub_callback");
-        pub_lambda_lvalue_->publish(*msg); // rclcpp::Publisher::publish does not have shared_ptr version
+        // use reference because rclcpp::Publisher::publish does not have shared_ptr version
+        pub_lambda_lvalue_->publish(*msg);
       };
     sub_pc_.registerCallback(sub_callback);
 
@@ -118,7 +119,8 @@ public:
     // std::function
     // registerCallback(const std::function<void(P)>& callback)
     pub_callback2_ = create_tilde_publisher<Msg>("out_std_function_lvalue", 1);
-    std::function<void(MsgConstPtr)> stdfunc = std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1);
+    std::function<void(MsgConstPtr)> stdfunc =
+        std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1);
     sub_pc_.registerCallback(stdfunc);
 
     /*
@@ -131,7 +133,8 @@ public:
 
     // std::bind rvalue
     // const C& callback
-    sub_pc_.registerCallback(std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1));
+    sub_pc_.registerCallback(
+        std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1));
 
     // std::bind lvalue but use auto
     // const C& callback.  => with C = std::_Bind<void ....>
@@ -173,6 +176,6 @@ private:
   MsgPtr msg_;
 };
 
-}  // namespace tilde_sample
+}  // namespace sample_tilde_message_filter
 
 RCLCPP_COMPONENTS_REGISTER_NODE(sample_tilde_message_filter::SampleSubscriberWithHeader)
