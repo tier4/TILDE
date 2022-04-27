@@ -16,6 +16,8 @@
 #define TILDE_MESSAGE_FILTERS__TILDE_SUBSCRIBER_HPP_
 
 #include <iostream>
+#include <memory>
+#include <string>
 
 #include "message_filters/subscriber.h"
 #include "message_filters/connection.h"
@@ -51,26 +53,30 @@ class TildeSubscriber
   using EventType = message_filters::MessageEvent<M const>;
 
 public:
-  TildeSubscriber(NodePtr node, const std::string& topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
+  TildeSubscriber(NodePtr node, const std::string& topic,
+                  const rmw_qos_profile_t qos = rmw_qos_profile_default)
   {
     subscribe(node, topic, qos);
   }
 
-  TildeSubscriber(NodeType * node, const std::string& topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
+  TildeSubscriber(NodeType * node, const std::string& topic,
+                  const rmw_qos_profile_t qos = rmw_qos_profile_default)
   {
     subscribe(node, topic, qos);
   }
 
   TildeSubscriber() = default;
 
-  void subscribe(NodePtr node, const std::string& topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
+  void subscribe(NodePtr node, const std::string& topic,
+                 const rmw_qos_profile_t qos = rmw_qos_profile_default)
   {
     subscribe(node.get(), topic, qos);
     node_raw_ = nullptr;
     node_shared_ = node;
   }
 
-  void subscribe(NodeType * node, const std::string& topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
+  void subscribe(NodeType * node, const std::string& topic,
+                 const rmw_qos_profile_t qos = rmw_qos_profile_default)
   {
     node_raw_ = node;
     subscriber_.subscribe(node, topic, qos);
@@ -332,4 +338,4 @@ private:
 };
 }  // namespace tilde_message_filters
 
-#endif // TILDE_MESSAGE_FILTERS__TILDE_SUBSCRIBER_HPP_
+#endif  // TILDE_MESSAGE_FILTERS__TILDE_SUBSCRIBER_HPP_
