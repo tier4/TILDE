@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TILDE_MESSAGE_FILTERS__TILDE_SYNCHRONIZER_H
-#define TILDE_MESSAGE_FILTERS__TILDE_SYNCHRONIZER_H
+#ifndef TILDE_MESSAGE_FILTERS__TILDE_SYNCHRONIZER_HPP_
+#define TILDE_MESSAGE_FILTERS__TILDE_SYNCHRONIZER_HPP_
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "tilde/tilde_node.hpp"
 
@@ -60,7 +62,8 @@ class TildeSynchronizer
 
 public:
   template<class F0, class F1>
-  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1)
+  TildeSynchronizer(tilde::TildeNode *node,
+                    F0& f0, F1& f1)
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(f0, f1);
@@ -69,7 +72,8 @@ public:
   }
 
   template<class F0, class F1>
-  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1)
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy,
+                    F0& f0, F1& f1)
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(policy, f0, f1);
@@ -78,7 +82,8 @@ public:
   }
 
   template<class F0, class F1, class F2>
-  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2)
+  TildeSynchronizer(tilde::TildeNode *node,
+                    F0& f0, F1& f1, F2& f2)
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(f0, f1, f2);
@@ -88,7 +93,8 @@ public:
   }
 
   template<class F0, class F1, class F2>
-  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2)
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy,
+                    F0& f0, F1& f1, F2& f2)
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2);
@@ -98,7 +104,8 @@ public:
   }
 
   template<class F0, class F1, class F2, class F3>
-  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3)
+  TildeSynchronizer(tilde::TildeNode *node,
+                    F0& f0, F1& f1, F2& f2, F3& f3)
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(f0, f1, f2, f3);
@@ -109,7 +116,8 @@ public:
   }
 
   template<class F0, class F1, class F2, class F3>
-  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3)
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy,
+                    F0& f0, F1& f1, F2& f2, F3& f3)
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2, f3);
@@ -120,7 +128,8 @@ public:
   }
 
   template<class F0, class F1, class F2, class F3, class F4>
-  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4)
+  TildeSynchronizer(tilde::TildeNode *node,
+                    F0& f0, F1& f1, F2& f2, F3& f3, F4& f4)
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(f0, f1, f2, f3, f4);
@@ -132,7 +141,8 @@ public:
   }
 
   template<class F0, class F1, class F2, class F3, class F4>
-  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4)
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy,
+                    F0& f0, F1& f1, F2& f2, F3& f3, F4& f4)
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>(policy, f0, f1, f2, f3, f4);
@@ -145,7 +155,8 @@ public:
 
   template<class F0, class F1, class F2, class F3, class F4,
            class F5>
-  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+  TildeSynchronizer(tilde::TildeNode *node,
+                    F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
                     F5& f5)
       : node_(node)
   {
@@ -160,7 +171,8 @@ public:
 
   template<class F0, class F1, class F2, class F3, class F4,
            class F5>
-  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy,
+                    F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
                     F5& f5)
       : node_(node)
   {
@@ -175,7 +187,8 @@ public:
 
   template<class F0, class F1, class F2, class F3, class F4,
            class F5, class F6>
-  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+  TildeSynchronizer(tilde::TildeNode *node,
+                    F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
                     F5& f5, F6& f6)
       : node_(node)
   {
@@ -191,7 +204,8 @@ public:
 
   template<class F0, class F1, class F2, class F3, class F4,
            class F5, class F6>
-  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy,
+                    F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
                     F5& f5, F6& f6)
       : node_(node)
   {
@@ -207,7 +221,8 @@ public:
 
   template<class F0, class F1, class F2, class F3, class F4,
            class F5, class F6, class F7>
-  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+  TildeSynchronizer(tilde::TildeNode *node,
+                    F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
                     F5& f5, F6& f6, F7& f7)
       : node_(node)
   {
@@ -224,7 +239,8 @@ public:
 
   template<class F0, class F1, class F2, class F3, class F4,
            class F5, class F6, class F7>
-  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy,
+                    F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
                     F5& f5, F6& f6, F7& f7)
       : node_(node)
   {
@@ -241,7 +257,8 @@ public:
 
   template<class F0, class F1, class F2, class F3, class F4,
            class F5, class F6, class F7, class F8>
-  TildeSynchronizer(tilde::TildeNode *node, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+  TildeSynchronizer(tilde::TildeNode *node,
+                    F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
                     F5& f5, F6& f6, F7& f7, F8& f8)
       : node_(node)
   {
@@ -259,7 +276,8 @@ public:
 
   template<class F0, class F1, class F2, class F3, class F4,
            class F5, class F6, class F7, class F8>
-  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy, F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
+  TildeSynchronizer(tilde::TildeNode *node, const Policy& policy,
+                    F0& f0, F1& f1, F2& f2, F3& f3, F4& f4,
                     F5& f5, F6& f6, F7& f7, F8& f8)
       : node_(node)
   {
@@ -275,7 +293,7 @@ public:
     init_topic_name<8, M8>(f8);
   }
 
-  TildeSynchronizer(tilde::TildeNode *node)
+  explicit TildeSynchronizer(tilde::TildeNode *node)
       : node_(node)
   {
     sync_ptr_ = std::make_shared<Sync>();
@@ -1563,7 +1581,7 @@ public:
     }
   }
 };
-}  // tilde_message_filters
+}  // namespace tilde_message_filters
 
 
-#endif // TILDE_MESSAGE_FILTERS__TILDE_SYNCHRONIZER_H
+#endif  // TILDE_MESSAGE_FILTERS__TILDE_SYNCHRONIZER_HPP_
