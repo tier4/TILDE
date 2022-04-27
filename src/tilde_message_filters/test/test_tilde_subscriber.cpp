@@ -14,6 +14,10 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -21,9 +25,11 @@
 
 #include "tilde_message_filters/tilde_subscriber.hpp"
 
-using namespace tilde;
-using namespace message_filters;
-using namespace tilde_message_filters;
+using TildeNode = tilde::TildeNode;
+template<typename T>
+using TildePublisher = tilde::TildePublisher<T>;
+template<typename T>
+using TildeSubscriber = tilde_message_filters::TildeSubscriber<T>;
 
 using Node = rclcpp::Node;
 using PointCloud2 = sensor_msgs::msg::PointCloud2;
@@ -52,7 +58,7 @@ public:
 
     // setup pub node
     pub_node = std::make_shared<Node>("pub_node", options);
-    for(auto i=0u; i<pubs.size(); i++) {
+    for(auto i = 0u; i < pubs.size(); i++) {
       auto topic = std::string("in") + std::to_string(i + 1);
       pubs[i] = pub_node->create_publisher<PointCloud2>(topic, qos);
     }
