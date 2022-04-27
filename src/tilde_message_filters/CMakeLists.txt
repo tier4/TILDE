@@ -72,8 +72,17 @@ if(BUILD_TESTING)
   #set(ament_cmake_copyright_FOUND TRUE)
   # the following line skips cpplint (only works in a git repo)
   # uncomment the line when this package is not in a git repo
-  #set(ament_cmake_cpplint_FOUND TRUE)
+  # set(ament_cmake_cpplint_FOUND TRUE)
+  list(APPEND AMENT_LINT_AUTO_EXCLUDE
+    ament_cmake_cpplint
+  )
   ament_lint_auto_find_test_dependencies()
+
+  # we skip cpplint of borrowed files
+  find_package(ament_cmake_cpplint)
+  ament_cpplint(EXCLUDE
+    "test/test_from_original_subscriber.cpp"
+    "test/test_from_original_synchronizer.cpp")
 
   ament_add_gtest(test_tilde_subscriber
     test/test_tilde_subscriber.cpp)
