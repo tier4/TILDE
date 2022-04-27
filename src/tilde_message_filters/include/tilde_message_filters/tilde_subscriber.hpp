@@ -53,13 +53,9 @@ class TildeSubscriber
   using EventType = message_filters::MessageEvent<M const>;
 
 public:
-  TildeSubscriber(
-    NodePtr node, const std::string & topic,
-    const rmw_qos_profile_t qos = rmw_qos_profile_default)
-  {
-    subscribe(node, topic, qos);
-  }
+  TildeSubscriber() = default;
 
+  // cppcheck syntaxError
   TildeSubscriber(
     NodeType * node, const std::string & topic,
     const rmw_qos_profile_t qos = rmw_qos_profile_default)
@@ -67,7 +63,12 @@ public:
     subscribe(node, topic, qos);
   }
 
-  TildeSubscriber() = default;
+  TildeSubscriber(
+    NodePtr node, const std::string & topic,
+    const rmw_qos_profile_t qos = rmw_qos_profile_default)
+  {
+    subscribe(node, topic, qos);
+  }
 
   void subscribe(
     NodePtr node, const std::string & topic,

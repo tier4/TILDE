@@ -122,6 +122,24 @@ void EXPECT_CLOCK(rclcpp::Time time, int sec, uint32_t nsec)
   EXPECT_EQ(t.nanosec, nsec);
 }
 
+TEST_F(TestTildeSubscriber, no_arg_constructor)
+{
+  auto ts = TildeSubscriber<PointCloud2>();
+  SUCCEED();
+}
+
+TEST_F(TestTildeSubscriber, shared_ptr_constructor)
+{
+  auto ts = TildeSubscriber<PointCloud2>(sub_node, "topic");
+  SUCCEED();
+}
+
+TEST_F(TestTildeSubscriber, ptr_constructor)
+{
+  auto ts = TildeSubscriber<PointCloud2>(sub_node.get(), "topic");
+  SUCCEED();
+}
+
 TEST_F(TestTildeSubscriber, hold_subtime)
 {
   auto & pub1 = pubs[0];

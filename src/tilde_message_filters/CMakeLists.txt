@@ -76,6 +76,7 @@ if(BUILD_TESTING)
   list(APPEND AMENT_LINT_AUTO_EXCLUDE
     ament_cmake_cpplint
     ament_cmake_uncrustify
+    ament_cmake_cppcheck
   )
   ament_lint_auto_find_test_dependencies()
 
@@ -90,6 +91,12 @@ if(BUILD_TESTING)
   ament_uncrustify(--exclude
     "test_from_original_subscriber.cpp"
     "test_from_original_synchronizer.cpp")
+
+  # TODO(y-okumura-isp): syntaxError but success to build & UT
+  find_package(ament_cmake_cppcheck)
+  ament_cppcheck(EXCLUDE
+    "tilde_subscriber.hpp"
+  )
 
   ament_add_gtest(test_tilde_subscriber
     test/test_tilde_subscriber.cpp)
