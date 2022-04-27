@@ -13,20 +13,33 @@
 // limitations under the License.
 
 #include <gtest/gtest.h>
+#include <message_filters/pass_through.h>
+
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "rosgraph_msgs/msg/clock.hpp"
 
-#include <message_filters/pass_through.h>
-
 #include "tilde_message_filters/tilde_subscriber.hpp"
 #include "tilde_message_filters/tilde_synchronizer.hpp"
 
-using namespace tilde;
-using namespace message_filters;
-using namespace tilde_message_filters;
+template<typename T>
+using Subscriber = message_filters::Subscriber<T>;
+template<typename T>
+using PassThrough = message_filters::PassThrough<T>;
+
+using TildeNode = tilde::TildeNode;
+template<typename T>
+using TildePublisher = tilde::TildePublisher<T>;
+template<typename T>
+using TildeSubscriber = tilde_message_filters::TildeSubscriber<T>;
+template<typename T>
+using TildeSynchronizer = tilde_message_filters::TildeSynchronizer<T>;
 
 using Node = rclcpp::Node;
 using PointCloud2 = sensor_msgs::msg::PointCloud2;
@@ -55,7 +68,7 @@ public:
 
     // setup pub node
     pub_node = std::make_shared<Node>("pub_node", options);
-    for(auto i=0u; i<subs.size(); i++) {
+    for(auto i = 0u; i < subs.size(); i++) {
       auto topic = std::string("in") + std::to_string(i + 1);
       pubs.push_back(pub_node->create_publisher<PointCloud2>(topic, qos));
     }
@@ -135,7 +148,7 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
   auto& sub2 = init_and_get_sub<1>();
 
   // setup sub_node synchronizer
-  using SyncPolicy = sync_policies::ExactTime<PointCloud2, PointCloud2>;
+  using SyncPolicy = message_filters::sync_policies::ExactTime<PointCloud2, PointCloud2>;
   using Sync = TildeSynchronizer<SyncPolicy>;
   auto sync = std::make_shared<Sync>(sub_node.get(), SyncPolicy(5), sub1, sub2);
 
@@ -162,12 +175,12 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
         EXPECT_EQ(pi->input_infos.size(), 2u);
 
         std::map<std::string, size_t> topic2idx;
-        for(size_t i=0; i<pi->input_infos.size(); i++) {
+        for(size_t i = 0; i < pi->input_infos.size(); i++) {
           topic2idx[pi->input_infos[i].topic_name] = i;
         }
 
         EXPECT_EQ(topic2idx.size(), 2u);
-        for(size_t i=1; i<=2; i++) {
+        for(size_t i = 1; i <= 2; i++) {
           auto topic = std::string("/in") + std::to_string(i);
           auto idx = topic2idx[topic];
           const auto& in_info = pi->input_infos[idx];
@@ -230,7 +243,7 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
   sub2.subscribe(sub_node, "in2", qos.get_rmw_qos_profile());
 
   // setup sub_node synchronizer
-  using SyncPolicy = sync_policies::ExactTime<PointCloud2, PointCloud2>;
+  using SyncPolicy = message_filters::sync_policies::ExactTime<PointCloud2, PointCloud2>;
   using Sync = TildeSynchronizer<SyncPolicy>;
   auto sync = std::make_shared<Sync>(sub_node.get(), SyncPolicy(5), sub1, sub2);
 
@@ -256,7 +269,7 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
         EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
         EXPECT_EQ(pi->input_infos.size(), 1u);
 
-        for(const auto &in_info: pi->input_infos) {
+        for(const auto &in_info : pi->input_infos) {
           if(in_info.topic_name == "/in1") {
             EXPECT_EQ(in_info.sub_time.sec, 123);
             EXPECT_EQ(in_info.sub_time.nanosec, 456u);
@@ -311,7 +324,7 @@ TEST_F(TestSynchronizer, work_with_passthrough)
       });
 
   // setup sub_node synchronizer
-  using SyncPolicy = sync_policies::ExactTime<PointCloud2, PointCloud2>;
+  using SyncPolicy = message_filters::sync_policies::ExactTime<PointCloud2, PointCloud2>;
   using Sync = TildeSynchronizer<SyncPolicy>;
   auto sync = std::make_shared<Sync>(sub_node.get(), SyncPolicy(5), sub1, passthrough);
 
@@ -337,7 +350,7 @@ TEST_F(TestSynchronizer, work_with_passthrough)
         EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
         EXPECT_EQ(pi->input_infos.size(), 1u);
 
-        for(const auto &in_info: pi->input_infos) {
+        for(const auto &in_info : pi->input_infos) {
           if(in_info.topic_name == "/in1") {
             EXPECT_EQ(in_info.sub_time.sec, 123);
             EXPECT_EQ(in_info.sub_time.nanosec, 456u);
@@ -385,7 +398,7 @@ TEST_F(TestSynchronizer, order_inversion)
   const uint32_t t1_nsec{50}, t2_nsec{100}, t3_nsec{150};
 
   // setup sub_node synchronizer
-  using SyncPolicy = sync_policies::ExactTime<PointCloud2, PointCloud2>;
+  using SyncPolicy = message_filters::sync_policies::ExactTime<PointCloud2, PointCloud2>;
   using Sync = TildeSynchronizer<SyncPolicy>;
   auto sync = std::make_shared<Sync>(sub_node.get(), SyncPolicy(5), sub1, sub2);
 
@@ -412,15 +425,14 @@ TEST_F(TestSynchronizer, order_inversion)
         EXPECT_EQ(pi->output_info.header_stamp.nanosec, t2_nsec);
         EXPECT_EQ(pi->input_infos.size(), 2u);
 
-        for(const auto & in_info: pi->input_infos) {
+        for(const auto & in_info : pi->input_infos) {
           if(in_info.topic_name == "/in1") {
             EXPECT_EQ(in_info.sub_time.sec, t1_sec);
             EXPECT_EQ(in_info.sub_time.nanosec, t1_nsec);
           } else if(in_info.topic_name == "/in2") {
             EXPECT_EQ(in_info.sub_time.sec, t3_sec);
             EXPECT_EQ(in_info.sub_time.nanosec, t3_nsec);
-          }
-          else {
+          } else {
             FAIL() << "invalid topic" << in_info.topic_name;
           }
         }
