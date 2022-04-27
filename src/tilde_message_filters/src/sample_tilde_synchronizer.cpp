@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
+
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
 
@@ -133,7 +135,7 @@ private:
   }
 };
 
-}  // sample_tilde_message_filter
+}  // namespace sample_tilde_message_filter
 
 RCLCPP_COMPONENTS_REGISTER_NODE(sample_tilde_message_filter::SampleTildeSynchronizer2)
 RCLCPP_COMPONENTS_REGISTER_NODE(sample_tilde_message_filter::SampleTildeSynchronizer3)
