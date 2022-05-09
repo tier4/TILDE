@@ -252,3 +252,68 @@ TEST_F(TestTildeNode, enable_tilde) {
   rclcpp::spin_some(checker_node);
   EXPECT_EQ(checker_sub_called, false);
 }
+
+TEST_F(TestTildeNode, register_message_as_input_find_subtime) {
+  rclcpp::NodeOptions options;
+  options.append_parameter_override("use_sim_time", true);
+
+  auto sensor_node = std::make_shared<rclcpp::Node>("sensorNode", options);
+  auto main_node = std::make_shared<TildeNode>("mainNode", options);
+
+  auto sensor_pub = sensor_node->create_publisher<sensor_msgs::msg::PointCloud2>(
+    "in_topic", 1);
+  auto clock_pub = sensor_node->create_publisher<rosgraph_msgs::msg::Clock>(
+    "/clock", 1);
+
+  // prepare pub/sub
+  auto main_pub = main_node->create_tilde_publisher<sensor_msgs::msg::PointCloud2>(
+    "out_topic", 1);
+  auto main_sub = main_node->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
+    "in_topic", 1,
+    [&main_pub](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
+    {
+      std::cout << "main_sub_callback" << std::endl;
+      (void)msg;
+      main_pub->publish(std::move(msg));
+    });
+
+  // publish @123.456
+  rosgraph_msgs::msg::Clock clock_msg1;
+  clock_msg1.clock.sec = 123;
+  clock_msg1.clock.nanosec = 456;
+
+  clock_pub->publish(clock_msg1);
+  rclcpp::spin_some(sensor_node);
+  rclcpp::spin_some(main_node);
+
+  sensor_msgs::msg::PointCloud2 sensor_msg1;
+  sensor_msg1.header.stamp = sensor_node->now();
+  sensor_pub->publish(sensor_msg1);
+  rclcpp::spin_some(sensor_node);
+  rclcpp::spin_some(main_node);
+
+  // publish @124.321
+  rosgraph_msgs::msg::Clock clock_msg2;
+  clock_msg2.clock.sec = 124;
+  clock_msg2.clock.nanosec = 321;
+
+  clock_pub->publish(clock_msg2);
+  rclcpp::spin_some(sensor_node);
+  rclcpp::spin_some(main_node);
+
+  sensor_msgs::msg::PointCloud2 sensor_msg2;
+  sensor_msg2.header.stamp = sensor_node->now();
+  sensor_pub->publish(sensor_msg2);
+  rclcpp::spin_some(sensor_node);
+  rclcpp::spin_some(main_node);
+
+  // check
+  rclcpp::Time subtime, subtime_steady;
+  auto found = main_node->find_subtime(
+    &sensor_msg1, "/in_topic",
+    subtime, subtime_steady);
+  EXPECT_TRUE(found);
+  builtin_interfaces::msg::Time subtime_msg = subtime;
+  EXPECT_EQ(subtime_msg.sec, clock_msg1.clock.sec);
+  EXPECT_EQ(subtime_msg.nanosec, clock_msg1.clock.nanosec);
+}

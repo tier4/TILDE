@@ -34,6 +34,28 @@
 
 #include "tilde/tp.h"
 
+#define TILDE_NODE_GET_PTR(MessageT, msg, out) \
+  using S = std::decay_t<decltype(msg)>; \
+  using ConstRef = const MessageT &; \
+  using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>; \
+  using SharedConstPtr = std::shared_ptr<const MessageT>; \
+  using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&; \
+  using SharedPtr = std::shared_ptr<MessageT>; \
+ \
+  if constexpr (std::is_same_v<S, ConstRef>) { \
+    (out) = &(msg); \
+  } else if constexpr (std::is_same_v<S, UniquePtr>) { \
+    (out) = (msg).get(); \
+  } else if constexpr (std::is_same_v<S, SharedConstPtr>) { \
+    (out) = (msg).get(); \
+  } else if constexpr (std::is_same_v<S, ConstRefSharedConstPtr>) { \
+    (out) = (msg).get(); \
+  } else if constexpr (std::is_same_v<S, SharedPtr>) { \
+    (out) = (msg).get(); \
+  } else { \
+    static_assert(always_false_v<S>, "non-exhaustive visitor!"); \
+  }
+
 namespace tilde
 {
 template<class>
@@ -42,6 +64,8 @@ inline constexpr bool always_false_v = false;
 /// Use TildeNode instead of rclcpp::Node and its create_* methods
 class TildeNode : public rclcpp::Node
 {
+  typedef std::map<std::string, std::shared_ptr<TildePublisherBase>> PublisherMap;
+
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(TildeNode)
 
@@ -115,55 +139,14 @@ public:
             callback_addr,
             subtime_steady.nanoseconds());
 
-          // prepare InputInfo
-          using ConstRef = const MessageT &;
-          using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
-          using SharedConstPtr = std::shared_ptr<const MessageT>;
-          using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;
-          using SharedPtr = std::shared_ptr<MessageT>;
-
-          rclcpp::Time header_stamp;
-          rclcpp::Time t(0, 100, this->now().get_clock_type());
-
-          using S = std::decay_t<decltype(msg)>;
-          if constexpr (std::is_same_v<S, ConstRef>) {
-            // std::cout << "visit: ConstRef\n";
-            header_stamp = Process<MessageT>::get_timestamp_from_const(t, &msg);
-          } else if constexpr (std::is_same_v<S, UniquePtr>) {
-            // std::cout << "visit: UniquePtr\n";
-            header_stamp = Process<MessageT>::get_timestamp_from_const(t, msg.get());
-          } else if constexpr (std::is_same_v<S, SharedConstPtr>) {
-            // std::cout << "visit: SharedConstPtr\n";
-            header_stamp = Process<MessageT>::get_timestamp_from_const(t, msg.get());
-          } else if constexpr (std::is_same_v<S, ConstRefSharedConstPtr>) {
-            // std::cout << "visit: ConstRefSharedPtr\n";
-            header_stamp = Process<MessageT>::get_timestamp_from_const(t, msg.get());
-          } else if constexpr (std::is_same_v<S, SharedPtr>) {
-            // std::cout << "visit: SharedPtr\n";
-            header_stamp = Process<MessageT>::get_timestamp_from_const(t, msg.get());
-          } else {
-            static_assert(always_false_v<S>, "non-exhaustive visitor!");
-          }
-
-          auto input_info = std::make_shared<InputInfo>();
-
-          input_info->sub_time = subtime;
-          input_info->sub_time_steady = subtime_steady;
-          if (header_stamp != t) {
-            input_info->has_header_stamp = true;
-            input_info->header_stamp = header_stamp;
-          }
-
-          // TODO(y-okumura-isp): consider race condition in multi threaded executor.
-          // i.e. subA comes when subB callback which uses topicA is running
-          for (auto &[topic, tp] : tilde_pubs_) {
-            tp->set_implicit_input_info(resolved_topic_name, input_info);
-            if (input_info->has_header_stamp) {
-              tp->set_explicit_subtime(resolved_topic_name, input_info);
-            }
-          }
+          const MessageT * pmsg;
+          TILDE_NODE_GET_PTR(MessageT, msg, pmsg);
+          register_message_as_input(
+            pmsg,
+            resolved_topic_name,
+            subtime,
+            subtime_steady);
         }
-
         // finally, call original function
         callback(std::forward<CallbackArgT>(msg));
       };
@@ -211,9 +194,107 @@ public:
     return tilde_pub;
   }
 
+  /// register message as input
+  /**
+   * Register message to the both implit and explicit data store.
+   * Canonically, this is called when subscription gets a message.
+   *
+   * \param pmgs[in] message raw pointer, can be freed after the function call
+   * \param resolved_topic_name[in] topic FQN
+   * \param subtime subscription time on ROS_TIME
+   * \param subtime subscription time on steady clock
+   */
+  template<typename MessageT,
+    typename MessageDeleter = std::default_delete<MessageT>>
+  void register_message_as_input(
+    const MessageT * pmsg,
+    const std::string & resolved_topic_name,
+    const rclcpp::Time & subtime,
+    const rclcpp::Time & subtime_steady)
+  {
+    // prepare InputInfo
+
+    rclcpp::Time header_stamp;
+    // TODO(y-okumura-isp): introduce has_timestamp()
+    rclcpp::Time t(0, 100, this->now().get_clock_type());
+
+    header_stamp = Process<MessageT>::get_timestamp_from_const(t, pmsg);
+
+    auto input_info = std::make_shared<InputInfo>();
+
+    input_info->sub_time = subtime;
+    input_info->sub_time_steady = subtime_steady;
+    if (header_stamp != t) {
+      input_info->has_header_stamp = true;
+      input_info->header_stamp = header_stamp;
+    }
+
+    // TODO(y-okumura-isp): consider race condition in multi threaded executor.
+    // i.e. subA comes when subB callback which uses topicA is running
+    for (auto &[topic, tp] : tilde_pubs_) {
+      tp->set_implicit_input_info(resolved_topic_name, input_info);
+      if (input_info->has_header_stamp) {
+        tp->set_explicit_subtime(resolved_topic_name, input_info);
+      }
+    }
+  }
+
+  /// automatically find subtime and subtime_steady
+  /**
+   * Fill subtime and subtime_steady from internal data.
+   * This if for TILDE framework internal use,
+   * so users are expected to use explicit API.
+   *
+   * \param pmsg[in]
+   * \param resolved_topic_name[in]
+   * \param subtime[out]
+   * \param subtime_steady[out]
+   * \return true if subtime found else false
+   * \sa register_message_as_input
+   */
+  template<typename MessageT,
+    typename MessageDeleter = std::default_delete<MessageT>>
+  bool find_subtime(
+    const MessageT * pmsg,
+    const std::string & resolved_topic_name,
+    rclcpp::Time & subtime,
+    rclcpp::Time & subtime_steady)
+  {
+    // get header stamp
+    rclcpp::Time header_stamp;
+    rclcpp::Time t(0, 100, this->now().get_clock_type());
+
+    header_stamp = Process<MessageT>::get_timestamp_from_const(t, pmsg);
+
+    InputInfo input_info;
+
+    if (header_stamp != t) {
+      input_info.has_header_stamp = true;
+      input_info.header_stamp = header_stamp;
+    }
+
+    bool found = false;
+    if (header_stamp != t && tilde_pubs_.size() > 0) {
+      auto pub = tilde_pubs_.begin()->second;
+      found = pub->get_input_info(resolved_topic_name, header_stamp, input_info);
+    }
+
+    if (found) {
+      subtime = input_info.sub_time;
+      subtime_steady = input_info.sub_time_steady;
+    }
+
+    return found;
+  }
+
+  rclcpp::Time get_steady_time()
+  {
+    return steady_clock_->now();
+  }
+
 private:
   /// topic vs publishers
-  std::map<std::string, std::shared_ptr<TildePublisherBase>> tilde_pubs_;
+  PublisherMap tilde_pubs_;
   /// node clock may be simulation time
   std::shared_ptr<rclcpp::Clock> steady_clock_;
 
@@ -223,5 +304,7 @@ private:
 };
 
 }  // namespace tilde
+
+#undef TILDE_NODE_GET_PTR
 
 #endif  // TILDE__TILDE_NODE_HPP_
