@@ -208,7 +208,7 @@ class TestTimerCallback(unittest.TestCase):
     def tearDown(self):
         rclpy.shutdown()
 
-    def test_issues32_1(self):
+    def test_issues23_1(self):
         topic_name = "topic"
         node = LatencyViewerNode()
         node.target_topic = topic_name
@@ -233,7 +233,7 @@ class TestTimerCallback(unittest.TestCase):
         except AttributeError:
             self.fail(msg="timer_callback causes AttributeError")
 
-    def test_issues32_2(self):
+    def test_issues23_2(self):
         topic_name = "topic"
         node = LatencyViewerNode()
 
