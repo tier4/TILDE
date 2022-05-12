@@ -45,16 +45,16 @@ def run(args):
     type_map = {topic_types[i].name: topic_types[i].type
                 for i in range(len(topic_types))}
 
-    cnt = 0
-
     # topic => list of record
     out_per_topic = PubInfos()
 
     skip_topic_vs_count = {}
 
+    cnt = 0
     while reader.has_next():
         if 0 <= args.cnt and args.cnt < cnt:
             break
+
         (topic, data, t) = reader.read_next()
         # TODO: need more accurate check
         if "/info/pub" not in topic:
@@ -66,6 +66,10 @@ def run(args):
         pub_info = PubInfo.fromMsg(msg)
         out_per_topic.add(pub_info)
 
+        if 0 < cnt and cnt % 1000 == 0:
+            print(cnt)
+        cnt += 1
+
     pickle.dump(out_per_topic, open("topic_infos.pkl", "wb"),
                 protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -76,7 +80,9 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("bag_path")
-    parser.add_argument("--cnt", type=int, default=-1)
+    parser.add_argument(
+        "--cnt", type=int, default=-1,
+        help="number of messages to dump (whole */info/pub, not per topic)")
     args = parser.parse_args()
 
     run(args)
