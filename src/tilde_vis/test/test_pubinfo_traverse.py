@@ -74,6 +74,7 @@ def get_scenario1():
         PubInfo("topic1",
                 t1.to_msg(),
                 t1_steady.to_msg(),
+                True,
                 t1.to_msg())
 
     topic2_t1_times = get_topic2_times(t1, t1_steady)
@@ -81,6 +82,7 @@ def get_scenario1():
         PubInfo("topic2",
                 topic2_t1_times["pub"].to_msg(),
                 topic2_t1_times["pub_steady"].to_msg(),
+                True,
                 t1.to_msg())
     pubinfo_topic2_t1.add_input_info(
         "topic1",
@@ -94,6 +96,7 @@ def get_scenario1():
         PubInfo("topic3",
                 topic3_t1_times["pub"].to_msg(),
                 topic3_t1_times["pub_steady"].to_msg(),
+                True,
                 t1.to_msg())
     pubinfo_topic3_t1.add_input_info(
         "topic2",
@@ -138,6 +141,7 @@ def gen_scenario2(
         PubInfo("topic1",
                 st.to_msg(),
                 st_steady.to_msg(),
+                True,
                 st.to_msg())
 
     topic2_stamp = st + nw_dur
@@ -145,6 +149,7 @@ def gen_scenario2(
         PubInfo("topic2",
                 st.to_msg(),
                 st_steady.to_msg(),
+                True,
                 topic2_stamp.to_msg())
 
     sub_dur3 = nw_dur
@@ -154,6 +159,7 @@ def gen_scenario2(
         PubInfo("topic3",
                 (st + pub_dur3).to_msg(),
                 (st_steady + pub_dur3).to_msg(),
+                True,
                 topic3_stamp.to_msg())
     pubinfo_topic3.add_input_info(
         "topic1",
@@ -176,6 +182,7 @@ def gen_scenario2(
         PubInfo("topic4",
                 (st + pub_dur4).to_msg(),
                 (st_steady + pub_dur4).to_msg(),
+                True,
                 topic4_stamp.to_msg())
     pubinfo_topic4.add_input_info(
         "topic3",

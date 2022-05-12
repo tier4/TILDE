@@ -81,7 +81,7 @@ def get_solver_result_simple(
     stamp1 = t1_pub
     pubinfo3 = PubInfo(
         "topic3",
-        t3_pub, t3_pub, stamp1)
+        t3_pub, t3_pub, True, stamp1)
     pubinfo3.add_input_info(
         "topic2", t2_sub, t2_sub,
         True, stamp1)
@@ -89,7 +89,7 @@ def get_solver_result_simple(
 
     pubinfo2 = PubInfo(
         "topic2",
-        t2_pub, t2_pub, stamp1)
+        t2_pub, t2_pub, True, stamp1)
     pubinfo2.add_input_info(
         "topic1", t1_sub, t1_sub,
         True, stamp1)
@@ -97,7 +97,7 @@ def get_solver_result_simple(
 
     pubinfo1 = PubInfo(
         "topic1",
-        t1_pub, t1_pub, stamp1)
+        t1_pub, t1_pub, True, stamp1)
     tree_node1.add_data(pubinfo1)
 
     return tree_node3
@@ -199,6 +199,65 @@ class TestListenerCallback(unittest.TestCase):
         self.assertEqual(node.topic_seq[topic_name], 20)
 
         node.destroy_node()
+
+
+class TestTimerCallback(unittest.TestCase):
+    def setUp(self):
+        rclpy.init()
+
+    def tearDown(self):
+        rclpy.shutdown()
+
+    def test_issues32_1(self):
+        topic_name = "topic"
+        node = LatencyViewerNode()
+        node.target_topic = topic_name
+
+        msg = PubInfoMsg()
+        msg.output_info.topic_name = topic_name
+        msg.output_info.seq = 0
+        msg.output_info.has_header_stamp = False
+        msg.output_info.header_stamp = TimeMsg(sec=10, nanosec=0)
+
+        node.listener_callback(msg)
+        self.assertEqual(len(node.pub_infos.topics()), 1)
+        self.assertEqual(node.pub_infos.topics()[0], topic_name)
+        stamps = node.pub_infos.stamps(topic_name)
+        self.assertEqual(len(stamps), 1)
+
+        node.wait_init = node.wait_sec_to_init_graph + 1
+
+        try:
+            node.timer_callback()
+            self.assertTrue(True)
+        except AttributeError:
+            self.fail(msg="timer_callback causes AttributeError")
+
+    def test_issues32_2(self):
+        topic_name = "topic"
+        node = LatencyViewerNode()
+
+        node.target_topic = topic_name
+
+        msg = PubInfoMsg()
+        msg.output_info.topic_name = topic_name
+        msg.output_info.seq = 0
+        msg.output_info.has_header_stamp = True
+        msg.output_info.header_stamp = TimeMsg(sec=10, nanosec=0)
+
+        node.listener_callback(msg)
+        self.assertEqual(len(node.pub_infos.topics()), 1)
+        self.assertEqual(node.pub_infos.topics()[0], topic_name)
+        stamps = node.pub_infos.stamps(topic_name)
+        self.assertEqual(len(stamps), 1)
+
+        node.wait_init = node.wait_sec_to_init_graph + 1
+
+        try:
+            node.timer_callback()
+            self.assertTrue(True)
+        except AttributeError:
+            self.fail(msg="timer_callback causes AttributeError")
 
 
 if __name__ == '__main__':
