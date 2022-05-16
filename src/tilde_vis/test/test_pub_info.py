@@ -35,18 +35,21 @@ class TestPubInfos(unittest.TestCase):
             "topic1",
             time_msg(8, 0),
             time_msg(9, 0),
+            True,
             time_msg(10, 0)
         ))
         infos.add(PubInfo(
             "topic2",
             time_msg(18, 0),
             time_msg(19, 0),
+            True,
             time_msg(20, 0)
         ))
         infos.add(PubInfo(
             "topic1",
             time_msg(28, 0),
             time_msg(29, 0),
+            True,
             time_msg(30, 0)
         ))
 
@@ -84,6 +87,7 @@ class TestPubInfos(unittest.TestCase):
                 "topic1",
                 time_msg(i, 0),
                 time_msg(i, 0),
+                True,
                 time_msg(i, 0)
             ))
 

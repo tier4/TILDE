@@ -53,14 +53,16 @@ class PubInfo(object):
       - out_info = TopicInfo
       - in_infos = {topic_name => list of TopicInfo}
     """
-    def __init__(self, out_topic, pub_time, pub_time_steady, out_stamp):
+    def __init__(self, out_topic, pub_time, pub_time_steady,
+                 has_stamp, out_stamp):
         """
         out_topic: topic name
         pub_time: when publish main topic [builtin_interfaces.msg.Time]
+        has_stamp: whether main topic has header.stamp [bool]
         out_stamp: main topic header.stamp [builtin_interfaces.msg.Time]
         """
         self.out_info = TopicInfo(out_topic, pub_time, pub_time_steady,
-                                  True, out_stamp)
+                                  has_stamp, out_stamp)
         # topic name vs TopicInfo
         self.in_infos = {}
 
@@ -102,6 +104,7 @@ class PubInfo(object):
         pub_info = PubInfo(output_info.topic_name,
                            output_info.pub_time,
                            output_info.pub_time_steady,
+                           output_info.has_header_stamp,
                            output_info.header_stamp)
         for input_info in pub_info_msg.input_infos:
             pub_info.add_input_info(input_info.topic_name,
@@ -181,6 +184,8 @@ class PubInfos(object):
         """
         topic: str
         stamp: str such as 1618559286.884563157
+
+        return PubInfo or None
         """
         ret = None
         if topic not in self.topic_vs_pubinfos.keys():

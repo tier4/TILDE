@@ -273,9 +273,10 @@ def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
     if len(stamps) == 0:
         return
     elif len(stamps) < 3:
-        idx = 0
+        idx = 1
 
     merged = None
+    print(f"idx: {idx}")
     for target_stamp in stamps[:idx]:
         results = solver.solve2(
             pubinfos, target_topic, target_stamp,
@@ -537,6 +538,7 @@ class LatencyViewerNode(Node):
         pub_info = PubInfoObj(output_info.topic_name,
                               output_info.pub_time,
                               output_info.pub_time_steady,
+                              output_info.has_header_stamp,
                               output_info.header_stamp)
         for input_info in pub_info_msg.input_infos:
             pub_info.add_input_info(input_info.topic_name,
@@ -678,6 +680,12 @@ class LatencyViewerNode(Node):
         str_stamp = stamps[0] if len(stamps) > 0 else ''
         logs.append(f"stamps: {len(stamps)}, {str_stamp}")
         if len(stamps) == 0:
+            self.printer.print(logs)
+            return
+
+        # check header.stamp field existence
+        if not pubinfos.get(target_topic, stamps[0]).out_info.has_stamp:
+            logs.append("**WARNING** target topic has no stamp field")
             self.printer.print(logs)
             return
 
