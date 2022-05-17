@@ -7,14 +7,19 @@ endif()
 
 include_directories(include)
 
-add_library(forward_estimator SHARED
-  src/forward_estimator.cpp)
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(tilde_msg REQUIRED)
+
+add_library(forward_estimator SHARED
+  src/forward_estimator.cpp)
+ament_target_dependencies(forward_estimator
+  rclcpp
+  tilde_msg)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

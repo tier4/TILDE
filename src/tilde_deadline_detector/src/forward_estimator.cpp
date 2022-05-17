@@ -20,4 +20,39 @@ namespace tilde_deadline_detector
 ForwardEstimator::ForwardEstimator()
 {}
 
+void ForwardEstimator::add(std::shared_ptr<PubInfoMsg> pub_info)
+{
+  if(!pub_info->output_info.has_header_stamp) return;
+
+  const auto & topic_name = pub_info->output_info.topic_name;
+  const auto stamp = rclcpp::Time(pub_info->output_info.header_stamp);
+
+  // no input => it may be sensor source
+  if(pub_info->input_infos.size() == 0) {
+    // TODO(y-okumura-isp): what if timer fires without no new input in explicit API case
+
+    sources_[topic_name][stamp] = pub_info;
+    message_sources_[topic_name][stamp].insert(std::weak_ptr<PubInfoMsg>(pub_info));
+    topic_sensors_[topic_name].insert(topic_name);
+    return;
+  }
+
+  // have input => get reference
+  for(const auto & input: pub_info->input_infos) {
+    // get sources of input
+    if(!input.has_header_stamp) continue;
+    const auto & input_topic = input.topic_name;
+    const auto & input_stamp = rclcpp::Time(input.header_stamp);
+    const auto & input_source_topics = topic_sensors_[input_topic];
+    const auto & input_sources = message_sources_[input_topic][input_stamp];
+
+    // TODO(y-okumura-isp): what if input PubInfo is not recieved yet?
+
+    // register sources
+    message_sources_[topic_name][stamp].insert(input_sources.begin(), input_sources.end());
+    topic_sensors_[topic_name].insert(input_source_topics.begin(),
+                                      input_source_topics.end());
+  }
+}
+
 }  // namespace tilde_deadline_detector
