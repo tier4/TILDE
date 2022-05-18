@@ -116,7 +116,7 @@ TEST(ForwardEstimator, two_sensors)
   EXPECT_EQ(*is21[topic2].begin(), time21);
 
   // skew
-  auto is1_21 = fe.get_input_sources(topic1, time21); // topic1 of time21
+  auto is1_21 = fe.get_input_sources(topic1, time21);  // topic1 of time21
   EXPECT_EQ(is1_21.find(topic1), is1_21.end());
 }
 
