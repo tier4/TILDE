@@ -15,9 +15,10 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(tilde_msg REQUIRED)
 
-add_library(forward_estimator SHARED
-  src/forward_estimator.cpp)
-ament_target_dependencies(forward_estimator
+add_library(tilde_deadline_detector_node SHARED
+  src/forward_estimator.cpp
+  src/tilde_deadline_detector_node.cpp)
+ament_target_dependencies(tilde_deadline_detector_node
   rclcpp
   tilde_msg)
 
