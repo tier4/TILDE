@@ -19,6 +19,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <string>
 #include <unordered_set>
 
 #include "rclcpp/rclcpp.hpp"
@@ -28,6 +29,7 @@ namespace tilde_deadline_detector
 {
 class ForwardEstimator
 {
+public:
   using TopicName = std::string;
   using PubInfoMsg = tilde_msg::msg::PubInfo;
   using HeaderStamp = rclcpp::Time;
@@ -42,28 +44,33 @@ class ForwardEstimator
   /// sources of the specific message
   // if target topic is sensor, MessageInputs[topic][stamp] points itself source.
   using MessageSources = std::map<TopicName, std::map<HeaderStamp, RefToSources>>;
+  /// input sources which output consists of
+  using InputSources = std::map<TopicName, std::set<HeaderStamp>>;
 
-public:
   ForwardEstimator();
 
   /// add PubInfo
   void add(std::shared_ptr<PubInfoMsg> pub_info);
 
-  /// get latency from the oldest input sensor
+  /// get the oldest sensor time
   /**
    * \param topic_name Target topic name
    * \param stamp Target header stamp
-   * \return latency in ms. -1 if not able to calcurate.
+   * \return topic vs oldest header.stamp of sensor
    *
    * Calcurated latency is best effort i.e.
    * when it cannot gather all sensor PubInfo,
    * it returns the longest latency in gathered PubInfo.
    */
-  float get_latency_ms(const std::string & topic_name,
-                       const HeaderStamp & stamp);
+  InputSources get_input_sources(
+    const std::string & topic_name,
+    const HeaderStamp & stamp);
 
   /// garbage collect
-  void gc();
+  /**
+   * delete PubInfos whose stamp < thres
+   */
+  void gc(const rclcpp::Time & thres);
 
 private:
   /// all shared_ptr<PubInfo> of sensors to control pointer life time

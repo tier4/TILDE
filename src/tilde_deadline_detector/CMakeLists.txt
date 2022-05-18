@@ -33,6 +33,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   ament_add_gtest(test_forward_estimator
+    src/forward_estimator.cpp
     test/test_forward_estimator.cpp)
   ament_target_dependencies(test_forward_estimator
     rclcpp
