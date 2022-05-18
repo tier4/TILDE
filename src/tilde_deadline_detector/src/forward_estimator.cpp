@@ -84,5 +84,4 @@ ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
   return is;
 }
 
-
 }  // namespace tilde_deadline_detector
