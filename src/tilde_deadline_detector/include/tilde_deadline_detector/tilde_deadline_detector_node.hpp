@@ -15,15 +15,22 @@
 #ifndef TILDE_DEADLINE_DETECTOR__TILDE_DEADLINE_DETECTOR_NODE_HPP_
 #define TILDE_DEADLINE_DETECTOR__TILDE_DEADLINE_DETECTOR_NODE_HPP_
 
+#include <gtest/gtest_prod.h>
+
 #include <string>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 #include "tilde_msg/msg/pub_info.hpp"
+
+#include "tilde_deadline_detector/forward_estimator.hpp"
 
 namespace tilde_deadline_detector
 {
 class TildeDeadlineDetectorNode : public rclcpp::Node
 {
+  using PubInfoSubscription = rclcpp::Subscription<tilde_msg::msg::PubInfo>;
+
 public:
   RCLCPP_PUBLIC
   explicit TildeDeadlineDetectorNode(
@@ -39,6 +46,15 @@ public:
 
   RCLCPP_PUBLIC
   virtual ~TildeDeadlineDetectorNode();
+
+  std::set<std::string> get_pub_info_topics() const;
+
+private:
+  ForwardEstimator fe;
+
+  std::vector<PubInfoSubscription::SharedPtr> subs_;
+  void init();
+  void pubinfo_callback(const tilde_msg::msg::PubInfo::SharedPtr msg);
 };
 
 }  // namespace tilde_deadline_detector

@@ -33,12 +33,25 @@ if(BUILD_TESTING)
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
+  find_package(tilde REQUIRED)
+  find_package(sensor_msgs REQUIRED)
+
   ament_add_gtest(test_forward_estimator
     src/forward_estimator.cpp
     test/test_forward_estimator.cpp)
   ament_target_dependencies(test_forward_estimator
     rclcpp
     tilde_msg)
+
+  ament_add_gtest(test_tilde_deadline_detector_node
+    test/test_tilde_deadline_detector_node.cpp)
+  ament_target_dependencies(test_tilde_deadline_detector_node
+    rclcpp
+    sensor_msgs
+    tilde
+    tilde_msg)
+  target_link_libraries(test_tilde_deadline_detector_node
+    tilde_deadline_detector_node)
 
 endif()
 
