@@ -50,7 +50,7 @@ public:
   ForwardEstimator();
 
   /// add PubInfo
-  void add(std::shared_ptr<PubInfoMsg> pub_info);
+  void add(std::shared_ptr<PubInfoMsg> pub_info, bool is_sensor=false);
 
   /// get the oldest sensor time
   /**

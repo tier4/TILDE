@@ -23,7 +23,7 @@ namespace tilde_deadline_detector
 ForwardEstimator::ForwardEstimator()
 {}
 
-void ForwardEstimator::add(std::shared_ptr<PubInfoMsg> pub_info)
+void ForwardEstimator::add(std::shared_ptr<PubInfoMsg> pub_info, bool is_sensor)
 {
   if (!pub_info->output_info.has_header_stamp) {return;}
 
@@ -31,7 +31,7 @@ void ForwardEstimator::add(std::shared_ptr<PubInfoMsg> pub_info)
   const auto stamp = rclcpp::Time(pub_info->output_info.header_stamp);
 
   // no input => it may be sensor source
-  if (pub_info->input_infos.size() == 0) {
+  if (is_sensor || pub_info->input_infos.size() == 0) {
     // TODO(y-okumura-isp): what if timer fires without no new input in explicit API case
 
     sources_[topic_name][stamp] = pub_info;

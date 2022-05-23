@@ -45,12 +45,17 @@ public:
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   RCLCPP_PUBLIC
+  explicit TildeDeadlineDetectorNode(const rclcpp::NodeOptions & options);
+
+  RCLCPP_PUBLIC
   virtual ~TildeDeadlineDetectorNode();
 
   std::set<std::string> get_pub_info_topics() const;
 
 private:
   ForwardEstimator fe;
+  std::set<std::string> sensor_topics_;
+  std::set<std::string> target_topics_;
 
   std::vector<PubInfoSubscription::SharedPtr> subs_;
   void init();

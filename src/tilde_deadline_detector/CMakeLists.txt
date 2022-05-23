@@ -14,13 +14,20 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(tilde_msg REQUIRED)
+find_package(rclcpp_components REQUIRED)
 
 add_library(tilde_deadline_detector_node SHARED
   src/forward_estimator.cpp
   src/tilde_deadline_detector_node.cpp)
 ament_target_dependencies(tilde_deadline_detector_node
   rclcpp
+  rclcpp_components
   tilde_msg)
+
+rclcpp_components_register_node(tilde_deadline_detector_node
+  PLUGIN "tilde_deadline_detector::TildeDeadlineDetectorNode"
+  EXECUTABLE tilde_deadline_detector_node_exe)
+
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -35,6 +42,7 @@ if(BUILD_TESTING)
 
   find_package(tilde REQUIRED)
   find_package(sensor_msgs REQUIRED)
+  find_package(builtin_interfaces REQUIRED)
 
   ament_add_gtest(test_forward_estimator
     src/forward_estimator.cpp
@@ -47,6 +55,7 @@ if(BUILD_TESTING)
     test/test_tilde_deadline_detector_node.cpp)
   ament_target_dependencies(test_tilde_deadline_detector_node
     rclcpp
+    builtin_interfaces
     sensor_msgs
     tilde
     tilde_msg)
@@ -54,5 +63,11 @@ if(BUILD_TESTING)
     tilde_deadline_detector_node)
 
 endif()
+
+install(TARGETS
+  tilde_deadline_detector_node
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
 ament_package()
