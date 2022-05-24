@@ -311,3 +311,55 @@ TEST(ForwardEstimator, merged_flow)
   EXPECT_NE(is31[topic2].find(time21), is31[topic2].end());
   EXPECT_NE(is31[topic2].find(time22), is31[topic2].end());
 }
+
+TEST(ForwardEstimator, reverse_order)
+{
+  // DAG is "A -> B -> C",
+  // but PubInfo comes C -> A -> B
+  auto fe = ForwardEstimator();
+  const std::string topic1 = "topicA";
+  const std::string topic2 = "topicB";
+  const std::string topic3 = "topicC";
+
+  // PubInfo of A
+  const auto time_msg11 = get_time(11, 110);
+  rclcpp::Time time11(time_msg11);
+  auto pub_info11 = std::make_shared<PubInfo>();
+  pub_info11->output_info.topic_name = topic1;
+  pub_info11->output_info.has_header_stamp = true;
+  pub_info11->output_info.header_stamp = time_msg11;
+
+  // PubInfo of B
+  const auto time_msg21 = get_time(21, 210);
+  rclcpp::Time time21(time_msg21);
+  auto pub_info21 = std::make_shared<PubInfo>();
+  pub_info21->output_info.topic_name = topic2;
+  pub_info21->output_info.has_header_stamp = true;
+  pub_info21->output_info.header_stamp = time_msg21;
+  auto ii21 = SubTopicTimeInfo();
+  ii21.topic_name = topic1;
+  ii21.has_header_stamp = true;
+  ii21.header_stamp = time11;
+  pub_info21->input_infos.push_back(ii21);
+
+  // PubInfo of C
+  const auto time_msg31 = get_time(31, 310);
+  rclcpp::Time time31(time_msg31);
+  auto pub_info31 = std::make_shared<PubInfo>();
+  pub_info31->output_info.topic_name = topic3;
+  pub_info31->output_info.has_header_stamp = true;
+  pub_info31->output_info.header_stamp = time_msg31;
+  auto ii31 = SubTopicTimeInfo();
+  ii31.topic_name = topic2;
+  ii31.has_header_stamp = true;
+  ii31.header_stamp = time21;
+  pub_info31->input_infos.push_back(ii31);
+
+  // add PubInfo in C -> A -> B order
+  fe.add(pub_info31);
+  fe.add(pub_info11);
+  fe.add(pub_info21);
+
+  auto is31 = fe.get_input_sources(topic3, time31);
+  EXPECT_EQ(is31.size(), 1u);
+}

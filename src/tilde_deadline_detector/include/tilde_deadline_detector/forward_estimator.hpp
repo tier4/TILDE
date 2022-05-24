@@ -27,6 +27,13 @@
 
 namespace tilde_deadline_detector
 {
+
+template<class C, class T>
+bool contains(const C & cnt, const T & v)
+{
+  return cnt.find(v) != cnt.end();
+}
+
 class ForwardEstimator
 {
 public:
@@ -46,6 +53,9 @@ public:
   using MessageSources = std::map<TopicName, std::map<HeaderStamp, RefToSources>>;
   /// input sources which output consists of
   using InputSources = std::map<TopicName, std::set<HeaderStamp>>;
+  /// pending messages: <wanted message>: <pending messages>
+  using Message = std::tuple<TopicName, HeaderStamp>;
+  using PendingMessages = std::map<Message, std::set<Message>>;
 
   ForwardEstimator();
 
@@ -72,6 +82,8 @@ public:
    */
   void gc(const rclcpp::Time & thres);
 
+  void debug_print() const;
+
 private:
   /// all shared_ptr<PubInfo> of sensors to control pointer life time
   Sources sources_;
@@ -81,6 +93,11 @@ private:
 
   /// gather sensor topics of topics to know graph
   TopicVsSensors topic_sensors_;
+
+  /// pending messages
+  PendingMessages pending_messages_;
+
+  void update_pending(std::shared_ptr<PubInfoMsg> pub_info);
 };
 
 }  // namespace tilde_deadline_detector

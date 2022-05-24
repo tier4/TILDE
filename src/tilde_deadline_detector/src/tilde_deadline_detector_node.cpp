@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cassert>
 #include <chrono>
 #include <string>
 #include <sstream>
@@ -32,12 +33,6 @@ std::string time2str(const builtin_interfaces::msg::Time & time)
   ret << ".";
   ret << std::setfill('0') << std::setw(9) << std::to_string(time.nanosec);
   return ret.str();
-}
-
-bool contains(const std::set<std::string> & container,
-              const std::string & key)
-{
-  return container.find(key) != container.end();
 }
 
 TildeDeadlineDetectorNode::TildeDeadlineDetectorNode(
@@ -110,7 +105,7 @@ void TildeDeadlineDetectorNode::init()
     topics.erase(ignore);
   }
 
-  rclcpp::QoS qos(3);
+  rclcpp::QoS qos(5);
   qos.best_effort();
 
   for(const auto & topic: topics) {
@@ -133,6 +128,8 @@ void TildeDeadlineDetectorNode::pubinfo_callback(const PubInfo::SharedPtr pubinf
   if(!contains(target_topics_, target)) {
     return;
   }
+
+  // fe.debug_print();
 
   auto is = fe.get_input_sources(target, stamp);
 
