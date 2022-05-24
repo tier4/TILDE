@@ -8,7 +8,8 @@ TILDE では以下の様なユースケースを想定ユースケースして�
   - 入力情報の「賞味期限」検出
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
-**Table of Contents**
+
+## Table of Contents
 
 - [TILDE の想定ユースケース](#tilde-の想定ユースケース)
   - [TILDE で分かること](#tilde-で分かること)
@@ -56,7 +57,7 @@ PlanningNode も同様の PubInfo を送信します。
 これらの情報から、stamp=10 の `/planning/base` は以下のセンサー情報を元に算出されたと分かります。
 
 - **推論**: stamp=10 の `/planning/base` は以下のトピックを参照している
-  - `/sensor/topic/A`: stamp=4 のもの(`/sensor/fusion` 経由) 
+  - `/sensor/topic/A`: stamp=4 のもの(`/sensor/fusion` 経由)
   - `/sensor/topic/B`: stamp=6 のもの(`/sensor/fusion` 経由) と stamp=3 のもの(直接受信)
 
 同様の推論を繰り返すことで「stamp=X の `/conrol/cmd` はいつのセンサー情報を用いたか?」という問いに答えることができます。
@@ -66,7 +67,7 @@ PubInfo を元に、DAG を逆向きに遡ってデータの紐付けを行う�
 
 上記の推論から stamp=10 の `/planning/base` は各センサーの最も古い値として以下を参照していることが分かります。
 
-- `/sensor/topic/A`: stamp=4 のもの(`/sensor/fusion` 経由) 
+- `/sensor/topic/A`: stamp=4 のもの(`/sensor/fusion` 経由)
 - `/sensor/topic/B`: stamp=3 のもの(直接受信)
 
 「センサーの stamp = センサーの計測時刻」と仮定するとこのデータを作るまで **センサー A 取得から 6 秒, センサー B からは 7 秒かかった** と言えます。
@@ -78,13 +79,13 @@ PubInfo を元に、DAG を逆向きに遡ってデータの紐付けを行う�
 
 この様にして TILDE を用いてレンテンシを計測することが可能です。
 
-**オンライン性**
+### オンライン性
 
 PubInfo は topic で送信される為、計測対象のシステムを動かしながら PubInfo を解析することが可能です。  
 latency viewer では top や vmstat の様にシステムを動かしながらレンテンシを見ることができます。  
-TILDE ではこの様にシステムを動かしながらメトリククを計算できる性質を **オンライン** と呼称しています。  
+TILDE ではこの様にシステムを動かしながらメトリククを計算できる性質を **オンライン** と呼称しています。
 
-**オンライン vs オフライン、TILDE と CARET**
+### オンライン vs オフライン、TILDE と CARET
 
 [CARET](https://tier4.github.io/CARET_doc/) は LTTng のトレースポイントを用いて計算する為、システムを動かした後に性能を評価します。この様に事後に解析することを、**オフライン** と呼称しています。
 
@@ -95,7 +96,10 @@ TILDE ではこの様にシステムを動かしながらメトリククを計�
 
 ## デッドライン検出
 
-**(2022/01/21 現在本機能は未実装)**
+<prettier-ignore-start>
+!!! info
+        (2022/01/21 現在本機能は未実装)
+<prettier-ignore-end>
 
 以下の様な DAG を考えます。この DAG は所定の時間内(例えば 100 ms 以内)に処理を追える必要があるとします。
 NodeA、NodeB はタイマーで動作すると考えます。

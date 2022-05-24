@@ -43,7 +43,7 @@ Latency viewer grasps your application topic graph in constructor by discovering
 Latency viewer shows latencies from `target_topic` to source topics.
 Here is the example command.
 
-``` bash
+```bash
 # (1) run your application
 ros2 launch ...
 
@@ -56,16 +56,16 @@ ros2 run tilde_vis latency_viewer \
 In default, you see output just like `top`. Internally [curses](https://docs.python.org/3/library/curses.html) is used.
 To save the results to a file, use `--batch` option and redirect or `tee` stdout.
 
-``` bash
+```bash
 ros2 run tilde_vis latency_viewer --batch ...
 ```
 
 ### Parameters
 
-**General parameters**
+#### General parameters
 
 | name                     | values             | about                                      |
-|--------------------------|--------------------|--------------------------------------------|
+| ------------------------ | ------------------ | ------------------------------------------ |
 | `mode`                   | `onehot` or `stat` | Calcuration rule. See below.               |
 | `wait_sec_to_init_graph` | positive integer   | Initial wait seconds to grasp topic graph. |
 
@@ -73,12 +73,12 @@ ros2 run tilde_vis latency_viewer --batch ...
   - onehot: prints the specific flow latency
   - stat: calcurates statistics per second
 
-**topic graph specific parameters**
+#### topic graph specific parameters
 
 You can use topic graph specific options.
 
 | name              | about                                                                          |
-|-------------------|--------------------------------------------------------------------------------|
+| ----------------- | ------------------------------------------------------------------------------ |
 | `excludes_topics` | Topics you don't want to watch, such as `debug` topic.                         |
 | `stops`           | Stop traversal if latency viewer reaches these topics to prevent infinit loop. |
 
@@ -90,7 +90,7 @@ But you need to directly edit `LatencyViewerNode.init_skips()` to do it.
 You can see the following lines are displayed repeatedly.
 Columns are "topic name", "header stamp", "latency in ROS time", "latency in staedy time".
 
-```
+```text
 /control/trajectory_follower/lateral/control_cmd                                 1618559274.549348133      0      0
  /localization/twist                                                             1618559274.544330488      5      3
  /planning/scenario_planning/trajectory                                          1618559274.479350019     15     12
@@ -117,10 +117,10 @@ See [latency_viewer.md](../../doc/latency_viewer.md) in detail (in Japanese).
 
 In ncurses view, you can use interactive commands.
 When you enter "move" or "filter" commands, periodic update of view stops.
-Hit 
+Hit
 
 | keys                | about                                                 |
-|---------------------|-------------------------------------------------------|
+| ------------------- | ----------------------------------------------------- |
 | down/up arrow, j, k | move lines.                                           |
 | d, u                | page up/down.                                         |
 | g, G                | move to top or bottom of lines                        |
@@ -135,7 +135,7 @@ Read rosbag2 file, and create pkl file.
 
 ### Run
 
-``` bash
+```bash
 ros2 run tilde_vis parse_pub_info <path/to/rosbag/dbfile>
 ```
 
@@ -170,7 +170,7 @@ e2e: 110.0   94.0   80.0
 In the publisher topic info, timestamp means published topic header timestamp.
 /sensing nodes conveys the lidar timestamp, we get latency is 0.0.
 
-```
+```bash
 $ ros2 run tilde_vis tilde_vis --ros-args -p watches_pub:=True
 
 /sensing/lidar/top/self_cropped/pointcloud_ex -> /sensing/lidar/top/mirror_cropped/pointcloud_ex -> /sensing/lidar/top/outlier_filtered/pointcloud -> /sensing/lidar/concatenated/pointcloud -> /sensing/lidar/measurement_range_cropped/pointcloud

@@ -1,15 +1,15 @@
 - repository: autowarefoundation/autoware
   files:
-#    - source: CODE_OF_CONDUCT.md
-#    - source: CONTRIBUTING.md
-#    - source: DISCLAIMER.md
-#    - source: LICENSE
-#    - source: .github/ISSUE_TEMPLATE/bug.yaml
-#    - source: .github/ISSUE_TEMPLATE/config.yml
-#    - source: .github/ISSUE_TEMPLATE/task.yaml
-#    - source: .github/PULL_REQUEST_TEMPLATE.md
-#    - source: .github/PULL_REQUEST_TEMPLATE/small-change.md
-#    - source: .github/PULL_REQUEST_TEMPLATE/standard-change.md
+    #    - source: CODE_OF_CONDUCT.md
+    #    - source: CONTRIBUTING.md
+    #    - source: DISCLAIMER.md
+    #    - source: LICENSE
+    #    - source: .github/ISSUE_TEMPLATE/bug.yaml
+    #    - source: .github/ISSUE_TEMPLATE/config.yml
+    #    - source: .github/ISSUE_TEMPLATE/task.yaml
+    #    - source: .github/PULL_REQUEST_TEMPLATE.md
+    #    - source: .github/PULL_REQUEST_TEMPLATE/small-change.md
+    #    - source: .github/PULL_REQUEST_TEMPLATE/standard-change.md
     - source: .github/dependabot.yaml
     - source: .github/stale.yml
     - source: .github/workflows/github-release.yaml
@@ -37,7 +37,6 @@
     - source: .github/workflows/check-build-depends.yaml
     - source: .github/workflows/clang-tidy-pr-comments.yaml
     - source: codecov.yaml
-
 #- repository: autowarefoundation/autoware-documentation
 #  files:
 #    - source: .github/workflows/deploy-docs.yaml

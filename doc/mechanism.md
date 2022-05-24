@@ -3,13 +3,14 @@
 **best viewed with [mermaid-diagrams](https://chrome.google.com/webstore/detail/mermaid-diagrams/phfcghedmopjadpojhmmaffjmfiakfil/related) or [GitHub + Mermaid](https://chrome.google.com/webstore/detail/github-+-mermaid/goiiopgdnkogdbjmncgedmgpoajilohe)**
 
 TILDE は、ユーザプログラムがメイントピックを publish するのに併せて PubInfo というトピックを `<topic名>/info/pub` に publish します。  
-PubInfo は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。  
+PubInfo は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。
 
 ここで **メイントピック** とはアプリケーションが本来やりとりするメッセージです。
 TILDE が PubInfo という付加的なトピックをやりとりする為、アプリケーション本来のメッセージをメイントピックと呼称しています。
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
-**Table of Contents**
+
+## Table of Contents
 
 - [TILDE の動作原理](#tilde-の動作原理)
   - [PubInfo](#pubinfo)
@@ -57,8 +58,8 @@ PubInfo はメイントピックの publish 時と同時に送信されるメタ
 
 トピック名やノード名の長さにもよりますがデータサイズは以下の通りです。送信周波数はメイントピックと同じです。
 
-- Header + output_info: 約 80バイト + トピック名やノード名分のバイト数
-- input_infos: (入力トピック数 * 約 40バイト) + トピック名のバイト数
+- Header + output_info: 約 80 バイト + トピック名やノード名分のバイト数
+- input_infos: (入力トピック数 \* 約 40 バイト) + トピック名のバイト数
 
 ## 例
 
@@ -66,7 +67,7 @@ PubInfo はメイントピックの publish 時と同時に送信されるメタ
 
 NodeA, NodeB, NodeC からなる以下の DAG を考えます(丸はノード、四角はトピック)。
 
-``` mermaid
+```mermaid
 graph LR
   NodeA((NodeA)) --t=2,stamp=1--> topic_a
   NodeB((NodeB)) --t=4,stamp=3--> topic_b
@@ -87,7 +88,7 @@ graph LR
 各 Node では ros2 の sensor_msgs やアプリケーション固有のメッセージ型を送信します。
 例えば `sensor_msgs/msg/PointCloud2` の場合、以下の様なメッセージになります(説明の為フィールドは省略しています)。
 
-``` mermaid
+```mermaid
 classDiagram
   direction LR
   Header <.. PointCloud2
@@ -111,7 +112,7 @@ TILDE では **header フィールドの stamp を利用** によりメッセー
 TILDE はメインメッセージの publish をフックして PubInfo を送信します。
 NodeC の出力する PubInfo は以下の様な物になります(フィールドは一部省略しています)。
 
-``` mermaid
+```mermaid
 classDiagram
   direction LR
   OutputInfo <.. PubInfo_NodeC
@@ -163,7 +164,7 @@ PubInfo はメイントピックの publish 時に同時に送信されます。
 - PubInfo の作成
   - TILDE のカスタム create_publisher によりカスタムの Publisher である TildePublisher が作成される。
   - TildePublisher は入力情報に関するデータを持っている。
-  - メイントピックの publish をフックし、メイントピックを送信すると同時に入力情報データから PubInfo を作成してPubInfo を送信する。
+  - メイントピックの publish をフックし、メイントピックを送信すると同時に入力情報データから PubInfo を作成して PubInfo を送信する。
 - input infos の紐付け
   - TILE のカスタム create_subscription により subscription コールバックがフックされる。
   - フック中の処理で TildePublisher に対して入力トピックや header stamp などの情報を登録する。
@@ -176,7 +177,7 @@ TILDE では以下のクラス・API を提供します。
 - `create_publisher` や `create_subscription` の TILDE カスタム版
 - いずれもクラス名・関数名が異なることを除けば ROS2 のものと同じシグニチャです。よって機械的変換で組み込むことができます。
 
-``` mermaid
+```mermaid
 classDiagram
   Node <|-- TildeNode
   Publisher <.. TildePublisher
@@ -211,11 +212,10 @@ classDiagram
 
 ### create_tilde_publisher
 
-
 `create_tilde_publisher<T>(topic, ...)` によりメインメッセージと PubInfo 用の publisher が作成されます。
 PubInfo 用のトピック名はメイントピック名に `/info/pub` という接尾語がついたものです。
 
-``` mermaid
+```mermaid
 sequenceDiagram
     UserNode-->>TildeNode: create_tilde_publisher<T>(topic, ...)
     activate TildeNode
@@ -237,14 +237,14 @@ TILDE では subscription callback をフックする為、ユーザ指定のコ
 
 疑似コードで記載すると以下の様になります。
 
-``` cpp
+```cpp
 void create_tilde_subscription<T>(topic, qos, cb) {
   auto tilde_cb = [this, topic, cb](T msg) {
      // PubInfo 用に入力情報の紐付け
      auto sub_time = now();
      this->tilde_pub.set_input_info(
         topic,
-        sub_time, 
+        sub_time,
         msg.header.stamp);
 
      // cb の呼び出し
@@ -258,7 +258,7 @@ void create_tilde_subscription<T>(topic, qos, cb) {
 subscription 時の動作は以下の通りです。
 subscription 時に TildePublisher の input_info 情報を登録します。
 
-``` mermaid
+```mermaid
 sequenceDiagram
   topic-->>Executor: msg
   Executor-->>+UserNode: tilde_callback(msg)
@@ -294,9 +294,9 @@ sequenceDiagram
 それぞれの入力はバッファされ publish 時に選択的に利用されます。
 この図では `/left` は L1-L3 の 3 世代あり、 L2 が使われています。
 
-```
+```text
              入力をバッファ    callback の中でバッファの中から
-			                   利用するデータを選択
+                      利用するデータを選択
                buffer       +- callback-+
 /left    -->  L1 L2 L3  ->  | L2        |
                             |           |
