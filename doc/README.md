@@ -119,9 +119,9 @@ rclcpp::Node の子クラスです。
 
 ## デッドライン検出
 
-<prettier-ignore-start>
 !!! info
-        2022/01/21 現在本機能は未実装
+<prettier-ignore-start>
+2022/01/21 現在本機能は未実装
 <prettier-ignore-end>
 
 ## 周辺ツール
