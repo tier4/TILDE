@@ -60,8 +60,7 @@ void ForwardEstimator::add(std::shared_ptr<PubInfoMsg> pub_info, bool is_sensor)
   std::set<Message> pendings = std::set<Message>();
   if(contains(pending_messages_, Message{topic_name, stamp})) {
     auto it = pending_messages_.find(Message{topic_name, stamp});
-    pendings.merge(std::move(it->second));
-    it->second = std::set<Message>();
+    pendings.merge(it->second);
     pending_messages_.erase(it);
   }
 
@@ -78,7 +77,8 @@ void ForwardEstimator::add(std::shared_ptr<PubInfoMsg> pub_info, bool is_sensor)
     if(!contains(message_sources_[input_topic], input_stamp)) {
       pending_messages_[{input_topic, input_stamp}].insert({topic_name, stamp});
 
-      pending_messages_[{input_topic, input_stamp}].merge(pendings);
+      pending_messages_[{input_topic, input_stamp}].insert(
+          pendings.begin(), pendings.end());
       continue;
     }
 

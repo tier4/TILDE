@@ -38,6 +38,30 @@ TimeMsg get_time(int sec, int nsec)
   return t;
 }
 
+std::shared_ptr<PubInfo>
+create_pubinfo(
+    const std::string & topic,
+    const TimeMsg & time)
+{
+  auto pub_info = std::make_shared<PubInfo>();
+  pub_info->output_info.topic_name = topic;
+  pub_info->output_info.has_header_stamp = true;
+  pub_info->output_info.header_stamp = time;
+
+  return pub_info;
+}
+
+void add_input_info(
+    std::shared_ptr<PubInfo> target_pub_info,
+    std::shared_ptr<const PubInfo> in_pub_info)
+{
+  auto ii = SubTopicTimeInfo();
+  ii.topic_name = in_pub_info->output_info.topic_name;
+  ii.has_header_stamp = true;
+  ii.header_stamp = in_pub_info->output_info.header_stamp;
+  target_pub_info->input_infos.push_back(ii);
+}
+
 TEST(ForwardEstimator, one_sensor)
 {
   auto fe = ForwardEstimator();
@@ -312,7 +336,7 @@ TEST(ForwardEstimator, merged_flow)
   EXPECT_NE(is31[topic2].find(time22), is31[topic2].end());
 }
 
-TEST(ForwardEstimator, reverse_order)
+TEST(ForwardEstimator, reverse_order2)
 {
   // DAG is "A -> B -> C",
   // but PubInfo comes C -> A -> B
@@ -362,4 +386,100 @@ TEST(ForwardEstimator, reverse_order)
 
   auto is31 = fe.get_input_sources(topic3, time31);
   EXPECT_EQ(is31.size(), 1u);
+  EXPECT_NE(is31.find(topic1), is31.end());
+  EXPECT_EQ(is31[topic1].size(), 1u);
+  EXPECT_EQ(*is31[topic1].begin(), time11);
+}
+
+TEST(ForwardEstimator, reverse_order)
+{
+  // DAG is "A -> B -> C",
+  // but PubInfo comes C -> B -> A
+  auto fe = ForwardEstimator();
+  const std::string topic1 = "topicA";
+  const std::string topic2 = "topicB";
+  const std::string topic3 = "topicC";
+
+  // PubInfo of A
+  const auto time_msg11 = get_time(11, 110);
+  rclcpp::Time time11(time_msg11);
+  auto pub_info11 = std::make_shared<PubInfo>();
+  pub_info11->output_info.topic_name = topic1;
+  pub_info11->output_info.has_header_stamp = true;
+  pub_info11->output_info.header_stamp = time_msg11;
+
+  // PubInfo of B
+  const auto time_msg21 = get_time(21, 210);
+  rclcpp::Time time21(time_msg21);
+  auto pub_info21 = std::make_shared<PubInfo>();
+  pub_info21->output_info.topic_name = topic2;
+  pub_info21->output_info.has_header_stamp = true;
+  pub_info21->output_info.header_stamp = time_msg21;
+  auto ii21 = SubTopicTimeInfo();
+  ii21.topic_name = topic1;
+  ii21.has_header_stamp = true;
+  ii21.header_stamp = time11;
+  pub_info21->input_infos.push_back(ii21);
+
+  // PubInfo of C
+  const auto time_msg31 = get_time(31, 310);
+  rclcpp::Time time31(time_msg31);
+  auto pub_info31 = std::make_shared<PubInfo>();
+  pub_info31->output_info.topic_name = topic3;
+  pub_info31->output_info.has_header_stamp = true;
+  pub_info31->output_info.header_stamp = time_msg31;
+  auto ii31 = SubTopicTimeInfo();
+  ii31.topic_name = topic2;
+  ii31.has_header_stamp = true;
+  ii31.header_stamp = time21;
+  pub_info31->input_infos.push_back(ii31);
+
+  // add PubInfo in C -> B -> A order
+  fe.add(pub_info31);
+  fe.add(pub_info21);
+  fe.add(pub_info11);
+
+  auto is31 = fe.get_input_sources(topic3, time31);
+  EXPECT_EQ(is31.size(), 1u);
+  EXPECT_NE(is31.find(topic1), is31.end());
+  EXPECT_EQ(is31[topic1].size(), 1u);
+  EXPECT_EQ(*is31[topic1].begin(), time11);
+}
+
+TEST(ForwardEstimator, reverse_order_with_merge)
+{
+  // DAG
+  //   1 --> 3 --> 4
+  //       /
+  //   2 --
+  //
+  // PubInfo order: 4 -> 3 -> 1 -> 2
+
+  auto fe = ForwardEstimator();
+
+  const std::string topic1 = "topic1";
+  auto time11 = get_time(11, 110);
+  const std::string topic2 = "topic2";
+  auto time21 = get_time(21, 210);
+  const std::string topic3 = "topic3";
+  auto time31 = get_time(31, 310);
+  const std::string topic4 = "topic4";
+  auto time41 = get_time(41, 410);
+
+  auto pub_info11 = create_pubinfo(topic1, time11);
+  auto pub_info21 = create_pubinfo(topic2, time21);
+  auto pub_info31 = create_pubinfo(topic3, time31);
+  add_input_info(pub_info31, pub_info11);
+  add_input_info(pub_info31, pub_info21);
+  auto pub_info41 = create_pubinfo(topic4, time41);
+  add_input_info(pub_info41, pub_info31);
+
+  // 4 -> 3 -> 1 -> 2
+  fe.add(pub_info41);
+  fe.add(pub_info31);
+  fe.add(pub_info11);
+  fe.add(pub_info21);
+
+  auto is41 = fe.get_input_sources(topic4, time41);
+  EXPECT_EQ(is41.size(), 2u);
 }
