@@ -1,1 +1,2 @@
-# this file is empty because TILDE does not depend on any ROS package
+repositories:
+  # repository list would be added if needed.
