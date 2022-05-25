@@ -29,4 +29,3 @@ def find_key(edges, name):
             # print("find_key: {} -> {}".format(name, key))
             return key
     return None
-

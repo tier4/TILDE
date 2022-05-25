@@ -9,7 +9,7 @@ Sample classes for TILDE.
 As TILDE uses header.stamp, we have publishers/subscriptions with and without a header field.
 
 | class                       | about                                                              |
-|-----------------------------|--------------------------------------------------------------------|
+| --------------------------- | ------------------------------------------------------------------ |
 | SamplePublisherWithStamp    | Publish message with standard header (PointCloud2)                 |
 | SamplePublisherWithoutStamp | Publish message without standard header (String)                   |
 | RelayTimer                  | Subscribe PointCloud2 and String, and relay them                   |
@@ -19,7 +19,7 @@ As TILDE uses header.stamp, we have publishers/subscriptions with and without a 
 
 ### (1) Publisher and Subscription with standard header
 
-``` bash
+```bash
 $ ros2 launch tilde_sample publisher_relay_with_header.launch.py
 (snip)
 [publisher_with_stamp-1] [INFO] [1646122380.746137604] [talker_with_stamp]: Publishing PointCloud2: 7 stamp: 1646122380745891914
@@ -31,7 +31,7 @@ $ ros2 launch tilde_sample publisher_relay_with_header.launch.py
 See PubInfo by `ros2 topic echo <topic>/info/pub`.
 In this example, you can see `PubInfo.outpub_info.stamp` is filled.
 
-``` bash
+```bash
 $ ros2 topic echo /relay_with_stamp/info/pub
 header:
   stamp:
@@ -69,7 +69,7 @@ input_infos:
 
 ### (2) Publisher and Subscription without standard header
 
-``` bash
+```bash
 $ ros2 launch tilde_sample publisher_relay_without_header.launch.py
 [publisher_without_stamp-1] [INFO] [1646122584.868273517] [talker_without_stamp]: Publishing String: '3' at '1646122584868032019'
 [relay_timer-2] [INFO] [1646122584.868610655] [relay_timer]: RelayTimer sub String seq: 3
@@ -79,14 +79,14 @@ $ ros2 launch tilde_sample publisher_relay_without_header.launch.py
 In this example, you can see `PubInfo.outpub_info.has_header` is false,
 and `stamp` has no meaning.
 
-``` bash
-$ ros2 topic echo /relay_without_stamp/info/pub
+```bash
+ros2 topic echo /relay_without_stamp/info/pub
 ```
 
 <details>
 <summary>Result</summary>
 
-```
+```bash
 header:
   stamp:
     sec: 1646122584
@@ -120,12 +120,13 @@ input_infos:
     nanosec: 0
 ---
 ```
+
 </details>
 
 ### (3) Multiple Publishers and Subscription
 
-``` bash
-$ ros2 launch tilde_sample multi_publisher_relay.launch.py
+```bash
+ros2 launch tilde_sample multi_publisher_relay.launch.py
 ```
 
 In this example, two publshers are launched.
@@ -135,11 +136,12 @@ RelayTimer is launched for the subscription, and relays
 both publisher messages.
 
 You can see:
+
 - PubInfo has multiple input_info field
 
 #### multiple input + with stamp
 
-``` bash
+```bash
 $ ros2 topic echo /relay_with_stamp/info/pub
 [publisher_with_stamp-1] [INFO] [1646122873.266387175] [talker_with_stamp]: Publishing PointCloud2: 5 stamp: 1646122873266132674
 [relay_timer-3] [INFO] [1646122873.266819191] [relay_timer]: RelayTimer sub PointCloud2 seq: 5 stamp: 1646122873266132674
@@ -151,7 +153,7 @@ $ ros2 topic echo /relay_with_stamp/info/pub
 
 Result
 
-```
+```bash
 header:
   stamp:
     sec: 1646122873
@@ -200,13 +202,13 @@ input_infos:
 
 Now, let's see `/relay_without_stamp` PubInfo
 
-``` bash
-$ ros2 topic echo /relay_without_stamp/info/pub
+```bash
+ros2 topic echo /relay_without_stamp/info/pub
 ```
 
 Result:
 
-```
+```bash
 header:
   stamp:
     sec: 1646122966
@@ -253,20 +255,20 @@ input_infos:
 
 ### (4) Multiple Publishers and buffered Subscription
 
-``` bash
-$ ros2 launch tilde_sample multi_publisher_buffered_relay.launch.py
+```bash
+ros2 launch tilde_sample multi_publisher_buffered_relay.launch.py
 ```
 
 In this example, two publshers are launched as in (3).
 
 For the subscription side, RelayTimerWithBuffer is launched.
 
-As RelayTimerWithBuffer uses explicit API, 
+As RelayTimerWithBuffer uses explicit API,
 you can see PubInfo has single input_info field.
 
 ### buffer with stamp
 
-``` bash
+```bash
 $ ros2 topic echo /relay_buffer_with_stamp/info/pub
 header:
   stamp:
@@ -306,7 +308,7 @@ input_infos:                       # only one entry
 We cannot call explicit API because this topic has no `header.stamp`.
 So, there are two input info entries.
 
-``` bash
+```bash
 $ ros2 topic echo /relay_buffer_without_stamp/info/pub
 header:
   stamp:

@@ -5,7 +5,7 @@
 ## Contents
 
 | src/         | about                                                |
-|--------------|------------------------------------------------------|
+| ------------ | ---------------------------------------------------- |
 | tilde        | TILDE main code                                      |
 | tilde_sample | samples including talker, relay, listener and so on. |
 | tilde_msg    | TILDE internal msg                                   |
@@ -13,7 +13,7 @@
 
 ## Build
 
-```
+```bash
 . /path/to/ros2_galactic/install/setup.bash
 colcon build --symlink-install
 ```

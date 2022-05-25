@@ -41,7 +41,7 @@ def main(args):
 
     # topics to save.
     # design:
-    #   
+    #
     # We save all of twist and clock.
     topics_to_save = {
         "/sensing/lidar/left/outlier_filtered/pointcloud": [

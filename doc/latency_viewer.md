@@ -20,7 +20,7 @@ trajectory_follower を表示した結果は以下の通りです。
   - ROS time ベースと steady time の 2 種類が表示されています。
   - レイテンシはある行のトピックが publish されてから `/control/trajectory_follower/lateral/control_cmd` が publish されるまでの経過時間です
 
-```
+```text
 /control/trajectory_follower/lateral/control_cmd                                 1618559274.549348133      0      0
  /localization/twist                                                             1618559274.544330488      5      3
  /planning/scenario_planning/trajectory                                          1618559274.479350019     15     12

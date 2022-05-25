@@ -1,5 +1,4 @@
-myscripts
-===
+# myscripts
 
 ## Description
 
@@ -12,7 +11,7 @@ bag file 内のトピックの送信時刻を出力する。
 時刻は header field の timestamp を参照する。無い場合はその旨出力して終了する。
 シミュレータを動かし全トピックを計測の上、送信時刻を確認するなど。
 
-``` bash
+```bash
 $ ./topic_times.py <bagfile> <topic>
 
 $ ./topic_times.py lsim_all_topics/lsim_all_topics_0.db3 /sensing/lidar/top/rectified/pointcloud
@@ -34,7 +33,7 @@ $ ./topic_times.py lsim_all_topics/lsim_all_topics_0.db3 /sensing/lidar/top/rect
 topic や node の from, to を指定して最短経路を取得する。
 `rqt_graph` がバックエンドの為、実機やシミュレータなど対象システムが動作している状態で実行すること。
 
-``` bash
+```bash
 $ ./topic_traversal.py <from> <to>
 
 $ ./topic_traversal.py /sensing/lidar/top/pointcloud_raw_ex /sensing/lidar/top/rectified/pointcloud
@@ -60,7 +59,7 @@ Found のうち、半角スペース始まりは topic、そうでないもの�
 
 ある地点からグラフを BFS してノードやトピックを出力する。
 
-``` bash
+```bash
 $ ./myscripts/graph_around.py /localization/pose_twist_fusion_filter/ekf_localizer --depth 2
 
 depth: 0
@@ -86,7 +85,7 @@ PugInfo が保存された bag ファイルを pub_info.py のデータ書式に
 pkl 形式で保存する。
 結果は `${CWD}/topic_infos.pkl` に保存される。
 
-``` bash
+```bash
 parse_pub_info.py <path/to/bagfile>
 ```
 
@@ -96,10 +95,9 @@ parse_pub_info.py で作成された pkl ファイルを元に E2E latency を�
 第三引数が終点となるトピック名。
 第二引数は何番目に送信されたトピック(正確には PubInfo)を対象とするか。あまり若い数字だと初期化中の為辿り付けないセンサーが発生することがある。
 
-``` bash
+```bash
 ./pubinfo_traverse.py \
   <path/to>/topic_infos.pkl \
   1000 \
-  /localization/pose_twist_fusion_filter/twist_with_covariance 
+  /localization/pose_twist_fusion_filter/twist_with_covariance
 ```
-
