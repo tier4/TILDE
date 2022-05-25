@@ -38,30 +38,44 @@ void ForwardEstimator::add(std::shared_ptr<PubInfoMsg> pub_info, bool is_sensor)
     message_sources_[topic_name][stamp].insert(std::weak_ptr<PubInfoMsg>(pub_info));
     topic_sensors_[topic_name].insert(topic_name);
 
-    if(contains(pending_messages_, Message{topic_name, stamp})) {
-      for(auto it : pending_messages_[Message{topic_name, stamp}]) {
-        const auto & waited_topic = std::get<0>(it);
-        const auto & waited_stamp = std::get<1>(it);
-        const auto & input_sources = message_sources_[topic_name][stamp];
-        const auto & input_source_topics = topic_sensors_[topic_name];
-
-        message_sources_[waited_topic][waited_stamp].insert(input_sources.begin(), input_sources.end());
-        topic_sensors_[waited_topic].insert(
-            input_source_topics.begin(),
-            input_source_topics.end());
-      }
+    auto pending_messages_topic_it = pending_messages_.find(topic_name);
+    if(pending_messages_topic_it == pending_messages_.end()) {
+      return;
     }
 
+    auto pending_messages_it = pending_messages_topic_it->second.find(stamp);
+    if(pending_messages_it == pending_messages_topic_it->second.end()) {
+      return;
+    }
+
+    for(auto it : pending_messages_it->second) {
+      const auto & waited_topic = std::get<0>(it);
+      const auto & waited_stamp = std::get<1>(it);
+      const auto & input_sources = message_sources_[topic_name][stamp];
+      const auto & input_source_topics = topic_sensors_[topic_name];
+
+      message_sources_[waited_topic][waited_stamp].insert(input_sources.begin(), input_sources.end());
+      topic_sensors_[waited_topic].insert(
+          input_source_topics.begin(),
+          input_source_topics.end());
+    }
+
+    pending_messages_topic_it->second.erase(pending_messages_it);
+    // we keep pending_messages_[topic_name] because it is fixed size resources
     return;
   }
 
   // if some messages wait this message, then
   // input of these messages are changed
   std::set<Message> pendings = std::set<Message>();
-  if(contains(pending_messages_, Message{topic_name, stamp})) {
-    auto it = pending_messages_.find(Message{topic_name, stamp});
-    pendings.merge(it->second);
-    pending_messages_.erase(it);
+  auto pending_messages_topic_it = pending_messages_.find(topic_name);
+  if(pending_messages_topic_it != pending_messages_.end()) {
+    auto pending_messages_it = pending_messages_topic_it->second.find(stamp);
+    if(pending_messages_it != pending_messages_topic_it->second.end()) {
+      pendings.merge(pending_messages_it->second);
+      pending_messages_topic_it->second.erase(pending_messages_it);
+    }
+    // we keep pending_messages_[topic_name] because it is fixed size resources
   }
 
   // have input => get reference
@@ -74,11 +88,11 @@ void ForwardEstimator::add(std::shared_ptr<PubInfoMsg> pub_info, bool is_sensor)
 
     // if input of this message lacks,
     // both this message and pending messages wait the input
-    if(!contains(message_sources_[input_topic], input_stamp)) {
-      pending_messages_[{input_topic, input_stamp}].insert({topic_name, stamp});
-
-      pending_messages_[{input_topic, input_stamp}].insert(
-          pendings.begin(), pendings.end());
+    auto message_sources_it = message_sources_[input_topic].find(input_stamp);
+    if(message_sources_it == message_sources_[input_topic].end()) {
+      auto & waiters = pending_messages_[input_topic][input_stamp];
+      waiters.insert({topic_name, stamp});
+      waiters.insert(pendings.begin(), pendings.end());
       continue;
     }
 

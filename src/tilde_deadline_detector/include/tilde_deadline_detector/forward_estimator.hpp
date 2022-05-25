@@ -55,7 +55,7 @@ public:
   using InputSources = std::map<TopicName, std::set<HeaderStamp>>;
   /// pending messages: <wanted message>: <pending messages>
   using Message = std::tuple<TopicName, HeaderStamp>;
-  using PendingMessages = std::map<Message, std::set<Message>>;
+  using PendingMessages = std::map<TopicName, std::map<HeaderStamp, std::set<Message>>>;
 
   ForwardEstimator();
 
