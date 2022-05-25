@@ -1,5 +1,3 @@
-
-
 ## TODO
 
 - [ ] consider pointer from TildeSynchronizer or TildeSubscriber to TildeNode
@@ -35,6 +33,7 @@ See bellow to know how to maintenance.
 
 - Manually copy & rename corresponding files
 - Prepare TildeSynchronizer
+
   - add `#include "tilde_message_filters/tilde_synchronizer.hpp"`
   - add `using namespace tilde_message_filters;`
   - replace `Synchronizer` to `TildeSynchronizer` of TEST

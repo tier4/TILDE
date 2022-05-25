@@ -2,7 +2,7 @@
 
 ROS2 galatic 環境が構築済みのこと。
 
-```
+```bash
 . /path/to/ros2/galatic/setup.bash
 
 git clone git@github.com:tier4/TILDE.git

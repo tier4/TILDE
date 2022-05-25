@@ -5,7 +5,8 @@ TILDE はノードから出力されたトピックを遡り、元となった�
 入力から出力までを辿れる為、レイテンシ計測とデッドライン検出が可能です。
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
-**Table of Contents**
+
+## Table of Contents
 
 - [TILDE - Tilde Is Latency Data Embedding](#tilde---tilde-is-latency-data-embedding)
   - [TILDE の目標](#tilde-の目標)
@@ -79,7 +80,7 @@ rclcpp::Node の子クラスです。
 以下の Parameter を持ちます。
 
 - `enable_tilde`
-  - boolean. 
+  - boolean.
   - false の場合 TILDE の機能がオフになる。つまり Subscription callback でのフックや publish 時の PubInfo 送信が抑制される。
   - 2022/03/02 現在初期化時のみ指定可能。
 
@@ -88,7 +89,7 @@ rclcpp::Node の子クラスです。
 [build](./build.md)
 
 既存のアプリケーションに TILDE を組み込む際は以下の流れになります。
-※ TODO: TILDEライブラリ（*.so）の取込み手順
+※ TODO: TILDE ライブラリ（\*.so）の取込み手順
 
 - rclcpp::Node, rclcpp::Node::create_publisher, rclcpp::Node::create_subscription に代わり tilde の各 API の利用
   - rclcpp::Node とコンストラクタを tilde::TildeNode に置換
@@ -118,7 +119,7 @@ rclcpp::Node の子クラスです。
 
 ## デッドライン検出
 
-**2022/01/21 現在本機能は未実装**
+> **_NOTE:_** 2022/01/21 現在本機能は未実装
 
 ## 周辺ツール
 

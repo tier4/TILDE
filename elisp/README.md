@@ -1,5 +1,4 @@
-TILDE view mode
-===
+# TILDE view mode
 
 ## About
 
@@ -12,7 +11,7 @@ First, run tilde latency viewer with `--batch` mode.
 Redirect stdout to file.
 
 Open the log file, and `M-x tilde-view-mode`.
-Of course, you need read tilde-view-mode.el in advance 
+Of course, you need read tilde-view-mode.el in advance
 by putting load path, or `M-x eval-buffer` or other fancy way.
 
 ## Keymap
@@ -21,7 +20,7 @@ The latency viewer log file has space-index structure.
 In the non batch mode, latency viewer shows lines between `/target/topic`.
 Let's call these lines a BLOCK.
 
-```
+```text
 stamp ...
 /target/topic
  /depth1/child/topic1
@@ -49,4 +48,3 @@ Hit "w" to widen.
 
 We can use the narrow view mode, just like latency viewer non-batch mode.
 Morever, we can combine foldings.
-
