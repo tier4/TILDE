@@ -15,7 +15,7 @@
 
 
 import os
-import collections
+from collections import defaultdict
 import numpy as np
 from logging import basicConfig, getLogger
 
@@ -57,7 +57,7 @@ class TopicInfoStatistics(object):
     def __init__(self, topics, max_rows=10):
         self.topics = topics
         self.t2i = {topic: i for i, topic in enumerate(topics)}
-        self.seq2time = collections.defaultdict(lambda: - np.ones(len(self.t2i), dtype=np.float64))
+        self.seq2time = defaultdict(lambda: - np.ones(len(self.t2i), dtype=np.float64))
         # (n_messages, n_subcallbacks), nanoseconds
         self.data = - np.ones((max_rows, len(topics)), dtype=np.float)
         self.data_idx = 0
