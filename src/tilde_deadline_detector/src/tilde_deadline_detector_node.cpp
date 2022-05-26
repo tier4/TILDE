@@ -81,18 +81,14 @@ std::set<std::string> TildeDeadlineDetectorNode::get_pub_info_topics() const
 
 void TildeDeadlineDetectorNode::init()
 {
-  declare_parameter<std::vector<std::string>>("ignore_topics", std::vector<std::string>{});
-  std::vector<std::string> ignores;
-  get_parameter("ignore_topics", ignores);
+  auto ignores = declare_parameter<std::vector<std::string>>("ignore_topics", std::vector<std::string>{});
 
-  declare_parameter<std::vector<std::string>>("sensor_topics", std::vector<std::string>{});
-  std::vector<std::string> tmp_sensor_topics;
-  get_parameter("sensor_topics", tmp_sensor_topics);
+  auto tmp_sensor_topics = declare_parameter<std::vector<std::string>>(
+      "sensor_topics", std::vector<std::string>{});
   sensor_topics_.insert(tmp_sensor_topics.begin(), tmp_sensor_topics.end());
 
-  declare_parameter<std::vector<std::string>>("target_topics", std::vector<std::string>{});
-  std::vector<std::string> tmp_target_topics;
-  get_parameter("target_topics", tmp_target_topics);
+  auto tmp_target_topics = declare_parameter<std::vector<std::string>>(
+      "target_topics", std::vector<std::string>{});
   target_topics_.insert(tmp_target_topics.begin(), tmp_target_topics.end());
 
   expire_ms_ = declare_parameter<int64_t>("expire_ms", 3 * 1000);
@@ -161,6 +157,7 @@ void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
   // fe.debug_print();
 
   auto is = fe.get_input_sources(target, stamp);
+  print_report(target, stamp, is);
 
   // TODO(y-okumura-isp) send warning to diagnostic
 }
