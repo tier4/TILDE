@@ -12,8 +12,11 @@ TILDE では以下の様なユースケースを想定ユースケースして�
 ## Table of Contents
 
 - [TILDE の想定ユースケース](#tilde-の想定ユースケース)
+  - [Table of Contents](#table-of-contents)
   - [TILDE で分かること](#tilde-で分かること)
   - [オンラインレイテンシ計測](#オンラインレイテンシ計測)
+    - [オンライン性](#オンライン性)
+    - [オンライン vs オフライン、TILDE と CARET](#オンライン-vs-オフラインtilde-と-caret)
   - [デッドライン検出](#デッドライン検出)
 
 <!-- markdown-toc end -->
@@ -32,11 +35,11 @@ stamp はメイントピックの Header stamp で、説明の為単位は秒と
 
 ```mermaid
 graph LR
-  /sernsor/topic/A --stamp=4--> FusionNode((FusionNode))
-  /sernsor/topic/B --stamp=6--> FusionNode
-  FusionNode --stamp=8-->/sernsor/fusion
-  /sernsor/fusion --stamp=8--> PlanningNode((PlanningNode))
-  /sernsor/topic/B --stamp=3--> PlanningNode
+  /sensor/topic/A --stamp=4--> FusionNode((FusionNode))
+  /sensor/topic/B --stamp=6--> FusionNode
+  FusionNode --stamp=8-->/sensor/fusion
+  /sensor/fusion --stamp=8--> PlanningNode((PlanningNode))
+  /sensor/topic/B --stamp=3--> PlanningNode
   PlanningNode --stamp=10-->/planning/base
 ```
 
@@ -60,7 +63,7 @@ PlanningNode も同様の PubInfo を送信します。
   - `/sensor/topic/A`: stamp=4 のもの(`/sensor/fusion` 経由)
   - `/sensor/topic/B`: stamp=6 のもの(`/sensor/fusion` 経由) と stamp=3 のもの(直接受信)
 
-同様の推論を繰り返すことで「stamp=X の `/conrol/cmd` はいつのセンサー情報を用いたか?」という問いに答えることができます。
+同様の推論を繰り返すことで「stamp=X の `/control/cmd` はいつのセンサー情報を用いたか?」という問いに答えることができます。
 PubInfo を元に、DAG を逆向きに遡ってデータの紐付けを行うことからこの様な推論を **PubInfo の探索** と呼称します。
 
 ## オンラインレイテンシ計測
@@ -75,7 +78,7 @@ PubInfo を元に、DAG を逆向きに遡ってデータの紐付けを行う�
 他のノードでも同様の推論が可能です。
 
 また、 PubInfo の探索を途中で止めることでノード間にかかった時間も分かります。  
-例えば 「/sernsor/fusion が送信されてから /control/cmd が送信されるまで X 秒かかった」などの推論ができます。
+例えば 「/sensor/fusion が送信されてから /control/cmd が送信されるまで X 秒かかった」などの推論ができます。
 
 この様にして TILDE を用いてレンテンシを計測することが可能です。
 

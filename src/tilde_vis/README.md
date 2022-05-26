@@ -80,7 +80,7 @@ You can use topic graph specific options.
 | name              | about                                                                          |
 | ----------------- | ------------------------------------------------------------------------------ |
 | `excludes_topics` | Topics you don't want to watch, such as `debug` topic.                         |
-| `stops`           | Stop traversal if latency viewer reaches these topics to prevent infinit loop. |
+| `stops`           | Stop traversal if latency viewer reaches these topics to prevent infinite loop. |
 
 Additionally, you can specify "skip" setting to skip non-TILDE node.
 But you need to directly edit `LatencyViewerNode.init_skips()` to do it.
@@ -88,7 +88,7 @@ But you need to directly edit `LatencyViewerNode.init_skips()` to do it.
 ### Result
 
 You can see the following lines are displayed repeatedly.
-Columns are "topic name", "header stamp", "latency in ROS time", "latency in staedy time".
+Columns are "topic name", "header stamp", "latency in ROS time", "latency in steady time".
 
 ```text
 /control/trajectory_follower/lateral/control_cmd                                 1618559274.549348133      0      0
@@ -148,7 +148,7 @@ Here are some examples. We use customized autoware.proj logging simulator where 
 
 (1) Print subscribers topic info.
 
-There are five topics, so tilde_vis shows four per-callback latencies(from some subscription callback to the nexe subscription callback) and e2e latency.
+There are five topics, so tilde_vis shows four per-callback latencies(from some subscription callback to the next subscription callback) and e2e latency.
 
 ```bash
 $ ros2 run tilde_vis tilde_vis

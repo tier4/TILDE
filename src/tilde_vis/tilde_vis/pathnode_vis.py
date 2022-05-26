@@ -104,9 +104,9 @@ class TopicInfoStatistics(object):
         maxtime = diff.max(axis=0)
         avgtime = diff.mean(axis=0)
         mintime = diff.min(axis=0)
-        maxe2e = e2e.max()
-        avge2e = e2e.mean()
-        mine2e = e2e.min()
+        max_e2e = e2e.max()
+        avg_e2e = e2e.mean()
+        min_e2e = e2e.min()
 
         def fmt(vec):
             s = ""
@@ -117,7 +117,7 @@ class TopicInfoStatistics(object):
         print("max: " + fmt(maxtime))
         print("avg: " + fmt(avgtime))
         print("min: " + fmt(mintime))
-        print("e2e: " + fmt([maxe2e, avge2e, mine2e]))
+        print("e2e: " + fmt([max_e2e, avg_e2e, min_e2e]))
         print("")
 
         self.data[...] = -1.0
@@ -157,11 +157,11 @@ class PathVisNode(Node):
     def listener_callback(self, topic_info):
         seq = topic_info.seq
         topic = topic_info.topic_name
-        stime = Time.from_msg(topic_info.callback_start).nanoseconds
+        start_time = Time.from_msg(topic_info.callback_start).nanoseconds
         dump = self.get_parameter("dump").get_parameter_value().bool_value
 
         logger.debug("{} {}".format(seq, topic))
-        self.statistics.set(seq, topic, stime)
+        self.statistics.set(seq, topic, start_time)
         if self.statistics.is_filled():
             self.statistics.dump_and_clear(dump)
 
