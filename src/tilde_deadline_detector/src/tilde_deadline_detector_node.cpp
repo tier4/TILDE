@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
 #include <chrono>
 #include <string>
 #include <sstream>
@@ -91,9 +92,21 @@ void TildeDeadlineDetectorNode::init()
       "target_topics", std::vector<std::string>{});
   target_topics_.insert(tmp_target_topics.begin(), tmp_target_topics.end());
 
+  auto deadline_ms = declare_parameter<std::vector<int64_t>>(
+      "deadline_ms", std::vector<int64_t>{});
+
   expire_ms_ = declare_parameter<int64_t>("expire_ms", 3 * 1000);
   cleanup_ms_ = declare_parameter<int64_t>("cleanup_ms", 3 * 1000);
   print_report_ = declare_parameter<bool>("print_report", false);
+
+  // init topic_vs_deadline_ms_
+  for(size_t i=0; i < tmp_target_topics.size(); i++) {
+    auto topic = tmp_target_topics[i];
+    auto deadline = i < deadline_ms.size() ? deadline_ms[i] : 0;
+    deadline = std::max(deadline, 0l);
+    topic_vs_deadline_ms_[topic] = deadline;
+    std::cout << "deadline setting: " << topic << " = " << deadline << std::endl;
+  }
 
   // wait discovery done
   std::set<std::string> topics;

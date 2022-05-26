@@ -56,6 +56,7 @@ private:
   ForwardEstimator fe;
   std::set<std::string> sensor_topics_;
   std::set<std::string> target_topics_;
+  std::map<std::string, int64_t> topic_vs_deadline_ms_;
   uint64_t expire_ms_;
   uint64_t cleanup_ms_;
   bool print_report_{false};
