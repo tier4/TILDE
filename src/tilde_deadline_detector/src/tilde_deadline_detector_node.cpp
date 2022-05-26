@@ -130,6 +130,22 @@ void TildeDeadlineDetectorNode::init()
       });
 }
 
+void print_report(
+    const std::string & topic,
+    const builtin_interfaces::msg::Time & stamp,
+    const ForwardEstimator::InputSources & is)
+{
+  std::cout << topic << ": " << time2str(stamp) << "\n";
+  for(auto it : is) {
+    std::cout << "  " << it.first << ": ";
+    for(auto stmp : it.second) {
+      std::cout << time2str(stmp) << ", ";
+    }
+    std::cout << "\n";
+  }
+  std::cout << std::endl;
+}
+
 void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
 {
   auto target = pubinfo->output_info.topic_name;
@@ -145,17 +161,6 @@ void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
   // fe.debug_print();
 
   auto is = fe.get_input_sources(target, stamp);
-
-  // print report
-  std::cout << target << ": " << time2str(stamp) << "\n";
-  for(auto it : is) {
-    std::cout << "  " << it.first << ": ";
-    for(auto stmp : it.second) {
-      std::cout << time2str(stmp) << ", ";
-    }
-    std::cout << "\n";
-  }
-  std::cout << std::endl;
 
   // TODO(y-okumura-isp) send warning to diagnostic
 }
