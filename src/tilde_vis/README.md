@@ -77,9 +77,9 @@ ros2 run tilde_vis latency_viewer --batch ...
 
 You can use topic graph specific options.
 
-| name              | about                                                                          |
-| ----------------- | ------------------------------------------------------------------------------ |
-| `excludes_topics` | Topics you don't want to watch, such as `debug` topic.                         |
+| name              | about                                                                           |
+| ----------------- | ------------------------------------------------------------------------------- |
+| `excludes_topics` | Topics you don't want to watch, such as `debug` topic.                          |
 | `stops`           | Stop traversal if latency viewer reaches these topics to prevent infinite loop. |
 
 Additionally, you can specify "skip" setting to skip non-TILDE node.
