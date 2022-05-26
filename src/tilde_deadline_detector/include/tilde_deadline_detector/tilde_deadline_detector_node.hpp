@@ -58,6 +58,7 @@ private:
   std::set<std::string> target_topics_;
   uint64_t expire_ms_;
   uint64_t cleanup_ms_;
+  bool print_report_{false};
 
   std::vector<PubInfoSubscription::SharedPtr> subs_;
   rclcpp::TimerBase::SharedPtr timer_;

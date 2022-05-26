@@ -93,6 +93,7 @@ void TildeDeadlineDetectorNode::init()
 
   expire_ms_ = declare_parameter<int64_t>("expire_ms", 3 * 1000);
   cleanup_ms_ = declare_parameter<int64_t>("cleanup_ms", 3 * 1000);
+  print_report_ = declare_parameter<bool>("print_report", false);
 
   // wait discovery done
   std::set<std::string> topics;
@@ -157,7 +158,9 @@ void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
   // fe.debug_print();
 
   auto is = fe.get_input_sources(target, stamp);
-  print_report(target, stamp, is);
+  if(print_report_) {
+    print_report(target, stamp, is);
+  }
 
   // TODO(y-okumura-isp) send warning to diagnostic
 }
