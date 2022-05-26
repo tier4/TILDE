@@ -117,13 +117,13 @@ void TildeDeadlineDetectorNode::init()
   }
 }
 
-void TildeDeadlineDetectorNode::pubinfo_callback(const PubInfo::SharedPtr pubinfo)
+void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
 {
   auto target = pubinfo->output_info.topic_name;
   auto stamp = pubinfo->output_info.header_stamp;
 
   bool is_sensor = (sensor_topics_.find(pubinfo->output_info.topic_name) != sensor_topics_.end());
-  fe.add(pubinfo, is_sensor);
+  fe.add(std::move(pubinfo), is_sensor);
 
   if(!contains(target_topics_, target)) {
     return;

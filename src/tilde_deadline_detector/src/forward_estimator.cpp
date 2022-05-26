@@ -23,9 +23,11 @@ namespace tilde_deadline_detector
 ForwardEstimator::ForwardEstimator()
 {}
 
-void ForwardEstimator::add(std::shared_ptr<PubInfoMsg> pub_info, bool is_sensor)
+void ForwardEstimator::add(std::unique_ptr<PubInfoMsg> _pub_info, bool is_sensor)
 {
-  if (!pub_info->output_info.has_header_stamp) {return;}
+  if (!_pub_info->output_info.has_header_stamp) {return;}
+
+  std::shared_ptr<PubInfoMsg> pub_info = std::move(_pub_info);
 
   const auto & topic_name = pub_info->output_info.topic_name;
   const auto stamp = rclcpp::Time(pub_info->output_info.header_stamp);
@@ -77,7 +79,6 @@ void ForwardEstimator::add(std::shared_ptr<PubInfoMsg> pub_info, bool is_sensor)
     }
     // we keep pending_messages_[topic_name] because it is fixed size resources
   }
-
   // have input => get reference
   for (const auto & input : pub_info->input_infos) {
     // get sources of input
@@ -131,13 +132,13 @@ ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
 {
   InputSources is;
   if (message_sources_.find(topic_name) == message_sources_.end()) {
-    std::cout << topic_name << ": not found in message_sources_" << std::endl;
+    // std::cout << topic_name << ": not found in message_sources_" << std::endl;
     return is;
   }
 
   auto stamps_sources = message_sources_[topic_name];
   if (stamps_sources.find(stamp) == stamps_sources.end()) {
-    std::cout << topic_name << ":" << _time2str(stamp) << ": not found in message_sources_" << std::endl;
+    // std::cout << topic_name << ":" << _time2str(stamp) << ": not found in message_sources_" << std::endl;
     return is;
   }
 
@@ -145,7 +146,7 @@ ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
   for (auto & wsrc : sources) {
     auto src = wsrc.lock();
     if (!src) {
-      std::cout << topic_name << ":" << _time2str(stamp) << " source deleted" << std::endl;
+      // std::cout << topic_name << ":" << _time2str(stamp) << " source deleted" << std::endl;
       continue;
     }
 
@@ -153,6 +154,40 @@ ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
   }
 
   return is;
+}
+
+void ForwardEstimator::delete_expired(const rclcpp::Time & thres)
+{
+  // delete references
+  for(auto & it : message_sources_) {
+    auto & stamp_refs = it.second;
+    for(auto stamp_refs_it = stamp_refs.begin();
+        stamp_refs_it != stamp_refs.end(); ) {
+      if(thres < stamp_refs_it->first) break;
+      stamp_refs_it = stamp_refs.erase(stamp_refs_it);
+    }
+  }
+
+  // delete sources
+  for(auto & it : sources_) {
+    auto & stamp_pubinfo = it.second;
+    for(auto stamp_pubinfo_it = stamp_pubinfo.begin();
+        stamp_pubinfo_it != stamp_pubinfo.end(); ) {
+      if(thres < stamp_pubinfo_it->first) break;
+      stamp_pubinfo_it->second.reset();
+      stamp_pubinfo_it = stamp_pubinfo.erase(stamp_pubinfo_it);
+    }
+  }
+
+  // delete pendings
+  for(auto & it : pending_messages_) {
+    auto & stamp_messages = it.second;
+    for(auto stamp_messages_it = stamp_messages.begin();
+        stamp_messages_it != stamp_messages.end(); ) {
+      if(thres < stamp_messages_it->first) break;
+      stamp_messages_it = stamp_messages.erase(stamp_messages_it);
+    }
+  }
 }
 
 void ForwardEstimator::debug_print() const

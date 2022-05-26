@@ -59,7 +59,7 @@ private:
 
   std::vector<PubInfoSubscription::SharedPtr> subs_;
   void init();
-  void pubinfo_callback(const tilde_msg::msg::PubInfo::SharedPtr msg);
+  void pubinfo_callback(tilde_msg::msg::PubInfo::UniquePtr msg);
 };
 
 }  // namespace tilde_deadline_detector

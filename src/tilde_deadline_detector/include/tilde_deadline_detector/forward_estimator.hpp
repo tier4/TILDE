@@ -60,7 +60,7 @@ public:
   ForwardEstimator();
 
   /// add PubInfo
-  void add(std::shared_ptr<PubInfoMsg> pub_info, bool is_sensor=false);
+  void add(std::unique_ptr<PubInfoMsg> pub_info, bool is_sensor=false);
 
   /// get the oldest sensor time
   /**
@@ -76,11 +76,11 @@ public:
     const std::string & topic_name,
     const HeaderStamp & stamp);
 
-  /// garbage collect
+  /// delete old data
   /**
-   * delete PubInfos whose stamp < thres
+   * \param threas Time point to delete data whose stamp <= thres
    */
-  void gc(const rclcpp::Time & thres);
+  void delete_expired(const rclcpp::Time & thres);
 
   void debug_print() const;
 
