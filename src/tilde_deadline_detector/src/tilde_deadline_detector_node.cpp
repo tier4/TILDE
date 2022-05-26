@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cassert>
 #include <chrono>
 #include <string>
 #include <sstream>
 #include <thread>
+
+#include "rcutils/time.h"
 
 #include "builtin_interfaces/msg/time.hpp"
 
 #include "tilde_deadline_detector/tilde_deadline_detector_node.hpp"
 
 using tilde_msg::msg::PubInfo;
+using std::chrono::milliseconds;
 
 namespace tilde_deadline_detector
 {
@@ -93,6 +95,9 @@ void TildeDeadlineDetectorNode::init()
   get_parameter("target_topics", tmp_target_topics);
   target_topics_.insert(tmp_target_topics.begin(), tmp_target_topics.end());
 
+  expire_ms_ = declare_parameter<int64_t>("expire_ms", 3 * 1000);
+  cleanup_ms_ = declare_parameter<int64_t>("cleanup_ms", 3 * 1000);
+
   // wait discovery done
   std::set<std::string> topics;
   while(topics.size() == 0) {
@@ -115,6 +120,14 @@ void TildeDeadlineDetectorNode::init()
         std::bind(&TildeDeadlineDetectorNode::pubinfo_callback, this, std::placeholders::_1));
     subs_.push_back(sub);
   }
+
+  timer_ = create_wall_timer(
+      milliseconds(cleanup_ms_),
+      [this]() -> void
+      {
+        auto t = this->now();
+        this->fe.delete_expired(t - rclcpp::Duration::from_nanoseconds(RCUTILS_MS_TO_NS(expire_ms_)));
+      });
 }
 
 void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
@@ -133,6 +146,7 @@ void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
 
   auto is = fe.get_input_sources(target, stamp);
 
+  // print report
   std::cout << target << ": " << time2str(stamp) << "\n";
   for(auto it : is) {
     std::cout << "  " << it.first << ": ";
@@ -142,6 +156,8 @@ void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
     std::cout << "\n";
   }
   std::cout << std::endl;
+
+  // TODO(y-okumura-isp) send warning to diagnostic
 }
 
 }  // namespace tilde_deadline_detector

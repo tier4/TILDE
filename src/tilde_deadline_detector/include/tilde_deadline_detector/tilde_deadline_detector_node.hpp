@@ -56,8 +56,12 @@ private:
   ForwardEstimator fe;
   std::set<std::string> sensor_topics_;
   std::set<std::string> target_topics_;
+  uint64_t expire_ms_;
+  uint64_t cleanup_ms_;
 
   std::vector<PubInfoSubscription::SharedPtr> subs_;
+  rclcpp::TimerBase::SharedPtr timer_;
+
   void init();
   void pubinfo_callback(tilde_msg::msg::PubInfo::UniquePtr msg);
 };
