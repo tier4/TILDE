@@ -485,3 +485,43 @@ TEST(TestForwardEstimator, expire_step_by_step_skew)
   EXPECT_EQ(fe.get_input_sources(topic2, time21).size(), 0u);
   EXPECT_EQ(fe.get_input_sources(topic1, time11).size(), 0u);
 }
+
+TEST(TestForwardEstimator, get_oldest_sensor_stamp)
+{
+  // DAG
+  // A, B -> C
+
+  const std::string topic1 = "topicA";
+  const std::string topic2 = "topicB";
+  const std::string topic3 = "topicC";
+
+  auto time11 = get_time(11, 110);
+  auto pubinfo11 = create_pubinfo(topic1, time11);
+  auto time12 = get_time(12, 120);
+  auto pubinfo12 = create_pubinfo(topic1, time12);
+
+  auto time21 = get_time(21, 110);
+  auto pubinfo21 = create_pubinfo(topic2, time21);
+  auto time22 = get_time(22, 120);
+  auto pubinfo22 = create_pubinfo(topic2, time22);
+
+  auto time31 = get_time(31, 310);
+  auto pubinfo31 = create_pubinfo(topic3, time31);
+
+  add_input_info(pubinfo31.get(), pubinfo11.get());
+  add_input_info(pubinfo31.get(), pubinfo12.get());
+  add_input_info(pubinfo31.get(), pubinfo21.get());
+  add_input_info(pubinfo31.get(), pubinfo22.get());
+
+  auto fe = ForwardEstimator();
+  fe.add(std::move(pubinfo11));
+  fe.add(std::move(pubinfo21));
+  fe.add(std::move(pubinfo31));
+
+  auto oldest = fe.get_oldest_sensor_stamp(topic3, time31);
+  if(!oldest) {
+    FAIL() << "not oldest";
+  } else {
+    EXPECT_EQ(*oldest, rclcpp::Time(time11));
+  }
+}

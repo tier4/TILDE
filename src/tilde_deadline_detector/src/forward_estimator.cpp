@@ -128,22 +128,22 @@ std::string _time2str(const builtin_interfaces::msg::Time & time)
 
 ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
   const std::string & topic_name,
-  const HeaderStamp & stamp)
+  const HeaderStamp & stamp) const
 {
   InputSources is;
-  if (message_sources_.find(topic_name) == message_sources_.end()) {
+  auto message_sources_topic_it = message_sources_.find(topic_name);
+  if (message_sources_topic_it == message_sources_.end()) {
     // std::cout << topic_name << ": not found in message_sources_" << std::endl;
     return is;
   }
 
-  auto stamps_sources = message_sources_[topic_name];
-  if (stamps_sources.find(stamp) == stamps_sources.end()) {
+  auto stamps_sources_it = message_sources_topic_it->second.find(stamp);;
+  if (stamps_sources_it == message_sources_topic_it->second.end()) {
     // std::cout << topic_name << ":" << _time2str(stamp) << ": not found in message_sources_" << std::endl;
     return is;
   }
 
-  auto sources = stamps_sources[stamp];
-  for (auto & wsrc : sources) {
+  for (auto & wsrc : stamps_sources_it->second) {
     auto src = wsrc.lock();
     if (!src) {
       // std::cout << topic_name << ":" << _time2str(stamp) << " source deleted" << std::endl;
@@ -154,6 +154,23 @@ ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
   }
 
   return is;
+}
+
+std::optional<rclcpp::Time> ForwardEstimator::get_oldest_sensor_stamp(
+    const std::string & topic_name,
+    const HeaderStamp & stamp) const
+{
+  auto is = get_input_sources(topic_name, stamp);
+  if(is.empty()) {
+    return std::nullopt;
+  }
+
+  std::set<HeaderStamp> mins;
+  for(auto & it : is) {
+    mins.insert(*std::min_element(it.second.begin(), it.second.end()));
+  }
+
+  return *(std::min_element(mins.begin(), mins.end()));
 }
 
 void ForwardEstimator::delete_expired(const rclcpp::Time & thres)

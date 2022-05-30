@@ -18,6 +18,7 @@
 #include <chrono>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -62,19 +63,29 @@ public:
   /// add PubInfo
   void add(std::unique_ptr<PubInfoMsg> pub_info, bool is_sensor=false);
 
+  /// get all sensor time
+  /**
+   * \param topic_name Target topic name
+   * \param stamp Target header stamp
+   * \return sensor topic vs its header stamps
+   */
+  InputSources get_input_sources(
+    const std::string & topic_name,
+    const HeaderStamp & stamp) const;
+
   /// get the oldest sensor time
   /**
    * \param topic_name Target topic name
    * \param stamp Target header stamp
-   * \return topic vs oldest header.stamp of sensor
+   * \return the oldest header.stamp of all sensors.
    *
    * Calcurated latency is best effort i.e.
    * when it cannot gather all sensor PubInfo,
    * it returns the longest latency in gathered PubInfo.
    */
-  InputSources get_input_sources(
-    const std::string & topic_name,
-    const HeaderStamp & stamp);
+  std::optional<rclcpp::Time> get_oldest_sensor_stamp(
+      const std::string & topic_name,
+      const HeaderStamp & stamp) const;
 
   /// delete old data
   /**

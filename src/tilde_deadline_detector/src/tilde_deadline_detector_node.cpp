@@ -146,7 +146,7 @@ void print_report(
     const ForwardEstimator::InputSources & is)
 {
   std::cout << topic << ": " << time2str(stamp) << "\n";
-  for(auto it : is) {
+  for(auto & it : is) {
     std::cout << "  " << it.first << ": ";
     for(auto stmp : it.second) {
       std::cout << time2str(stmp) << ", ";
@@ -170,10 +170,12 @@ void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
 
   // fe.debug_print();
 
-  auto is = fe.get_input_sources(target, stamp);
   if(print_report_) {
+    auto is = fe.get_input_sources(target, stamp);
     print_report(target, stamp, is);
   }
+
+  // auto deadline_ms = topic_vs_deadline_ms_[target];
 
   // TODO(y-okumura-isp) send warning to diagnostic
 }
