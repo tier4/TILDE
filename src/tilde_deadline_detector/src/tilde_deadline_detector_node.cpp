@@ -38,10 +38,17 @@ std::string time2str(const builtin_interfaces::msg::Time & time)
   return ret.str();
 }
 
+void PerformanceCounter::add(float v)
+{
+  avg = (avg * cnt + v) / (cnt + 1);
+  max = std::max(v, max);
+  cnt++;
+}
+
 TildeDeadlineDetectorNode::TildeDeadlineDetectorNode(
   const std::string & node_name,
   const rclcpp::NodeOptions & options)
-: Node(node_name, options)
+  : Node(node_name, options)
 {
   init();
 }
@@ -99,6 +106,9 @@ void TildeDeadlineDetectorNode::init()
   cleanup_ms_ = declare_parameter<int64_t>("cleanup_ms", 3 * 1000);
   print_report_ = declare_parameter<bool>("print_report", false);
 
+  bool clock_work_arround = declare_parameter<bool>("clock_work_arround", false);
+  bool show_performance = declare_parameter<bool>("show_performance", false);
+
   // init topic_vs_deadline_ms_
   for(size_t i=0; i < tmp_target_topics.size(); i++) {
     auto topic = tmp_target_topics[i];
@@ -131,12 +141,34 @@ void TildeDeadlineDetectorNode::init()
     subs_.push_back(sub);
   }
 
+  latest_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
+
   timer_ = create_wall_timer(
       milliseconds(cleanup_ms_),
-      [this]() -> void
+      [this, clock_work_arround, show_performance]() -> void
       {
+        auto st = std::chrono::steady_clock::now();
+
         auto t = this->now();
+        if(clock_work_arround) {
+          t = latest_;
+        }
+
         this->fe.delete_expired(t - rclcpp::Duration::from_nanoseconds(RCUTILS_MS_TO_NS(expire_ms_)));
+
+        auto et = std::chrono::steady_clock::now();
+        timer_callback_counter_.add(
+            std::chrono::duration_cast<std::chrono::milliseconds>(et-st).count());
+
+        if(show_performance) {
+          std::cout << "pubinfo_callback: "
+                    << "  avg: " << pubinfo_callback_counter_.avg << "\n"
+                    << "  max: " << pubinfo_callback_counter_.max << "\n"
+                    << "timer_callback: "
+                    << "  avg: " << timer_callback_counter_.avg << "\n"
+                    << "  max: " << timer_callback_counter_.max << std::endl;
+          this->fe.debug_print();
+        }
       });
 }
 
@@ -158,8 +190,13 @@ void print_report(
 
 void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
 {
+  auto st = std::chrono::steady_clock::now();
+
   auto target = pubinfo->output_info.topic_name;
   auto stamp = pubinfo->output_info.header_stamp;
+
+  // work arround for non `/clock` bag file
+  latest_ = std::max(rclcpp::Time(stamp), latest_);
 
   bool is_sensor = (sensor_topics_.find(pubinfo->output_info.topic_name) != sensor_topics_.end());
   fe.add(std::move(pubinfo), is_sensor);
@@ -178,6 +215,10 @@ void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
   // auto deadline_ms = topic_vs_deadline_ms_[target];
 
   // TODO(y-okumura-isp) send warning to diagnostic
+
+  auto et = std::chrono::steady_clock::now();
+  pubinfo_callback_counter_.add(
+      std::chrono::duration_cast<std::chrono::milliseconds>(et -st).count());
 }
 
 }  // namespace tilde_deadline_detector

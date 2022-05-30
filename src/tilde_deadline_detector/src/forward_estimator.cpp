@@ -207,21 +207,40 @@ void ForwardEstimator::delete_expired(const rclcpp::Time & thres)
   }
 }
 
-void ForwardEstimator::debug_print() const
+void ForwardEstimator::debug_print(bool verbose) const
 {
-  std::cout << "sources_: " << sources_.size() << std::endl;
-  for(auto it : sources_) {
-    std::cout << "  " << it.first << ": " << it.second.size() << std::endl;
-  }
+  if(verbose) {
+    std::cout << "sources_: " << sources_.size() << std::endl;
+    for(auto & it : sources_) {
+      std::cout << "  " << it.first << ": " << it.second.size() << std::endl;
+    }
 
-  std::cout << "message_sources_: " << message_sources_.size() << std::endl;
-  for(auto it : message_sources_) {
-    std::cout << "  " << it.first << ": " << it.second.size() << std::endl;
-  }
+    std::cout << "message_sources_: " << message_sources_.size() << std::endl;
+    for(auto & it : message_sources_) {
+      std::cout << "  " << it.first << ": " << it.second.size() << std::endl;
+    }
 
-  std::cout << "topic_sensors_: " << topic_sensors_.size() << std::endl;
-  for(auto it : topic_sensors_) {
-    std::cout << "  " << it.first << ": " << it.second.size() << std::endl;
+    std::cout << "topic_sensors_: " << topic_sensors_.size() << std::endl;
+    for(auto & it : topic_sensors_) {
+      std::cout << "  " << it.first << ": " << it.second.size() << std::endl;
+    }
+  } else {
+    auto n_sources = 0;
+    for(auto & it : sources_) {
+      n_sources += it.second.size();
+    }
+    auto n_message_sources = 0;
+    for(auto & it : message_sources_) {
+      n_message_sources += it.second.size();
+    }
+    auto n_topic_sensors = 0;
+    for(auto & it : topic_sensors_) {
+      n_topic_sensors += it.second.size();
+    }
+
+    std::cout << "sources: " << n_sources << " "
+              << "message_sources: " << n_message_sources << " "
+              << "topic_sensors: " << n_topic_sensors << std::endl;
   }
 }
 

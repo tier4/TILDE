@@ -27,6 +27,15 @@
 
 namespace tilde_deadline_detector
 {
+struct PerformanceCounter
+{
+  void add(float v);
+
+  float avg{0.0};
+  float max{0.0};
+  uint64_t cnt{0};
+};
+
 class TildeDeadlineDetectorNode : public rclcpp::Node
 {
   using PubInfoSubscription = rclcpp::Subscription<tilde_msg::msg::PubInfo>;
@@ -61,8 +70,15 @@ private:
   uint64_t cleanup_ms_;
   bool print_report_{false};
 
+  // work around for no `/clock` bag files.
+  // TODO(y-okumura-isp): delete related codes
+  rclcpp::Time latest_;
+
   std::vector<PubInfoSubscription::SharedPtr> subs_;
   rclcpp::TimerBase::SharedPtr timer_;
+
+  PerformanceCounter pubinfo_callback_counter_;
+  PerformanceCounter timer_callback_counter_;
 
   void init();
   void pubinfo_callback(tilde_msg::msg::PubInfo::UniquePtr msg);

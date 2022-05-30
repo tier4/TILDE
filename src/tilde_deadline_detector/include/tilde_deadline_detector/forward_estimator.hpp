@@ -93,7 +93,7 @@ public:
    */
   void delete_expired(const rclcpp::Time & thres);
 
-  void debug_print() const;
+  void debug_print(bool verbose=false) const;
 
 private:
   /// all shared_ptr<PubInfo> of sensors to control pointer life time
