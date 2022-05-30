@@ -18,9 +18,11 @@
 #include <chrono>
 #include <map>
 #include <memory>
-#include <optional>
+// NOLINT to prevent Found C system header after C++ system header
+#include <optional>  // NOLINT
 #include <set>
 #include <string>
+#include <tuple>
 #include <unordered_set>
 
 #include "rclcpp/rclcpp.hpp"
@@ -61,7 +63,7 @@ public:
   ForwardEstimator();
 
   /// add PubInfo
-  void add(std::unique_ptr<PubInfoMsg> pub_info, bool is_sensor=false);
+  void add(std::unique_ptr<PubInfoMsg> pub_info, bool is_sensor = false);
 
   /// get all sensor time
   /**
@@ -84,8 +86,8 @@ public:
    * it returns the longest latency in gathered PubInfo.
    */
   std::optional<rclcpp::Time> get_oldest_sensor_stamp(
-      const std::string & topic_name,
-      const HeaderStamp & stamp) const;
+    const std::string & topic_name,
+    const HeaderStamp & stamp) const;
 
   /// delete old data
   /**
@@ -93,7 +95,7 @@ public:
    */
   void delete_expired(const rclcpp::Time & thres);
 
-  void debug_print(bool verbose=false) const;
+  void debug_print(bool verbose = false) const;
 
 private:
   /// all shared_ptr<PubInfo> of sensors to control pointer life time

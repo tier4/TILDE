@@ -14,9 +14,13 @@
 
 #include <algorithm>
 #include <chrono>
+#include <map>
+#include <set>
 #include <string>
 #include <sstream>
 #include <thread>
+#include <utility>
+#include <vector>
 
 #include "rcutils/time.h"
 
@@ -48,7 +52,7 @@ void PerformanceCounter::add(float v)
 TildeDeadlineDetectorNode::TildeDeadlineDetectorNode(
   const std::string & node_name,
   const rclcpp::NodeOptions & options)
-  : Node(node_name, options)
+: Node(node_name, options)
 {
   init();
 }
@@ -63,7 +67,7 @@ TildeDeadlineDetectorNode::TildeDeadlineDetectorNode(
 }
 
 TildeDeadlineDetectorNode::TildeDeadlineDetectorNode(const rclcpp::NodeOptions & options)
-    : Node("tilde_deadline_detector_node", options)
+: Node("tilde_deadline_detector_node", options)
 {
   init();
 }
@@ -77,8 +81,8 @@ std::set<std::string> TildeDeadlineDetectorNode::get_pub_info_topics() const
 
   const std::string msg_type = "tilde_msg/msg/PubInfo";
   auto topic_and_types = get_topic_names_and_types();
-  for(const auto &it : topic_and_types) {
-    if(std::find(it.second.begin(), it.second.end(), msg_type) == it.second.end()) {
+  for (const auto & it : topic_and_types) {
+    if (std::find(it.second.begin(), it.second.end(), msg_type) == it.second.end()) {
       continue;
     }
     ret.insert(it.first);
@@ -89,18 +93,19 @@ std::set<std::string> TildeDeadlineDetectorNode::get_pub_info_topics() const
 
 void TildeDeadlineDetectorNode::init()
 {
-  auto ignores = declare_parameter<std::vector<std::string>>("ignore_topics", std::vector<std::string>{});
+  auto ignores = declare_parameter<std::vector<std::string>>(
+    "ignore_topics", std::vector<std::string>{});
 
   auto tmp_sensor_topics = declare_parameter<std::vector<std::string>>(
-      "sensor_topics", std::vector<std::string>{});
+    "sensor_topics", std::vector<std::string>{});
   sensor_topics_.insert(tmp_sensor_topics.begin(), tmp_sensor_topics.end());
 
   auto tmp_target_topics = declare_parameter<std::vector<std::string>>(
-      "target_topics", std::vector<std::string>{});
+    "target_topics", std::vector<std::string>{});
   target_topics_.insert(tmp_target_topics.begin(), tmp_target_topics.end());
 
   auto deadline_ms = declare_parameter<std::vector<int64_t>>(
-      "deadline_ms", std::vector<int64_t>{});
+    "deadline_ms", std::vector<int64_t>{});
 
   expire_ms_ = declare_parameter<int64_t>("expire_ms", 3 * 1000);
   cleanup_ms_ = declare_parameter<int64_t>("cleanup_ms", 3 * 1000);
@@ -110,7 +115,7 @@ void TildeDeadlineDetectorNode::init()
   bool show_performance = declare_parameter<bool>("show_performance", false);
 
   // init topic_vs_deadline_ms_
-  for(size_t i=0; i < tmp_target_topics.size(); i++) {
+  for (size_t i = 0; i < tmp_target_topics.size(); i++) {
     auto topic = tmp_target_topics[i];
     auto deadline = i < deadline_ms.size() ? deadline_ms[i] : 0;
     deadline = std::max(deadline, 0l);
@@ -120,67 +125,68 @@ void TildeDeadlineDetectorNode::init()
 
   // wait discovery done
   std::set<std::string> topics;
-  while(topics.size() == 0) {
+  while (topics.size() == 0) {
     RCLCPP_INFO(this->get_logger(), "wait discovery");
     std::this_thread::sleep_for(std::chrono::seconds(1));
     topics = get_pub_info_topics();
   }
 
-  for(const auto & ignore : ignores) {
+  for (const auto & ignore : ignores) {
     topics.erase(ignore);
   }
 
   rclcpp::QoS qos(5);
   qos.best_effort();
 
-  for(const auto & topic: topics) {
+  for (const auto & topic : topics) {
     RCLCPP_INFO(this->get_logger(), "subscribe: %s", topic.c_str());
     auto sub = create_subscription<PubInfo>(
-        topic, qos,
-        std::bind(&TildeDeadlineDetectorNode::pubinfo_callback, this, std::placeholders::_1));
+      topic, qos,
+      std::bind(&TildeDeadlineDetectorNode::pubinfo_callback, this, std::placeholders::_1));
     subs_.push_back(sub);
   }
 
   latest_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   timer_ = create_wall_timer(
-      milliseconds(cleanup_ms_),
-      [this, clock_work_arround, show_performance]() -> void
-      {
-        auto st = std::chrono::steady_clock::now();
+    milliseconds(cleanup_ms_),
+    [this, clock_work_arround, show_performance]() -> void
+    {
+      auto st = std::chrono::steady_clock::now();
 
-        auto t = this->now();
-        if(clock_work_arround) {
-          t = latest_;
-        }
+      auto t = this->now();
+      if (clock_work_arround) {
+        t = latest_;
+      }
 
-        this->fe.delete_expired(t - rclcpp::Duration::from_nanoseconds(RCUTILS_MS_TO_NS(expire_ms_)));
+      auto delta = rclcpp::Duration::from_nanoseconds(RCUTILS_MS_TO_NS(expire_ms_));
+      this->fe.delete_expired(t - delta);
 
-        auto et = std::chrono::steady_clock::now();
-        timer_callback_counter_.add(
-            std::chrono::duration_cast<std::chrono::milliseconds>(et-st).count());
+      auto et = std::chrono::steady_clock::now();
+      timer_callback_counter_.add(
+        std::chrono::duration_cast<std::chrono::milliseconds>(et - st).count());
 
-        if(show_performance) {
-          std::cout << "pubinfo_callback: "
-                    << "  avg: " << pubinfo_callback_counter_.avg << "\n"
-                    << "  max: " << pubinfo_callback_counter_.max << "\n"
-                    << "timer_callback: "
-                    << "  avg: " << timer_callback_counter_.avg << "\n"
-                    << "  max: " << timer_callback_counter_.max << std::endl;
-          this->fe.debug_print();
-        }
-      });
+      if (show_performance) {
+        std::cout << "pubinfo_callback: " <<
+        "  avg: " << pubinfo_callback_counter_.avg << "\n" <<
+        "  max: " << pubinfo_callback_counter_.max << "\n" <<
+        "timer_callback: " <<
+        "  avg: " << timer_callback_counter_.avg << "\n" <<
+        "  max: " << timer_callback_counter_.max << std::endl;
+        this->fe.debug_print();
+      }
+    });
 }
 
 void print_report(
-    const std::string & topic,
-    const builtin_interfaces::msg::Time & stamp,
-    const ForwardEstimator::InputSources & is)
+  const std::string & topic,
+  const builtin_interfaces::msg::Time & stamp,
+  const ForwardEstimator::InputSources & is)
 {
   std::cout << topic << ": " << time2str(stamp) << "\n";
-  for(auto & it : is) {
+  for (auto & it : is) {
     std::cout << "  " << it.first << ": ";
-    for(auto stmp : it.second) {
+    for (auto stmp : it.second) {
       std::cout << time2str(stmp) << ", ";
     }
     std::cout << "\n";
@@ -201,13 +207,13 @@ void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
   bool is_sensor = (sensor_topics_.find(pubinfo->output_info.topic_name) != sensor_topics_.end());
   fe.add(std::move(pubinfo), is_sensor);
 
-  if(!contains(target_topics_, target)) {
+  if (!contains(target_topics_, target)) {
     return;
   }
 
   // fe.debug_print();
 
-  if(print_report_) {
+  if (print_report_) {
     auto is = fe.get_input_sources(target, stamp);
     print_report(target, stamp, is);
   }
@@ -218,7 +224,7 @@ void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
 
   auto et = std::chrono::steady_clock::now();
   pubinfo_callback_counter_.add(
-      std::chrono::duration_cast<std::chrono::milliseconds>(et -st).count());
+    std::chrono::duration_cast<std::chrono::milliseconds>(et - st).count());
 }
 
 }  // namespace tilde_deadline_detector

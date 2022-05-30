@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
 #include <memory>
+#include <set>
 #include <string>
+#include <utility>
 
 #include "tilde_deadline_detector/forward_estimator.hpp"
 
@@ -41,25 +44,26 @@ void ForwardEstimator::add(std::unique_ptr<PubInfoMsg> _pub_info, bool is_sensor
     topic_sensors_[topic_name].insert(topic_name);
 
     auto pending_messages_topic_it = pending_messages_.find(topic_name);
-    if(pending_messages_topic_it == pending_messages_.end()) {
+    if (pending_messages_topic_it == pending_messages_.end()) {
       return;
     }
 
     auto pending_messages_it = pending_messages_topic_it->second.find(stamp);
-    if(pending_messages_it == pending_messages_topic_it->second.end()) {
+    if (pending_messages_it == pending_messages_topic_it->second.end()) {
       return;
     }
 
-    for(auto it : pending_messages_it->second) {
+    for (auto it : pending_messages_it->second) {
       const auto & waited_topic = std::get<0>(it);
       const auto & waited_stamp = std::get<1>(it);
       const auto & input_sources = message_sources_[topic_name][stamp];
       const auto & input_source_topics = topic_sensors_[topic_name];
 
-      message_sources_[waited_topic][waited_stamp].insert(input_sources.begin(), input_sources.end());
+      message_sources_[waited_topic][waited_stamp].insert(
+        input_sources.begin(), input_sources.end());
       topic_sensors_[waited_topic].insert(
-          input_source_topics.begin(),
-          input_source_topics.end());
+        input_source_topics.begin(),
+        input_source_topics.end());
     }
 
     pending_messages_topic_it->second.erase(pending_messages_it);
@@ -71,9 +75,9 @@ void ForwardEstimator::add(std::unique_ptr<PubInfoMsg> _pub_info, bool is_sensor
   // input of these messages are changed
   std::set<Message> pendings = std::set<Message>();
   auto pending_messages_topic_it = pending_messages_.find(topic_name);
-  if(pending_messages_topic_it != pending_messages_.end()) {
+  if (pending_messages_topic_it != pending_messages_.end()) {
     auto pending_messages_it = pending_messages_topic_it->second.find(stamp);
-    if(pending_messages_it != pending_messages_topic_it->second.end()) {
+    if (pending_messages_it != pending_messages_topic_it->second.end()) {
       pendings.merge(pending_messages_it->second);
       pending_messages_topic_it->second.erase(pending_messages_it);
     }
@@ -90,7 +94,7 @@ void ForwardEstimator::add(std::unique_ptr<PubInfoMsg> _pub_info, bool is_sensor
     // if input of this message lacks,
     // both this message and pending messages wait the input
     auto message_sources_it = message_sources_[input_topic].find(input_stamp);
-    if(message_sources_it == message_sources_[input_topic].end()) {
+    if (message_sources_it == message_sources_[input_topic].end()) {
       auto & waiters = pending_messages_[input_topic][input_stamp];
       waiters.insert({topic_name, stamp});
       waiters.insert(pendings.begin(), pendings.end());
@@ -106,13 +110,13 @@ void ForwardEstimator::add(std::unique_ptr<PubInfoMsg> _pub_info, bool is_sensor
       input_source_topics.end());
 
     // pending messages also get sources
-    for(const auto & wait : pendings) {
-        const auto & wait_topic = std::get<0>(wait);
-        const auto & wait_stamp = std::get<1>(wait);
-        message_sources_[wait_topic][wait_stamp].insert(input_sources.begin(), input_sources.end());
-        topic_sensors_[wait_topic].insert(
-            input_source_topics.begin(),
-            input_source_topics.end());
+    for (const auto & wait : pendings) {
+      const auto & wait_topic = std::get<0>(wait);
+      const auto & wait_stamp = std::get<1>(wait);
+      message_sources_[wait_topic][wait_stamp].insert(input_sources.begin(), input_sources.end());
+      topic_sensors_[wait_topic].insert(
+        input_source_topics.begin(),
+        input_source_topics.end());
     }
   }
 }
@@ -137,9 +141,13 @@ ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
     return is;
   }
 
-  auto stamps_sources_it = message_sources_topic_it->second.find(stamp);;
+  auto stamps_sources_it = message_sources_topic_it->second.find(stamp);
   if (stamps_sources_it == message_sources_topic_it->second.end()) {
-    // std::cout << topic_name << ":" << _time2str(stamp) << ": not found in message_sources_" << std::endl;
+    /*
+    std::cout << topic_name << ":"
+              << _time2str(stamp) << ": not found in message_sources_"
+              << std::endl;
+    */
     return is;
   }
 
@@ -157,16 +165,16 @@ ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
 }
 
 std::optional<rclcpp::Time> ForwardEstimator::get_oldest_sensor_stamp(
-    const std::string & topic_name,
-    const HeaderStamp & stamp) const
+  const std::string & topic_name,
+  const HeaderStamp & stamp) const
 {
   auto is = get_input_sources(topic_name, stamp);
-  if(is.empty()) {
+  if (is.empty()) {
     return std::nullopt;
   }
 
   std::set<HeaderStamp> mins;
-  for(auto & it : is) {
+  for (auto & it : is) {
     mins.insert(*std::min_element(it.second.begin(), it.second.end()));
   }
 
@@ -176,32 +184,35 @@ std::optional<rclcpp::Time> ForwardEstimator::get_oldest_sensor_stamp(
 void ForwardEstimator::delete_expired(const rclcpp::Time & thres)
 {
   // delete references
-  for(auto & it : message_sources_) {
+  for (auto & it : message_sources_) {
     auto & stamp_refs = it.second;
-    for(auto stamp_refs_it = stamp_refs.begin();
-        stamp_refs_it != stamp_refs.end(); ) {
-      if(thres < stamp_refs_it->first) break;
+    for (auto stamp_refs_it = stamp_refs.begin();
+      stamp_refs_it != stamp_refs.end(); )
+    {
+      if (thres < stamp_refs_it->first) {break;}
       stamp_refs_it = stamp_refs.erase(stamp_refs_it);
     }
   }
 
   // delete sources
-  for(auto & it : sources_) {
+  for (auto & it : sources_) {
     auto & stamp_pubinfo = it.second;
-    for(auto stamp_pubinfo_it = stamp_pubinfo.begin();
-        stamp_pubinfo_it != stamp_pubinfo.end(); ) {
-      if(thres < stamp_pubinfo_it->first) break;
+    for (auto stamp_pubinfo_it = stamp_pubinfo.begin();
+      stamp_pubinfo_it != stamp_pubinfo.end(); )
+    {
+      if (thres < stamp_pubinfo_it->first) {break;}
       stamp_pubinfo_it->second.reset();
       stamp_pubinfo_it = stamp_pubinfo.erase(stamp_pubinfo_it);
     }
   }
 
   // delete pendings
-  for(auto & it : pending_messages_) {
+  for (auto & it : pending_messages_) {
     auto & stamp_messages = it.second;
-    for(auto stamp_messages_it = stamp_messages.begin();
-        stamp_messages_it != stamp_messages.end(); ) {
-      if(thres < stamp_messages_it->first) break;
+    for (auto stamp_messages_it = stamp_messages.begin();
+      stamp_messages_it != stamp_messages.end(); )
+    {
+      if (thres < stamp_messages_it->first) {break;}
       stamp_messages_it = stamp_messages.erase(stamp_messages_it);
     }
   }
@@ -209,38 +220,38 @@ void ForwardEstimator::delete_expired(const rclcpp::Time & thres)
 
 void ForwardEstimator::debug_print(bool verbose) const
 {
-  if(verbose) {
+  if (verbose) {
     std::cout << "sources_: " << sources_.size() << std::endl;
-    for(auto & it : sources_) {
+    for (auto & it : sources_) {
       std::cout << "  " << it.first << ": " << it.second.size() << std::endl;
     }
 
     std::cout << "message_sources_: " << message_sources_.size() << std::endl;
-    for(auto & it : message_sources_) {
+    for (auto & it : message_sources_) {
       std::cout << "  " << it.first << ": " << it.second.size() << std::endl;
     }
 
     std::cout << "topic_sensors_: " << topic_sensors_.size() << std::endl;
-    for(auto & it : topic_sensors_) {
+    for (auto & it : topic_sensors_) {
       std::cout << "  " << it.first << ": " << it.second.size() << std::endl;
     }
   } else {
     auto n_sources = 0;
-    for(auto & it : sources_) {
+    for (auto & it : sources_) {
       n_sources += it.second.size();
     }
     auto n_message_sources = 0;
-    for(auto & it : message_sources_) {
+    for (auto & it : message_sources_) {
       n_message_sources += it.second.size();
     }
     auto n_topic_sensors = 0;
-    for(auto & it : topic_sensors_) {
+    for (auto & it : topic_sensors_) {
       n_topic_sensors += it.second.size();
     }
 
-    std::cout << "sources: " << n_sources << " "
-              << "message_sources: " << n_message_sources << " "
-              << "topic_sensors: " << n_topic_sensors << std::endl;
+    std::cout << "sources: " << n_sources << " " <<
+      "message_sources: " << n_message_sources << " " <<
+      "topic_sensors: " << n_topic_sensors << std::endl;
   }
 }
 

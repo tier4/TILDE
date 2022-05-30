@@ -30,8 +30,7 @@
 
 #include "tilde_deadline_detector/tilde_deadline_detector_node.hpp"
 
-namespace tilde_deadline_detector
-{
+using tilde_deadline_detector::TildeDeadlineDetectorNode;
 
 class TestTildeDeadlineDetectorNode : public ::testing::Test
 {
@@ -45,7 +44,6 @@ public:
   {
     rclcpp::shutdown();
   }
-
 };
 
 TEST_F(TestTildeDeadlineDetectorNode, get_pub_info_topics)
@@ -63,5 +61,3 @@ TEST_F(TestTildeDeadlineDetectorNode, get_pub_info_topics)
   EXPECT_EQ(topics.size(), 1u);
   EXPECT_EQ(*topics.begin(), "/topic/info/pub");
 }
-
-}  // namespace tilde_deadline_detector

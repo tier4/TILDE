@@ -40,8 +40,8 @@ TimeMsg get_time(int sec, int nsec)
 
 std::unique_ptr<PubInfo>
 create_pubinfo(
-    const std::string & topic,
-    const TimeMsg & time)
+  const std::string & topic,
+  const TimeMsg & time)
 {
   auto pub_info = std::make_unique<PubInfo>();
   pub_info->output_info.topic_name = topic;
@@ -52,8 +52,8 @@ create_pubinfo(
 }
 
 void add_input_info(
-    PubInfo * target_pub_info,
-    const PubInfo * const in_pub_info)
+  PubInfo * target_pub_info,
+  const PubInfo * const in_pub_info)
 {
   auto ii = SubTopicTimeInfo();
   ii.topic_name = in_pub_info->output_info.topic_name;
@@ -435,7 +435,6 @@ TEST(TestForwardEstimator, expire_step_by_step)
   EXPECT_EQ(fe.get_input_sources(topic3, time31).size(), 0u);
   EXPECT_EQ(fe.get_input_sources(topic2, time21).size(), 0u);
   EXPECT_EQ(fe.get_input_sources(topic1, time11).size(), 0u);
-
 }
 
 TEST(TestForwardEstimator, expire_step_by_step_skew)
@@ -519,7 +518,7 @@ TEST(TestForwardEstimator, get_oldest_sensor_stamp)
   fe.add(std::move(pubinfo31));
 
   auto oldest = fe.get_oldest_sensor_stamp(topic3, time31);
-  if(!oldest) {
+  if (!oldest) {
     FAIL() << "nil oldest";
   } else {
     EXPECT_EQ(*oldest, rclcpp::Time(time11));
@@ -528,7 +527,7 @@ TEST(TestForwardEstimator, get_oldest_sensor_stamp)
   fe.delete_expired(time11);
 
   auto oldest_without_11 = fe.get_oldest_sensor_stamp(topic3, time31);
-  if(!oldest_without_11) {
+  if (!oldest_without_11) {
     FAIL() << "nil oldest_without_11";
   } else {
     EXPECT_EQ(*oldest_without_11, rclcpp::Time(time21));
@@ -537,7 +536,7 @@ TEST(TestForwardEstimator, get_oldest_sensor_stamp)
   fe.delete_expired(time21);
 
   auto oldest_without_21 = fe.get_oldest_sensor_stamp(topic3, time31);
-  if(!oldest_without_21) {
+  if (!oldest_without_21) {
     SUCCEED();
   } else {
     FAIL() << "zombie oldest_without_21";
