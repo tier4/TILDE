@@ -520,8 +520,26 @@ TEST(TestForwardEstimator, get_oldest_sensor_stamp)
 
   auto oldest = fe.get_oldest_sensor_stamp(topic3, time31);
   if(!oldest) {
-    FAIL() << "not oldest";
+    FAIL() << "nil oldest";
   } else {
     EXPECT_EQ(*oldest, rclcpp::Time(time11));
+  }
+
+  fe.delete_expired(time11);
+
+  auto oldest_without_11 = fe.get_oldest_sensor_stamp(topic3, time31);
+  if(!oldest_without_11) {
+    FAIL() << "nil oldest_without_11";
+  } else {
+    EXPECT_EQ(*oldest_without_11, rclcpp::Time(time21));
+  }
+
+  fe.delete_expired(time21);
+
+  auto oldest_without_21 = fe.get_oldest_sensor_stamp(topic3, time31);
+  if(!oldest_without_21) {
+    SUCCEED();
+  } else {
+    FAIL() << "zombie oldest_without_21";
   }
 }
