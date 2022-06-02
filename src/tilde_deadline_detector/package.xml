@@ -14,7 +14,7 @@
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
-  <depend>tilde_msgs</depend>
+  <depend>tilde_msg</depend>
   <depend>sensor_msgs</depend>
 
   <export>
