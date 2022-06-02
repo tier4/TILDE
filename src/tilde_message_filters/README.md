@@ -42,7 +42,7 @@ See bellow to know how to maintenance.
     - `nullptr` may work
     - non-null instance is needed for message handling tests.
       (add2, add3, and so on)
-      If null, SEGV occurs.
+      If null, the results are unexpectable.
 
 - Use `tilde::TildeNode` instead of `rclcpp::Node`
   - add `#include "tilde/tilde_node.hpp"`

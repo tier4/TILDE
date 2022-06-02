@@ -13,6 +13,7 @@ TILDE が PubInfo という付加的なトピックをやりとりする為、�
 ## Table of Contents
 
 - [TILDE の動作原理](#tilde-の動作原理)
+  - [Table of Contents](#table-of-contents)
   - [PubInfo](#pubinfo)
   - [例](#例)
     - [DAG と動作概要](#dag-と動作概要)
@@ -228,7 +229,7 @@ sequenceDiagram
     deactivate TildeNode
 ```
 
-`create_tilde_publisher` の返り値は rclcpp::Publisher ではなく TilderPublisher です。
+`create_tilde_publisher` の返り値は rclcpp::Publisher ではなく TildePublisher です。
 
 ### create_tilde_subscription
 
@@ -300,7 +301,7 @@ sequenceDiagram
                buffer       +- callback-+
 /left    -->  L1 L2 L3  ->  | L2        |
                             |           |
-/right   -->  R1 R2     ->  | R1        |  --> /cancate
+/right   -->  R1 R2     ->  | R1        |  --> /cancatenate
                             |           |
 /top     -->  T1 T2 T3  ->  | T2        |
                             |           |
@@ -310,7 +311,7 @@ sequenceDiagram
               TILDE では「最も最近受信した stamp」しか覚えていない為、正確な PubInfo を作成できない
 ```
 
-Explicit API では「`/concate` を作成するのに `/left` の L2、`/right` の R1 (以下略)を使った」という指定ができます。
+Explicit API では「`/concatenate` を作成するのに `/left` の L2、`/right` の R1 (以下略)を使った」という指定ができます。
 
 ## オーバーヘッド
 

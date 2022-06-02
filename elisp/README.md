@@ -3,7 +3,7 @@
 ## About
 
 Emacs major mode for viewing latency viewer stdout log.
-You can see stdout log just like ncurse window.
+You can see stdout log just like ncurses window.
 
 ## Usage
 
