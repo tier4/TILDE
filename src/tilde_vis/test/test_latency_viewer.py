@@ -15,25 +15,26 @@
 
 import unittest
 
+from builtin_interfaces.msg import Time as TimeMsg
 import rclpy
 from rclpy.time import Time
-from builtin_interfaces.msg import Time as TimeMsg
 
-from tilde_vis.data_as_tree import TreeNode
-from tilde_vis.pub_info import (
-    PubInfo
-    )
-from tilde_vis.latency_viewer import (
-    calc_stat,
-    update_stat,
-    LatencyViewerNode,
-    )
 from tilde_msg.msg import (
     PubInfo as PubInfoMsg,
+    )
+from tilde_vis.data_as_tree import TreeNode
+from tilde_vis.latency_viewer import (
+    calc_stat,
+    LatencyViewerNode,
+    update_stat,
+    )
+from tilde_vis.pub_info import (
+    PubInfo
     )
 
 
 class TestCalcStat(unittest.TestCase):
+
     def test_none(self):
         root = TreeNode('root')
         root.data = [(None, None), (None, None), (None, None)]
@@ -58,7 +59,7 @@ class TestCalcStat(unittest.TestCase):
 
 
 def time_msg(sec, ms):
-    """Get builtin.msg.Time"""
+    """Get builtin.msg.Time."""
     return Time(seconds=sec, nanoseconds=ms * 10**6).to_msg()
 
 
@@ -66,7 +67,8 @@ def get_solver_result_simple(
         t1_pub,
         t1_sub, t2_pub,
         t2_sub, t3_pub):
-    """Generate solver result
+    """Generate solver result.
+
     Graph: topic1 --> topic2 --> topic3
 
     You can specify each pub/sub time.
@@ -104,8 +106,11 @@ def get_solver_result_simple(
 
 
 class TestUpdateStat(unittest.TestCase):
+
     def test_simple(self):
         """
+        Simple case.
+
         pub/sub time
         (case1)    10   11     12  13    14
         (case2)    20   24     28  30    35
@@ -133,6 +138,7 @@ class TestUpdateStat(unittest.TestCase):
 
 
 class TestListenerCallback(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         rclpy.init()
@@ -202,6 +208,7 @@ class TestListenerCallback(unittest.TestCase):
 
 
 class TestTimerCallback(unittest.TestCase):
+
     def setUp(self):
         rclpy.init()
 
