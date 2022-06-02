@@ -26,7 +26,7 @@ def main(stdscr, args=None):
     printer = NcursesPrinter(stdscr)
     while True:
         now = time.time()
-        lines = [f"{now}: {i}" for i in range(100)]
+        lines = [f'{now}: {i}' for i in range(100)]
         printer.print(lines)
         time.sleep(1)
 
