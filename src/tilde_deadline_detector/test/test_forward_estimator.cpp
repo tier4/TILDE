@@ -425,7 +425,7 @@ TEST(TestForwardEstimator, expire_step_by_step)
   EXPECT_EQ(fe.get_input_sources(topic2, time21).size(), 0u);
   EXPECT_EQ(fe.get_input_sources(topic1, time11).size(), 0u);
 
-  // ForwardEstimator internal data is maintenanced
+  // ForwardEstimator internal data is maintained
   fe.delete_expired(time21);
   EXPECT_EQ(fe.get_input_sources(topic3, time31).size(), 0u);
   EXPECT_EQ(fe.get_input_sources(topic2, time21).size(), 0u);
