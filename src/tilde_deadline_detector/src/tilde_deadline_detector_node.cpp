@@ -111,7 +111,7 @@ void TildeDeadlineDetectorNode::init()
   cleanup_ms_ = declare_parameter<int64_t>("cleanup_ms", 3 * 1000);
   print_report_ = declare_parameter<bool>("print_report", false);
 
-  bool clock_work_arround = declare_parameter<bool>("clock_work_arround", false);
+  bool clock_work_around = declare_parameter<bool>("clock_work_around", false);
   bool show_performance = declare_parameter<bool>("show_performance", false);
 
   // init topic_vs_deadline_ms_
@@ -150,12 +150,12 @@ void TildeDeadlineDetectorNode::init()
 
   timer_ = create_wall_timer(
     milliseconds(cleanup_ms_),
-    [this, clock_work_arround, show_performance]() -> void
+    [this, clock_work_around, show_performance]() -> void
     {
       auto st = std::chrono::steady_clock::now();
 
       auto t = this->now();
-      if (clock_work_arround) {
+      if (clock_work_around) {
         t = latest_;
       }
 
@@ -186,8 +186,8 @@ void print_report(
   std::cout << topic << ": " << time2str(stamp) << "\n";
   for (auto & it : is) {
     std::cout << "  " << it.first << ": ";
-    for (auto stmp : it.second) {
-      std::cout << time2str(stmp) << ", ";
+    for (auto input_stamp : it.second) {
+      std::cout << time2str(input_stamp) << ", ";
     }
     std::cout << "\n";
   }
@@ -201,7 +201,7 @@ void TildeDeadlineDetectorNode::pubinfo_callback(PubInfo::UniquePtr pubinfo)
   auto target = pubinfo->output_info.topic_name;
   auto stamp = pubinfo->output_info.header_stamp;
 
-  // work arround for non `/clock` bag file
+  // work around for non `/clock` bag file
   latest_ = std::max(rclcpp::Time(stamp), latest_);
 
   bool is_sensor = (sensor_topics_.find(pubinfo->output_info.topic_name) != sensor_topics_.end());
