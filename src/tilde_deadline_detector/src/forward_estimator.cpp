@@ -73,12 +73,12 @@ void ForwardEstimator::add(std::unique_ptr<PubInfoMsg> _pub_info, bool is_sensor
 
   // if some messages wait this message, then
   // input of these messages are changed
-  std::set<Message> pendings = std::set<Message>();
+  std::set<Message> pending_messages = std::set<Message>();
   auto pending_messages_topic_it = pending_messages_.find(topic_name);
   if (pending_messages_topic_it != pending_messages_.end()) {
     auto pending_messages_it = pending_messages_topic_it->second.find(stamp);
     if (pending_messages_it != pending_messages_topic_it->second.end()) {
-      pendings.merge(pending_messages_it->second);
+      pending_messages.merge(pending_messages_it->second);
       pending_messages_topic_it->second.erase(pending_messages_it);
     }
     // we keep pending_messages_[topic_name] because it is fixed size resources
@@ -97,7 +97,7 @@ void ForwardEstimator::add(std::unique_ptr<PubInfoMsg> _pub_info, bool is_sensor
     if (message_sources_it == message_sources_[input_topic].end()) {
       auto & waiters = pending_messages_[input_topic][input_stamp];
       waiters.insert({topic_name, stamp});
-      waiters.insert(pendings.begin(), pendings.end());
+      waiters.insert(pending_messages.begin(), pending_messages.end());
       continue;
     }
 
@@ -110,7 +110,7 @@ void ForwardEstimator::add(std::unique_ptr<PubInfoMsg> _pub_info, bool is_sensor
       input_source_topics.end());
 
     // pending messages also get sources
-    for (const auto & wait : pendings) {
+    for (const auto & wait : pending_messages) {
       const auto & wait_topic = std::get<0>(wait);
       const auto & wait_stamp = std::get<1>(wait);
       message_sources_[wait_topic][wait_stamp].insert(input_sources.begin(), input_sources.end());
@@ -151,8 +151,8 @@ ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
     return is;
   }
 
-  for (auto & wsrc : stamps_sources_it->second) {
-    auto src = wsrc.lock();
+  for (auto & weak_src : stamps_sources_it->second) {
+    auto src = weak_src.lock();
     if (!src) {
       // std::cout << topic_name << ":" << _time2str(stamp) << " source deleted" << std::endl;
       continue;
@@ -181,7 +181,7 @@ std::optional<rclcpp::Time> ForwardEstimator::get_oldest_sensor_stamp(
   return *(std::min_element(mins.begin(), mins.end()));
 }
 
-void ForwardEstimator::delete_expired(const rclcpp::Time & thres)
+void ForwardEstimator::delete_expired(const rclcpp::Time & threshold)
 {
   // delete references
   for (auto & it : message_sources_) {
@@ -189,7 +189,7 @@ void ForwardEstimator::delete_expired(const rclcpp::Time & thres)
     for (auto stamp_refs_it = stamp_refs.begin();
       stamp_refs_it != stamp_refs.end(); )
     {
-      if (thres < stamp_refs_it->first) {break;}
+      if (threshold < stamp_refs_it->first) {break;}
       stamp_refs_it = stamp_refs.erase(stamp_refs_it);
     }
   }
@@ -200,19 +200,19 @@ void ForwardEstimator::delete_expired(const rclcpp::Time & thres)
     for (auto stamp_pubinfo_it = stamp_pubinfo.begin();
       stamp_pubinfo_it != stamp_pubinfo.end(); )
     {
-      if (thres < stamp_pubinfo_it->first) {break;}
+      if (threshold < stamp_pubinfo_it->first) {break;}
       stamp_pubinfo_it->second.reset();
       stamp_pubinfo_it = stamp_pubinfo.erase(stamp_pubinfo_it);
     }
   }
 
-  // delete pendings
+  // delete pending_messages
   for (auto & it : pending_messages_) {
     auto & stamp_messages = it.second;
     for (auto stamp_messages_it = stamp_messages.begin();
       stamp_messages_it != stamp_messages.end(); )
     {
-      if (thres < stamp_messages_it->first) {break;}
+      if (threshold < stamp_messages_it->first) {break;}
       stamp_messages_it = stamp_messages.erase(stamp_messages_it);
     }
   }

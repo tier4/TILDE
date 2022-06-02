@@ -81,7 +81,7 @@ public:
    * \param stamp Target header stamp
    * \return the oldest header.stamp of all sensors.
    *
-   * Calcurated latency is best effort i.e.
+   * Calculated latency is best effort i.e.
    * when it cannot gather all sensor PubInfo,
    * it returns the longest latency in gathered PubInfo.
    */
@@ -91,9 +91,9 @@ public:
 
   /// delete old data
   /**
-   * \param threas Time point to delete data whose stamp <= thres
+   * \param threas Time point to delete data whose stamp <= threshold
    */
-  void delete_expired(const rclcpp::Time & thres);
+  void delete_expired(const rclcpp::Time & threshold);
 
   void debug_print(bool verbose = false) const;
 
