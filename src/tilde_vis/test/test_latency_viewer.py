@@ -35,26 +35,26 @@ from tilde_msg.msg import (
 
 class TestCalcStat(unittest.TestCase):
     def test_none(self):
-        root = TreeNode("root")
+        root = TreeNode('root')
         root.data = [(None, None), (None, None), (None, None)]
         ret = calc_stat(root)
 
         self.assertEqual(len(ret), 1)
-        self.assertEqual(ret[0]["dur_min"], None)
-        self.assertEqual(ret[0]["dur_mean"], None)
+        self.assertEqual(ret[0]['dur_min'], None)
+        self.assertEqual(ret[0]['dur_mean'], None)
 
     def test_simple(self):
-        root = TreeNode("root")
+        root = TreeNode('root')
         root.data = [(1, 10), (2, 20), (3, 30)]
         ret = calc_stat(root)
 
         self.assertEqual(len(ret), 1)
-        self.assertEqual(ret[0]["dur_min"], 1)
-        self.assertEqual(ret[0]["dur_mean"], 2)
-        self.assertEqual(ret[0]["dur_max"], 3)
-        self.assertEqual(ret[0]["dur_min_steady"], 10)
-        self.assertEqual(ret[0]["dur_mean_steady"], 20)
-        self.assertEqual(ret[0]["dur_max_steady"], 30)
+        self.assertEqual(ret[0]['dur_min'], 1)
+        self.assertEqual(ret[0]['dur_mean'], 2)
+        self.assertEqual(ret[0]['dur_max'], 3)
+        self.assertEqual(ret[0]['dur_min_steady'], 10)
+        self.assertEqual(ret[0]['dur_mean_steady'], 20)
+        self.assertEqual(ret[0]['dur_max_steady'], 30)
 
 
 def time_msg(sec, ms):
@@ -74,29 +74,29 @@ def get_solver_result_simple(
     - header_stamp is preserved at topic1 pub time.
     - stamp and stamp_steady are same
     """
-    tree_node3 = TreeNode("topic3")
-    tree_node2 = tree_node3.get_child("topic2")
-    tree_node1 = tree_node2.get_child("topic1")
+    tree_node3 = TreeNode('topic3')
+    tree_node2 = tree_node3.get_child('topic2')
+    tree_node1 = tree_node2.get_child('topic1')
 
     stamp1 = t1_pub
     pubinfo3 = PubInfo(
-        "topic3",
+        'topic3',
         t3_pub, t3_pub, True, stamp1)
     pubinfo3.add_input_info(
-        "topic2", t2_sub, t2_sub,
+        'topic2', t2_sub, t2_sub,
         True, stamp1)
     tree_node3.add_data(pubinfo3)
 
     pubinfo2 = PubInfo(
-        "topic2",
+        'topic2',
         t2_pub, t2_pub, True, stamp1)
     pubinfo2.add_input_info(
-        "topic1", t1_sub, t1_sub,
+        'topic1', t1_sub, t1_sub,
         True, stamp1)
     tree_node2.add_data(pubinfo2)
 
     pubinfo1 = PubInfo(
-        "topic1",
+        'topic1',
         t1_pub, t1_pub, True, stamp1)
     tree_node1.add_data(pubinfo1)
 
@@ -124,11 +124,11 @@ class TestUpdateStat(unittest.TestCase):
         topic3_result_data = update_stat_case1.data
         self.assertEqual(topic3_result_data[0], (0, 0))
 
-        topic2_result_data = update_stat_case1.name2child["topic2"].data
+        topic2_result_data = update_stat_case1.name2child['topic2'].data
         self.assertEqual(topic2_result_data[0], (2, 2))
 
         topic1_result_data = \
-            update_stat_case1.name2child["topic2"].name2child["topic1"].data
+            update_stat_case1.name2child['topic2'].name2child['topic1'].data
         self.assertEqual(topic1_result_data[0], (4, 4))
 
 
@@ -142,7 +142,7 @@ class TestListenerCallback(unittest.TestCase):
         rclpy.shutdown()
 
     def test_seq(self):
-        topic_name = "topic"
+        topic_name = 'topic'
         node = LatencyViewerNode()
         msg = PubInfoMsg()
         msg.output_info.topic_name = topic_name
@@ -175,7 +175,7 @@ class TestListenerCallback(unittest.TestCase):
         node.destroy_node()
 
     def test_seq_non_zero_start(self):
-        topic_name = "topic"
+        topic_name = 'topic'
         node = LatencyViewerNode()
         msg = PubInfoMsg()
         msg.output_info.topic_name = topic_name
@@ -209,7 +209,7 @@ class TestTimerCallback(unittest.TestCase):
         rclpy.shutdown()
 
     def test_issues23_1(self):
-        topic_name = "topic"
+        topic_name = 'topic'
         node = LatencyViewerNode()
         node.target_topic = topic_name
 
@@ -231,10 +231,10 @@ class TestTimerCallback(unittest.TestCase):
             node.timer_callback()
             self.assertTrue(True)
         except AttributeError:
-            self.fail(msg="timer_callback causes AttributeError")
+            self.fail(msg='timer_callback causes AttributeError')
 
     def test_issues23_2(self):
-        topic_name = "topic"
+        topic_name = 'topic'
         node = LatencyViewerNode()
 
         node.target_topic = topic_name
@@ -257,7 +257,7 @@ class TestTimerCallback(unittest.TestCase):
             node.timer_callback()
             self.assertTrue(True)
         except AttributeError:
-            self.fail(msg="timer_callback causes AttributeError")
+            self.fail(msg='timer_callback causes AttributeError')
 
 
 if __name__ == '__main__':
