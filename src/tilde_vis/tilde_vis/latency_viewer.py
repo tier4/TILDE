@@ -216,7 +216,7 @@ class PerTopicLatencyStat(object):
             s += f'{report["is_all_leaf"]}'
             logs.append(s)
 
-        printer.print(logs)
+        printer.print_(logs)
 
 
 def calc_one_hot(results):
@@ -488,7 +488,7 @@ class LatencyViewerNode(Node):
 
         self.init_skips()
 
-        self.printer.print(logs)
+        self.printer.print_(logs)
 
         self.dumps = (
             self.get_parameter('dumps')
@@ -698,18 +698,18 @@ class LatencyViewerNode(Node):
         str_stamp = stamps[0] if len(stamps) > 0 else ''
         logs.append(f'stamps: {len(stamps)}, {str_stamp}')
         if len(stamps) == 0:
-            self.printer.print(logs)
+            self.printer.print_(logs)
             return
 
         # check header.stamp field existence
         if not pubinfos.get(target_topic, stamps[0]).out_info.has_stamp:
             logs.append('**WARNING** target topic has no stamp field')
-            self.printer.print(logs)
+            self.printer.print_(logs)
             return
 
         if not self.solver:
             if self.wait_init < self.wait_sec_to_init_graph:
-                self.printer.print(logs)
+                self.printer.print_(logs)
                 self.wait_init += 1
                 return
             logs.append('init solver')
@@ -734,7 +734,7 @@ class LatencyViewerNode(Node):
         et2 = time.time()
         cleanup_ms = (et2 - et1) * 1000
 
-        self.printer.print(logs)
+        self.printer.print_(logs)
 
         if handle_ms + cleanup_ms > 30:
             s = f'timer handle_ms={handle_ms}' + \

@@ -27,7 +27,7 @@ def main(stdscr, args=None):
     while True:
         now = time.time()
         lines = [f'{now}: {i}' for i in range(100)]
-        printer.print(lines)
+        printer.print_(lines)
         time.sleep(1)
 
 

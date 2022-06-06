@@ -18,12 +18,14 @@ import re
 
 
 class Printer(object):
-    def print(self, lines):
+
+    def print_(self, lines):
         for s in lines:
             print(s)
 
 
 class NcursesPrinter(object):
+
     MODE_STOP = 0
     MODE_RUN = 1
     MODE_REGEXP = 2
@@ -55,7 +57,7 @@ class NcursesPrinter(object):
         self.start_line = 0
 
         # regexp mode
-        self.regexp_ptn = ""
+        self.regexp_ptn = ''
         self.search = None
 
         self.adjust_keys = (
@@ -109,7 +111,7 @@ class NcursesPrinter(object):
     def enter_regex_mode(self):
         self.mode = self.MODE_REGEXP
 
-    def print(self, input_lines):
+    def print_(self, input_lines):
         stdscr = self.stdscr
         lines = self.lines
 
@@ -161,7 +163,7 @@ class NcursesPrinter(object):
                 elif k in (curses.KEY_ENTER, ord('\n')):
                     self.mode = self.MODE_RUN
             else:
-                raise Exception("unknown mode")
+                raise Exception('unknown mode')
 
         stdscr.clear()
 
@@ -170,10 +172,10 @@ class NcursesPrinter(object):
             if i + 1 == self.y_max - 1:
                 break
 
-            if s[-1] != "\n":
-                s += "\n"
+            if s[-1] != '\n':
+                s += '\n'
             lineno = self.start_line + i
-            stdscr.addstr(i+1, 0, f"{lineno:<3}| ")
+            stdscr.addstr(i+1, 0, f'{lineno:<3}| ')
             stdscr.addstr(i+1, 5, s)
         stdscr.refresh()
 
@@ -183,21 +185,21 @@ class NcursesPrinter(object):
 
         t = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
 
-        mode_str = ""
+        mode_str = ''
         if self.mode == self.MODE_RUN:
             mode_str = \
-                "press UP/DOWN/PgUp/PgDown/jkdugG to scroll," + \
-                "r or '/' to filter"
+                'press UP/DOWN/PgUp/PgDown/jkdugG to scroll,' + \
+                'r or "/" to filter'
             color = self.WHITE
         elif self.mode == self.MODE_STOP:
-            mode_str = "scrolling... Press q/F to periodically update"
+            mode_str = 'scrolling... Press q/F to periodically update'
             color = self.CYAN
         elif self.mode == self.MODE_REGEXP:
-            mode_str = "Regexp: " + self.regexp_ptn + "_"
+            mode_str = 'Regexp: ' + self.regexp_ptn + '_'
             color = self.CYAN
 
         s = mode_str
-        s += " " * (self.x_max - len(mode_str) - len(t))
+        s += ' ' * (self.x_max - len(mode_str) - len(t))
         s += t
 
         stdscr.addstr(0, 0, s, color)
