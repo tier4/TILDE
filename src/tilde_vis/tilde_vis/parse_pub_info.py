@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pickle
 import argparse
+import pickle
+
+from rclpy.serialization import deserialize_message
 import rosbag2_py
 from rosidl_runtime_py.utilities import get_message
-from rclpy.serialization import deserialize_message
 
 from tilde_vis.pub_info import PubInfo, PubInfos
 
@@ -57,7 +58,7 @@ def run(args):
 
         (topic, data, t) = reader.read_next()
         # TODO: need more accurate check
-        if "/info/pub" not in topic:
+        if '/info/pub' not in topic:
             continue
 
         msg_type = get_message(type_map[topic])
@@ -70,23 +71,23 @@ def run(args):
             print(cnt)
         cnt += 1
 
-    pickle.dump(out_per_topic, open("topic_infos.pkl", "wb"),
+    pickle.dump(out_per_topic, open('topic_infos.pkl', 'wb'),
                 protocol=pickle.HIGHEST_PROTOCOL)
 
     for topic, count in skip_topic_vs_count.items():
-        print(f"skipped {topic} {count} times")
+        print(f'skipped {topic} {count} times')
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("bag_path")
+    parser.add_argument('bag_path')
     parser.add_argument(
-        "--cnt", type=int, default=-1,
-        help="number of messages to dump (whole */info/pub, not per topic)")
+        '--cnt', type=int, default=-1,
+        help='number of messages to dump (whole */info/pub, not per topic)')
     args = parser.parse_args()
 
     run(args)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
