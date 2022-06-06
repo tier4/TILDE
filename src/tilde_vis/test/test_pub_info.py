@@ -29,6 +29,7 @@ def time_msg(sec, ms):
 
 
 class TestPubInfos(unittest.TestCase):
+
     def test_erase_until(self):
         infos = PubInfos()
         infos.add(PubInfo(
