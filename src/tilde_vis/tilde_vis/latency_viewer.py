@@ -17,34 +17,37 @@ import argparse
 import curses
 import os
 import pickle
-import sys
 from statistics import mean
+import sys
 import time
 
+from builtin_interfaces.msg import Time as TimeMsg
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import (
+    QoSHistoryPolicy,
+    QoSProfile,
+    QoSReliabilityPolicy
+    )
 from rclpy.time import Time
-from rclpy.qos import QoSHistoryPolicy
-from rclpy.qos import QoSProfile
-from rclpy.qos import QoSReliabilityPolicy
-
-from builtin_interfaces.msg import Time as TimeMsg
 
 from tilde_msg.msg import (
     PubInfo,
     )
-from tilde_vis.pubinfo_traverse import TopicGraph, InputSensorStampSolver
+from tilde_vis.printer import (
+    NcursesPrinter,
+    Printer
+    )
 from tilde_vis.pub_info import (
     PubInfo as PubInfoObj,
-    PubInfos as PubInfosObj
-    )
-from tilde_vis.printer import (
-    Printer,
-    NcursesPrinter
-    )
-from tilde_vis.pub_info import (
+    PubInfos as PubInfosObj,
     time2str
     )
+from tilde_vis.pubinfo_traverse import (
+    InputSensorStampSolver,
+    TopicGraph
+    )
+
 
 EXCLUDES_TOPICS = [
     '/diagnostics/info/pub',
@@ -76,7 +79,7 @@ LEAVES = [
     '/sensing/imu/imu_data',
     '/vehicle/status/twist',
     ]
-PUB_INFO = "topic_infos.pkl"
+PUB_INFO = 'topic_infos.pkl'
 TIMER_SEC = 1.0
 TARGET_TOPIC = '/sensing/lidar/concatenated/pointcloud'
 STOPS = [
@@ -97,6 +100,7 @@ def truncate(s, prelen=20, n=80):
     Return
     ------
     truncated string such that "abc...edf"
+
     """
     assert prelen + 5 < n
 
@@ -110,6 +114,7 @@ def truncate(s, prelen=20, n=80):
 
 
 class LatencyStat(object):
+
     def __init__(self):
         self.dur_ms_list = []
         self.dur_pub_ms_list = []
@@ -117,10 +122,12 @@ class LatencyStat(object):
         self.is_leaf_list = []
 
     def add(self, r):
-        """
+        """Add single result.
+
         Parameters
         ----------
         r: pubinfo_traverse.SolverResults
+
         """
         self.dur_ms_list.append(r.dur_ms)
         self.dur_pub_ms_list.append(r.dur_pub_ms)
@@ -162,14 +169,17 @@ class LatencyStat(object):
 
 
 class PerTopicLatencyStat(object):
+
     def __init__(self):
         self.data = {}
 
     def add(self, r):
-        """
+        """Add single result.
+
         Parameters
         ----------
         r: pubinfo_traverse.SolverResults
+
         """
         self.data.setdefault(r.topic, LatencyStat()).add(r)
 
@@ -253,7 +263,7 @@ def calc_one_hot(results):
 
 
 def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
-    """Handle stat core
+    """Calculate latency statistics.
 
     Parameters
     ----------
@@ -268,6 +278,7 @@ def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
     ------
     TreeNode.
     .data: see calc_stat
+
     """
     idx = -3
     if len(stamps) == 0:
@@ -299,7 +310,7 @@ def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
 
 
 def update_stat(results):
-    """Update results to have durations
+    """Update results to have durations.
 
     Parameters
     ----------
@@ -310,6 +321,7 @@ def update_stat(results):
     results with
     results.data: [(dur_ms, dur_ms_steady)]
     results.data_orig = results.data
+
     """
     last_pub_time = Time.from_msg(
         results.data[0].out_info.pubsub_stamp)
@@ -341,7 +353,7 @@ def update_stat(results):
 
 
 def calc_stat(results):
-    """Calcurate statistics
+    """Calcurate statistics.
 
     Parameters
     ----------
@@ -359,6 +371,7 @@ def calc_stat(results):
       "dur_mean_steady"
       "dur_max_steady"
       "is_leaf"
+
     """
     def _calc_stat(node, depth):
         durs = []
@@ -391,12 +404,14 @@ def calc_stat(results):
 
 
 class LatencyViewerNode(Node):
+
     def __init__(self, stdscr=None):
-        """Constructor
+        """Constructor.
 
         Parameters
         ----------
         stdscr: if not None, use ncurses
+
         """
         super().__init__('latency_viewer_node')
         self.declare_parameter('excludes_topics', EXCLUDES_TOPICS)
@@ -482,8 +497,8 @@ class LatencyViewerNode(Node):
             os.makedirs(DUMP_DIR, exist_ok=True)
 
     def init_skips(self):
-        """
-        Definition of skips.
+        """Define skips.
+
         See TopicGraph.__init__ comment.
         """
         skips = {}
@@ -557,7 +572,7 @@ class LatencyViewerNode(Node):
                 f'sub {topic} at {stamp}@ {elasped_ms} [ms]')
 
     def handle_stat(self, stamps):
-        """Report statistics
+        """Report statistics.
 
         Paramters
         ---------
@@ -566,6 +581,7 @@ class LatencyViewerNode(Node):
         Returns
         -------
         list of string
+
         """
         pubinfos = self.pub_infos
         target_topic = self.target_topic
@@ -620,7 +636,7 @@ class LatencyViewerNode(Node):
         return logs
 
     def handle_one_hot(self, stamps):
-        """Report only one message
+        """Report only one message.
 
         Paramters
         ---------
@@ -629,6 +645,7 @@ class LatencyViewerNode(Node):
         Returns
         -------
         array of strings for log
+
         """
         pubinfos = self.pub_infos
         target_topic = self.target_topic
@@ -649,24 +666,24 @@ class LatencyViewerNode(Node):
 
         if self.dumps:
             pickle.dump(results,
-                        open(f"{DUMP_DIR}/onehot_results_{target_stamp}.pkl",
-                             "wb"),
+                        open(f'{DUMP_DIR}/onehot_results_{target_stamp}.pkl',
+                             'wb'),
                         protocol=pickle.HIGHEST_PROTOCOL)
 
         onehot_durs = calc_one_hot(results)
         logs = []
         for e in onehot_durs:
             (depth, name, dur_ms, dur_ms_steady, is_leaf, stamp) = e
-            name = truncate(" " * depth + name + ("*" if is_leaf else ""))
+            name = truncate(' ' * depth + name + ('*' if is_leaf else ''))
             if dur_ms is None:
-                dur_ms = "NA"
+                dur_ms = 'NA'
             if dur_ms_steady is None:
-                dur_ms_steady = "NA"
-            stamp_s = "NA"
+                dur_ms_steady = 'NA'
+            stamp_s = 'NA'
             if stamp:
                 stamp_s = time2str(stamp)
 
-            s = f"{name:80} {stamp_s:>20} {dur_ms:>6} {dur_ms_steady:>6}"
+            s = f'{name:80} {stamp_s:>20} {dur_ms:>6} {dur_ms_steady:>6}'
             logs.append(s)
 
         return logs
@@ -679,14 +696,14 @@ class LatencyViewerNode(Node):
         stamps = sorted(pubinfos.stamps(target_topic))
         logs = []
         str_stamp = stamps[0] if len(stamps) > 0 else ''
-        logs.append(f"stamps: {len(stamps)}, {str_stamp}")
+        logs.append(f'stamps: {len(stamps)}, {str_stamp}')
         if len(stamps) == 0:
             self.printer.print(logs)
             return
 
         # check header.stamp field existence
         if not pubinfos.get(target_topic, stamps[0]).out_info.has_stamp:
-            logs.append("**WARNING** target topic has no stamp field")
+            logs.append('**WARNING** target topic has no stamp field')
             self.printer.print(logs)
             return
 
@@ -695,22 +712,22 @@ class LatencyViewerNode(Node):
                 self.printer.print(logs)
                 self.wait_init += 1
                 return
-            logs.append("init solver")
+            logs.append('init solver')
             graph = TopicGraph(pubinfos, skips=self.skips)
             self.solver = InputSensorStampSolver(graph)
 
-        mode = self.get_parameter("mode").get_parameter_value().string_value
-        if mode == "stat":
+        mode = self.get_parameter('mode').get_parameter_value().string_value
+        if mode == 'stat':
             logs.extend(self.handle_stat(stamps))
-        elif mode == "onehot":
+        elif mode == 'onehot':
             logs.extend(self.handle_one_hot(stamps))
         else:
-            logs.append("unknown mode")
+            logs.append('unknown mode')
         et1 = time.time()
         handle_ms = (et1 - st) * 1000
 
         # cleanup PubInfos
-        (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split("."))
+        (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split('.'))
         until_stamp = TimeMsg(sec=latest_sec - self.keep_info_sec,
                               nanosec=latest_ns)
         pubinfos.erase_until(until_stamp)
@@ -720,12 +737,12 @@ class LatencyViewerNode(Node):
         self.printer.print(logs)
 
         if handle_ms + cleanup_ms > 30:
-            s = f"timer handle_ms={handle_ms}" + \
-                f" cleanup_ms={cleanup_ms}"
+            s = f'timer handle_ms={handle_ms}' + \
+                f' cleanup_ms={cleanup_ms}'
             self.get_logger().info(s)
 
     def get_pub_info_topics(self, excludes=[]):
-        """Get all topic infos
+        """Get all topic infos.
 
         Paramters
         ---------
@@ -734,6 +751,7 @@ class LatencyViewerNode(Node):
         -------
         map
           a list of pubinfo topics
+
         """
         # short sleep between node creation and get_topic_names_and_types
         # https://github.com/ros2/ros2/issues/1057
@@ -741,7 +759,7 @@ class LatencyViewerNode(Node):
         # but don't need in dev environment(i.e. rosbagged PubInfo)
         time.sleep(0.5)
 
-        msg_type = "tilde_msg/msg/PubInfo"
+        msg_type = 'tilde_msg/msg/PubInfo'
         topic_and_types = self.get_topic_names_and_types()
         filtered_topic_and_types = \
             filter(lambda x: msg_type in x[1], topic_and_types)
@@ -762,17 +780,17 @@ def main_curses(stdscr, args=None):
 def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--batch", action="store_true",
-        help="Run as batch mode, just like top command `-b` option")
+        '--batch', action='store_true',
+        help='Run as batch mode, just like top command `-b` option')
     parsed = parser.parse_known_args()[0]
 
     print(parsed)
 
     if not parsed.batch:
-        print("not batch")
+        print('not batch')
         curses.wrapper(main_curses, args=sys.argv)
     else:
-        print("batch")
+        print('batch')
         main_curses(None, args=sys.argv)
 
 
