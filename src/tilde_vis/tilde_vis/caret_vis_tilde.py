@@ -15,14 +15,14 @@
 
 from collections import defaultdict
 
-from bokeh.plotting import figure, show
 from bokeh.models import CrosshairTool
-import pandas as pd
+from bokeh.plotting import figure, show
 import numpy as np
+import pandas as pd
 
 from tilde_vis.pub_info import (
-    PubInfos,
-    PubInfo
+    PubInfo,
+    PubInfos
 )
 from tilde_vis.pubinfo_traverse import (
     InputSensorStampSolver,
@@ -31,16 +31,12 @@ from tilde_vis.pubinfo_traverse import (
 
 
 def time2str(t):
-    """
-    t: builtin_interfaces.msg.Time
-    """
-    return f"{t.sec}.{t.nanosec:09d}"
+    """Convert builtin_interfaces.msg.Time to string."""
+    return f'{t.sec}.{t.nanosec:09d}'
 
 
 def time2int(t):
-    """
-    t: builtin_interfaces.msg.Time
-    """
+    """Convert builtin_interfaces.msg.Time to int."""
     return t.sec * 10**9 + t.nanosec
 
 
@@ -68,8 +64,7 @@ def _rosbag_iter(rosbag_path):
 
 
 def read_msgs(rosbag_path):
-    """
-    Read demo messages from rosbag
+    """Read demo messages from rosbag.
 
     Returns
     -------
@@ -77,6 +72,7 @@ def read_msgs(rosbag_path):
     {
        <topic_name>: [<message>]
     }
+
     """
     msg_topics = defaultdict(list)
     for topic, msg, t in _rosbag_iter(rosbag_path):
@@ -87,7 +83,7 @@ def read_msgs(rosbag_path):
 def read_pubinfo(raw_msgs):
     pubinfos = PubInfos()
     for i in range(5):
-        msgs = raw_msgs[f"/topic{i+1}/info/pub"]
+        msgs = raw_msgs[f'/topic{i+1}/info/pub']
         for msg in msgs:
             pubinfos.add(PubInfo.fromMsg(msg))
     return pubinfos
@@ -104,8 +100,13 @@ def get_uuid2msg(raw_msgs):
 
 
 def build_latency_table(traces, ds):
-    """
+    """Calculate latencies.
+
+    Parameters
+    ----------
+    traces: CARET traces
     ds: list to output
+
     """
     traces_dict = {trace.uuid: trace for trace in traces}
 
@@ -134,7 +135,7 @@ def build_latency_table(traces, ds):
 
     # start_msgs = msgs_topics['/topic1']
     start_msgs = [trace.uuid for trace in traces
-                  if "/topic1" in trace.uuid and trace.trace_type == "publish"]
+                  if '/topic1' in trace.uuid and trace.trace_type == 'publish']
 
     uid_flows = []
     for msg in start_msgs:
@@ -163,23 +164,24 @@ def build_latency_table(traces, ds):
 
 
 class Trace(object):
+
     def __init__(self, node_name, uuid, stamp, is_publish, uuids):
         self.node_name = node_name  # "<topic>"
         self.uuid = uuid  # "<topic>_<stamp>"
         self.steady_t = stamp
-        self.trace_type = "publish" if is_publish else "callback_start"
+        self.trace_type = 'publish' if is_publish else 'callback_start'
         self.used_uuids = uuids
 
     def __repr__(self):
         return (
             '<repr> '
-            f"node_name={self.node_name} uuid={self.uuid} "
-            f"steady_t={self.steady_t} trace_type={self.trace_type} "
-            f"used_uuids={self.used_uuids}")
+            f'node_name={self.node_name} uuid={self.uuid} '
+            f'steady_t={self.steady_t} trace_type={self.trace_type} '
+            f'used_uuids={self.used_uuids}')
 
 
 def vis_tilde(pub_infos):
-    tgt_topic = "/topic5"
+    tgt_topic = '/topic5'
     topic5_stamps = pub_infos.stamps(tgt_topic)
 
     graph = TopicGraph(pub_infos)
@@ -196,13 +198,13 @@ def vis_tilde(pub_infos):
             for d in node.data:
                 stamp = time2int(d.out_info.stamp)
                 pubtime = time2int(d.out_info.pubsub_stamp)
-                uuid = f"{topic}_{stamp}"
+                uuid = f'{topic}_{stamp}'
                 uuids = []
                 for in_topic, infos in d.in_infos.items():
                     for i in infos:
                         i_stamp = time2int(i.stamp)
                         subtime = time2int(i.pubsub_stamp)
-                        i_uuid = f"{in_topic}_{i_stamp}"
+                        i_uuid = f'{in_topic}_{i_stamp}'
                         uuids.append(i_uuid)
 
                         # append callback_start
@@ -248,7 +250,7 @@ def plot_latency_table(df):
 
 
 def main():
-    bagfile = "rosbag2_2022_02_16-18_12_46"
+    bagfile = 'rosbag2_2022_02_16-18_12_46'
     raw_msgs = read_msgs(bagfile)
     pub_infos = read_pubinfo(raw_msgs)
     ds = vis_tilde(pub_infos)
@@ -257,5 +259,5 @@ def main():
     plot_latency_table(df)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
