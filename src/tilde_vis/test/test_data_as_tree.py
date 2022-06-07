@@ -20,7 +20,8 @@ from tilde_vis.data_as_tree import TreeNode
 
 
 def dict2tree(adict):
-    """Convert dictionary to TreeNode.
+    """
+    Convert dictionary to TreeNode.
 
     Parameters
     ----------
@@ -51,7 +52,8 @@ def dict2tree(adict):
 
 
 def get_complex_tree():
-    """Get complex tree.
+    """
+    Get complex tree.
 
     Return
     ------

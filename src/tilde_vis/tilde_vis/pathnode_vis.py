@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""LatencyViewer PoC version. Deprecated."""
 
 from collections import defaultdict
 from logging import basicConfig, getLogger
@@ -55,8 +56,10 @@ LIDAR_PREPROCESS_PUB = [
 
 
 class TopicInfoStatistics(object):
+    """TopicInfo statistics."""
 
     def __init__(self, topics, max_rows=10):
+        """Constructor."""
         self.topics = topics
         self.t2i = {topic: i for i, topic in enumerate(topics)}
         self.seq2time = defaultdict(
@@ -75,6 +78,7 @@ class TopicInfoStatistics(object):
         print(s)
 
     def register(self, seq, topic, callback_start_time):
+        """Register result."""
         vec = self.seq2time[seq]
         i = self.t2i[topic]
         vec[i] = callback_start_time
@@ -89,9 +93,11 @@ class TopicInfoStatistics(object):
             # TODO: delete too old seq key (now leaks)
 
     def is_filled(self):
+        """Check data."""
         return self.data_idx == self.max_rows
 
     def dump_and_clear(self, dumps=False):
+        """Dump and clear results."""
         if dumps:
             self.num_dump += 1
             fname = '{}.npy'.format(self.num_dump)
@@ -130,8 +136,10 @@ class TopicInfoStatistics(object):
 
 
 class PathVisNode(Node):
+    """Path visualization node."""
 
     def __init__(self):
+        """Constructor."""
         super().__init__('path_vis_node')
         self.declare_parameter('topics', LIDAR_PREPROCESS)
         self.declare_parameter('window', 10)
@@ -167,6 +175,7 @@ class PathVisNode(Node):
             self.subs.append(sub)
 
     def listener_callback(self, topic_info):
+        """Store data and print results."""
         seq = topic_info.seq
         topic = topic_info.topic_name
         start_time = Time.from_msg(topic_info.callback_start).nanoseconds
@@ -179,6 +188,7 @@ class PathVisNode(Node):
 
 
 def main(args=None):
+    """Main."""
     rclpy.init(args=args)
     node = PathVisNode()
 
@@ -188,4 +198,5 @@ def main(args=None):
 
 
 if __name__ == '__main__':
+    """Main."""
     main()

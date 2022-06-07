@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Convert rosbag of PubInfo to pkl file."""
+
 import argparse
 import pickle
 
@@ -24,6 +26,7 @@ from tilde_vis.pub_info import PubInfo, PubInfos
 
 
 def get_rosbag_options(path, serialization_format='cdr'):
+    """Get rosbag options."""
     storage_options = rosbag2_py.StorageOptions(uri=path, storage_id='sqlite3')
 
     converter_options = rosbag2_py.ConverterOptions(
@@ -34,6 +37,7 @@ def get_rosbag_options(path, serialization_format='cdr'):
 
 
 def run(args):
+    """Do main loop."""
     bag_path = args.bag_path
 
     storage_options, converter_options = get_rosbag_options(bag_path)
@@ -79,6 +83,7 @@ def run(args):
 
 
 def main():
+    """Main."""
     parser = argparse.ArgumentParser()
     parser.add_argument('bag_path')
     parser.add_argument(
@@ -90,4 +95,5 @@ def main():
 
 
 if __name__ == '__main__':
+    """Main."""
     main()

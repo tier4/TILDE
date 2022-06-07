@@ -67,7 +67,8 @@ def get_solver_result_simple(
         t1_pub,
         t1_sub, t2_pub,
         t2_sub, t3_pub):
-    """Generate solver result.
+    """
+    Generate solver result.
 
     Graph: topic1 --> topic2 --> topic3
 

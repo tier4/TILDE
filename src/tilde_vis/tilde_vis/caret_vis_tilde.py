@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Check CARET vs TILDE results."""
+
 from collections import defaultdict
 
 from bokeh.models import CrosshairTool
@@ -64,7 +66,8 @@ def _rosbag_iter(rosbag_path):
 
 
 def read_msgs(rosbag_path):
-    """Read demo messages from rosbag.
+    """
+    Read demo messages from rosbag.
 
     Returns
     -------
@@ -81,6 +84,7 @@ def read_msgs(rosbag_path):
 
 
 def read_pubinfo(raw_msgs):
+    """Convert raw messages to PubInfos."""
     pubinfos = PubInfos()
     for i in range(5):
         msgs = raw_msgs[f'/topic{i+1}/info/pub']
@@ -90,6 +94,7 @@ def read_pubinfo(raw_msgs):
 
 
 def get_uuid2msg(raw_msgs):
+    """Convert raw messages to dictionary."""
     hashed_msgs = {}
     hash_target_keys = ['/topic1', '/topic2', '/topic3', '/topic4', '/topic5']
     for hash_target_key in hash_target_keys:
@@ -100,7 +105,8 @@ def get_uuid2msg(raw_msgs):
 
 
 def build_latency_table(traces, ds):
-    """Calculate latencies.
+    """
+    Calculate latencies.
 
     Parameters
     ----------
@@ -164,8 +170,10 @@ def build_latency_table(traces, ds):
 
 
 class Trace(object):
+    """Trace data for CARET."""
 
     def __init__(self, node_name, uuid, stamp, is_publish, uuids):
+        """Constructor."""
         self.node_name = node_name  # "<topic>"
         self.uuid = uuid  # "<topic>_<stamp>"
         self.steady_t = stamp
@@ -173,6 +181,7 @@ class Trace(object):
         self.used_uuids = uuids
 
     def __repr__(self):
+        """Print self."""
         return (
             '<repr> '
             f'node_name={self.node_name} uuid={self.uuid} '
@@ -181,6 +190,7 @@ class Trace(object):
 
 
 def vis_tilde(pub_infos):
+    """Visualize tilde result."""
     tgt_topic = '/topic5'
     topic5_stamps = pub_infos.stamps(tgt_topic)
 
@@ -221,7 +231,7 @@ def vis_tilde(pub_infos):
 
 
 def plot_latency_table(df):
-    # dfからフローの可視化
+    """Plot flows from df."""
     from tqdm import tqdm
     from bokeh.palettes import Bokeh8
 
@@ -250,6 +260,7 @@ def plot_latency_table(df):
 
 
 def main():
+    """Main."""
     bagfile = 'rosbag2_2022_02_16-18_12_46'
     raw_msgs = read_msgs(bagfile)
     pub_infos = read_pubinfo(raw_msgs)
@@ -260,4 +271,5 @@ def main():
 
 
 if __name__ == '__main__':
+    """Main."""
     main()

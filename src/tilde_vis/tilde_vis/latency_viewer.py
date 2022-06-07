@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Latency viewer node and its main function."""
+
 import argparse
 import curses
 import os
@@ -89,7 +91,8 @@ DUMP_DIR = 'dump.d'
 
 
 def truncate(s, prelen=20, n=80):
-    """Truncate string.
+    """
+    Truncate string.
 
     Parameters
     ----------
@@ -114,15 +117,18 @@ def truncate(s, prelen=20, n=80):
 
 
 class LatencyStat(object):
+    """Latency statistics."""
 
     def __init__(self):
+        """Constructor."""
         self.dur_ms_list = []
         self.dur_pub_ms_list = []
         self.dur_pub_ms_steady_list = []
         self.is_leaf_list = []
 
     def add(self, r):
-        """Add single result.
+        """
+        Add single result.
 
         Parameters
         ----------
@@ -135,6 +141,7 @@ class LatencyStat(object):
         self.is_leaf_list.append(r.is_leaf)
 
     def report(self):
+        """Report statistics."""
         dur_ms_list = self.dur_ms_list
         is_leaf_list = self.is_leaf_list
         dur_pub_ms_list = self.dur_pub_ms_list
@@ -169,12 +176,15 @@ class LatencyStat(object):
 
 
 class PerTopicLatencyStat(object):
+    """Per topic latency statistics."""
 
     def __init__(self):
+        """Constructor."""
         self.data = {}
 
     def add(self, r):
-        """Add single result.
+        """
+        Add single result.
 
         Parameters
         ----------
@@ -184,12 +194,21 @@ class PerTopicLatencyStat(object):
         self.data.setdefault(r.topic, LatencyStat()).add(r)
 
     def report(self):
+        """Get report as dictionary."""
         ret = {}
         for (topic, stat) in self.data.items():
             ret[topic] = stat.report()
         return ret
 
     def print_report(self, printer):
+        """
+        Print report.
+
+        Parameters
+        ----------
+        printer: see printer.py
+
+        """
         logs = []
         reports = self.report()
         logs.append('{:80} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6}'.format(
@@ -220,7 +239,8 @@ class PerTopicLatencyStat(object):
 
 
 def calc_one_hot(results):
-    """Calcurate one hot result.
+    """
+    Calcurate one hot result.
 
     Paramters
     ---------
@@ -263,7 +283,8 @@ def calc_one_hot(results):
 
 
 def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
-    """Calculate latency statistics.
+    """
+    Calculate latency statistics.
 
     Parameters
     ----------
@@ -310,7 +331,8 @@ def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
 
 
 def update_stat(results):
-    """Update results to have durations.
+    """
+    Update results to have durations.
 
     Parameters
     ----------
@@ -353,7 +375,8 @@ def update_stat(results):
 
 
 def calc_stat(results):
-    """Calcurate statistics.
+    """
+    Calcurate statistics.
 
     Parameters
     ----------
@@ -404,9 +427,11 @@ def calc_stat(results):
 
 
 class LatencyViewerNode(Node):
+    """Latency viewer node."""
 
     def __init__(self, stdscr=None):
-        """Constructor.
+        """
+        Constructor.
 
         Parameters
         ----------
@@ -497,7 +522,8 @@ class LatencyViewerNode(Node):
             os.makedirs(DUMP_DIR, exist_ok=True)
 
     def init_skips(self):
-        """Define skips.
+        """
+        Define skips.
 
         See TopicGraph.__init__ comment.
         """
@@ -517,6 +543,7 @@ class LatencyViewerNode(Node):
         self.skips = skips
 
     def listener_callback(self, pub_info_msg):
+        """Handle PubInfo message."""
         st = time.time()
         output_info = pub_info_msg.output_info
 
@@ -572,7 +599,8 @@ class LatencyViewerNode(Node):
                 f'sub {topic} at {stamp}@ {elasped_ms} [ms]')
 
     def handle_stat(self, stamps):
-        """Report statistics.
+        """
+        Report statistics.
 
         Paramters
         ---------
@@ -636,7 +664,8 @@ class LatencyViewerNode(Node):
         return logs
 
     def handle_one_hot(self, stamps):
-        """Report only one message.
+        """
+        Report only one message.
 
         Paramters
         ---------
@@ -689,6 +718,7 @@ class LatencyViewerNode(Node):
         return logs
 
     def timer_callback(self):
+        """Clear old data."""
         st = time.time()
         pubinfos = self.pub_infos
         target_topic = self.target_topic
@@ -742,7 +772,8 @@ class LatencyViewerNode(Node):
             self.get_logger().info(s)
 
     def get_pub_info_topics(self, excludes=[]):
-        """Get all topic infos.
+        """
+        Get all topic infos.
 
         Paramters
         ---------
@@ -770,6 +801,7 @@ class LatencyViewerNode(Node):
 
 
 def main_curses(stdscr, args=None):
+    """Wrap main function for ncurses."""
     rclpy.init(args=args)
 
     node = LatencyViewerNode(stdscr=stdscr)
@@ -778,6 +810,7 @@ def main_curses(stdscr, args=None):
 
 
 def main(args=None):
+    """Main."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--batch', action='store_true',
@@ -795,4 +828,5 @@ def main(args=None):
 
 
 if __name__ == '__main__':
+    """Main."""
     main(sys.argv)

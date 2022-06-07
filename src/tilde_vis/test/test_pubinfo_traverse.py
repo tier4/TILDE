@@ -31,7 +31,8 @@ from tilde_vis.pubinfo_traverse import (
 
 
 def get_scenario1():
-    """Get the following scenario.
+    """
+    Get the following scenario.
 
     topic1 --> topic2 --> topic3
 
@@ -118,7 +119,8 @@ def dur_plus(lhs, rhs):
 def gen_scenario2(
         st, st_steady,
         nw_dur, cb_dur):
-    """Get the following scenario.
+    """
+    Get the following scenario.
 
     topic1 --> topic3 --> topic4
     topic2 ---/
@@ -254,7 +256,8 @@ class TestTopicGraph(unittest.TestCase):
         self.assertEqual(rev_edges[3], {2})
 
     def test_scenario2_with_loss(self):
-        """Graph creation with lossy PubInfos.
+        """
+        Graph creation with lossy PubInfos.
 
         t0: pubinfo only topic1 and topic3
         t1: only topic2

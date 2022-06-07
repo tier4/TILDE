@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""PubInfo Traverser."""
+
 import argparse
 from collections import defaultdict, deque
 import json
@@ -26,16 +28,19 @@ from tilde_vis.pub_info import time2str
 
 
 def strstamp2time(strstamp):
+    """Convert string time to Time."""
     sec, nanosec = strstamp.split('.')
     return Time(seconds=int(sec), nanoseconds=int(nanosec))
 
 
 class SolverResult(object):
+    """SolverResult."""
 
     def __init__(self, topic, stamp, dur_ms,
                  dur_pub_ms, dur_pub_ms_steady,
                  is_leaf, parent):
-        """Constructor.
+        """
+        Constructor.
 
         Parameters
         ----------
@@ -58,10 +63,12 @@ class SolverResult(object):
 
 
 class SolverResultsPrinter(object):
+    """SolverResultsPrinter."""
 
     @classmethod
     def as_tree(cls, results):
-        """Construct array of string to print.
+        """
+        Construct array of string to print.
 
         This methos returns tree command like expression
         from output topic to source topics.
@@ -88,12 +95,15 @@ class SolverResultsPrinter(object):
 
 
 class SolverResults(object):
+    """SolverResults."""
 
     def __init__(self):
+        """Constructor."""
         self.data = []  # list of Result
 
     def add(self, *args):
-        """Register Result.
+        """
+        Register Result.
 
         Paramaters
         ----------
@@ -103,8 +113,10 @@ class SolverResults(object):
 
 
 class InputSensorStampSolver(object):
+    """InputSensorStampSolver."""
 
     def __init__(self, graph):
+        """Constructor."""
         # {topic: {stamp: {sensor_topic: [stamps]}}}
         self.topic_stamp_to_sensor_stamp = {}
         self.graph = graph
@@ -113,7 +125,8 @@ class InputSensorStampSolver(object):
 
     def solve(self, pubinfos, tgt_topic, tgt_stamp,
               stops=[]):
-        """Traverse from (tgt_topic, tgt_stamp)-message.
+        """
+        Traverse from (tgt_topic, tgt_stamp)-message.
 
         Parameters
         ----------
@@ -198,7 +211,8 @@ class InputSensorStampSolver(object):
 
     def solve2(self, pubinfos, tgt_topic, tgt_stamp,
                stops=[]):
-        """Traverse DAG from output to input.
+        """
+        Traverse DAG from output to input.
 
         Parameters
         ----------
@@ -258,6 +272,7 @@ class InputSensorStampSolver(object):
         return root_results
 
     def append(self, topic, stamp, sensor_topic, sensor_stamp):
+        """Append results to topic_stamp_to_sensor_stamp."""
         dic = self.topic_stamp_to_sensor_stamp
         if topic not in dic.keys():
             dic[topic] = {}
@@ -270,7 +285,8 @@ class InputSensorStampSolver(object):
 
     def _solve_empty(self, tgt_topic,
                      stops=[]):
-        """Get empty results to know graph.
+        """
+        Get empty results to know graph.
 
         Parameters
         ----------
@@ -310,7 +326,8 @@ class TopicGraph(object):
     """Construct topic graph by ignoring stamps."""
 
     def __init__(self, pubinfos, skips={}):
-        """Constructor.
+        """
+        Constructor.
 
         Parameters
         ----------
@@ -341,6 +358,7 @@ class TopicGraph(object):
                 self.rev_edges[out_id].add(in_id)
 
     def dump(self, fname):
+        """Dump."""
         out = {}
         out['topics'] = self.topics
         out['topic2id'] = self.t2i
@@ -350,7 +368,8 @@ class TopicGraph(object):
         json.dump(out, open(fname, 'wt'))
 
     def rev_topics(self, topic):
-        """Get input topics of the target topic.
+        """
+        Get input topics of the target topic.
 
         Parameters
         ----------
@@ -365,7 +384,8 @@ class TopicGraph(object):
         return [self.topics[i] for i in self.rev_edges[out_topic_idx]]
 
     def dfs_rev(self, start_topic):
-        """Do depth first search from the topic.
+        """
+        Do depth first search from the topic.
 
         Parameters
         ----------
@@ -395,7 +415,8 @@ class TopicGraph(object):
         return ret
 
     def bfs_rev(self, start_topic):
-        """Do breadth first search from the topic.
+        """
+        Do breadth first search from the topic.
 
         Parameters
         ----------
@@ -429,6 +450,7 @@ class TopicGraph(object):
 
 
 def run(args):
+    """Run."""
     pklfile = args.pickle_file
     pubinfos = pickle.load(open(pklfile, 'rb'))
 
@@ -457,6 +479,7 @@ def run(args):
 
 
 def main():
+    """Main."""
     parser = argparse.ArgumentParser()
     parser.add_argument('pickle_file')
     parser.add_argument('stamp_index', type=int, default=0,

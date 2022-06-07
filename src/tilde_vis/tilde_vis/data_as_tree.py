@@ -12,15 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Tree like data structure for PubInfo traversal."""
+
 
 class TreeNode(object):
-    """Node of DataAsTree.
+    """
+    Node of DataAsTree.
 
     This hold data list and children.
 
     """
 
     def __init__(self, name):
+        """Constructor."""
         self.name = name
         self.children = []
         self.name2child = {}
@@ -28,10 +32,12 @@ class TreeNode(object):
         self.value = None
 
     def num_children(self):
+        """Get the number of children."""
         return len(self.children)
 
     def get_child(self, child_name):
-        """Get child.
+        """
+        Get child.
 
         If not exists, then append.
 
@@ -50,10 +56,19 @@ class TreeNode(object):
         return c
 
     def add_data(self, d):
+        """
+        Add data.
+
+        Parameters
+        ----------
+        d: any value or object
+
+        """
         self.data.append(d)
 
     def apply(self, fn):
-        """Apply fn recursively.
+        """
+        Apply fn recursively.
 
         Internally, preordering DFS is used.
 
@@ -76,7 +91,8 @@ class TreeNode(object):
         return ret
 
     def apply_with_depth(self, fn, depth=0):
-        """Apply with depth option.
+        """
+        Apply with depth option.
 
         Internally, preordering DFS is used.
 
@@ -99,7 +115,8 @@ class TreeNode(object):
         return ret
 
     def merge(self, rhs):
-        """Merge data of another tree.
+        """
+        Merge data of another tree.
 
         If self does not have some keys which rhs has,
         then new nodes are added.
@@ -110,7 +127,8 @@ class TreeNode(object):
 
         """
         def _merge(lhs, rhs):
-            """Merge data.
+            """
+            Merge data.
 
             lhs: TreeNode which is updated
             rhs: TreeNode whici is const

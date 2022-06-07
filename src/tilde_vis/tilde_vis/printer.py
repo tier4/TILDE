@@ -12,19 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Printer for stdout w/wo interactions."""
+
 import curses
 import datetime
 import re
 
 
 class Printer(object):
+    """Print messages to stdout."""
 
     def print_(self, lines):
+        """Print logs."""
         for s in lines:
             print(s)
 
 
 class NcursesPrinter(object):
+    """Print messages with interaction."""
 
     MODE_STOP = 0
     MODE_RUN = 1
@@ -36,6 +41,7 @@ class NcursesPrinter(object):
     NPAGE = curses.KEY_NPAGE
 
     def __init__(self, stdscr):
+        """Constructor."""
         stdscr.scrollok(True)
         stdscr.timeout(0)  # set non-blocking
         self.stdscr = stdscr
@@ -86,6 +92,7 @@ class NcursesPrinter(object):
             )
 
     def adjust_lines(self, k, lines):
+        """Move lines by interaction."""
         step = 0
         if k in (self.DOWN, ord('j')):
             step = 1
@@ -109,9 +116,11 @@ class NcursesPrinter(object):
             self.start_line = len(lines) - 1
 
     def enter_regex_mode(self):
+        """Change mode."""
         self.mode = self.MODE_REGEXP
 
     def print_(self, input_lines):
+        """Print logs."""
         stdscr = self.stdscr
         lines = self.lines
 
@@ -180,6 +189,7 @@ class NcursesPrinter(object):
         stdscr.refresh()
 
     def print_mode(self):
+        """Print mode line."""
         stdscr = self.stdscr
         color = self.CYAN
 

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Internal data structures for PubInfo."""
+
 from rclpy.time import Time
 
 
@@ -21,9 +23,12 @@ def time2str(t):
 
 
 class TopicInfo(object):
+    """Represent output_info and input_infos of PubInfo message."""
+
     def __init__(self, topic, pubsub_stamp, pubsub_stamp_steady,
                  has_stamp, stamp):
-        """Hold information similar to PubInfo in/out info.
+        """
+        Hold information similar to PubInfo in/out info.
 
         Parameters
         ----------
@@ -45,12 +50,14 @@ class TopicInfo(object):
         self.stamp = stamp
 
     def __str__(self):
+        """Get string."""
         stamp_s = time2str(self.stamp) if self.has_stamp else 'NA'
         return f'TopicInfo(topic={self.topic}, stamp={stamp_s})'
 
 
 class PubInfo(object):
-    """Hold information similar to PubInfoMsg.
+    """
+    Hold information similar to PubInfoMsg.
 
     TODO(y-okumura-isp): Can we use PubInfoMsg directly?
 
@@ -58,7 +65,8 @@ class PubInfo(object):
 
     def __init__(self, out_topic, pub_time, pub_time_steady,
                  has_stamp, out_stamp):
-        """Constructor.
+        """
+        Constructor.
 
         Parameters
         ----------
@@ -75,7 +83,8 @@ class PubInfo(object):
 
     def add_input_info(self, in_topic, sub_stamp, sub_stamp_steady,
                        has_stamp, stamp):
-        """Add input info.
+        """
+        Add input info.
 
         Parameters
         ----------
@@ -89,6 +98,7 @@ class PubInfo(object):
         self.in_infos.setdefault(in_topic, []).append(info)
 
     def __str__(self):
+        """Get string."""
         s = 'PubInfo: \n'
         s += f'  out_info={self.out_info}\n'
         for _, infos in self.in_infos.items():
@@ -98,11 +108,13 @@ class PubInfo(object):
 
     @property
     def out_topic(self):
+        """Get output topic."""
         return self.out_info.topic
 
     @staticmethod
     def fromMsg(pub_info_msg):
-        """Convert PubInfoMsg to PubInfo.
+        """
+        Convert PubInfoMsg to PubInfo.
 
         Parameters
         ----------
@@ -129,7 +141,8 @@ class PubInfo(object):
 
 
 class PubInfos(object):
-    """Hold topic vs PubInfo.
+    """
+    Hold topic vs PubInfo.
 
     We have double-key dictionary internally, i.e.
     we can get PubInfo by topic_vs_pubinfo[topic_name][stamp].
@@ -137,10 +150,12 @@ class PubInfos(object):
     """
 
     def __init__(self):
+        """Constructor."""
         # {topic => {stamp_str => PubInfo}}
         self.topic_vs_pubinfos = {}
 
     def add(self, pubinfo):
+        """Add a PubInfo."""
         out_topic = pubinfo.out_info.topic
         out_stamp = time2str(pubinfo.out_info.stamp)
         if out_topic not in self.topic_vs_pubinfos.keys():
@@ -153,7 +168,8 @@ class PubInfos(object):
         infos[out_stamp] = pubinfo
 
     def erase_until(self, stamp):
-        """Erase added pubinfo where out_stamp < stamp.
+        """
+        Erase added pubinfo where out_stamp < stamp.
 
         Parameters
         ----------
@@ -161,7 +177,8 @@ class PubInfos(object):
 
         """
         def time_ge(lhs, rhs):
-            """Compare time.
+            """
+            Compare time.
 
             Helper function to compare stamps i.e.
             self.topic_vs_pubinfos[*].keys().
@@ -190,6 +207,7 @@ class PubInfos(object):
                 del self.topic_vs_pubinfos[topic][stamp]
 
     def topics(self):
+        """Get topic names which has registered PubInfo."""
         return list(self.topic_vs_pubinfos.keys())
 
     def stamps(self, topic):
@@ -200,7 +218,8 @@ class PubInfos(object):
         return list(self.topic_vs_pubinfos[topic].keys())
 
     def get(self, topic, stamp=None, idx=None):
-        """Get a PubInfo.
+        """
+        Get a PubInfo.
 
         Parameters
         ----------
@@ -234,7 +253,8 @@ class PubInfos(object):
         return ret
 
     def in_topics(self, topic):
-        """Gather input topics by ignoring stamps.
+        """
+        Gather input topics by ignoring stamps.
 
         Return
         ------
@@ -252,6 +272,7 @@ class PubInfos(object):
         return ret
 
     def all_topics(self):
+        """Get all topics which are used as input or output."""
         out = set()
 
         lhs = self.topics()
