@@ -8,7 +8,7 @@ Supplementary files to test `tilde_vis` package.
 
 See #23. It's OK if the program runs with no error.
 
-``` bash
+```bash
 $ ros2 launch tilde_vis_test issues_23_1.launch.py
 [filter-1] [INFO] [1654561227.800326321] [filter]: Filter get message cnt_ = 0
 [filter-1] [INFO] [1654561228.300162503] [filter]: Filter get message cnt_ = 1
@@ -22,7 +22,7 @@ $ ros2 launch tilde_vis_test issues_23_1.launch.py
 See #23. It's OK if the program runs with no error.
 Be aware that FPS is very slow to reproduce bug.
 
-``` bash
+```bash
 $ ros2 launch tilde_vis_test issues_23_2.launch.py
 
 [relay-1] [INFO] [1654561285.390170828] [relay]: Relay get message cnt_ = 0
