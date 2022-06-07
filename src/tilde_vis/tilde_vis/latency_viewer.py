@@ -13,80 +13,86 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Latency viewer node and its main function."""
+
 import argparse
 import curses
 import os
 import pickle
-import sys
 from statistics import mean
+import sys
 import time
 
+from builtin_interfaces.msg import Time as TimeMsg
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import (
+    QoSHistoryPolicy,
+    QoSProfile,
+    QoSReliabilityPolicy
+    )
 from rclpy.time import Time
-from rclpy.qos import QoSHistoryPolicy
-from rclpy.qos import QoSProfile
-from rclpy.qos import QoSReliabilityPolicy
-
-from builtin_interfaces.msg import Time as TimeMsg
 
 from tilde_msg.msg import (
     PubInfo,
     )
-from tilde_vis.pubinfo_traverse import TopicGraph, InputSensorStampSolver
+from tilde_vis.printer import (
+    NcursesPrinter,
+    Printer
+    )
 from tilde_vis.pub_info import (
     PubInfo as PubInfoObj,
-    PubInfos as PubInfosObj
-    )
-from tilde_vis.printer import (
-    Printer,
-    NcursesPrinter
-    )
-from tilde_vis.pub_info import (
+    PubInfos as PubInfosObj,
     time2str
     )
+from tilde_vis.pubinfo_traverse import (
+    InputSensorStampSolver,
+    TopicGraph
+    )
+
 
 EXCLUDES_TOPICS = [
-    "/diagnostics/info/pub",
-    "/control/trajectory_follower/mpc_follower/debug/markers/info/pub",
-    "/control/trajectory_follower/mpc_follower/debug/steering_cmd/info/pub",
-    "/localization/debug/ellipse_marker/info/pub",
-    "/localization/pose_twist_fusion_filter/debug/info/pub",
-    "/localization/pose_twist_fusion_filter/debug/measured_pose/info/pub",
-    "/localization/pose_twist_fusion_filter/debug/stop_flag/info/pub",
-    "/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/drivable_area/info/pub",  # noqa: #501
-    "/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/markers/info/pub",  # noqa: #501
-    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/area_with_objects/info/pub",  # noqa: #501
-    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/clearance_map/info/pub",  # noqa: #501
-    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/marker/info/pub",  # noqa: #501
-    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/object_clearance_map/info/pub",  # noqa: #501
-    "/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/smoothed_points/info/pub",  # noqa: #501
-    "/planning/scenario_planning/motion_velocity_smoother/debug/backward_filtered_trajectory/info/pub",  # noqa: #501
-    "/planning/scenario_planning/motion_velocity_smoother/debug/forward_filtered_trajectory/info/pub",  # noqa: #501
-    "/planning/scenario_planning/motion_velocity_smoother/debug/merged_filtered_trajectory/info/pub",  # noqa: #501
-    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_external_velocity_limited/info/pub",  # noqa: #501
-    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_lateral_acc_filtered/info/pub",  # noqa: #501
-    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_raw/info/pub",  # noqa: #501
-    "/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_time_resampled/info/pub",  # noqa: #501
+    '/diagnostics/info/pub',
+    '/control/trajectory_follower/mpc_follower/debug/markers/info/pub',
+    '/control/trajectory_follower/mpc_follower/debug/steering_cmd/info/pub',
+    '/localization/debug/ellipse_marker/info/pub',
+    '/localization/pose_twist_fusion_filter/debug/info/pub',
+    '/localization/pose_twist_fusion_filter/debug/measured_pose/info/pub',
+    '/localization/pose_twist_fusion_filter/debug/stop_flag/info/pub',
+    '/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/drivable_area/info/pub',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/markers/info/pub',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/area_with_objects/info/pub',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/clearance_map/info/pub',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/marker/info/pub',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/object_clearance_map/info/pub',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/smoothed_points/info/pub',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/backward_filtered_trajectory/info/pub',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/forward_filtered_trajectory/info/pub',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/merged_filtered_trajectory/info/pub',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_external_velocity_limited/info/pub',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_lateral_acc_filtered/info/pub',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_raw/info/pub',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_time_resampled/info/pub',  # noqa: #501
     ]
 LEAVES = [
-    "/initialpose",
-    "/map/pointcloud_map",
-    "/sensing/lidar/top/rectified/pointcloud",
-    "/sensing/imu/imu_data",
-    "/vehicle/status/twist",
+    '/initialpose',
+    '/map/pointcloud_map',
+    '/sensing/lidar/top/rectified/pointcloud',
+    '/sensing/imu/imu_data',
+    '/vehicle/status/twist',
     ]
-PUB_INFO = "topic_infos.pkl"
+PUB_INFO = 'topic_infos.pkl'
 TIMER_SEC = 1.0
-TARGET_TOPIC = "/sensing/lidar/concatenated/pointcloud"
+TARGET_TOPIC = '/sensing/lidar/concatenated/pointcloud'
 STOPS = [
-    "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias",  # noqa: #501
+    '/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias',  # noqa: #501
     ]
-DUMP_DIR = "dump.d"
+DUMP_DIR = 'dump.d'
 
 
 def truncate(s, prelen=20, n=80):
-    """Truncate string.
+    """
+    Truncate string.
 
     Parameters
     ----------
@@ -97,6 +103,7 @@ def truncate(s, prelen=20, n=80):
     Return
     ------
     truncated string such that "abc...edf"
+
     """
     assert prelen + 5 < n
 
@@ -106,11 +113,14 @@ def truncate(s, prelen=20, n=80):
     pre = s[:prelen]
     post = s[len(s) - n + prelen + 5:]
 
-    return pre + "..." + post
+    return pre + '...' + post
 
 
 class LatencyStat(object):
+    """Latency statistics."""
+
     def __init__(self):
+        """Constructor."""
         self.dur_ms_list = []
         self.dur_pub_ms_list = []
         self.dur_pub_ms_steady_list = []
@@ -118,9 +128,12 @@ class LatencyStat(object):
 
     def add(self, r):
         """
+        Add single result.
+
         Parameters
         ----------
         r: pubinfo_traverse.SolverResults
+
         """
         self.dur_ms_list.append(r.dur_ms)
         self.dur_pub_ms_list.append(r.dur_pub_ms)
@@ -128,6 +141,7 @@ class LatencyStat(object):
         self.is_leaf_list.append(r.is_leaf)
 
     def report(self):
+        """Report statistics."""
         dur_ms_list = self.dur_ms_list
         is_leaf_list = self.is_leaf_list
         dur_pub_ms_list = self.dur_pub_ms_list
@@ -148,69 +162,85 @@ class LatencyStat(object):
         is_all_leaf = all(is_leaf_list)
 
         return {
-            "dur_min": dur_min,
-            "dur_mean": dur_mean,
-            "dur_max": dur_max,
-            "dur_pub_min": dur_pub_min,
-            "dur_pub_mean": dur_pub_mean,
-            "dur_pub_max": dur_pub_max,
-            "dur_pub_steady_min": dur_pub_steady_min,
-            "dur_pub_steady_mean": dur_pub_steady_mean,
-            "dur_pub_steady_max": dur_pub_steady_max,
-            "is_all_leaf": is_all_leaf,
+            'dur_min': dur_min,
+            'dur_mean': dur_mean,
+            'dur_max': dur_max,
+            'dur_pub_min': dur_pub_min,
+            'dur_pub_mean': dur_pub_mean,
+            'dur_pub_max': dur_pub_max,
+            'dur_pub_steady_min': dur_pub_steady_min,
+            'dur_pub_steady_mean': dur_pub_steady_mean,
+            'dur_pub_steady_max': dur_pub_steady_max,
+            'is_all_leaf': is_all_leaf,
             }
 
 
 class PerTopicLatencyStat(object):
+    """Per topic latency statistics."""
+
     def __init__(self):
+        """Constructor."""
         self.data = {}
 
     def add(self, r):
         """
+        Add single result.
+
         Parameters
         ----------
         r: pubinfo_traverse.SolverResults
+
         """
         self.data.setdefault(r.topic, LatencyStat()).add(r)
 
     def report(self):
+        """Get report as dictionary."""
         ret = {}
         for (topic, stat) in self.data.items():
             ret[topic] = stat.report()
         return ret
 
     def print_report(self, printer):
+        """
+        Print report.
+
+        Parameters
+        ----------
+        printer: see printer.py
+
+        """
         logs = []
         reports = self.report()
-        logs.append("{:80} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6}".format(
-            "topic", "dur", "dur", "dur", "e2e", "e2e", "e2e", "e2e_s", "e2e_s", "e2e_s"
+        logs.append('{:80} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6} {:>6}'.format(
+            'topic', 'dur', 'dur', 'dur', 'e2e', 'e2e', 'e2e', 'e2e_s', 'e2e_s', 'e2e_s'
         ))
 
         def p(v):
             if v > 1000:
-                return "   inf"
+                return '   inf'
             else:
-                return "{:>6.1f}".format(v)
+                return '{:>6.1f}'.format(v)
 
         for (topic, report) in reports.items():
-            s = f"{topic:80} "
-            s += f"{p(report['dur_min'])} "
-            s += f"{p(report['dur_mean'])} "
-            s += f"{p(report['dur_max'])} "
-            s += f"{p(report['dur_pub_min'])} "
-            s += f"{p(report['dur_pub_mean'])} "
-            s += f"{p(report['dur_pub_max'])} "
-            s += f"{p(report['dur_pub_steady_min'])} "
-            s += f"{p(report['dur_pub_steady_mean'])} "
-            s += f"{p(report['dur_pub_steady_max'])} "
-            s += f"{report['is_all_leaf']}"
+            s = f'{topic:80} '
+            s += f'{p(report["dur_min"])} '
+            s += f'{p(report["dur_mean"])} '
+            s += f'{p(report["dur_max"])} '
+            s += f'{p(report["dur_pub_min"])} '
+            s += f'{p(report["dur_pub_mean"])} '
+            s += f'{p(report["dur_pub_maxn"])} '
+            s += f'{p(report["dur_pub_steady_min"])} '
+            s += f'{p(report["dur_pub_steady_mean"])} '
+            s += f'{p(report["dur_pub_steady_max"])} '
+            s += f'{report["is_all_leaf"]}'
             logs.append(s)
 
-        printer.print(logs)
+        printer.print_(logs)
 
 
 def calc_one_hot(results):
-    """Calcurate one hot result.
+    """
+    Calcurate one hot result.
 
     Paramters
     ---------
@@ -253,7 +283,8 @@ def calc_one_hot(results):
 
 
 def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
-    """Handle stat core
+    """
+    Calculate latency statistics.
 
     Parameters
     ----------
@@ -268,6 +299,7 @@ def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
     ------
     TreeNode.
     .data: see calc_stat
+
     """
     idx = -3
     if len(stamps) == 0:
@@ -276,7 +308,7 @@ def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
         idx = 1
 
     merged = None
-    print(f"idx: {idx}")
+    print(f'idx: {idx}')
     for target_stamp in stamps[:idx]:
         results = solver.solve2(
             pubinfos, target_topic, target_stamp,
@@ -284,7 +316,8 @@ def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
 
         if dumps:
             pickle.dump(results,
-                        open(f"{DUMP_DIR}/stat_results_{target_stamp}.pkl", "wb"),
+                        open(f'{DUMP_DIR}/stat_results_{target_stamp}.pkl',
+                             'wb'),
                         protocol=pickle.HIGHEST_PROTOCOL)
 
         results = update_stat(results)
@@ -298,7 +331,8 @@ def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
 
 
 def update_stat(results):
-    """Update results to have durations
+    """
+    Update results to have durations.
 
     Parameters
     ----------
@@ -309,6 +343,7 @@ def update_stat(results):
     results with
     results.data: [(dur_ms, dur_ms_steady)]
     results.data_orig = results.data
+
     """
     last_pub_time = Time.from_msg(
         results.data[0].out_info.pubsub_stamp)
@@ -340,7 +375,8 @@ def update_stat(results):
 
 
 def calc_stat(results):
-    """Calcurate statistics
+    """
+    Calcurate statistics.
 
     Parameters
     ----------
@@ -358,6 +394,7 @@ def calc_stat(results):
       "dur_mean_steady"
       "dur_max_steady"
       "is_leaf"
+
     """
     def _calc_stat(node, depth):
         durs = []
@@ -375,40 +412,44 @@ def calc_stat(results):
             return fn(arr)
 
         return {
-            "depth": depth,
-            "name": node.name,
-            "dur_min": _calc(durs, min),
-            "dur_mean": _calc(durs, mean),
-            "dur_max": _calc(durs, max),
-            "dur_min_steady": _calc(durs_steady, min),
-            "dur_mean_steady": _calc(durs_steady, mean),
-            "dur_max_steady": _calc(durs_steady, max),
-            "is_leaf": is_leaf
+            'depth': depth,
+            'name': node.name,
+            'dur_min': _calc(durs, min),
+            'dur_mean': _calc(durs, mean),
+            'dur_max': _calc(durs, max),
+            'dur_min_steady': _calc(durs_steady, min),
+            'dur_mean_steady': _calc(durs_steady, mean),
+            'dur_max_steady': _calc(durs_steady, max),
+            'is_leaf': is_leaf
         }
 
     return results.apply_with_depth(_calc_stat)
 
 
 class LatencyViewerNode(Node):
+    """Latency viewer node."""
+
     def __init__(self, stdscr=None):
-        """Constructor
+        """
+        Constructor.
 
         Parameters
         ----------
         stdscr: if not None, use ncurses
+
         """
         super().__init__('latency_viewer_node')
-        self.declare_parameter("excludes_topics", EXCLUDES_TOPICS)
-        self.declare_parameter("leaves", LEAVES)
-        self.declare_parameter("graph_pkl", "")
-        self.declare_parameter("timer_sec", TIMER_SEC)
-        self.declare_parameter("target_topic", TARGET_TOPIC)
-        self.declare_parameter("keep_info_sec", 3)
-        self.declare_parameter("wait_sec_to_init_graph", 10)
-        self.declare_parameter("mode", "stat")
-        self.declare_parameter("stops", STOPS)
+        self.declare_parameter('excludes_topics', EXCLUDES_TOPICS)
+        self.declare_parameter('leaves', LEAVES)
+        self.declare_parameter('graph_pkl', '')
+        self.declare_parameter('timer_sec', TIMER_SEC)
+        self.declare_parameter('target_topic', TARGET_TOPIC)
+        self.declare_parameter('keep_info_sec', 3)
+        self.declare_parameter('wait_sec_to_init_graph', 10)
+        self.declare_parameter('mode', 'stat')
+        self.declare_parameter('stops', STOPS)
         # whether to dump solver.solve() result
-        self.declare_parameter("dumps", False)
+        self.declare_parameter('dumps', False)
 
         print(stdscr)
         if stdscr is not None:
@@ -421,7 +462,7 @@ class LatencyViewerNode(Node):
         self.topic_seq = {}
 
         excludes_topic = (
-            self.get_parameter("excludes_topics")
+            self.get_parameter('excludes_topics')
             .get_parameter_value().string_array_value)
         topics = self.get_pub_info_topics(excludes=excludes_topic)
         logs = []
@@ -442,65 +483,67 @@ class LatencyViewerNode(Node):
 
         self.solver = None
         self.stops = (
-            self.get_parameter("stops")
+            self.get_parameter('stops')
             .get_parameter_value().string_array_value)
         graph_pkl = (
-            self.get_parameter("graph_pkl")
+            self.get_parameter('graph_pkl')
             .get_parameter_value().string_value)
         if graph_pkl:
-            graph = pickle.load(open(graph_pkl, "rb"))
+            graph = pickle.load(open(graph_pkl, 'rb'))
             self.solver = InputSensorStampSolver(graph)
 
         self.pub_infos = PubInfosObj()
 
         timer_sec = (
-            self.get_parameter("timer_sec")
+            self.get_parameter('timer_sec')
             .get_parameter_value().double_value)
         self.timer = self.create_timer(timer_sec,
                                        self.timer_callback)
 
         self.target_topic = (
-            self.get_parameter("target_topic")
+            self.get_parameter('target_topic')
             .get_parameter_value().string_value)
         self.keep_info_sec = (
-            self.get_parameter("keep_info_sec")
+            self.get_parameter('keep_info_sec')
             .get_parameter_value().integer_value)
         self.wait_sec_to_init_graph = (
-            self.get_parameter("wait_sec_to_init_graph").
+            self.get_parameter('wait_sec_to_init_graph').
             get_parameter_value().integer_value)
         self.wait_init = 0
 
         self.init_skips()
 
-        self.printer.print(logs)
+        self.printer.print_(logs)
 
         self.dumps = (
-            self.get_parameter("dumps")
+            self.get_parameter('dumps')
             .get_parameter_value().bool_value)
         if self.dumps:
             os.makedirs(DUMP_DIR, exist_ok=True)
 
     def init_skips(self):
         """
-        Definition of skips.
+        Define skips.
+
         See TopicGraph.__init__ comment.
         """
         skips = {}
-        RECT_OUT_EX = "/sensing/lidar/{}/rectified/pointcloud_ex"
-        RECT_OUT = "/sensing/lidar/{}/rectified/pointcloud"
-        RECT_IN = "/sensing/lidar/{}/mirror_cropped/pointcloud_ex"
+        RECT_OUT_EX = '/sensing/lidar/{}/rectified/pointcloud_ex'
+        RECT_OUT = '/sensing/lidar/{}/rectified/pointcloud'
+        RECT_IN = '/sensing/lidar/{}/mirror_cropped/pointcloud_ex'
 
         # top
-        for pos in ["top", "left", "right"]:
+        for pos in ['top', 'left', 'right']:
             skips[RECT_OUT_EX.format(pos)] = RECT_IN.format(pos)
             skips[RECT_OUT.format(pos)] = RECT_IN.format(pos)
 
-        skips["/sensing/lidar/no_ground/pointcloud"] = \
-            "/sensing/lidar/concatenated/pointcloud"
+        skips['/sensing/lidar/no_ground/pointcloud'] = \
+            '/sensing/lidar/concatenated/pointcloud'
 
         self.skips = skips
 
     def listener_callback(self, pub_info_msg):
+        """Handle PubInfo message."""
         st = time.time()
         output_info = pub_info_msg.output_info
 
@@ -513,22 +556,22 @@ class LatencyViewerNode(Node):
         seq = self.topic_seq[topic]
 
         if this_seq < seq:  # skew
-            s = f"skew topic={topic} " + \
-                f"msg_seq={this_seq}({time2str(output_info.header_stamp)})" + \
-                f" saved_seq={seq}"
+            s = f'skew topic={topic} ' + \
+                f'msg_seq={this_seq}({time2str(output_info.header_stamp)})' + \
+                f' saved_seq={seq}'
             stamps = self.pub_infos.stamps(topic)
             if stamps or len(stamps) > 0:
                 last_stamp = sorted(stamps)[-1]
-                s += f"({last_stamp})"
+                s += f'({last_stamp})'
             self.get_logger().info(s)
         elif seq + 1 < this_seq:  # message drop happens
-            s = f"may drop topic={topic} " + \
-                f"msg_seq={this_seq}({time2str(output_info.header_stamp)})" + \
-                f" saved_seq={seq}"
+            s = f'may drop topic={topic} ' + \
+                f'msg_seq={this_seq}({time2str(output_info.header_stamp)})' + \
+                f' saved_seq={seq}'
             stamps = self.pub_infos.stamps(topic)
             if stamps or len(stamps) > 0:
                 last_stamp = sorted(stamps)[-1]
-                s += f"({last_stamp})"
+                s += f'({last_stamp})'
             self.get_logger().info(s)
             self.topic_seq[topic] = this_seq
         else:
@@ -553,10 +596,11 @@ class LatencyViewerNode(Node):
         elasped_ms = (et - st) * 1000
         if elasped_ms > 1:
             self.get_logger().info(
-                f"sub {topic} at {stamp}@ {elasped_ms} [ms]")
+                f'sub {topic} at {stamp}@ {elasped_ms} [ms]')
 
     def handle_stat(self, stamps):
-        """Report statistics
+        """
+        Report statistics.
 
         Paramters
         ---------
@@ -565,6 +609,7 @@ class LatencyViewerNode(Node):
         Returns
         -------
         list of string
+
         """
         pubinfos = self.pub_infos
         target_topic = self.target_topic
@@ -581,45 +626,46 @@ class LatencyViewerNode(Node):
 
         logs = []
 
-        fmt = "{:80} " + \
-            "{:>6} {:>6} {:>6} " + \
-            "{:>6} {:>6} {:>6}"
+        fmt = '{:80} ' + \
+            '{:>6} {:>6} {:>6} ' + \
+            '{:>6} {:>6} {:>6}'
         logs.append(fmt.format(
-            "topic",
-            "e2e", "e2e", "e2e",
-            "e2e_s", "e2e_s", "e2e_s"
+            'topic',
+            'e2e', 'e2e', 'e2e',
+            'e2e_s', 'e2e_s', 'e2e_s'
         ))
 
         for stat in stats:
-            name = (" " * stat["depth"] +
-                    stat["name"] +
-                    ("*" if stat["is_leaf"] else ""))
+            name = (' ' * stat['depth'] +
+                    stat['name'] +
+                    ('*' if stat['is_leaf'] else ''))
             name = truncate(name)
 
             def p(v):
                 if v is None:
-                    s = "NA"
-                    return f"{s:>6}"
+                    s = 'NA'
+                    return f'{s:>6}'
                 if v > 1000:
-                    s = "inf"
-                    return f"{s:>6}"
+                    s = 'inf'
+                    return f'{s:>6}'
                 else:
-                    return f"{v:>6.1f}"
+                    return f'{v:>6.1f}'
 
-            s = f"{name:80} "
-            s += f"{p(stat['dur_min']):>6} "
-            s += f"{p(stat['dur_mean']):>6} "
-            s += f"{p(stat['dur_max']):>6} "
-            s += f"{p(stat['dur_min_steady']):>6} "
-            s += f"{p(stat['dur_mean_steady']):>6} "
-            s += f"{p(stat['dur_max_steady']):>6} "
+            s = f'{name:80} '
+            s += f'{p(stat["dur_min"]):>6} '
+            s += f'{p(stat["dur_mean"]):>6} '
+            s += f'{p(stat["dur_max"]):>6} '
+            s += f'{p(stat["dur_min_steady"]):>6} '
+            s += f'{p(stat["dur_mean_steady"]):>6} '
+            s += f'{p(stat["dur_max_steady"]):>6} '
 
             logs.append(s)
 
         return logs
 
     def handle_one_hot(self, stamps):
-        """Report only one message
+        """
+        Report only one message.
 
         Paramters
         ---------
@@ -628,6 +674,7 @@ class LatencyViewerNode(Node):
         Returns
         -------
         array of strings for log
+
         """
         pubinfos = self.pub_infos
         target_topic = self.target_topic
@@ -648,29 +695,30 @@ class LatencyViewerNode(Node):
 
         if self.dumps:
             pickle.dump(results,
-                        open(f"{DUMP_DIR}/onehot_results_{target_stamp}.pkl",
-                             "wb"),
+                        open(f'{DUMP_DIR}/onehot_results_{target_stamp}.pkl',
+                             'wb'),
                         protocol=pickle.HIGHEST_PROTOCOL)
 
         onehot_durs = calc_one_hot(results)
         logs = []
         for e in onehot_durs:
             (depth, name, dur_ms, dur_ms_steady, is_leaf, stamp) = e
-            name = truncate(" " * depth + name + ("*" if is_leaf else ""))
+            name = truncate(' ' * depth + name + ('*' if is_leaf else ''))
             if dur_ms is None:
-                dur_ms = "NA"
+                dur_ms = 'NA'
             if dur_ms_steady is None:
-                dur_ms_steady = "NA"
-            stamp_s = "NA"
+                dur_ms_steady = 'NA'
+            stamp_s = 'NA'
             if stamp:
                 stamp_s = time2str(stamp)
 
-            s = f"{name:80} {stamp_s:>20} {dur_ms:>6} {dur_ms_steady:>6}"
+            s = f'{name:80} {stamp_s:>20} {dur_ms:>6} {dur_ms_steady:>6}'
             logs.append(s)
 
         return logs
 
     def timer_callback(self):
+        """Clear old data."""
         st = time.time()
         pubinfos = self.pub_infos
         target_topic = self.target_topic
@@ -678,53 +726,54 @@ class LatencyViewerNode(Node):
         stamps = sorted(pubinfos.stamps(target_topic))
         logs = []
         str_stamp = stamps[0] if len(stamps) > 0 else ''
-        logs.append(f"stamps: {len(stamps)}, {str_stamp}")
+        logs.append(f'stamps: {len(stamps)}, {str_stamp}')
         if len(stamps) == 0:
-            self.printer.print(logs)
+            self.printer.print_(logs)
             return
 
         # check header.stamp field existence
         if not pubinfos.get(target_topic, stamps[0]).out_info.has_stamp:
-            logs.append("**WARNING** target topic has no stamp field")
-            self.printer.print(logs)
+            logs.append('**WARNING** target topic has no stamp field')
+            self.printer.print_(logs)
             return
 
         if not self.solver:
             if self.wait_init < self.wait_sec_to_init_graph:
-                self.printer.print(logs)
+                self.printer.print_(logs)
                 self.wait_init += 1
                 return
-            logs.append("init solver")
+            logs.append('init solver')
             graph = TopicGraph(pubinfos, skips=self.skips)
             self.solver = InputSensorStampSolver(graph)
 
-        mode = self.get_parameter("mode").get_parameter_value().string_value
-        if mode == "stat":
+        mode = self.get_parameter('mode').get_parameter_value().string_value
+        if mode == 'stat':
             logs.extend(self.handle_stat(stamps))
-        elif mode == "onehot":
+        elif mode == 'onehot':
             logs.extend(self.handle_one_hot(stamps))
         else:
-            logs.append("unknown mode")
+            logs.append('unknown mode')
         et1 = time.time()
         handle_ms = (et1 - st) * 1000
 
         # cleanup PubInfos
-        (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split("."))
+        (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split('.'))
         until_stamp = TimeMsg(sec=latest_sec - self.keep_info_sec,
                               nanosec=latest_ns)
         pubinfos.erase_until(until_stamp)
         et2 = time.time()
         cleanup_ms = (et2 - et1) * 1000
 
-        self.printer.print(logs)
+        self.printer.print_(logs)
 
         if handle_ms + cleanup_ms > 30:
-            s = f"timer handle_ms={handle_ms}" + \
-                f" cleanup_ms={cleanup_ms}"
+            s = f'timer handle_ms={handle_ms}' + \
+                f' cleanup_ms={cleanup_ms}'
             self.get_logger().info(s)
 
     def get_pub_info_topics(self, excludes=[]):
-        """Get all topic infos
+        """
+        Get all topic infos.
 
         Paramters
         ---------
@@ -733,6 +782,7 @@ class LatencyViewerNode(Node):
         -------
         map
           a list of pubinfo topics
+
         """
         # short sleep between node creation and get_topic_names_and_types
         # https://github.com/ros2/ros2/issues/1057
@@ -740,7 +790,7 @@ class LatencyViewerNode(Node):
         # but don't need in dev environment(i.e. rosbagged PubInfo)
         time.sleep(0.5)
 
-        msg_type = "tilde_msg/msg/PubInfo"
+        msg_type = 'tilde_msg/msg/PubInfo'
         topic_and_types = self.get_topic_names_and_types()
         filtered_topic_and_types = \
             filter(lambda x: msg_type in x[1], topic_and_types)
@@ -751,6 +801,7 @@ class LatencyViewerNode(Node):
 
 
 def main_curses(stdscr, args=None):
+    """Wrap main function for ncurses."""
     rclpy.init(args=args)
 
     node = LatencyViewerNode(stdscr=stdscr)
@@ -759,21 +810,23 @@ def main_curses(stdscr, args=None):
 
 
 def main(args=None):
+    """Main."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--batch", action="store_true",
-        help="Run as batch mode, just like top command `-b` option")
+        '--batch', action='store_true',
+        help='Run as batch mode, just like top command `-b` option')
     parsed = parser.parse_known_args()[0]
 
     print(parsed)
 
     if not parsed.batch:
-        print("not batch")
+        print('not batch')
         curses.wrapper(main_curses, args=sys.argv)
     else:
-        print("batch")
+        print('batch')
         main_curses(None, args=sys.argv)
 
 
 if __name__ == '__main__':
+    """Main."""
     main(sys.argv)

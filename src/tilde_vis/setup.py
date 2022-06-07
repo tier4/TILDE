@@ -1,3 +1,4 @@
+"""Visualization tool for TILDE."""
 from setuptools import setup
 
 package_name = 'tilde_vis'

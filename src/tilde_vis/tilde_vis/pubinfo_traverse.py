@@ -13,28 +13,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pickle
+"""PubInfo Traverser."""
+
 import argparse
-from collections import deque, defaultdict
-import time
+from collections import defaultdict, deque
 import json
+import pickle
+import time
 
 from rclpy.time import Time
 
-from tilde_vis.pub_info import time2str
 from tilde_vis.data_as_tree import TreeNode
+from tilde_vis.pub_info import time2str
 
 
 def strstamp2time(strstamp):
-    sec, nanosec = strstamp.split(".")
+    """Convert string time to Time."""
+    sec, nanosec = strstamp.split('.')
     return Time(seconds=int(sec), nanoseconds=int(nanosec))
 
 
 class SolverResult(object):
+    """SolverResult."""
+
     def __init__(self, topic, stamp, dur_ms,
                  dur_pub_ms, dur_pub_ms_steady,
                  is_leaf, parent):
         """
+        Constructor.
+
+        Parameters
+        ----------
         topic: topic [string]
         stamp: header.stamp [rclpy.Time]
         dur_ms: duration of header.stamp in ms [double]
@@ -42,6 +51,7 @@ class SolverResult(object):
         dur_pub_ms_steady: same with above but in steady clock ms [double]
         is_leaf: bool
         parent: parent topic [string]
+
         """
         self.topic = topic
         self.stamp = stamp
@@ -53,9 +63,13 @@ class SolverResult(object):
 
 
 class SolverResultsPrinter(object):
+    """SolverResultsPrinter."""
+
     @classmethod
     def as_tree(cls, results):
-        """ Construct array of string to print.
+        """
+        Construct array of string to print.
+
         This methos returns tree command like expression
         from output topic to source topics.
         Multiple input topics are shown by indented listing.
@@ -75,16 +89,21 @@ class SolverResultsPrinter(object):
         Return
         ------
         array of string
+
         """
         pass
 
 
 class SolverResults(object):
+    """SolverResults."""
+
     def __init__(self):
+        """Constructor."""
         self.data = []  # list of Result
 
     def add(self, *args):
-        """ Register Result.
+        """
+        Register Result.
 
         Paramaters
         ----------
@@ -94,7 +113,10 @@ class SolverResults(object):
 
 
 class InputSensorStampSolver(object):
+    """InputSensorStampSolver."""
+
     def __init__(self, graph):
+        """Constructor."""
         # {topic: {stamp: {sensor_topic: [stamps]}}}
         self.topic_stamp_to_sensor_stamp = {}
         self.graph = graph
@@ -104,14 +126,21 @@ class InputSensorStampSolver(object):
     def solve(self, pubinfos, tgt_topic, tgt_stamp,
               stops=[]):
         """
+        Traverse from (tgt_topic, tgt_stamp)-message.
+
+        Parameters
+        ----------
         topic: target topic
         stamp: target stamp(str)
 
         stops: list of stop topics to prevent loop
 
-        return SolverResults
+        Return
+        ------
+        SolverResults
 
         Calcurate topic_stamp_to_sensor_stamp internally.
+
         """
         graph = self.graph
         path_bfs = graph.bfs_rev(tgt_topic)
@@ -133,7 +162,7 @@ class InputSensorStampSolver(object):
         dists[tgt_topic][tgt_stamp] = 1
         queue.append((tgt_topic, tgt_stamp,
                       start_pub_time, start_pub_time_steady))
-        parentQ.append("")
+        parentQ.append('')
 
         ret = SolverResults()
         while len(queue) != 0:
@@ -182,7 +211,8 @@ class InputSensorStampSolver(object):
 
     def solve2(self, pubinfos, tgt_topic, tgt_stamp,
                stops=[]):
-        """Traverse DAG from output to input.
+        """
+        Traverse DAG from output to input.
 
         Parameters
         ----------
@@ -199,10 +229,11 @@ class InputSensorStampSolver(object):
           returned TreeNode preserve entire graph.
         - .name means topic
         - .data is PubInfo of the topic. [] whn PubInfo loss
+
         """
         skips = self.skips
         stamp = tgt_stamp
-        key = tgt_topic + ".".join(stops)
+        key = tgt_topic + '.'.join(stops)
         if key not in self.empty_results:
             self.empty_results[key] = self._solve_empty(tgt_topic, stops=stops)
         empty_results = self.empty_results[key]
@@ -241,6 +272,7 @@ class InputSensorStampSolver(object):
         return root_results
 
     def append(self, topic, stamp, sensor_topic, sensor_stamp):
+        """Append results to topic_stamp_to_sensor_stamp."""
         dic = self.topic_stamp_to_sensor_stamp
         if topic not in dic.keys():
             dic[topic] = {}
@@ -253,7 +285,9 @@ class InputSensorStampSolver(object):
 
     def _solve_empty(self, tgt_topic,
                      stops=[]):
-        """Get empty results to know graph
+        """
+        Get empty results to know graph.
+
         Parameters
         ----------
         tgt_topic: output topic [string]
@@ -262,6 +296,7 @@ class InputSensorStampSolver(object):
         Returns
         -------
         TreeNode
+
         """
         skips = self.skips
         graph = self.graph
@@ -288,17 +323,19 @@ class InputSensorStampSolver(object):
 
 
 class TopicGraph(object):
-    "Construct topic graph by ignoring stamps"
+    """Construct topic graph by ignoring stamps."""
 
     def __init__(self, pubinfos, skips={}):
         """
-        Parameters
-        ----------        def init_solver():
+        Constructor.
 
+        Parameters
+        ----------
         pubinfos: PubInfos
         skips: skip topics. {downstream: upstream} by input-to-output order
                ex) {"/sensing/lidar/top/rectified/pointcloud_ex":
                     "/sensing/lidar/top/mirror_cropped/pointcloud_ex"}
+
         """
         self.topics = sorted(pubinfos.all_topics())
         self.t2i = {t: i for i, t in enumerate(self.topics)}
@@ -321,28 +358,44 @@ class TopicGraph(object):
                 self.rev_edges[out_id].add(in_id)
 
     def dump(self, fname):
+        """Dump."""
         out = {}
-        out["topics"] = self.topics
-        out["topic2id"] = self.t2i
-        out["topic_edges"] = [list(l) for l in self.topic_edges]
-        out["rev_edges"] = [list(l) for l in self.rev_edges]
+        out['topics'] = self.topics
+        out['topic2id'] = self.t2i
+        out['topic_edges'] = [list(l) for l in self.topic_edges]
+        out['rev_edges'] = [list(l) for l in self.rev_edges]
 
-        json.dump(out, open(fname, "wt"))
+        json.dump(out, open(fname, 'wt'))
 
     def rev_topics(self, topic):
         """
-        get input topics
-        return List[Topic]
+        Get input topics of the target topic.
+
+        Parameters
+        ----------
+        topic: topic name
+
+        Return
+        ------
+        List[Topic]
+
         """
         out_topic_idx = self.t2i[topic]
         return [self.topics[i] for i in self.rev_edges[out_topic_idx]]
 
     def dfs_rev(self, start_topic):
-        '''
-        traverse topic graph reversely from start_topic
+        """
+        Do depth first search from the topic.
 
-        return topic names in appearance order
-        '''
+        Parameters
+        ----------
+        start_topic: topic name
+
+        Return
+        ------
+        topic names in appearance order
+
+        """
         edges = self.rev_edges
         n = len(edges)
         seen = [False for _ in range(n)]
@@ -363,7 +416,16 @@ class TopicGraph(object):
 
     def bfs_rev(self, start_topic):
         """
-        return list of (topic, is_leaf)
+        Do breadth first search from the topic.
+
+        Parameters
+        ----------
+        start_topic: topic name
+
+        Return
+        ------
+        topic names in appearance order
+
         """
         edges = self.rev_edges
         n = len(edges)
@@ -388,17 +450,18 @@ class TopicGraph(object):
 
 
 def run(args):
+    """Run."""
     pklfile = args.pickle_file
-    pubinfos = pickle.load(open(pklfile, "rb"))
+    pubinfos = pickle.load(open(pklfile, 'rb'))
 
     tgt_topic = args.topic
     tgt_stamp = sorted(pubinfos.stamps(tgt_topic))[args.stamp_index]
 
     graph = TopicGraph(pubinfos)
 
-    print("dump")
-    graph.dump("graph.json")
-    pickle.dump(graph, open("graph.pkl", "wb"),
+    print('dump')
+    graph.dump('graph.json')
+    pickle.dump(graph, open('graph.pkl', 'wb'),
                 protocol=pickle.HIGHEST_PROTOCOL)
 
     # bfs_path = graph.bfs_rev(tgt_topic)
@@ -412,22 +475,23 @@ def run(args):
     solver.solve(pubinfos, tgt_topic, tgt_stamp)
     et = time.time()
 
-    print(f"solve {(et-st) * 1000} [ms]")
+    print(f'solve {(et-st) * 1000} [ms]')
 
 
 def main():
+    """Main."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("pickle_file")
-    parser.add_argument("stamp_index", type=int, default=0,
-                        help="header stamp index")
-    parser.add_argument("topic",
-                        default="/sensing/lidar/no_ground/pointcloud",
-                        nargs="?")
+    parser.add_argument('pickle_file')
+    parser.add_argument('stamp_index', type=int, default=0,
+                        help='header stamp index')
+    parser.add_argument('topic',
+                        default='/sensing/lidar/no_ground/pointcloud',
+                        nargs='?')
 
     args = parser.parse_args()
 
     run(args)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

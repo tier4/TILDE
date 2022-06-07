@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""LatencyViewer PoC version. Deprecated."""
 
-import os
 from collections import defaultdict
-import numpy as np
 from logging import basicConfig, getLogger
+import os
+
+import numpy as np
 
 import rclpy
 from rclpy.node import Node
@@ -54,29 +56,36 @@ LIDAR_PREPROCESS_PUB = [
 
 
 class TopicInfoStatistics(object):
+    """TopicInfo statistics."""
+
     def __init__(self, topics, max_rows=10):
+        """Constructor."""
         self.topics = topics
         self.t2i = {topic: i for i, topic in enumerate(topics)}
-        self.seq2time = defaultdict(lambda: - np.ones(len(self.t2i), dtype=np.float64))
+        self.seq2time = defaultdict(
+            lambda: - np.ones(len(self.t2i), dtype=np.float64))
         # (n_messages, n_subcallbacks), nanoseconds
         self.data = - np.ones((max_rows, len(topics)), dtype=np.float)
         self.data_idx = 0
         self.max_rows = max_rows
         self.num_dump = -1
 
-        s = ""
+        s = ''
         for t in topics:
-            s += f"{t}  "
+            s += f'{t}  '
         s = s.rstrip()
-        s = s.replace("  ", " -> ")
+        s = s.replace('  ', ' -> ')
         print(s)
 
-    def set(self, seq, topic, callback_start_time):
+    def register(self, seq, topic, callback_start_time):
+        """Register result."""
         vec = self.seq2time[seq]
         i = self.t2i[topic]
         vec[i] = callback_start_time
-        logger.debug("seq {}: i: {} non zero: {}".format(seq, i, np.count_nonzero(vec > 0)))
-        if np.count_nonzero(vec > 0) == len(self.t2i) and self.data_idx < self.max_rows:
+        logger.debug('seq {}: i: {} non zero: {}'.format(
+            seq, i, np.count_nonzero(vec > 0)))
+        if (np.count_nonzero(vec > 0) == len(self.t2i) and
+                self.data_idx < self.max_rows):
             self.data[self.data_idx, ...] = vec[...]
             del self.seq2time[seq]
             self.data_idx += 1
@@ -84,12 +93,14 @@ class TopicInfoStatistics(object):
             # TODO: delete too old seq key (now leaks)
 
     def is_filled(self):
+        """Check data."""
         return self.data_idx == self.max_rows
 
     def dump_and_clear(self, dumps=False):
+        """Dump and clear results."""
         if dumps:
             self.num_dump += 1
-            fname = "{}.npy".format(self.num_dump)
+            fname = '{}.npy'.format(self.num_dump)
             np.save(fname, self.data)
 
         # TODO: ignore nan(-1) field
@@ -109,41 +120,50 @@ class TopicInfoStatistics(object):
         min_e2e = e2e.min()
 
         def fmt(vec):
-            s = ""
+            s = ''
             for v in vec:
-                s += f"{v:5.1f}  "
+                s += f'{v:5.1f}  '
             return s.rstrip()
 
-        print("max: " + fmt(maxtime))
-        print("avg: " + fmt(avgtime))
-        print("min: " + fmt(mintime))
-        print("e2e: " + fmt([max_e2e, avg_e2e, min_e2e]))
-        print("")
+        print('max: ' + fmt(maxtime))
+        print('avg: ' + fmt(avgtime))
+        print('min: ' + fmt(mintime))
+        print('e2e: ' + fmt([max_e2e, avg_e2e, min_e2e]))
+        print('')
 
         self.data[...] = -1.0
         self.data_idx = 0
 
 
 class PathVisNode(Node):
-    def __init__(self):
-        super().__init__('path_vis_node')
-        self.declare_parameter("topics", LIDAR_PREPROCESS)
-        self.declare_parameter("window", 10)
-        self.declare_parameter("dump", False)
-        self.declare_parameter("watches_pub", False)
+    """Path visualization node."""
 
-        topics = self.get_parameter("topics").get_parameter_value().string_array_value
-        window = self.get_parameter("window").get_parameter_value().integer_value
-        watches_pub = self.get_parameter("watches_pub").get_parameter_value().bool_value
-        info_name = "/info/sub"
+    def __init__(self):
+        """Constructor."""
+        super().__init__('path_vis_node')
+        self.declare_parameter('topics', LIDAR_PREPROCESS)
+        self.declare_parameter('window', 10)
+        self.declare_parameter('dump', False)
+        self.declare_parameter('watches_pub', False)
+
+        topics = self.get_parameter('topics') \
+                     .get_parameter_value() \
+                     .string_array_value
+        window = self.get_parameter('window') \
+                     .get_parameter_value() \
+                     .integer_value
+        watches_pub = self.get_parameter('watches_pub') \
+                          .get_parameter_value() \
+                          .bool_value
+        info_name = '/info/sub'
         if watches_pub:
-            info_name = "/info/pub"
+            info_name = '/info/pub'
             topics = LIDAR_PREPROCESS_PUB
 
         self.statistics = TopicInfoStatistics(topics, window)
         self.subs = []
 
-        logger.debug("info_name: {}".format(info_name))
+        logger.debug('info_name: {}'.format(info_name))
 
         for topic in topics:
             sub = self.create_subscription(
@@ -155,18 +175,20 @@ class PathVisNode(Node):
             self.subs.append(sub)
 
     def listener_callback(self, topic_info):
+        """Store data and print results."""
         seq = topic_info.seq
         topic = topic_info.topic_name
         start_time = Time.from_msg(topic_info.callback_start).nanoseconds
-        dump = self.get_parameter("dump").get_parameter_value().bool_value
+        dump = self.get_parameter('dump').get_parameter_value().bool_value
 
-        logger.debug("{} {}".format(seq, topic))
-        self.statistics.set(seq, topic, start_time)
+        logger.debug('{} {}'.format(seq, topic))
+        self.statistics.register(seq, topic, start_time)
         if self.statistics.is_filled():
             self.statistics.dump_and_clear(dump)
 
 
 def main(args=None):
+    """Main."""
     rclpy.init(args=args)
     node = PathVisNode()
 
@@ -176,4 +198,5 @@ def main(args=None):
 
 
 if __name__ == '__main__':
+    """Main."""
     main()
