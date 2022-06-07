@@ -65,7 +65,7 @@ ros2 run tilde_vis latency_viewer --batch ...
 #### General parameters
 
 | name                     | values              | about                                      |
-|--------------------------|---------------------|--------------------------------------------|
+| ------------------------ | ------------------- | ------------------------------------------ |
 | `mode`                   | `one_hot` or `stat` | Calculation rule. See below.               |
 | `wait_sec_to_init_graph` | positive integer    | Initial wait seconds to grasp topic graph. |
 
