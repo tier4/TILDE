@@ -3,7 +3,7 @@
 ## Description
 
 Deadline detector by TILDE PubInfo.
-You can detect deadlines in some scenarios: 
+You can detect deadlines in some scenarios:
 
 - from the sensor to some node
 - a specific path
@@ -18,15 +18,15 @@ You can detect deadlines in some scenarios:
 
 Do `colcon build`. We recommend the "Release" build for performance.
 
-```
-$ colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+```bash
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 
 ## Run
 
 Use `ros2 run` as below.
 
-``` bash
+```bash
 $ ros2 run tilde_deadline_detector tilde_deadline_detector_node_exe \
     --ros-args --params-file src/tilde_deadline_detector/autoware_sensors.yaml \
 ```
@@ -36,21 +36,21 @@ The deadline notification is not implemented yet.
 
 Here is a set of parameters.
 
-| name                 | about                                                                               |
-|----------------------|-------------------------------------------------------------------------------------|
-| `ignore_topics`      | don't subscribe these topics                                                        |
-| `sensor_topics`      | regard nodes as sensors if PubInfo has no input_infos or the topic is in this list. |
-| `target_topics`      | topics of which you want to detect deadline                                         |
-| `deadline_ms`        | list of deadline [ms] in `target_topics` order.                                     |
-| `expire_ms`          | internal data lifetime                                                              |
-| `cleanup_ms`         | timer period to cleanup internal data                                               |
-| `print_report`       | whether to print internal data                                                      |
+| name                | about                                                                               |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| `ignore_topics`     | don't subscribe these topics                                                        |
+| `sensor_topics`     | regard nodes as sensors if PubInfo has no input_infos or the topic is in this list. |
+| `target_topics`     | topics of which you want to detect deadline                                         |
+| `deadline_ms`       | list of deadline [ms] in `target_topics` order.                                     |
+| `expire_ms`         | internal data lifetime                                                              |
+| `cleanup_ms`        | timer period to cleanup internal data                                               |
+| `print_report`      | whether to print internal data                                                      |
 | `clock_work_around` | set true when your bag file does not have `/clock`                                  |
-| `show_performance`   | set true to show performance report                                                 |
+| `show_performance`  | set true to show performance report                                                 |
 
 This is a sample parameter yaml file.
 
-```
+```text
 tilde_deadline_detector_node:
   ros__parameters:
     sensor_topics: [
@@ -73,4 +73,3 @@ tilde_deadline_detector_node:
       0,
     ]
 ```
-

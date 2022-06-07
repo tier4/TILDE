@@ -9,11 +9,13 @@ TILDE はノードから出力されたトピックを遡り、元となった�
 ## Table of Contents
 
 - [TILDE - Tilde Is Latency Data Embedding](#tilde---tilde-is-latency-data-embedding)
+  - [Table of Contents](#table-of-contents)
   - [TILDE の目標](#tilde-の目標)
   - [想定ユースケース](#想定ユースケース)
   - [動作原理](#動作原理)
   - [API](#api)
-  - [インストール・組み込み](#インストール組み込み)
+    - [tilde::TildeNode](#tildetildenode)
+  - [インストール, 組み込み](#インストール-組み込み)
   - [デッドライン検出](#デッドライン検出)
   - [周辺ツール](#周辺ツール)
   - [リポジトリ一覧](#リポジトリ一覧)
@@ -84,7 +86,7 @@ rclcpp::Node の子クラスです。
   - false の場合 TILDE の機能がオフになる。つまり Subscription callback でのフックや publish 時の PubInfo 送信が抑制される。
   - 2022/03/02 現在初期化時のみ指定可能。
 
-## インストール・組み込み
+## インストール, 組み込み
 
 [build](./build.md)
 
