@@ -168,11 +168,11 @@ void TildeDeadlineDetectorNode::init()
 
       if (show_performance) {
         std::cout << "pubinfo_callback: " <<
-          "  avg: " << pubinfo_callback_counter_.avg << "\n" <<
-          "  max: " << pubinfo_callback_counter_.max << "\n" <<
-          "timer_callback: " <<
-          "  avg: " << timer_callback_counter_.avg << "\n" <<
-          "  max: " << timer_callback_counter_.max << std::endl;
+        "  avg: " << pubinfo_callback_counter_.avg << "\n" <<
+        "  max: " << pubinfo_callback_counter_.max << "\n" <<
+        "timer_callback: " <<
+        "  avg: " << timer_callback_counter_.avg << "\n" <<
+        "  max: " << timer_callback_counter_.max << std::endl;
         this->fe.debug_print();
       }
     });
