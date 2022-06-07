@@ -185,13 +185,13 @@ class PubInfos(object):
 
             As stamps are string, it is not appropriate to compare as string.
             Builtin_msg.msg.Time does not implement `<=>`, we use rclpy.Time,
-            althoght clock_type has no meaning.
+            although clock_type has no meaning.
 
             """
-            [lhs_sec, lhs_nsec] = map(lambda x: int(x), lhs.split('.'))
-            [rhs_sec, rhs_nsec] = map(lambda x: int(x), rhs.split('.'))
-            lhs_time = Time(seconds=lhs_sec, nanoseconds=lhs_nsec)
-            rhs_time = Time(seconds=rhs_sec, nanoseconds=rhs_nsec)
+            [lhs_sec, lhs_nano_sec] = map(lambda x: int(x), lhs.split('.'))
+            [rhs_sec, rhs_nano_sec] = map(lambda x: int(x), rhs.split('.'))
+            lhs_time = Time(seconds=lhs_sec, nanoseconds=lhs_nano_sec)
+            rhs_time = Time(seconds=rhs_sec, nanoseconds=rhs_nano_sec)
             return lhs_time <= rhs_time
 
         thres_stamp = time2str(stamp)

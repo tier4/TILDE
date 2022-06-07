@@ -27,9 +27,9 @@ from tilde_vis.data_as_tree import TreeNode
 from tilde_vis.pub_info import time2str
 
 
-def strstamp2time(strstamp):
+def str_stamp2time(str_stamp):
     """Convert string time to Time."""
-    sec, nanosec = strstamp.split('.')
+    sec, nanosec = str_stamp.split('.')
     return Time(seconds=int(sec), nanoseconds=int(nanosec))
 
 
@@ -70,7 +70,7 @@ class SolverResultsPrinter(object):
         """
         Construct array of string to print.
 
-        This methos returns tree command like expression
+        This method returns tree command like expression
         from output topic to source topics.
         Multiple input topics are shown by indented listing.
 
@@ -105,9 +105,10 @@ class SolverResults(object):
         """
         Register Result.
 
-        Paramaters
+        Parameters
         ----------
         args: completely forward. See Result.__init__.
+
         """
         self.data.append(SolverResult(*args))
 
@@ -139,7 +140,7 @@ class InputSensorStampSolver(object):
         ------
         SolverResults
 
-        Calcurate topic_stamp_to_sensor_stamp internally.
+        Calculate topic_stamp_to_sensor_stamp internally.
 
         """
         graph = self.graph
@@ -154,7 +155,7 @@ class InputSensorStampSolver(object):
         queue = deque()
         parentQ = deque()
 
-        start = strstamp2time(tgt_stamp)
+        start = str_stamp2time(tgt_stamp)
         start_pub_info = pubinfos.get(tgt_topic, tgt_stamp)
         start_pub_time = start_pub_info.out_info.pubsub_stamp
         start_pub_time_steady = start_pub_info.out_info.pubsub_stamp_steady
@@ -169,7 +170,7 @@ class InputSensorStampSolver(object):
             topic, stamp, sub_time, sub_time_steady = queue.popleft()
             parent = parentQ.popleft()
 
-            dur = start - strstamp2time(stamp)
+            dur = start - str_stamp2time(stamp)
             dur_ms = dur.nanoseconds // 10**6
 
             dur_pub = Time.from_msg(start_pub_time) - Time.from_msg(sub_time)
@@ -245,11 +246,11 @@ class InputSensorStampSolver(object):
 
         queue.append((tgt_topic, tgt_stamp, root_results))
         while len(queue) != 0:
-            topic, stamp, cresult = queue.popleft()
+            topic, stamp, current_result = queue.popleft()
 
             next_pubinfo = pubinfos.get(topic, stamp)
             if next_pubinfo is not None:
-                cresult.add_data(next_pubinfo)
+                current_result.add_data(next_pubinfo)
             else:
                 # print(f"pubinfo of {topic} {stamp} not found")
                 continue
@@ -264,10 +265,10 @@ class InputSensorStampSolver(object):
                     if nx_topic in skips:
                         nx_topic = skips[nx_topic]
                     nx_stamp = time2str(in_info.stamp)
-                    nresult = cresult.get_child(nx_topic)
+                    next_result = current_result.get_child(nx_topic)
 
                     queue.append((nx_topic, nx_stamp,
-                                  nresult))
+                                  next_result))
 
         return root_results
 
@@ -306,7 +307,7 @@ class InputSensorStampSolver(object):
 
         queue.append((tgt_topic, root_results))
         while len(queue) != 0:
-            topic, cresult = queue.popleft()
+            topic, current_result = queue.popleft()
 
             if topic in stops:
                 continue
@@ -316,8 +317,8 @@ class InputSensorStampSolver(object):
                 if nx_topic in skips:
                     nx_topic = skips[nx_topic]
 
-                nresult = cresult.get_child(nx_topic)
-                queue.append((nx_topic, nresult))
+                next_result = current_result.get_child(nx_topic)
+                queue.append((nx_topic, next_result))
 
         return root_results
 
@@ -451,8 +452,8 @@ class TopicGraph(object):
 
 def run(args):
     """Run."""
-    pklfile = args.pickle_file
-    pubinfos = pickle.load(open(pklfile, 'rb'))
+    pickle_file = args.pickle_file
+    pubinfos = pickle.load(open(pickle_file, 'rb'))
 
     tgt_topic = args.topic
     tgt_stamp = sorted(pubinfos.stamps(tgt_topic))[args.stamp_index]

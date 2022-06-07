@@ -122,17 +122,17 @@ def build_latency_table(traces, ds):
         flows = []
 
         # 後続のトレースを取得
-        def get_subsequents(uuid):
+        def get_subsequence(uuid):
             return [trace for trace in traces if uuid in trace.used_uuids]
 
         def search_local(uuid, flow):
             flow.append(uuid)
 
-            subsequents = get_subsequents(uuid)
-            if len(subsequents) == 0:
+            subsequence = get_subsequence(uuid)
+            if len(subsequence) == 0:
                 flows.append(flow)
 
-            for sub in subsequents:
+            for sub in subsequence:
                 search_local(sub.uuid, deepcopy(flow))
 
         search_local(start_uuid, [])
@@ -207,21 +207,21 @@ def vis_tilde(pub_infos):
             topic = node.name
             for d in node.data:
                 stamp = time2int(d.out_info.stamp)
-                pubtime = time2int(d.out_info.pubsub_stamp)
+                pub_time = time2int(d.out_info.pubsub_stamp)
                 uuid = f'{topic}_{stamp}'
                 uuids = []
                 for in_topic, infos in d.in_infos.items():
                     for i in infos:
                         i_stamp = time2int(i.stamp)
-                        subtime = time2int(i.pubsub_stamp)
+                        sub_time = time2int(i.pubsub_stamp)
                         i_uuid = f'{in_topic}_{i_stamp}'
                         uuids.append(i_uuid)
 
                         # append callback_start
-                        trace = Trace(in_topic, i_uuid, subtime, False, [])
+                        trace = Trace(in_topic, i_uuid, sub_time, False, [])
                         traces.append(trace)
                 # append publish
-                traces.append(Trace(topic, uuid, pubtime, True, uuids))
+                traces.append(Trace(topic, uuid, pub_time, True, uuids))
 
         tilde_path.apply(update_traces)
 

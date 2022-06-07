@@ -70,7 +70,7 @@ class TreeNode(object):
         """
         Apply fn recursively.
 
-        Internally, preordering DFS is used.
+        Internally, pre-order DFS is used.
 
         Parameters
         ----------
@@ -94,7 +94,7 @@ class TreeNode(object):
         """
         Apply with depth option.
 
-        Internally, preordering DFS is used.
+        Internally, pre-order DFS is used.
 
         Parameters
         ----------
@@ -131,7 +131,7 @@ class TreeNode(object):
             Merge data.
 
             lhs: TreeNode which is updated
-            rhs: TreeNode whici is const
+            rhs: TreeNode which is const
             """
             lhs.data.extend(rhs.data)
 

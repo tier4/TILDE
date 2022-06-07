@@ -121,9 +121,9 @@ public:
           this->get_logger(),
           "Filter get message cnt_ = %d",
           cnt_);
-        auto omsg = std::make_unique<std_msgs::msg::String>();
-        omsg->data = "hello";
-        pub_str_->publish(std::move(omsg));
+        auto out_msg = std::make_unique<std_msgs::msg::String>();
+        out_msg->data = "hello";
+        pub_str_->publish(std::move(out_msg));
         cnt_++;
       });
   }

@@ -19,13 +19,13 @@ import unittest
 from tilde_vis.data_as_tree import TreeNode
 
 
-def dict2tree(adict):
+def dict2tree(dict_):
     """
     Convert dictionary to TreeNode.
 
     Parameters
     ----------
-    adict: dictionary. If value is a dictionary,
+    dict_: dictionary. If value is a dictionary,
            then sub tree is created.
            Otherwise, value are stored on data.
 
@@ -36,13 +36,13 @@ def dict2tree(adict):
     """
     Q = deque()
     root = TreeNode('root')
-    Q.append((root, adict))
+    Q.append((root, dict_))
 
     while len(Q) > 0:
-        cnode, subdict = Q.pop()
+        current_node, sub_dict = Q.pop()
 
-        for k, v in subdict.items():
-            child = cnode.get_child(k)
+        for k, v in sub_dict.items():
+            child = current_node.get_child(k)
             if isinstance(v, dict):
                 Q.append((child, v))
             else:
@@ -79,15 +79,15 @@ def get_complex_tree():
     Q.append((root, sample))
 
     while len(Q) > 0:
-        cnode, subdict = Q.pop()
+        current_node, sub_dict = Q.pop()
 
-        if not isinstance(subdict, dict):
-            cnode.get_child(subdict)
+        if not isinstance(sub_dict, dict):
+            current_node.get_child(sub_dict)
             continue
 
-        for k in subdict.keys():
-            nnode = cnode.get_child(k)
-            Q.append((nnode, subdict[k]))
+        for k in sub_dict.keys():
+            nnode = current_node.get_child(k)
+            Q.append((nnode, sub_dict[k]))
 
     return root
 

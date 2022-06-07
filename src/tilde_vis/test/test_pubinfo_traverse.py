@@ -395,21 +395,21 @@ class TestTreeNode(unittest.TestCase):
         self.assertEqual(r3.data[0].in_infos['topic1'][0].stamp,
                          test_stamp1.to_msg())
 
-        onehot_durs = calc_one_hot(results)
-        self.assertEqual(len(onehot_durs), 4)
-        dur4 = onehot_durs[0]
+        one_hot_durations = calc_one_hot(results)
+        self.assertEqual(len(one_hot_durations), 4)
+        dur4 = one_hot_durations[0]
         self.assertEqual(dur4[1], 'topic4')
         self.assertEqual(dur4[3], 0)
 
-        dur3 = onehot_durs[1]
+        dur3 = one_hot_durations[1]
         self.assertEqual(dur3[1], 'topic3')
         self.assertEqual(dur3[3], 11)
 
-        dur2 = onehot_durs[3]
+        dur2 = one_hot_durations[3]
         self.assertEqual(dur2[1], 'topic2')
         self.assertEqual(dur2[3], 22)
 
-        dur1 = onehot_durs[2]
+        dur1 = one_hot_durations[2]
         self.assertEqual(dur1[1], 'topic1')
         self.assertEqual(dur1[3], 22)
 
