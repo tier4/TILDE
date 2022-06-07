@@ -30,6 +30,6 @@ def generate_launch_description():
             executable='sensor',
             output='screen',
             parameters=[{
-                "timer_us": 5 * 1000 * 1000,
+                'timer_us': 5 * 1000 * 1000,
             }]),
     ])

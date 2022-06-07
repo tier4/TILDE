@@ -22,7 +22,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            name="filter",
+            name='filter',
             package='tilde_vis_test',
             executable='filter',
             output='screen'),
@@ -31,6 +31,6 @@ def generate_launch_description():
             executable='sensor',
             output='screen',
             parameters=[{
-                "timer_us": 500 * 1000,
+                'timer_us': 500 * 1000,
             }]),
     ])

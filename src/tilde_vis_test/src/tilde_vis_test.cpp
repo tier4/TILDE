@@ -36,8 +36,8 @@ using namespace std::chrono_literals;
 namespace tilde_vis_test
 {
 
-const std::string in_topic = "in";
-const std::string out_topic = "out";
+const char in_topic[] = "in";
+const char out_topic[] = "out";
 
 class Sensor : public rclcpp::Node
 {
@@ -79,19 +79,19 @@ public:
     rclcpp::QoS qos(rclcpp::KeepLast(7));
 
     pub_pc_ = this->create_tilde_publisher<sensor_msgs::msg::PointCloud2>(
-        out_topic, qos);
+      out_topic, qos);
 
     sub_pc_ = this->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
-        in_topic, qos,
-        [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
-        {
-          (void) msg;
-          RCLCPP_INFO(
-              this->get_logger(),
-              "Relay get message cnt_ = %d",
-              cnt_);
-          pub_pc_->publish(std::move(msg));
-          cnt_++;
+      in_topic, qos,
+      [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
+      {
+        (void) msg;
+        RCLCPP_INFO(
+          this->get_logger(),
+          "Relay get message cnt_ = %d",
+          cnt_);
+        pub_pc_->publish(std::move(msg));
+        cnt_++;
       });
   }
 
@@ -110,21 +110,21 @@ public:
     rclcpp::QoS qos(rclcpp::KeepLast(7));
 
     pub_str_ = this->create_tilde_publisher<std_msgs::msg::String>(
-        out_topic, qos);
+      out_topic, qos);
 
     sub_pc_ = this->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
-        in_topic, qos,
-        [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
-        {
-          (void) msg;
-          RCLCPP_INFO(
-              this->get_logger(),
-              "Filter get message cnt_ = %d",
-              cnt_);
-          auto omsg = std::make_unique<std_msgs::msg::String>();
-          omsg->data = "hello";
-          pub_str_->publish(std::move(omsg));
-          cnt_++;
+      in_topic, qos,
+      [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
+      {
+        (void) msg;
+        RCLCPP_INFO(
+          this->get_logger(),
+          "Filter get message cnt_ = %d",
+          cnt_);
+        auto omsg = std::make_unique<std_msgs::msg::String>();
+        omsg->data = "hello";
+        pub_str_->publish(std::move(omsg));
+        cnt_++;
       });
   }
 
