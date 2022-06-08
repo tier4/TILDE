@@ -38,6 +38,12 @@ struct MsgWithTopLevelStamp
   builtin_interfaces::msg::Time stamp;
 };
 
+struct MsgWithHeaderAndTopLevelStamp
+{
+  std_msgs::msg::Header header;
+  builtin_interfaces::msg::Time stamp;
+};
+
 TEST_F(TestStampProcessor, pointer_with_header_stamp) {
   PointCloud2 msg;
 
@@ -85,6 +91,18 @@ TEST_F(TestStampProcessor, pointer_with_top_level_stamp) {
   rclcpp::Time t(3, 4, RCL_ROS_TIME);
   auto stamp = Process<decltype(msg)>::get_timestamp(t, &msg);
 
-  EXPECT_EQ(stamp, expect);
+  EXPECT_EQ(stamp, t);
 }
 
+TEST_F(TestStampProcessor, pointer_with_header_and_top_level_stamp) {
+  MsgWithHeaderAndTopLevelStamp msg;
+
+  rclcpp::Time expect(1, 2, RCL_ROS_TIME);
+  rclcpp::Time unexpect(3, 4, RCL_ROS_TIME);
+  msg.header.stamp = expect;
+  msg.stamp = unexpect;
+  rclcpp::Time t(5, 6, RCL_ROS_TIME);
+  auto stamp = Process<decltype(msg)>::get_timestamp(t, &msg);
+
+  EXPECT_EQ(stamp, expect);
+}

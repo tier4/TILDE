@@ -58,6 +58,22 @@ struct HasHeader : public std::false_type {};
 template<typename M>
 struct HasHeader<M, decltype((void) M::header)>: std::true_type {};
 
+template<typename M, typename = void>
+struct HasStamp : public std::false_type {};
+
+// with header, without top level stamp
+template<typename M>
+struct HasStamp<M, decltype((void)M::stamp)>: public std::true_type {};
+
+template<typename M, typename = std::false_type, typename = std::false_type>
+struct HasStampWithoutHeader : public std::false_type {};
+
+template<typename M>
+struct HasStampWithoutHeader<M, HasHeader<M>, std::false_type>: public std::false_type {};
+
+template<typename M>
+struct HasStampWithoutHeader<M, std::false_type, HasStamp<M>>: public std::true_type {};
+
 /// SFINEs to get header.stamp, not found case
 template<typename M, typename Enable = void>
 struct Process
@@ -117,6 +133,37 @@ struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
   {
     (void) t;
     return m->header.stamp;
+  }
+};
+
+/// SFINEs to get top level stamp, found case
+template<typename M>
+struct Process<M, typename std::enable_if<HasStampWithoutHeader<M>::value>::type>
+{
+  /// stamp getter for non-const pointer with header field
+  /**
+   * Return header.stamp
+   *
+   * \param[in] t dummy stamp
+   * \param[in] m message
+   */
+  static rclcpp::Time get_timestamp(rclcpp::Time t, M * m)
+  {
+    (void) t;
+    return m->stamp;
+  }
+
+  /// stamp getter for const pointer with header field
+  /**
+   * Return header.stamp
+   *
+   * \param[in] t dummy stamp
+   * \param[in] m message
+   */
+  static rclcpp::Time get_timestamp_from_const(rclcpp::Time t, const M * m)
+  {
+    (void) t;
+    return m->stamp;
   }
 };
 
