@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "rclcpp/rclcpp.hpp"
+#include "builtin_interfaces/msg/time.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "std_msgs/msg/string.hpp"
 
@@ -30,6 +31,11 @@ using tilde::Process;
 
 class TestStampProcessor : public ::testing::Test
 {
+};
+
+struct MsgWithTopLevelStamp
+{
+  builtin_interfaces::msg::Time stamp;
 };
 
 TEST_F(TestStampProcessor, pointer_with_header_stamp) {
@@ -70,3 +76,15 @@ TEST_F(TestStampProcessor, const_pointer_without_header_stamp) {
 
   EXPECT_EQ(stamp, t);
 }
+
+TEST_F(TestStampProcessor, pointer_with_top_level_stamp) {
+  MsgWithTopLevelStamp msg;
+
+  rclcpp::Time expect(1, 2, RCL_ROS_TIME);
+  msg.stamp = expect;
+  rclcpp::Time t(3, 4, RCL_ROS_TIME);
+  auto stamp = Process<decltype(msg)>::get_timestamp(t, &msg);
+
+  EXPECT_EQ(stamp, expect);
+}
+
