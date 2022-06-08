@@ -36,7 +36,7 @@ jobs:
         id: get-modified-packages
         uses: autowarefoundation/autoware-github-actions/get-modified-packages@v1
 
-      - name: Install LTTng
+      - name: Install python3-pytest-cov
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pytest-cov
