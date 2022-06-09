@@ -91,7 +91,10 @@ TEST_F(TestStampProcessor, pointer_with_top_level_stamp) {
   rclcpp::Time t(3, 4, RCL_ROS_TIME);
   auto stamp = Process<decltype(msg)>::get_timestamp(t, &msg);
 
-  EXPECT_EQ(stamp, t);
+  EXPECT_FALSE(tilde::HasHeader<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStamp<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStampWithoutHeader<decltype(msg)>::value);
+  EXPECT_EQ(stamp, expect);
 }
 
 TEST_F(TestStampProcessor, const_pointer_with_top_level_stamp) {
@@ -103,7 +106,10 @@ TEST_F(TestStampProcessor, const_pointer_with_top_level_stamp) {
   rclcpp::Time t(3, 4, RCL_ROS_TIME);
   auto stamp = Process<decltype(msg)>::get_timestamp_from_const(t, &msg);
 
-  EXPECT_EQ(stamp, t);
+  EXPECT_FALSE(tilde::HasHeader<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStamp<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStampWithoutHeader<decltype(msg)>::value);
+  EXPECT_EQ(stamp, expect);
 }
 
 TEST_F(TestStampProcessor, pointer_with_header_and_top_level_stamp) {
@@ -116,6 +122,9 @@ TEST_F(TestStampProcessor, pointer_with_header_and_top_level_stamp) {
   rclcpp::Time t(5, 6, RCL_ROS_TIME);
   auto stamp = Process<decltype(msg)>::get_timestamp(t, &msg);
 
+  EXPECT_TRUE(tilde::HasHeader<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStamp<decltype(msg)>::value);
+  EXPECT_FALSE(tilde::HasStampWithoutHeader<decltype(msg)>::value);
   EXPECT_EQ(stamp, expect);
 }
 
@@ -131,5 +140,8 @@ TEST_F(TestStampProcessor, const_pointer_with_header_and_top_level_stamp) {
   rclcpp::Time t(5, 6, RCL_ROS_TIME);
   auto stamp = Process<decltype(msg)>::get_timestamp_from_const(t, &msg);
 
+  EXPECT_TRUE(tilde::HasHeader<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStamp<decltype(msg)>::value);
+  EXPECT_FALSE(tilde::HasStampWithoutHeader<decltype(msg)>::value);
   EXPECT_EQ(stamp, expect);
 }

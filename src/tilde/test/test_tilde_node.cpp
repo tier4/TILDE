@@ -26,6 +26,7 @@
 #include "tilde/tilde_node.hpp"
 #include "tilde/tilde_publisher.hpp"
 #include "tilde_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/test_top_level_stamp.hpp"
 
 using tilde::TildeNode;
 using tilde::InputInfo;
@@ -316,4 +317,50 @@ TEST_F(TestTildeNode, register_message_as_input_find_subtime) {
   builtin_interfaces::msg::Time subtime_msg = subtime;
   EXPECT_EQ(subtime_msg.sec, clock_msg1.clock.sec);
   EXPECT_EQ(subtime_msg.nanosec, clock_msg1.clock.nanosec);
+}
+
+TEST_F(TestTildeNode, publish_top_level_stamp) {
+  rclcpp::NodeOptions options;
+  options.append_parameter_override("use_sim_time", true);
+
+  auto main_node = std::make_shared<TildeNode>("mainNode", options);
+  auto checker_node = std::make_shared<rclcpp::Node>("checkerNode", options);
+
+  // prepare publishers
+  auto main_pub = main_node->create_tilde_publisher<tilde_msg::msg::TestTopLevelStamp>(
+      "out_topic", 1);
+  auto clock_pub = main_node->create_publisher<rosgraph_msgs::msg::Clock>(
+    "/clock", 1);
+
+  // apply clock
+  rosgraph_msgs::msg::Clock clock_msg;
+  clock_msg.clock.sec = 123;
+  clock_msg.clock.nanosec = 456;
+
+  clock_pub->publish(clock_msg);
+  rclcpp::spin_some(main_node);
+  rclcpp::spin_some(checker_node);
+
+  // prepare checker subscription
+  bool checker_sub_called = false;
+  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::PubInfo>(
+      "out_topic/info/pub", 1,
+      [&checker_sub_called, &clock_msg](tilde_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
+      {
+        (void) pub_info_msg;
+        checker_sub_called = true;
+        EXPECT_TRUE(pub_info_msg->output_info.has_header_stamp);
+      });
+
+  // publish
+  tilde_msg::msg::TestTopLevelStamp msg;
+  msg.stamp.sec = 1234;
+  msg.stamp.nanosec = 5678;
+
+  main_pub->publish(msg);
+
+  rclcpp::spin_some(main_node);
+  rclcpp::spin_some(checker_node);
+
+  EXPECT_TRUE(checker_sub_called);
 }
