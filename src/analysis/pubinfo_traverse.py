@@ -11,8 +11,8 @@ from rclpy.time import Time
 
 from pub_info import time2str, PubInfo, PubInfos
 
-def strstamp2time(strstamp):
-    sec, nanosec = strstamp.split(".")
+def str_stamp2time(timestamp: str):
+    sec, nanosec = timestamp.split(".")
     return Time(seconds=int(sec), nanoseconds=int(nanosec))
 
 class InputSensorStampSolver(object):
@@ -27,7 +27,7 @@ class InputSensorStampSolver(object):
 
         return list of {sensor: oldest stamp}
 
-        Calcurate topic_stamp_to_sensor_stamp internally.
+        Calculate topic_stamp_to_sensor_stamp internally.
         """
         graph = TopicGraph(pubinfos)
         path_bfs = graph.bfs_rev(tgt_topic)
@@ -53,8 +53,8 @@ class InputSensorStampSolver(object):
             is_leaf_s = "looks_sensor" if is_leaf[topic] else ""
 
             if start is None:
-                start = strstamp2time(stamp)
-            dur = start - strstamp2time(stamp)
+                start = str_stamp2time(stamp)
+            dur = start - str_stamp2time(stamp)
             dur_ms = dur.nanoseconds // 10**6
 
             print(f"{topic:80} {stamp:>20} {dur_ms:4} ms {is_leaf_s} {parent}")
@@ -119,8 +119,8 @@ class TopicGraph(object):
         get input topics
         return List[Topic]
         """
-        ins = self.t2i[topic]
-        return [self.topics[i] for i in iself.rev_edges[i]]
+        input_topics = self.t2i[topic]
+        return [self.topics[i] for i in input_topics.rev_edges[i]]
 
     def dfs_rev(self, start_topic):
         '''
@@ -171,8 +171,8 @@ class TopicGraph(object):
         return paths
 
 def main(args):
-    pklfile = args.pickle_file
-    pubinfos = pickle.load(open(pklfile, "rb"))
+    pickle_file = args.pickle_file
+    pubinfos = pickle.load(open(pickle_file, "rb"))
 
     tgt_topic = args.topic
     tgt_stamp = sorted(pubinfos.stamps(tgt_topic))[args.stamp_index]
