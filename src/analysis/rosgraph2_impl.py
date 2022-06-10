@@ -148,7 +148,7 @@ class EdgeList(object):
     def add_edges(self, start, dest, direction, label='', qos=None):
         """
         Create Edge instances for args and add resulting edges to edge
-        list. Convenience method to avoid repetitve logging, etc...
+        list. Convenience method to avoid repetitive logging, etc...
         @param edge_list: data structure to add edge to
         @type  edge_list: EdgeList
         @param start: name of start node. If None, warning will be logged and add fails
@@ -157,11 +157,11 @@ class EdgeList(object):
         @type  dest: str
         @param direction: direction string (i/o/b)
         @type  direction: str
-        @return: True if update occured
+        @return: True if update occurred
         @rtype: bool
         """
 
-        # the warnings should generally be temporary, occuring of the
+        # the warnings should generally be temporary, occurring of the
         # master/node information becomes stale while we are still
         # doing an update
         updated = False
