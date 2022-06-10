@@ -86,8 +86,8 @@ def get_complex_tree():
             continue
 
         for k in sub_dict.keys():
-            nnode = current_node.get_child(k)
-            Q.append((nnode, sub_dict[k]))
+            child_node = current_node.get_child(k)
+            Q.append((child_node, sub_dict[k]))
 
     return root
 

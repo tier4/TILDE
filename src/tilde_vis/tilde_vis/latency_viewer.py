@@ -700,9 +700,9 @@ class LatencyViewerNode(Node):
                              'wb'),
                         protocol=pickle.HIGHEST_PROTOCOL)
 
-        one_hot_durs = calc_one_hot(results)
+        one_hot_durations = calc_one_hot(results)
         logs = []
-        for e in one_hot_durs:
+        for e in one_hot_durations:
             (depth, name, dur_ms, dur_ms_steady, is_leaf, stamp) = e
             name = truncate(' ' * depth + name + ('*' if is_leaf else ''))
             if dur_ms is None:
