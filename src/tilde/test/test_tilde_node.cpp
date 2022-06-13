@@ -328,7 +328,7 @@ TEST_F(TestTildeNode, publish_top_level_stamp) {
 
   // prepare publishers
   auto main_pub = main_node->create_tilde_publisher<tilde_msg::msg::TestTopLevelStamp>(
-      "out_topic", 1);
+    "out_topic", 1);
   auto clock_pub = main_node->create_publisher<rosgraph_msgs::msg::Clock>(
     "/clock", 1);
 
@@ -344,13 +344,13 @@ TEST_F(TestTildeNode, publish_top_level_stamp) {
   // prepare checker subscription
   bool checker_sub_called = false;
   auto checker_sub = checker_node->create_subscription<tilde_msg::msg::PubInfo>(
-      "out_topic/info/pub", 1,
-      [&checker_sub_called, &clock_msg](tilde_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
-      {
-        (void) pub_info_msg;
-        checker_sub_called = true;
-        EXPECT_TRUE(pub_info_msg->output_info.has_header_stamp);
-      });
+    "out_topic/info/pub", 1,
+    [&checker_sub_called, &clock_msg](tilde_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
+    {
+      (void) pub_info_msg;
+      checker_sub_called = true;
+      EXPECT_TRUE(pub_info_msg->output_info.has_header_stamp);
+    });
 
   // publish
   tilde_msg::msg::TestTopLevelStamp msg;

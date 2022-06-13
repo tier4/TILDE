@@ -76,7 +76,7 @@ struct HasStampWithoutHeader<
     std::conjunction_v<
       std::negation<HasHeader<M>>,
       HasStamp<M>>>::type>
-    : public std::true_type {};
+  : public std::true_type {};
 
 /// SFINEs to get header.stamp, not found case
 template<typename M, typename Enable = void>
