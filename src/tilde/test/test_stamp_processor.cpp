@@ -116,9 +116,9 @@ TEST_F(TestStampProcessor, pointer_with_header_and_top_level_stamp) {
   MsgWithHeaderAndTopLevelStamp msg;
 
   rclcpp::Time expect(1, 2, RCL_ROS_TIME);
-  rclcpp::Time unexpect(3, 4, RCL_ROS_TIME);
+  rclcpp::Time unexpected(3, 4, RCL_ROS_TIME);
   msg.header.stamp = expect;
-  msg.stamp = unexpect;
+  msg.stamp = unexpected;
   rclcpp::Time t(5, 6, RCL_ROS_TIME);
   auto stamp = Process<decltype(msg)>::get_timestamp(t, &msg);
 
@@ -132,9 +132,9 @@ TEST_F(TestStampProcessor, const_pointer_with_header_and_top_level_stamp) {
   MsgWithHeaderAndTopLevelStamp _msg;
 
   rclcpp::Time expect(1, 2, RCL_ROS_TIME);
-  rclcpp::Time unexpect(3, 4, RCL_ROS_TIME);
+  rclcpp::Time unexpected(3, 4, RCL_ROS_TIME);
   _msg.header.stamp = expect;
-  _msg.stamp = unexpect;
+  _msg.stamp = unexpected;
 
   const MsgWithHeaderAndTopLevelStamp msg(_msg);
   rclcpp::Time t(5, 6, RCL_ROS_TIME);

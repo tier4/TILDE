@@ -171,7 +171,7 @@ TEST_F(TestTildeSubscriber, hold_subtime)
 
   // check
   rclcpp::Time subtime, subtime_steady;
-  sub_node->find_subtime(
+  sub_node->find_subscription_time(
     &msg,
     "/in1",
     subtime,

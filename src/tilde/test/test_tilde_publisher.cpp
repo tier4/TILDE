@@ -109,7 +109,7 @@ TEST_F(TestTildePublisher, add_explicit_input_info_subtime_not_found) {
   EXPECT_EQ(msg.input_infos[0].header_stamp, search_stamp);
 }
 
-TEST_F(TestTildePublisher, set_explicit_subtime_sucess_then_purged) {
+TEST_F(TestTildePublisher, set_explicit_subscription_time_sucess_then_purged) {
   // set input_info & explicit_input_info
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
@@ -129,7 +129,7 @@ TEST_F(TestTildePublisher, set_explicit_subtime_sucess_then_purged) {
     input_info->has_header_stamp = true;
     input_info->header_stamp = stamp_base + rclcpp::Duration(i, 0);
 
-    pub.set_explicit_subtime(
+    pub.set_explicit_subscription_time(
       TOPIC, input_info);
   }
 
@@ -169,7 +169,7 @@ TEST_F(TestTildePublisher, set_explicit_subtime_sucess_then_purged) {
   input_info->sub_time_steady = recv_base_steady + rclcpp::Duration(10, 0);
   input_info->has_header_stamp = true;
   input_info->header_stamp = stamp_base + rclcpp::Duration(10, 0);
-  pub.set_explicit_subtime(
+  pub.set_explicit_subscription_time(
     TOPIC, input_info);
 
   pub.add_explicit_input_info(
@@ -206,7 +206,7 @@ TEST_F(TestTildePublisher, set_multiple_topic) {
   input_info->has_header_stamp = true;
   input_info->header_stamp = stamp_base;
 
-  pub.set_explicit_subtime(
+  pub.set_explicit_subscription_time(
     TOPIC1, input_info);
   pub.add_explicit_input_info(
     TOPIC1,
@@ -222,7 +222,7 @@ TEST_F(TestTildePublisher, set_multiple_topic) {
   input_info2->has_header_stamp = true;
   input_info2->header_stamp = stamp_base2;
 
-  pub.set_explicit_subtime(
+  pub.set_explicit_subscription_time(
     TOPIC2, input_info2);
   pub.add_explicit_input_info(
     TOPIC2,
@@ -274,7 +274,7 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
     input_info->header_stamp = stamp_base;
 
     pub.set_implicit_input_info(TOPIC, input_info);
-    pub.set_explicit_subtime(
+    pub.set_explicit_subscription_time(
       TOPIC, input_info);
   }
 
@@ -319,11 +319,11 @@ TEST_F(TestTildePublisher, no_explcit_after_add_explicit) {
     input_info->has_header_stamp = true;
     input_info->header_stamp = stamp_base2;
 
-    pub.set_explicit_subtime(
+    pub.set_explicit_subscription_time(
       TOPIC, input_info);
 
     pub.set_implicit_input_info(TOPIC, input_info);
-    pub.set_explicit_subtime(
+    pub.set_explicit_subscription_time(
       TOPIC, input_info);
   }
 
@@ -356,7 +356,7 @@ TEST_F(TestTildePublisher, get_input_info) {
   input_info->header_stamp = stamp_base;
 
   pub.set_implicit_input_info(TOPIC, input_info);
-  pub.set_explicit_subtime(TOPIC, input_info);
+  pub.set_explicit_subscription_time(TOPIC, input_info);
 
   // register [TOPIC][stamp_base2]
   rclcpp::Duration dur(1, 2);
@@ -371,7 +371,7 @@ TEST_F(TestTildePublisher, get_input_info) {
   input_info2->header_stamp = stamp_base2;
 
   pub.set_implicit_input_info(TOPIC, input_info2);
-  pub.set_explicit_subtime(TOPIC, input_info2);
+  pub.set_explicit_subscription_time(TOPIC, input_info2);
 
   // topic not found
   InputInfo out;

@@ -108,7 +108,7 @@ public:
     CallbackT && callback,
     const rclcpp::SubscriptionOptionsWithAllocator<AllocatorT> & options =
     rclcpp::SubscriptionOptionsWithAllocator<AllocatorT>(),
-    typename MessageMemoryStrategyT::SharedPtr msg_mem_strat = (
+    typename MessageMemoryStrategyT::SharedPtr msg_mem_strategy = (
       MessageMemoryStrategyT::create_default()
   ))
   {
@@ -130,22 +130,22 @@ public:
       CallbackArgT msg) -> void
       {
         if (this->enable_tilde) {
-          auto subtime = this->now();
-          auto subtime_steady = this->steady_clock_->now();
+          auto subscription_time = this->now();
+          auto subscription_time_steady = this->steady_clock_->now();
 
           tracepoint(
             TRACEPOINT_PROVIDER,
             tilde_subscribe,
             callback_addr,
-            subtime_steady.nanoseconds());
+            subscription_time_steady.nanoseconds());
 
-          const MessageT * pmsg;
-          TILDE_NODE_GET_PTR(MessageT, msg, pmsg);
+          const MessageT * p_msg;
+          TILDE_NODE_GET_PTR(MessageT, msg, p_msg);
           register_message_as_input(
-            pmsg,
+            p_msg,
             resolved_topic_name,
-            subtime,
-            subtime_steady);
+            subscription_time,
+            subscription_time_steady);
         }
         // finally, call original function
         callback(std::forward<CallbackArgT>(msg));
@@ -156,7 +156,7 @@ public:
       qos,
       main_topic_callback,
       options,
-      msg_mem_strat);
+      msg_mem_strategy);
   }
 
   template<
@@ -196,21 +196,21 @@ public:
 
   /// register message as input
   /**
-   * Register message to the both implit and explicit data store.
+   * Register message to the both implicit and explicit data store.
    * Canonically, this is called when subscription gets a message.
    *
-   * \param pmgs[in] message raw pointer, can be freed after the function call
+   * \param p_msg[in] message raw pointer, can be freed after the function call
    * \param resolved_topic_name[in] topic FQN
-   * \param subtime subscription time on ROS_TIME
-   * \param subtime subscription time on steady clock
+   * \param subscription_time subscription time on ROS_TIME
+   * \param subscription_time subscription time on steady clock
    */
   template<typename MessageT,
     typename MessageDeleter = std::default_delete<MessageT>>
   void register_message_as_input(
-    const MessageT * pmsg,
+    const MessageT * p_msg,
     const std::string & resolved_topic_name,
-    const rclcpp::Time & subtime,
-    const rclcpp::Time & subtime_steady)
+    const rclcpp::Time & subscription_time,
+    const rclcpp::Time & subscription_time_steady)
   {
     // prepare InputInfo
 
@@ -218,12 +218,12 @@ public:
     // TODO(y-okumura-isp): introduce has_timestamp()
     rclcpp::Time t(0, 100, this->now().get_clock_type());
 
-    header_stamp = Process<MessageT>::get_timestamp_from_const(t, pmsg);
+    header_stamp = Process<MessageT>::get_timestamp_from_const(t, p_msg);
 
     auto input_info = std::make_shared<InputInfo>();
 
-    input_info->sub_time = subtime;
-    input_info->sub_time_steady = subtime_steady;
+    input_info->sub_time = subscription_time;
+    input_info->sub_time_steady = subscription_time_steady;
     if (header_stamp != t) {
       input_info->has_header_stamp = true;
       input_info->header_stamp = header_stamp;
@@ -234,37 +234,37 @@ public:
     for (auto &[topic, tp] : tilde_pubs_) {
       tp->set_implicit_input_info(resolved_topic_name, input_info);
       if (input_info->has_header_stamp) {
-        tp->set_explicit_subtime(resolved_topic_name, input_info);
+        tp->set_explicit_subscription_time(resolved_topic_name, input_info);
       }
     }
   }
 
-  /// automatically find subtime and subtime_steady
+  /// automatically find subscription_time and subscription_time_steady
   /**
-   * Fill subtime and subtime_steady from internal data.
+   * Fill subscription_time and subscription_time_steady from internal data.
    * This if for TILDE framework internal use,
    * so users are expected to use explicit API.
    *
-   * \param pmsg[in]
+   * \param p_msg[in]
    * \param resolved_topic_name[in]
-   * \param subtime[out]
-   * \param subtime_steady[out]
-   * \return true if subtime found else false
+   * \param subscription_time[out]
+   * \param subscription_time_steady[out]
+   * \return true if subscription_time found else false
    * \sa register_message_as_input
    */
   template<typename MessageT,
     typename MessageDeleter = std::default_delete<MessageT>>
-  bool find_subtime(
-    const MessageT * pmsg,
+  bool find_subscription_time(
+    const MessageT * p_msg,
     const std::string & resolved_topic_name,
-    rclcpp::Time & subtime,
-    rclcpp::Time & subtime_steady)
+    rclcpp::Time & subscription_time,
+    rclcpp::Time & subscription_time_steady)
   {
     // get header stamp
     rclcpp::Time header_stamp;
     rclcpp::Time t(0, 100, this->now().get_clock_type());
 
-    header_stamp = Process<MessageT>::get_timestamp_from_const(t, pmsg);
+    header_stamp = Process<MessageT>::get_timestamp_from_const(t, p_msg);
 
     InputInfo input_info;
 
@@ -280,8 +280,8 @@ public:
     }
 
     if (found) {
-      subtime = input_info.sub_time;
-      subtime_steady = input_info.sub_time_steady;
+      subscription_time = input_info.sub_time;
+      subscription_time_steady = input_info.sub_time_steady;
     }
 
     return found;

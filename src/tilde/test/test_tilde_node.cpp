@@ -254,7 +254,7 @@ TEST_F(TestTildeNode, enable_tilde) {
   EXPECT_EQ(checker_sub_called, false);
 }
 
-TEST_F(TestTildeNode, register_message_as_input_find_subtime) {
+TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   rclcpp::NodeOptions options;
   options.append_parameter_override("use_sim_time", true);
 
@@ -309,14 +309,14 @@ TEST_F(TestTildeNode, register_message_as_input_find_subtime) {
   rclcpp::spin_some(main_node);
 
   // check
-  rclcpp::Time subtime, subtime_steady;
-  auto found = main_node->find_subtime(
+  rclcpp::Time subscription_time, subscription_time_steady;
+  auto found = main_node->find_subscription_time(
     &sensor_msg1, "/in_topic",
-    subtime, subtime_steady);
+    subscription_time, subscription_time_steady);
   EXPECT_TRUE(found);
-  builtin_interfaces::msg::Time subtime_msg = subtime;
-  EXPECT_EQ(subtime_msg.sec, clock_msg1.clock.sec);
-  EXPECT_EQ(subtime_msg.nanosec, clock_msg1.clock.nanosec);
+  builtin_interfaces::msg::Time subscription_time_msg = subscription_time;
+  EXPECT_EQ(subscription_time_msg.sec, clock_msg1.clock.sec);
+  EXPECT_EQ(subscription_time_msg.nanosec, clock_msg1.clock.nanosec);
 }
 
 TEST_F(TestTildeNode, publish_top_level_stamp) {

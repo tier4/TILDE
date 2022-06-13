@@ -167,7 +167,7 @@ public:
 
         // on TildeSubscriber, default callback saves subtime
         rclcpp::Time subtime, subtime_steady;
-        pnode->find_subtime(
+        pnode->find_subscription_time(
           msg.get(), topic,
           subtime, subtime_steady);
 
@@ -210,7 +210,7 @@ public:
 
           // on TildeSubscriber, default callback saves subtime
           rclcpp::Time subtime, subtime_steady;
-          pnode->find_subtime(
+          pnode->find_subscription_time(
             msg.get(), topic,
             subtime, subtime_steady);
 
@@ -246,7 +246,7 @@ public:
 
         // on TildeSubscriber, default callback saves subtime
         rclcpp::Time subtime, subtime_steady;
-        pnode->find_subtime(
+        pnode->find_subscription_time(
           msg.get(), topic,
           subtime, subtime_steady);
 
@@ -279,7 +279,7 @@ public:
 
         // on TildeSubscriber, default callback saves subtime
         rclcpp::Time subtime, subtime_steady;
-        pnode->find_subtime(
+        pnode->find_subscription_time(
           msg.get(), topic,
           subtime, subtime_steady);
 

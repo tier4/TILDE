@@ -1609,7 +1609,7 @@ private:
       std::is_same_v<CallbackArgT, SharedConstPtr>||
       std::is_same_v<CallbackArgT, ConstRefSharedConstPtr>||
       std::is_same_v<CallbackArgT, SharedPtr>) {
-      node_->find_subtime(
+      node_->find_subscription_time(
         msg.get(), topic,
         subtime, subtime_steady);
 
@@ -1618,7 +1618,7 @@ private:
         msg.get(), topic,
         subtime, subtime_steady);
     } else if constexpr (std::is_same_v<CallbackArgT, ConstRef>) {
-      node_->find_subtime(
+      node_->find_subscription_time(
         &msg, topic,
         subtime, subtime_steady);
 
