@@ -117,7 +117,7 @@ TEST(TildeSubscriber, simple_raw)
   ASSERT_GT(h.count_, 0);
 }
 
-TEST(TildeSubscriber, subUnsubSub)
+TEST(TildeSubscriber, sub_UnSub_Sub)
 {
   auto node = std::make_shared<tilde::TildeNode>("test_node");
   Helper h;
@@ -140,7 +140,7 @@ TEST(TildeSubscriber, subUnsubSub)
   ASSERT_GT(h.count_, 0);
 }
 
-TEST(TildeSubscriber, subUnsubSub_raw)
+TEST(TildeSubscriber, sub_UnSub_Sub_raw)
 {
   auto node = std::make_shared<tilde::TildeNode>("test_node");
   Helper h;

@@ -72,7 +72,7 @@ TEST_F(TestTildePublisher, set_implicit_and_fill_input_info) {
   EXPECT_EQ(msg.input_infos[0].header_stamp, rclcpp::Time(0, 1));
 }
 
-TEST_F(TestTildePublisher, add_explicit_input_info_subtime_not_found) {
+TEST_F(TestTildePublisher, add_explicit_input_info_sub_time_not_found) {
   // set input_info & explicit_input_info
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
@@ -94,7 +94,7 @@ TEST_F(TestTildePublisher, add_explicit_input_info_subtime_not_found) {
   pub.set_implicit_input_info(TOPIC + "2", info);
 
   // use TOPIC + search_stamp explicit info
-  // although correponding explicit subtime doesn't exist
+  // although correponding explicit sub_time doesn't exist
   pub.add_explicit_input_info(
     TOPIC, search_stamp);
 

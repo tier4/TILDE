@@ -271,7 +271,7 @@ TEST(TildeSynchronizer, compileMethod7)
   sync.registerCallback(&MethodHelper::method7, &h);
 }
 
-/// cannot build this. too many placehodlers?
+/// cannot build this. too many placeholders?
 /*
 TEST(TildeSynchronizer, compileMethod8)
 {

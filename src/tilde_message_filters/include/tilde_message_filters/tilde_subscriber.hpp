@@ -162,19 +162,19 @@ public:
         // msg.get() in below codes:
         // we can use msg.get() because
         // - message_filters::simple_filter assumes that
-        //   typename C sholud be compatible with std::function<void(const MConstPtr&)>
+        //   typename C should be compatible with std::function<void(const MConstPtr&)>
         // - MConstPtr is std::shared_ptr<M const>
 
-        // on TildeSubscriber, default callback saves subtime
-        rclcpp::Time subtime, subtime_steady;
+        // on TildeSubscriber, default callback saves sub_time
+        rclcpp::Time sub_time, sub_time_steady;
         pnode->find_subscription_time(
           msg.get(), topic,
-          subtime, subtime_steady);
+          sub_time, sub_time_steady);
 
         // update implicit input info
         pnode->register_message_as_input(
           msg.get(), topic,
-          subtime, subtime_steady);
+          sub_time, sub_time_steady);
 
         callback(msg);
       };
@@ -208,16 +208,16 @@ public:
           // P looks to be const shared_ptr (see message_filters::MessageEvent).
           // TODO(y-okumura-isp): Is ConstRef also possible??
 
-          // on TildeSubscriber, default callback saves subtime
-          rclcpp::Time subtime, subtime_steady;
+          // on TildeSubscriber, default callback saves sub_time
+          rclcpp::Time sub_time, sub_time_steady;
           pnode->find_subscription_time(
             msg.get(), topic,
-            subtime, subtime_steady);
+            sub_time, sub_time_steady);
 
           // update implicit input info
           pnode->register_message_as_input(
             msg.get(), topic,
-            subtime, subtime_steady);
+            sub_time, sub_time_steady);
 
           callback(msg);
         };
@@ -244,16 +244,16 @@ public:
         // P looks to be const shared_ptr (see message_filters::MessageEvent).
         // TODO(y-okumura-isp): Is ConstRef also possible??
 
-        // on TildeSubscriber, default callback saves subtime
-        rclcpp::Time subtime, subtime_steady;
+        // on TildeSubscriber, default callback saves sub_time
+        rclcpp::Time sub_time, sub_time_steady;
         pnode->find_subscription_time(
           msg.get(), topic,
-          subtime, subtime_steady);
+          sub_time, sub_time_steady);
 
         // update implicit input info
         pnode->register_message_as_input(
           msg.get(), topic,
-          subtime, subtime_steady);
+          sub_time, sub_time_steady);
 
         callback(msg);
       };
@@ -277,20 +277,20 @@ public:
         // P looks to be const shared_ptr (see message_filters::MessageEvent).
         // TODO(y-okumura-isp): Can the msg type be ConstRef?
 
-        // on TildeSubscriber, default callback saves subtime
-        rclcpp::Time subtime, subtime_steady;
+        // on TildeSubscriber, default callback saves sub_time
+        rclcpp::Time sub_time, sub_time_steady;
         pnode->find_subscription_time(
           msg.get(), topic,
-          subtime, subtime_steady);
+          sub_time, sub_time_steady);
 
         // update implicit input info
         pnode->register_message_as_input(
           msg.get(), topic,
-          subtime, subtime_steady);
+          sub_time, sub_time_steady);
 
         bind_callback(msg);
       };
-    // We need to wrap new_callback bacause P is sometimes non MConstPtr.
+    // We need to wrap new_callback because P is sometimes non MConstPtr.
     // If P is non MConstPtr, `registerCallback(const C& callback)` is called and
     // subsequent `signal_.addCallback(Callback(callback))` fails because
     // Callback = std::function<void(const MConstPtr&)>.
@@ -325,20 +325,20 @@ private:
     return resolved_topic_name;
   }
 
-  /// TildeSubsriber 1st callback
+  /// TildeSubscriber 1st callback
   /**
-   *  Save subtime for other callbacks or TildeSynchronizer
+   *  Save sub_time for other callbacks or TildeSynchronizer
    */
   void register_message_callback(const MConstPtr msg)
   {
     auto topic = getTopicFQDN();
     auto pnode = get_node();
-    auto subtime = pnode->now();
-    auto subtime_steady = pnode->get_steady_time();
+    auto sub_time = pnode->now();
+    auto sub_time_steady = pnode->get_steady_time();
 
     pnode->register_message_as_input(
       msg.get(), topic,
-      subtime, subtime_steady);
+      sub_time, sub_time_steady);
   }
 };
 }  // namespace tilde_message_filters

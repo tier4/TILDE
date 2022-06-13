@@ -38,11 +38,11 @@ See bellow to know how to maintenance.
   - add `using namespace tilde_message_filters;`
   - replace `Synchronizer` to `TildeSynchronizer` of TEST
     - don't change `typedef Synchronizer<NullPolicy> Sync;` in `struct NullPolicy`
-  - Add `TildeNode` to TildeSynchronizer construstors
+  - Add `TildeNode` to TildeSynchronizer constructors
     - `nullptr` may work
     - non-null instance is needed for message handling tests.
       (add2, add3, and so on)
-      If null, the results are unexpectable.
+      If null, the results are unexpected.
 
 - Use `tilde::TildeNode` instead of `rclcpp::Node`
   - add `#include "tilde/tilde_node.hpp"`
