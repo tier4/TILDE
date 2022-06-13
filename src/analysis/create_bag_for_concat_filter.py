@@ -13,13 +13,13 @@ from geometry_msgs.msg import TwistStamped
 serialization_format = 'cdr'
 
 def main(args):
-    inbag_path = args.inbag
-    outbag_path = args.outdir
+    in_bag_path = args.in_bag
+    out_bag_path = args.out_dir
 
-    if os.path.exists(outbag_path):
-        shutil.rmtree(outbag_path)
+    if os.path.exists(out_bag_path):
+        shutil.rmtree(out_bag_path)
 
-    in_storage_options = rosbag2_py.StorageOptions(uri=inbag_path, storage_id='sqlite3')
+    in_storage_options = rosbag2_py.StorageOptions(uri=in_bag_path, storage_id='sqlite3')
     converter_options = rosbag2_py.ConverterOptions(
         input_serialization_format=serialization_format,
         output_serialization_format=serialization_format)
@@ -58,7 +58,7 @@ def main(args):
     storage_filter = rosbag2_py.StorageFilter(topics=topics)
     reader.set_filter(storage_filter)
 
-    out_storage_options = rosbag2_py.StorageOptions(outbag_path, "sqlite3")
+    out_storage_options = rosbag2_py.StorageOptions(out_bag_path, "sqlite3")
     writer = rosbag2_py.SequentialWriter()
     writer.open(out_storage_options, converter_options)
 
@@ -89,8 +89,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("inbag", help="input bagfile")
-    parser.add_argument("outdir", help="output directory")
+    parser.add_argument("in_bag", help="input bagfile")
+    parser.add_argument("out_dir", help="output directory")
     args = parser.parse_args()
 
     main(args)
