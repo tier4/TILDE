@@ -30,14 +30,14 @@ def main(args):
     print("key: '{}'".format(key))
 
     seen = set()
-    qnow = deque([key])
-    qnext = deque([])
+    current_item = deque([key])
+    next_item = deque([])
     depth = 0
 
     edges = graph.nt_edges.edges_by_start
     print("depth: {}".format(depth))
-    while len(qnow) != 0 and depth <= max_depth:
-        now = qnow.popleft()
+    while len(current_item) != 0 and depth <= max_depth:
+        now = current_item.popleft()
         print("now: '{}'".format(now))
 
         for nxt in edges[now]:
@@ -53,7 +53,7 @@ def main(args):
             if nxt in seen:
                 continue
             seen.add(nxt)
-            qnext.append(nxt)
+            next_item.append(nxt)
 
             # for n in edges[nxt]:
             #     if isinstance(n, Edge):
@@ -67,12 +67,12 @@ def main(args):
             #         continue
             #     if n in seen:
             #         continue
-            #     qnext.append(n)
+            #     next_item.append(n)
 
-        if len(qnow) == 0:
+        if len(current_item) == 0:
             depth += 1
-            qnow = qnext
-            qnext = deque([])
+            current_item = next_item
+            next_item = deque([])
             print("")
             if depth <= max_depth:
                 print("depth: {}".format(depth))

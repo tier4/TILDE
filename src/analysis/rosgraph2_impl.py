@@ -142,13 +142,13 @@ class EdgeList(object):
                 return True
 
         updated = update_map(self.edges_by_start, edge.key, edge)
-        updated = update_map(self.edges_by_end, edge.rkey, edge) or updated
+        updated = update_map(self.edges_by_end, edge.r_key, edge) or updated
         return updated
 
     def add_edges(self, start, dest, direction, label='', qos=None):
         """
         Create Edge instances for args and add resulting edges to edge
-        list. Convenience method to avoid repetitve logging, etc...
+        list. Convenience method to avoid repetitive logging, etc...
         @param edge_list: data structure to add edge to
         @type  edge_list: EdgeList
         @param start: name of start node. If None, warning will be logged and add fails
@@ -157,11 +157,11 @@ class EdgeList(object):
         @type  dest: str
         @param direction: direction string (i/o/b)
         @type  direction: str
-        @return: True if update occured
+        @return: True if update occurred
         @rtype: bool
         """
 
-        # the warnings should generally be temporary, occuring of the
+        # the warnings should generally be temporary, occurring of the
         # master/node information becomes stale while we are still
         # doing an update
         updated = False
@@ -198,7 +198,7 @@ class EdgeList(object):
                     edges.remove(edge)
                     return True
         update_map(self.edges_by_start, edge.key, edge)
-        update_map(self.edges_by_end, edge.rkey, edge)
+        update_map(self.edges_by_end, edge.r_key, edge)
 
 
 class Edge(object):
@@ -206,7 +206,7 @@ class Edge(object):
     Data structure for representing ROS node graph edge
     """
 
-    __slots__ = ['start', 'end', 'label', 'key', 'rkey', 'qos']
+    __slots__ = ['start', 'end', 'label', 'key', 'r_key', 'qos']
 
     def __init__(self, start, end, label='', qos=None):
         self.start = start
@@ -215,7 +215,7 @@ class Edge(object):
         self.qos = qos
         self.key = "%s|%s" % (self.start, self.label)
         # reverse key, indexed from end
-        self.rkey = "%s|%s" % (self.end, self.label)
+        self.r_key = "%s|%s" % (self.end, self.label)
 
     def __ne__(self, other):
         return self.start != other.start or self.end != other.end
@@ -231,7 +231,7 @@ class Edge(object):
 def edge_args(start, dest, direction, label, qos):
     """
     compute argument ordering for Edge constructor based on direction flag
-    @param direction str: 'i', 'o', or 'b' (in/out/bidir) relative to \a start
+    @param direction str: 'i', 'o', or 'b' (in/out/bi_dir) relative to \a start
     @param start str: name of starting node
     @param start dest: name of destination node
     """
@@ -432,7 +432,7 @@ class Graph(object):
         finally:
             self.bad_nodes_lock.release()
 
-    def _node_refresh_businfo(self, node, bad_node=False):
+    def _node_refresh_bus_info(self, node, bad_node=False):
         """
         Retrieve bus info from the node and update nodes and edges as appropriate
         @param node: node name
@@ -463,7 +463,7 @@ class Graph(object):
         uri = self._node_uri_refresh(node)
 
         bad_node = (uri is None)
-        updated = self._node_refresh_businfo(node, bad_node)
+        updated = self._node_refresh_bus_info(node, bad_node)
         return updated
 
     def _node_uri_refresh(self, node):
