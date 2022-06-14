@@ -140,7 +140,7 @@ TEST_F(TestTildeSubscriber, ptr_constructor)
   SUCCEED();
 }
 
-TEST_F(TestTildeSubscriber, hold_subtime)
+TEST_F(TestTildeSubscriber, hold_sub_time)
 {
   auto & pub1 = pubs[0];
   sub.subscribe(sub_node, "in1", qos.get_rmw_qos_profile());
@@ -170,12 +170,12 @@ TEST_F(TestTildeSubscriber, hold_subtime)
   EXPECT_CLOCK(sub_node->now(), t3_sec, t3_nsec);
 
   // check
-  rclcpp::Time subtime, subtime_steady;
-  sub_node->find_subtime(
+  rclcpp::Time sub_time, sub_time_steady;
+  sub_node->find_subscription_time(
     &msg,
     "/in1",
-    subtime,
-    subtime_steady);
-  (void) subtime_steady;
-  EXPECT_CLOCK(subtime, t1_sec, t1_nsec);
+    sub_time,
+    sub_time_steady);
+  (void) sub_time_steady;
+  EXPECT_CLOCK(sub_time, t1_sec, t1_nsec);
 }

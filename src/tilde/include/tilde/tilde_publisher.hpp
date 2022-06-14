@@ -50,15 +50,35 @@ public:
   bool operator==(const InputInfo & rhs) const;
 };
 
-/// SFINEs to detect header field, not found case
+/// detect header field, not found case
 template<typename M, typename = void>
 struct HasHeader : public std::false_type {};
 
-/// SFINEs to detect header field, found case
+/// detect header field, found case
 template<typename M>
 struct HasHeader<M, decltype((void) M::header)>: std::true_type {};
 
-/// SFINEs to get header.stamp, not found case
+/// has top level stamp
+template<typename M, typename = void>
+struct HasStamp : public std::false_type {};
+
+template<typename M>
+struct HasStamp<M, decltype((void)M::stamp)>: public std::true_type {};
+
+/// has top level stamp and no header
+template<typename M, class Enable = void>
+struct HasStampWithoutHeader : public std::false_type {};
+
+template<typename M>
+struct HasStampWithoutHeader<
+  M,
+  typename std::enable_if<
+    std::conjunction_v<
+      std::negation<HasHeader<M>>,
+      HasStamp<M>>>::type>
+  : public std::true_type {};
+
+/// SFINAE to get header.stamp, not found case
 template<typename M, typename Enable = void>
 struct Process
 {
@@ -89,7 +109,7 @@ struct Process
   }
 };
 
-/// SFINEs to get header.stamp, found case
+/// SFINAEEs to get header.stamp, found case
 template<typename M>
 struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
 {
@@ -117,6 +137,37 @@ struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
   {
     (void) t;
     return m->header.stamp;
+  }
+};
+
+/// SFINAE to get top level stamp, found case
+template<typename M>
+struct Process<M, typename std::enable_if<HasStampWithoutHeader<M>::value>::type>
+{
+  /// stamp getter for non-const pointer with header field
+  /**
+   * Return header.stamp
+   *
+   * \param[in] t dummy stamp
+   * \param[in] m message
+   */
+  static rclcpp::Time get_timestamp(rclcpp::Time t, M * m)
+  {
+    (void) t;
+    return m->stamp;
+  }
+
+  /// stamp getter for const pointer with header field
+  /**
+   * Return header.stamp
+   *
+   * \param[in] t dummy stamp
+   * \param[in] m message
+   */
+  static rclcpp::Time get_timestamp_from_const(rclcpp::Time t, const M * m)
+  {
+    (void) t;
+    return m->stamp;
   }
 };
 
@@ -165,7 +216,7 @@ public:
    * \param[in] sub_topic Subscribed topic name
    * \param[in] p InputInfo
    */
-  void set_explicit_subtime(
+  void set_explicit_subscription_time(
     const std::string & sub_topic,
     const std::shared_ptr<const InputInfo> p);
 
@@ -385,18 +436,18 @@ private:
     fill_input_info(*msg);
 
     for (auto & input_info : msg->input_infos) {
-      auto pubtime = TILDE_S_TO_NS(msg->output_info.pub_time.sec) +
+      auto pub_time = TILDE_S_TO_NS(msg->output_info.pub_time.sec) +
         msg->output_info.pub_time.nanosec;
-      auto subtime_steady = TILDE_S_TO_NS(input_info.sub_time_steady.sec) +
+      auto sub_time_steady = TILDE_S_TO_NS(input_info.sub_time_steady.sec) +
         input_info.sub_time_steady.nanosec;
       auto sub = &sub_topics_[input_info.topic_name];
       tracepoint(
         TRACEPOINT_PROVIDER,
         tilde_publish,
         this,
-        pubtime,
+        pub_time,
         sub,
-        subtime_steady
+        sub_time_steady
       );
     }
 

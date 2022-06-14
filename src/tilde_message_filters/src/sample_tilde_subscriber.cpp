@@ -119,17 +119,17 @@ public:
     // std::function
     // registerCallback(const std::function<void(P)>& callback)
     pub_callback2_ = create_tilde_publisher<Msg>("out_std_function_lvalue", 1);
-    std::function<void(MsgConstPtr)> stdfunc =
+    std::function<void(MsgConstPtr)> std_func =
       std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1);
-    sub_pc_.registerCallback(stdfunc);
+    sub_pc_.registerCallback(std_func);
 
     /*
      * We can not use unique_ptr because message_event.h does not accept
      * registerCallback(const std::function<void(P)>& callback)
      */
-    // std::function<void(std::unique_ptr<Msg>)> stdfunc_unique_ptr =
+    // std::function<void(std::unique_ptr<Msg>)> std_func_unique_ptr =
     //     std::bind(&SampleSubscriberWithHeader::callback_unique_ptr, this, std::placeholders::_1);
-    // sub_pc_.registerCallback(stdfunc_unique_ptr);
+    // sub_pc_.registerCallback(std_func_unique_ptr);
 
     // std::bind rvalue
     // const C& callback
@@ -138,8 +138,8 @@ public:
 
     // std::bind lvalue but use auto
     // const C& callback.  => with C = std::_Bind<void ....>
-    auto autofunc = std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1);
-    sub_pc_.registerCallback(autofunc);
+    auto auto_func = std::bind(&SampleSubscriberWithHeader::callback2, this, std::placeholders::_1);
+    sub_pc_.registerCallback(auto_func);
 
     // registerCallback(void(*callback)(P))
     // void(*callback)(P)

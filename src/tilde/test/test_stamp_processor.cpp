@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "rclcpp/rclcpp.hpp"
+#include "builtin_interfaces/msg/time.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "std_msgs/msg/string.hpp"
 
@@ -30,6 +31,17 @@ using tilde::Process;
 
 class TestStampProcessor : public ::testing::Test
 {
+};
+
+struct MsgWithTopLevelStamp
+{
+  builtin_interfaces::msg::Time stamp;
+};
+
+struct MsgWithHeaderAndTopLevelStamp
+{
+  std_msgs::msg::Header header;
+  builtin_interfaces::msg::Time stamp;
 };
 
 TEST_F(TestStampProcessor, pointer_with_header_stamp) {
@@ -69,4 +81,67 @@ TEST_F(TestStampProcessor, const_pointer_without_header_stamp) {
   auto stamp = Process<String>::get_timestamp_from_const(t, &msg);
 
   EXPECT_EQ(stamp, t);
+}
+
+TEST_F(TestStampProcessor, pointer_with_top_level_stamp) {
+  MsgWithTopLevelStamp msg;
+
+  rclcpp::Time expect(1, 2, RCL_ROS_TIME);
+  msg.stamp = expect;
+  rclcpp::Time t(3, 4, RCL_ROS_TIME);
+  auto stamp = Process<decltype(msg)>::get_timestamp(t, &msg);
+
+  EXPECT_FALSE(tilde::HasHeader<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStamp<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStampWithoutHeader<decltype(msg)>::value);
+  EXPECT_EQ(stamp, expect);
+}
+
+TEST_F(TestStampProcessor, const_pointer_with_top_level_stamp) {
+  MsgWithTopLevelStamp _msg;
+  rclcpp::Time expect(1, 2, RCL_ROS_TIME);
+  _msg.stamp = expect;
+
+  const MsgWithTopLevelStamp msg(_msg);
+  rclcpp::Time t(3, 4, RCL_ROS_TIME);
+  auto stamp = Process<decltype(msg)>::get_timestamp_from_const(t, &msg);
+
+  EXPECT_FALSE(tilde::HasHeader<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStamp<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStampWithoutHeader<decltype(msg)>::value);
+  EXPECT_EQ(stamp, expect);
+}
+
+TEST_F(TestStampProcessor, pointer_with_header_and_top_level_stamp) {
+  MsgWithHeaderAndTopLevelStamp msg;
+
+  rclcpp::Time expect(1, 2, RCL_ROS_TIME);
+  rclcpp::Time unexpected(3, 4, RCL_ROS_TIME);
+  msg.header.stamp = expect;
+  msg.stamp = unexpected;
+  rclcpp::Time t(5, 6, RCL_ROS_TIME);
+  auto stamp = Process<decltype(msg)>::get_timestamp(t, &msg);
+
+  EXPECT_TRUE(tilde::HasHeader<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStamp<decltype(msg)>::value);
+  EXPECT_FALSE(tilde::HasStampWithoutHeader<decltype(msg)>::value);
+  EXPECT_EQ(stamp, expect);
+}
+
+TEST_F(TestStampProcessor, const_pointer_with_header_and_top_level_stamp) {
+  MsgWithHeaderAndTopLevelStamp _msg;
+
+  rclcpp::Time expect(1, 2, RCL_ROS_TIME);
+  rclcpp::Time unexpected(3, 4, RCL_ROS_TIME);
+  _msg.header.stamp = expect;
+  _msg.stamp = unexpected;
+
+  const MsgWithHeaderAndTopLevelStamp msg(_msg);
+  rclcpp::Time t(5, 6, RCL_ROS_TIME);
+  auto stamp = Process<decltype(msg)>::get_timestamp_from_const(t, &msg);
+
+  EXPECT_TRUE(tilde::HasHeader<decltype(msg)>::value);
+  EXPECT_TRUE(tilde::HasStamp<decltype(msg)>::value);
+  EXPECT_FALSE(tilde::HasStampWithoutHeader<decltype(msg)>::value);
+  EXPECT_EQ(stamp, expect);
 }
