@@ -198,7 +198,7 @@ class NcursesPrinter(object):
         mode_str = ''
         if self.mode == self.MODE_RUN:
             mode_str = \
-                'press UP/DOWN/PgUp/PgDown/jkdugG to scroll,' + \
+                'press UP/DOWN/PgUp/PgDown/j/k/d/u/g/G to scroll,' + \
                 'r or "/" to filter'
             color = self.WHITE
         elif self.mode == self.MODE_STOP:

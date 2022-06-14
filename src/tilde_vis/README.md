@@ -64,13 +64,13 @@ ros2 run tilde_vis latency_viewer --batch ...
 
 #### General parameters
 
-| name                     | values             | about                                      |
-| ------------------------ | ------------------ | ------------------------------------------ |
-| `mode`                   | `onehot` or `stat` | Calcuration rule. See below.               |
-| `wait_sec_to_init_graph` | positive integer   | Initial wait seconds to grasp topic graph. |
+| name                     | values              | about                                      |
+| ------------------------ | ------------------- | ------------------------------------------ |
+| `mode`                   | `one_hot` or `stat` | Calculation rule. See below.               |
+| `wait_sec_to_init_graph` | positive integer    | Initial wait seconds to grasp topic graph. |
 
 - mode
-  - onehot: prints the specific flow latency
+  - one_hot: prints the specific flow latency
   - stat: calcurates statistics per second
 
 #### topic graph specific parameters

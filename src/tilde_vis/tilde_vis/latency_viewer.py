@@ -90,14 +90,14 @@ STOPS = [
 DUMP_DIR = 'dump.d'
 
 
-def truncate(s, prelen=20, n=80):
+def truncate(s, left_length=20, n=80):
     """
     Truncate string.
 
     Parameters
     ----------
     s: string
-    l: first half
+    left_length: first part length
     n: total length
 
     Return
@@ -105,13 +105,13 @@ def truncate(s, prelen=20, n=80):
     truncated string such that "abc...edf"
 
     """
-    assert prelen + 5 < n
+    assert left_length + 5 < n
 
     if len(s) < n:
         return s
 
-    pre = s[:prelen]
-    post = s[len(s) - n + prelen + 5:]
+    pre = s[:left_length]
+    post = s[len(s) - n + left_length + 5:]
 
     return pre + '...' + post
 
@@ -228,7 +228,7 @@ class PerTopicLatencyStat(object):
             s += f'{p(report["dur_max"])} '
             s += f'{p(report["dur_pub_min"])} '
             s += f'{p(report["dur_pub_mean"])} '
-            s += f'{p(report["dur_pub_maxn"])} '
+            s += f'{p(report["dur_pub_max"])} '
             s += f'{p(report["dur_pub_steady_min"])} '
             s += f'{p(report["dur_pub_steady_mean"])} '
             s += f'{p(report["dur_pub_steady_max"])} '
@@ -240,10 +240,10 @@ class PerTopicLatencyStat(object):
 
 def calc_one_hot(results):
     """
-    Calcurate one hot result.
+    Calculate one hot result.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     results: see InputSensorStampSolver.solve2
 
     Return
@@ -251,10 +251,11 @@ def calc_one_hot(results):
     list of (depth, topic name, dur, dur_steady, is_leaf)
     depth: depth of watched topic
     topic_name: watched topic
-    dur: final topic pubtime - pubtime
+    dur: final topic pub_time - sensor pub_time
     dur_steady: steady version of dur
     is_leaf: leaf of not [bool]
     stamp: target topic output stamp
+
     """
     last_pub_time = Time.from_msg(results.data[0].out_info.pubsub_stamp)
     last_pub_time_steady = Time.from_msg(
@@ -376,7 +377,7 @@ def update_stat(results):
 
 def calc_stat(results):
     """
-    Calcurate statistics.
+    Calculate statistics.
 
     Parameters
     ----------
@@ -397,14 +398,14 @@ def calc_stat(results):
 
     """
     def _calc_stat(node, depth):
-        durs = []
-        durs_steady = []
+        duration = []
+        duration_steady = []
         is_leaf = True if node.num_children() == 0 else False
         for d in node.data:
             if d[0] is not None:
-                durs.append(d[0])
+                duration.append(d[0])
             if d[1] is not None:
-                durs_steady.append(d[1])
+                duration_steady.append(d[1])
 
         def _calc(arr, fn):
             if len(arr) == 0:
@@ -414,12 +415,12 @@ def calc_stat(results):
         return {
             'depth': depth,
             'name': node.name,
-            'dur_min': _calc(durs, min),
-            'dur_mean': _calc(durs, mean),
-            'dur_max': _calc(durs, max),
-            'dur_min_steady': _calc(durs_steady, min),
-            'dur_mean_steady': _calc(durs_steady, mean),
-            'dur_max_steady': _calc(durs_steady, max),
+            'dur_min': _calc(duration, min),
+            'dur_mean': _calc(duration, mean),
+            'dur_max': _calc(duration, max),
+            'dur_min_steady': _calc(duration_steady, min),
+            'dur_mean_steady': _calc(duration_steady, mean),
+            'dur_max_steady': _calc(duration_steady, max),
             'is_leaf': is_leaf
         }
 
@@ -593,17 +594,17 @@ class LatencyViewerNode(Node):
 
         et = time.time()
 
-        elasped_ms = (et - st) * 1000
-        if elasped_ms > 1:
+        elapsed_ms = (et - st) * 1000
+        if elapsed_ms > 1:
             self.get_logger().info(
-                f'sub {topic} at {stamp}@ {elasped_ms} [ms]')
+                f'sub {topic} at {stamp}@ {elapsed_ms} [ms]')
 
     def handle_stat(self, stamps):
         """
         Report statistics.
 
-        Paramters
-        ---------
+        Parameters
+        ----------
         stamps: stamps sorted by old-to-new order
 
         Returns
@@ -667,8 +668,8 @@ class LatencyViewerNode(Node):
         """
         Report only one message.
 
-        Paramters
-        ---------
+        Parameters
+        ----------
         stamps: stamps sorted by old-to-new order
 
         Returns
@@ -695,13 +696,13 @@ class LatencyViewerNode(Node):
 
         if self.dumps:
             pickle.dump(results,
-                        open(f'{DUMP_DIR}/onehot_results_{target_stamp}.pkl',
+                        open(f'{DUMP_DIR}/one_hot_results_{target_stamp}.pkl',
                              'wb'),
                         protocol=pickle.HIGHEST_PROTOCOL)
 
-        onehot_durs = calc_one_hot(results)
+        one_hot_durs = calc_one_hot(results)
         logs = []
-        for e in onehot_durs:
+        for e in one_hot_durs:
             (depth, name, dur_ms, dur_ms_steady, is_leaf, stamp) = e
             name = truncate(' ' * depth + name + ('*' if is_leaf else ''))
             if dur_ms is None:
@@ -749,7 +750,7 @@ class LatencyViewerNode(Node):
         mode = self.get_parameter('mode').get_parameter_value().string_value
         if mode == 'stat':
             logs.extend(self.handle_stat(stamps))
-        elif mode == 'onehot':
+        elif mode == 'one_hot':
             logs.extend(self.handle_one_hot(stamps))
         else:
             logs.append('unknown mode')
@@ -775,8 +776,9 @@ class LatencyViewerNode(Node):
         """
         Get all topic infos.
 
-        Paramters
-        ---------
+        Parameters
+        ----------
+        excludes: topic names
 
         Returns
         -------
@@ -787,7 +789,7 @@ class LatencyViewerNode(Node):
         # short sleep between node creation and get_topic_names_and_types
         # https://github.com/ros2/ros2/issues/1057
         # We need this sleep with autoware,
-        # but don't need in dev environment(i.e. rosbagged PubInfo)
+        # but don't need in dev environment(i.e. PubInfo in rosbag)
         time.sleep(0.5)
 
         msg_type = 'tilde_msg/msg/PubInfo'

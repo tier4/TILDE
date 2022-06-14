@@ -64,7 +64,7 @@ class TopicInfoStatistics(object):
         self.t2i = {topic: i for i, topic in enumerate(topics)}
         self.seq2time = defaultdict(
             lambda: - np.ones(len(self.t2i), dtype=np.float64))
-        # (n_messages, n_subcallbacks), nanoseconds
+        # (n_messages, n_sub_callbacks), nanoseconds
         self.data = - np.ones((max_rows, len(topics)), dtype=np.float)
         self.data_idx = 0
         self.max_rows = max_rows
@@ -112,9 +112,9 @@ class TopicInfoStatistics(object):
         diff = data[:, 1:] - data[:, :-1]
         e2e = data[:, -1] - data[:, 0]
 
-        maxtime = diff.max(axis=0)
-        avgtime = diff.mean(axis=0)
-        mintime = diff.min(axis=0)
+        max_time = diff.max(axis=0)
+        avg_time = diff.mean(axis=0)
+        min_time = diff.min(axis=0)
         max_e2e = e2e.max()
         avg_e2e = e2e.mean()
         min_e2e = e2e.min()
@@ -125,9 +125,9 @@ class TopicInfoStatistics(object):
                 s += f'{v:5.1f}  '
             return s.rstrip()
 
-        print('max: ' + fmt(maxtime))
-        print('avg: ' + fmt(avgtime))
-        print('min: ' + fmt(mintime))
+        print('max: ' + fmt(max_time))
+        print('avg: ' + fmt(avg_time))
+        print('min: ' + fmt(min_time))
         print('e2e: ' + fmt([max_e2e, avg_e2e, min_e2e]))
         print('')
 
