@@ -89,7 +89,6 @@ def get_complex_tree():
             child_node = current_node.get_child(k)
             Q.append((child_node, sub_dict[k]))
 
-
     return root
 
 
