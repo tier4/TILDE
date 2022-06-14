@@ -1,4 +1,4 @@
-# myscripts
+# old scripts for analysis
 
 ## Description
 

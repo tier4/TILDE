@@ -40,7 +40,7 @@ def main(args):
     while reader.has_next() and cnt <= args.cnt:
         (topic, data, t) = reader.read_next()
         # TODO: need more accurate check
-        if not "/message_traking_tag" in topic:
+        if not "/message_tracking_tag" in topic:
             continue
 
         msg_type = get_message(type_map[topic])

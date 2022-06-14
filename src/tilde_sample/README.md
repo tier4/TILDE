@@ -129,7 +129,7 @@ input_infos:
 ros2 launch tilde_sample multi_publisher_relay.launch.py
 ```
 
-In this example, two publshers are launched.
+In this example, two publishers are launched.
 One has the standard header field, and another doesn't.
 
 RelayTimer is launched for the subscription, and relays
@@ -259,7 +259,7 @@ input_infos:
 ros2 launch tilde_sample multi_publisher_buffered_relay.launch.py
 ```
 
-In this example, two publshers are launched as in (3).
+In this example, two publishers are launched as in (3).
 
 For the subscription side, RelayTimerWithBuffer is launched.
 

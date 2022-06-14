@@ -92,7 +92,7 @@ public:
 
   /// delete old data
   /**
-   * \param threas Time point to delete data whose stamp <= threshold
+   * \param threshold Time point to delete data whose stamp <= threshold
    */
   void delete_expired(const rclcpp::Time & threshold);
 

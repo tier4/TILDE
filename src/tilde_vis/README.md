@@ -71,7 +71,7 @@ ros2 run tilde_vis latency_viewer --batch ...
 
 - mode
   - one_hot: prints the specific flow latency
-  - stat: calcurates statistics per second
+  - stat: calculates statistics per second
 
 #### topic graph specific parameters
 
