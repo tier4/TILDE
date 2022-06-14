@@ -142,7 +142,9 @@ void TildeDeadlineDetectorNode::init()
     RCLCPP_INFO(this->get_logger(), "subscribe: %s", topic.c_str());
     auto sub = create_subscription<MessageTrackingTag>(
       topic, qos,
-      std::bind(&TildeDeadlineDetectorNode::pubinfo_callback, this, std::placeholders::_1));
+      std::bind(
+        &TildeDeadlineDetectorNode::message_tracking_tag_callback, this,
+        std::placeholders::_1));
     subs_.push_back(sub);
   }
 
@@ -167,9 +169,9 @@ void TildeDeadlineDetectorNode::init()
         std::chrono::duration_cast<std::chrono::milliseconds>(et - st).count());
 
       if (show_performance) {
-        std::cout << "pubinfo_callback: " <<
-        "  avg: " << pubinfo_callback_counter_.avg << "\n" <<
-        "  max: " << pubinfo_callback_counter_.max << "\n" <<
+        std::cout << "message_tracking_tag_callback: " <<
+        "  avg: " << message_tracking_tag_callback_counter_.avg << "\n" <<
+        "  max: " << message_tracking_tag_callback_counter_.max << "\n" <<
         "timer_callback: " <<
         "  avg: " << timer_callback_counter_.avg << "\n" <<
         "  max: " << timer_callback_counter_.max << std::endl;
@@ -194,18 +196,20 @@ void print_report(
   std::cout << std::endl;
 }
 
-void TildeDeadlineDetectorNode::pubinfo_callback(MessageTrackingTag::UniquePtr pubinfo)
+void TildeDeadlineDetectorNode::message_tracking_tag_callback(
+  MessageTrackingTag::UniquePtr message_tracking_tag)
 {
   auto st = std::chrono::steady_clock::now();
 
-  auto target = pubinfo->output_info.topic_name;
-  auto stamp = pubinfo->output_info.header_stamp;
+  auto target = message_tracking_tag->output_info.topic_name;
+  auto stamp = message_tracking_tag->output_info.header_stamp;
 
   // work around for non `/clock` bag file
   latest_ = std::max(rclcpp::Time(stamp), latest_);
 
-  bool is_sensor = (sensor_topics_.find(pubinfo->output_info.topic_name) != sensor_topics_.end());
-  fe.add(std::move(pubinfo), is_sensor);
+  bool is_sensor =
+    (sensor_topics_.find(message_tracking_tag->output_info.topic_name) != sensor_topics_.end());
+  fe.add(std::move(message_tracking_tag), is_sensor);
 
   if (!contains(target_topics_, target)) {
     return;
@@ -223,7 +227,7 @@ void TildeDeadlineDetectorNode::pubinfo_callback(MessageTrackingTag::UniquePtr p
   // TODO(y-okumura-isp) send warning to diagnostic
 
   auto et = std::chrono::steady_clock::now();
-  pubinfo_callback_counter_.add(
+  message_tracking_tag_callback_counter_.add(
     std::chrono::duration_cast<std::chrono::milliseconds>(et - st).count());
 }
 

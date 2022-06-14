@@ -39,7 +39,7 @@ TimeMsg get_time(int sec, int nsec)
 }
 
 std::unique_ptr<MessageTrackingTag>
-create_pubinfo(
+create_message_tracking_tag(
   const std::string & topic,
   const TimeMsg & time)
 {
@@ -73,7 +73,7 @@ TEST(TestForwardEstimator, one_sensor)
   EXPECT_EQ(is0.size(), 0u);
 
   // msg 1
-  auto message_tracking_tag1 = create_pubinfo(topic, time1);
+  auto message_tracking_tag1 = create_message_tracking_tag(topic, time1);
   fe.add(std::move(message_tracking_tag1));
 
   auto is1 = fe.get_input_sources(topic, time1);
@@ -83,7 +83,7 @@ TEST(TestForwardEstimator, one_sensor)
 
   // msg 2
   auto time2 = get_time(11, 110);
-  auto message_tracking_tag2 = create_pubinfo(topic, time2);
+  auto message_tracking_tag2 = create_message_tracking_tag(topic, time2);
 
   fe.add(std::move(message_tracking_tag2));
 
@@ -100,7 +100,7 @@ TEST(TestForwardEstimator, two_sensors)
   // sensor1 msg1
   const std::string topic1 = "sensor1";
   const auto time11 = get_time(10, 100);
-  auto message_tracking_tag11 = create_pubinfo(topic1, time11);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
 
   fe.add(std::move(message_tracking_tag11));
 
@@ -112,7 +112,7 @@ TEST(TestForwardEstimator, two_sensors)
   // sensor2 msg1
   const std::string topic2 = "sensor2";
   const auto time21 = get_time(21, 210);
-  auto message_tracking_tag21 = create_pubinfo(topic2, time21);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time21);
 
   fe.add(std::move(message_tracking_tag21));
 
@@ -136,16 +136,16 @@ TEST(TestForwardEstimator, simple_flow_stamp_preserved)
 
   // sensor1 msg1
   const auto time11 = get_time(11, 110);
-  auto message_tracking_tag11 = create_pubinfo(topic1, time11);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
 
   // sensor2 msg1
   const auto time21 = time11;
-  auto message_tracking_tag21 = create_pubinfo(topic2, time21);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time21);
   add_input_info(message_tracking_tag21.get(), message_tracking_tag11.get());
 
   // sensor3 msg1
   rclcpp::Time time31 = time11;
-  auto message_tracking_tag31 = create_pubinfo(topic3, time31);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time31);
   add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
 
   fe.add(std::move(message_tracking_tag11));
@@ -176,16 +176,16 @@ TEST(TestForwardEstimator, simple_flow_stamp_update)
 
   // sensor1 msg1
   const auto time11 = get_time(11, 110);
-  auto message_tracking_tag11 = create_pubinfo(topic1, time11);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
 
   // sensor2 msg1
   const auto time21 = get_time(21, 210);
-  auto message_tracking_tag21 = create_pubinfo(topic2, time21);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time21);
   add_input_info(message_tracking_tag21.get(), message_tracking_tag11.get());
 
   // sensor3 msg1
   const auto time31 = get_time(31, 310);
-  auto message_tracking_tag31 = create_pubinfo(topic3, time31);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time31);
   add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
 
   fe.add(std::move(message_tracking_tag11));
@@ -216,19 +216,19 @@ TEST(TestForwardEstimator, merged_flow)
 
   // sensor1 msg1
   const auto time11 = get_time(11, 110);
-  auto message_tracking_tag11 = create_pubinfo(topic1, time11);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
 
   // sensor2 msg1
   const auto time21 = get_time(21, 210);
-  auto message_tracking_tag21 = create_pubinfo(topic2, time21);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time21);
 
   // sensor2 msg2
   const auto time22 = get_time(22, 220);
-  auto message_tracking_tag22 = create_pubinfo(topic2, time22);
+  auto message_tracking_tag22 = create_message_tracking_tag(topic2, time22);
 
   // sensor3 msg1 consists of msg 11, 21, 22
   const auto time31 = get_time(31, 310);
-  auto message_tracking_tag31 = create_pubinfo(topic3, time31);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time31);
   add_input_info(message_tracking_tag31.get(), message_tracking_tag11.get());
   add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
   add_input_info(message_tracking_tag31.get(), message_tracking_tag22.get());
@@ -262,16 +262,16 @@ TEST(TestForwardEstimator, reverse_order2)
 
   // MessageTrackingTag of A
   const auto time11 = get_time(11, 110);
-  auto message_tracking_tag11 = create_pubinfo(topic1, time11);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
 
   // MessageTrackingTag of B
   const auto time21 = get_time(21, 210);
-  auto message_tracking_tag21 = create_pubinfo(topic2, time21);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time21);
   add_input_info(message_tracking_tag21.get(), message_tracking_tag11.get());
 
   // MessageTrackingTag of C
   const auto time31 = get_time(31, 310);
-  auto message_tracking_tag31 = create_pubinfo(topic3, time31);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time31);
   add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
 
   // add MessageTrackingTag in C -> A -> B order
@@ -297,16 +297,16 @@ TEST(TestForwardEstimator, reverse_order)
 
   // MessageTrackingTag of A
   const auto time11 = get_time(11, 110);
-  auto message_tracking_tag11 = create_pubinfo(topic1, time11);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
 
   // MessageTrackingTag of B
   const auto time21 = get_time(21, 210);
-  auto message_tracking_tag21 = create_pubinfo(topic2, time21);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time21);
   add_input_info(message_tracking_tag21.get(), message_tracking_tag11.get());
 
   // MessageTrackingTag of C
   const auto time31 = get_time(31, 310);
-  auto message_tracking_tag31 = create_pubinfo(topic3, time31);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time31);
   add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
 
   // add MessageTrackingTag in C -> B -> A order
@@ -341,12 +341,12 @@ TEST(TestForwardEstimator, reverse_order_with_merge)
   const std::string topic4 = "topic4";
   auto time41 = get_time(41, 410);
 
-  auto message_tracking_tag11 = create_pubinfo(topic1, time11);
-  auto message_tracking_tag21 = create_pubinfo(topic2, time21);
-  auto message_tracking_tag31 = create_pubinfo(topic3, time31);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time21);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time31);
   add_input_info(message_tracking_tag31.get(), message_tracking_tag11.get());
   add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
-  auto message_tracking_tag41 = create_pubinfo(topic4, time41);
+  auto message_tracking_tag41 = create_message_tracking_tag(topic4, time41);
   add_input_info(message_tracking_tag41.get(), message_tracking_tag31.get());
 
   // 4 -> 3 -> 1 -> 2
@@ -372,10 +372,10 @@ TEST(TestForwardEstimator, expire_at_the_same_time)
   const std::string topic3 = "topic3";
   auto time = get_time(11, 110);
 
-  auto message_tracking_tag11 = create_pubinfo(topic1, time);
-  auto message_tracking_tag21 = create_pubinfo(topic2, time);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time);
   add_input_info(message_tracking_tag21.get(), message_tracking_tag11.get());
-  auto message_tracking_tag31 = create_pubinfo(topic3, time);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time);
   add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
 
   fe.add(std::move(message_tracking_tag11));
@@ -406,10 +406,10 @@ TEST(TestForwardEstimator, expire_step_by_step)
   auto time21 = get_time(21, 210);
   auto time31 = get_time(31, 310);
 
-  auto message_tracking_tag11 = create_pubinfo(topic1, time11);
-  auto message_tracking_tag21 = create_pubinfo(topic2, time21);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time21);
   add_input_info(message_tracking_tag21.get(), message_tracking_tag11.get());
-  auto message_tracking_tag31 = create_pubinfo(topic3, time31);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time31);
   add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
 
   fe.add(std::move(message_tracking_tag11));
@@ -453,10 +453,10 @@ TEST(TestForwardEstimator, expire_step_by_step_skew)
   auto time21 = get_time(21, 210);
   auto time31 = get_time(11, 110);
 
-  auto message_tracking_tag11 = create_pubinfo(topic1, time11);
-  auto message_tracking_tag21 = create_pubinfo(topic2, time21);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time21);
   add_input_info(message_tracking_tag21.get(), message_tracking_tag11.get());
-  auto message_tracking_tag31 = create_pubinfo(topic3, time31);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time31);
   add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
 
   fe.add(std::move(message_tracking_tag11));
@@ -495,27 +495,27 @@ TEST(TestForwardEstimator, get_oldest_sensor_stamp)
   const std::string topic3 = "topicC";
 
   auto time11 = get_time(11, 110);
-  auto pubinfo11 = create_pubinfo(topic1, time11);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
   auto time12 = get_time(12, 120);
-  auto pubinfo12 = create_pubinfo(topic1, time12);
+  auto message_tracking_tag12 = create_message_tracking_tag(topic1, time12);
 
   auto time21 = get_time(21, 110);
-  auto pubinfo21 = create_pubinfo(topic2, time21);
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time21);
   auto time22 = get_time(22, 120);
-  auto pubinfo22 = create_pubinfo(topic2, time22);
+  auto message_tracking_tag22 = create_message_tracking_tag(topic2, time22);
 
   auto time31 = get_time(31, 310);
-  auto pubinfo31 = create_pubinfo(topic3, time31);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time31);
 
-  add_input_info(pubinfo31.get(), pubinfo11.get());
-  add_input_info(pubinfo31.get(), pubinfo12.get());
-  add_input_info(pubinfo31.get(), pubinfo21.get());
-  add_input_info(pubinfo31.get(), pubinfo22.get());
+  add_input_info(message_tracking_tag31.get(), message_tracking_tag11.get());
+  add_input_info(message_tracking_tag31.get(), message_tracking_tag12.get());
+  add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
+  add_input_info(message_tracking_tag31.get(), message_tracking_tag22.get());
 
   auto fe = ForwardEstimator();
-  fe.add(std::move(pubinfo11));
-  fe.add(std::move(pubinfo21));
-  fe.add(std::move(pubinfo31));
+  fe.add(std::move(message_tracking_tag11));
+  fe.add(std::move(message_tracking_tag21));
+  fe.add(std::move(message_tracking_tag31));
 
   auto oldest = fe.get_oldest_sensor_stamp(topic3, time31);
   if (!oldest) {

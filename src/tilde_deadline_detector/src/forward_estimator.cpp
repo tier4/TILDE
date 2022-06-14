@@ -200,13 +200,14 @@ void ForwardEstimator::delete_expired(const rclcpp::Time & threshold)
 
   // delete sources
   for (auto & it : sources_) {
-    auto & stamp_pubinfo = it.second;
-    for (auto stamp_pubinfo_it = stamp_pubinfo.begin();
-      stamp_pubinfo_it != stamp_pubinfo.end(); )
+    auto & stamp_message_tracking_tag = it.second;
+    for (auto stamp_message_tracking_tag_it = stamp_message_tracking_tag.begin();
+      stamp_message_tracking_tag_it != stamp_message_tracking_tag.end(); )
     {
-      if (threshold < stamp_pubinfo_it->first) {break;}
-      stamp_pubinfo_it->second.reset();
-      stamp_pubinfo_it = stamp_pubinfo.erase(stamp_pubinfo_it);
+      if (threshold < stamp_message_tracking_tag_it->first) {break;}
+      stamp_message_tracking_tag_it->second.reset();
+      stamp_message_tracking_tag_it =
+        stamp_message_tracking_tag.erase(stamp_message_tracking_tag_it);
     }
   }
 

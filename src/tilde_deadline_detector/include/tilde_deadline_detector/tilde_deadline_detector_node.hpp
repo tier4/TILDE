@@ -79,11 +79,11 @@ private:
   std::vector<MessageTrackingTagSubscription::SharedPtr> subs_;
   rclcpp::TimerBase::SharedPtr timer_;
 
-  PerformanceCounter pubinfo_callback_counter_;
+  PerformanceCounter message_tracking_tag_callback_counter_;
   PerformanceCounter timer_callback_counter_;
 
   void init();
-  void pubinfo_callback(tilde_msg::msg::MessageTrackingTag::UniquePtr msg);
+  void message_tracking_tag_callback(tilde_msg::msg::MessageTrackingTag::UniquePtr msg);
 };
 
 }  // namespace tilde_deadline_detector
