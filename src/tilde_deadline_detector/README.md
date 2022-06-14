@@ -36,17 +36,17 @@ The deadline notification is not implemented yet.
 
 Here is a set of parameters.
 
-| name                | about                                                                               |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| `ignore_topics`     | don't subscribe these topics                                                        |
+| name                | about                                                                                          |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| `ignore_topics`     | don't subscribe these topics                                                                   |
 | `sensor_topics`     | regard nodes as sensors if MessageTrackingTag has no input_infos or the topic is in this list. |
-| `target_topics`     | topics of which you want to detect deadline                                         |
-| `deadline_ms`       | list of deadline [ms] in `target_topics` order.                                     |
-| `expire_ms`         | internal data lifetime                                                              |
-| `cleanup_ms`        | timer period to cleanup internal data                                               |
-| `print_report`      | whether to print internal data                                                      |
-| `clock_work_around` | set true when your bag file does not have `/clock`                                  |
-| `show_performance`  | set true to show performance report                                                 |
+| `target_topics`     | topics of which you want to detect deadline                                                    |
+| `deadline_ms`       | list of deadline [ms] in `target_topics` order.                                                |
+| `expire_ms`         | internal data lifetime                                                                         |
+| `cleanup_ms`        | timer period to cleanup internal data                                                          |
+| `print_report`      | whether to print internal data                                                                 |
+| `clock_work_around` | set true when your bag file does not have `/clock`                                             |
+| `show_performance`  | set true to show performance report                                                            |
 
 This is a sample parameter yaml file.
 
