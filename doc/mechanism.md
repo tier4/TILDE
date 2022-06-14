@@ -2,11 +2,11 @@
 
 **best viewed with [mermaid-diagrams](https://chrome.google.com/webstore/detail/mermaid-diagrams/phfcghedmopjadpojhmmaffjmfiakfil/related) or [GitHub + Mermaid](https://chrome.google.com/webstore/detail/github-+-mermaid/goiiopgdnkogdbjmncgedmgpoajilohe)**
 
-TILDE は、ユーザプログラムがメイントピックを publish するのに併せて PubInfo というトピックを `<topic名>/info/pub` に publish します。  
-PubInfo は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。
+TILDE は、ユーザプログラムがメイントピックを publish するのに併せて MessageTrackingTag というトピックを `<topic名>/message_tracking_tag` に publish します。  
+MessageTrackingTag は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。
 
 ここで **メイントピック** とはアプリケーションが本来やりとりするメッセージです。
-TILDE が PubInfo という付加的なトピックをやりとりする為、アプリケーション本来のメッセージをメイントピックと呼称しています。
+TILDE が MessageTrackingTag という付加的なトピックをやりとりする為、アプリケーション本来のメッセージをメイントピックと呼称しています。
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 
@@ -14,12 +14,12 @@ TILDE が PubInfo という付加的なトピックをやりとりする為、�
 
 - [TILDE の動作原理](#tilde-の動作原理)
   - [Table of Contents](#table-of-contents)
-  - [PubInfo](#pubinfo)
+  - [MessageTrackingTag](#message_tracking_tag)
   - [例](#例)
     - [DAG と動作概要](#dag-と動作概要)
     - [stamp](#stamp)
-    - [NodeC の PubInfo](#nodec-の-pubinfo)
-  - [PubInfo の作成メカニズム](#pubinfo-の作成メカニズム)
+    - [NodeC の MessageTrackingTag](#nodec-の-message_tracking_tag)
+  - [MessageTrackingTag の作成メカニズム](#message_tracking_tag-の作成メカニズム)
     - [概要](#概要)
     - [class](#class)
     - [create_tilde_publisher](#create_tilde_publisher)
@@ -30,19 +30,19 @@ TILDE が PubInfo という付加的なトピックをやりとりする為、�
 
 <!-- markdown-toc end -->
 
-まず PubInfo についてデータ構造と例を記述します。
-次に TILDE が PubInfo を作る仕組みを記述します。
+まず MessageTrackingTag についてデータ構造と例を記述します。
+次に TILDE が MessageTrackingTag を作る仕組みを記述します。
 最後にオーバーヘッドについて記載します。
 
-## PubInfo
+## MessageTrackingTag
 
-PubInfo はメイントピックの publish 時と同時に送信されるメタ情報です。
-`<メイントピック名>/info/pub` に送信されます。
+MessageTrackingTag はメイントピックの publish 時と同時に送信されるメタ情報です。
+`<メイントピック名>/message_tracking_tag` に送信されます。
 
 メッセージ定義は以下の通りです。
 ※ TODO: ファイル名やデータ構造はリファクタ予定
 
-[PubInfo.msg](../src/tilde_msg/msg/PubInfo.msg)
+[MessageTrackingTag.msg](../src/tilde_msg/msg/MessageTrackingTag.msg)
 
 - Header:
   - header
@@ -108,18 +108,18 @@ ROS2 のセンサーやナーゲーションで用いられるメッセージで
 header フィールドには stamp フィールドがあり、ユーザ定義のタイムスタンプを記入します。
 TILDE では **header フィールドの stamp を利用** によりメッセージを識別します。
 
-### NodeC の PubInfo
+### NodeC の MessageTrackingTag
 
-TILDE はメインメッセージの publish をフックして PubInfo を送信します。
-NodeC の出力する PubInfo は以下の様な物になります(フィールドは一部省略しています)。
+TILDE はメインメッセージの publish をフックして MessageTrackingTag を送信します。
+NodeC の出力する MessageTrackingTag は以下の様な物になります(フィールドは一部省略しています)。
 
 ```mermaid
 classDiagram
   direction LR
-  OutputInfo <.. PubInfo_NodeC
-  InputInfo_TopicA <.. PubInfo_NodeC
-  InputInfo_TopicB <.. PubInfo_NodeC
-  class PubInfo_NodeC {
+  OutputInfo <.. MessageTrackingTag_NodeC
+  InputInfo_TopicA <.. MessageTrackingTag_NodeC
+  InputInfo_TopicB <.. MessageTrackingTag_NodeC
+  class MessageTrackingTag_NodeC {
     +seq: 0
     +Node: NodeC
     +output_info
@@ -143,29 +143,29 @@ classDiagram
   }
 ```
 
-この様に PubInfo には **Node 単位で、出力と入力の紐付け情報** が記載されます。
+この様に MessageTrackingTag には **Node 単位で、出力と入力の紐付け情報** が記載されます。
 より具体的には **送信したメインメッセージと、自身が subscription している入力トピックのメッセージを header stamp で紐付け** ます。
 上記の様に、デフォルトではメッセージの紐付けは各入力トピックについて **メインメッセージ送信前に受信した最新のメッセージ** になっています。 explicit API により明示的に紐付け情報を設定することが可能です。
 
-## PubInfo の作成メカニズム
+## MessageTrackingTag の作成メカニズム
 
-PubInfo はメイントピックの publish 時に同時に送信されます。
+MessageTrackingTag はメイントピックの publish 時に同時に送信されます。
 また `input_infos` では入力トピックとの紐付け情報が設定されます。
 
-これらを行なうためには subscription 時に `input_infos` 用の情報を保持したり、 PubInfo のメッセージを作成・送信する必要がありますが、TILDE が publish や subscription callback をフックしてこれらの処理を実行する為、アプリケーションでこれらを意識する必要はありません。
+これらを行なうためには subscription 時に `input_infos` 用の情報を保持したり、 MessageTrackingTag のメッセージを作成・送信する必要がありますが、TILDE が publish や subscription callback をフックしてこれらの処理を実行する為、アプリケーションでこれらを意識する必要はありません。
 
 ### 概要
 
 以下で UML 風の図を用いて TILDE の動作概要を記述します。先に簡単に言葉でまとめます。
 
 - アプリケーションから見た TILDE
-  - PubInfo を作成するのに必要な情報の蓄積や PubInfo の送信は TILDE が行なう。
-  - その為、基本的にはアプリケーションで TILDE や PubInfo のことを考える必要はない。
+  - MessageTrackingTag を作成するのに必要な情報の蓄積や MessageTrackingTag の送信は TILDE が行なう。
+  - その為、基本的にはアプリケーションで TILDE や MessageTrackingTag のことを考える必要はない。
   - ただし内部でバッファリングしている場合、メッセージを正しくトラッキングするには input_info を明示的に登録する必要がある
-- PubInfo の作成
+- MessageTrackingTag の作成
   - TILDE のカスタム create_publisher によりカスタムの Publisher である TildePublisher が作成される。
   - TildePublisher は入力情報に関するデータを持っている。
-  - メイントピックの publish をフックし、メイントピックを送信すると同時に入力情報データから PubInfo を作成して PubInfo を送信する。
+  - メイントピックの publish をフックし、メイントピックを送信すると同時に入力情報データから MessageTrackingTag を作成して MessageTrackingTag を送信する。
 - input infos の紐付け
   - TILE のカスタム create_subscription により subscription コールバックがフックされる。
   - フック中の処理で TildePublisher に対して入力トピックや header stamp などの情報を登録する。
@@ -200,7 +200,7 @@ classDiagram
   class TildePublisher {
     +publish(msg)
     +main_pub_: Publisher<T>
-    +pubinfo_pub_: Publisher<PubInfo>
+    +message_tracking_tag_pub_: Publisher<MessageTrackingTag>
     -input_info
   }
   class Subscription~T~ {
@@ -213,8 +213,8 @@ classDiagram
 
 ### create_tilde_publisher
 
-`create_tilde_publisher<T>(topic, ...)` によりメインメッセージと PubInfo 用の publisher が作成されます。
-PubInfo 用のトピック名はメイントピック名に `/info/pub` という接尾語がついたものです。
+`create_tilde_publisher<T>(topic, ...)` によりメインメッセージと MessageTrackingTag 用の publisher が作成されます。
+MessageTrackingTag 用のトピック名はメイントピック名に `/message_tracking_tag` という接尾語がついたものです。
 
 ```mermaid
 sequenceDiagram
@@ -223,8 +223,8 @@ sequenceDiagram
     TildeNode-->TildeNode: tilde_pub_ = new TildePublisher
     TildeNode-->topic: tilde_pub_.main_pub_ = create_publisher<T>(topic, ...)
     note over topic: topic created
-    TildeNode-->topic/info/pub: tilde_pub.pub_info_pub_ = create_publisher<PubInfo>(topic + "/info/pub", ...)
-    note over topic/info/pub: topic created
+    TildeNode-->topic/message_tracking_tag: tilde_pub.message_tracking_tag_pub_ = create_publisher<MessageTrackingTag>(topic + "/message_tracking_tag", ...)
+    note over topic/message_tracking_tag: topic created
     TildeNode-->>UserNode: tilde_pub
     deactivate TildeNode
 ```
@@ -241,7 +241,7 @@ TILDE では subscription callback をフックする為、ユーザ指定のコ
 ```cpp
 void create_tilde_subscription<T>(topic, qos, cb) {
   auto tilde_cb = [this, topic, cb](T msg) {
-     // PubInfo 用に入力情報の紐付け
+     // MessageTrackingTag 用に入力情報の紐付け
      auto sub_time = now();
      this->tilde_pub.set_input_info(
         topic,
@@ -272,23 +272,23 @@ sequenceDiagram
 
 ### publish
 
-TildePublisher は登録済みの `input_info` を参照して PubInfo を作成します。
-PubInfo とメインメッセージを送信します。
+TildePublisher は登録済みの `input_info` を参照して MessageTrackingTag を作成します。
+MessageTrackingTag とメインメッセージを送信します。
 
 ```mermaid
 sequenceDiagram
     UserNode-->>TildePublisher: pub.publish(msg)
     activate TildePublisher
-    TildePublisher-->TildePublisher: pub_info = get_pub_info()
+    TildePublisher-->TildePublisher: message_tracking_tag = get_message_tracking_tag()
 
-    TildePublisher-->>topic/info/pub: pub_info_pub_.publish(pub_info)
+    TildePublisher-->>topic/message_tracking_tag: message_tracking_tag_pub_.publish(message_tracking_tag)
     TildePublisher-->>topic: main_pub_.publish(msg);
     deactivate TildePublisher
 ```
 
 ## Explicit API
 
-[NodeC の PubInfo](#nodec-の-pubinfo) では「メインメッセージ送信前に受信した最新のメッセージ」に紐付けられると記述しました。
+[NodeC の MessageTrackingTag](#nodec-の-message_tracking_tag) では「メインメッセージ送信前に受信した最新のメッセージ」に紐付けられると記述しました。
 受信メッセージを内部でバッファして選択的に利用している、あるいは入力トピックが複数ありそれぞれバッファリングしている等、入力トピックと出力トピックが明示的に紐付かないノードでは explicit API を使って明示的に紐付け情報を設定することが可能です。
 
 下図は 4 入力、 1 出力のノードの例です。
@@ -308,7 +308,7 @@ sequenceDiagram
 /twist   -->  W1 W2 W3  ->  | W2 W3     |
                             +-----------+
               ^
-              TILDE では「最も最近受信した stamp」しか覚えていない為、正確な PubInfo を作成できない
+              TILDE では「最も最近受信した stamp」しか覚えていない為、正確な MessageTrackingTag を作成できない
 ```
 
 Explicit API では「`/concatenate` を作成するのに `/left` の L2、`/right` の R1 (以下略)を使った」という指定ができます。
