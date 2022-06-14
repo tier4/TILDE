@@ -34,45 +34,45 @@ from rclpy.qos import (
 from rclpy.time import Time
 
 from tilde_msg.msg import (
-    PubInfo,
+    MessageTrackingTag,
+    )
+from tilde_vis.message_tracking_tag import (
+    MessageTrackingTag as MessageTrackingTagObj,
+    MessageTrackingTags as MessageTrackingTagsObj,
+    time2str
+    )
+from tilde_vis.message_tracking_tag_traverse import (
+    InputSensorStampSolver,
+    TopicGraph
     )
 from tilde_vis.printer import (
     NcursesPrinter,
     Printer
     )
-from tilde_vis.pub_info import (
-    PubInfo as PubInfoObj,
-    PubInfos as PubInfosObj,
-    time2str
-    )
-from tilde_vis.pubinfo_traverse import (
-    InputSensorStampSolver,
-    TopicGraph
-    )
 
 
 EXCLUDES_TOPICS = [
-    '/diagnostics/info/pub',
-    '/control/trajectory_follower/mpc_follower/debug/markers/info/pub',
-    '/control/trajectory_follower/mpc_follower/debug/steering_cmd/info/pub',
-    '/localization/debug/ellipse_marker/info/pub',
-    '/localization/pose_twist_fusion_filter/debug/info/pub',
-    '/localization/pose_twist_fusion_filter/debug/measured_pose/info/pub',
-    '/localization/pose_twist_fusion_filter/debug/stop_flag/info/pub',
-    '/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/drivable_area/info/pub',  # noqa: #501
-    '/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/markers/info/pub',  # noqa: #501
-    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/area_with_objects/info/pub',  # noqa: #501
-    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/clearance_map/info/pub',  # noqa: #501
-    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/marker/info/pub',  # noqa: #501
-    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/object_clearance_map/info/pub',  # noqa: #501
-    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/smoothed_points/info/pub',  # noqa: #501
-    '/planning/scenario_planning/motion_velocity_smoother/debug/backward_filtered_trajectory/info/pub',  # noqa: #501
-    '/planning/scenario_planning/motion_velocity_smoother/debug/forward_filtered_trajectory/info/pub',  # noqa: #501
-    '/planning/scenario_planning/motion_velocity_smoother/debug/merged_filtered_trajectory/info/pub',  # noqa: #501
-    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_external_velocity_limited/info/pub',  # noqa: #501
-    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_lateral_acc_filtered/info/pub',  # noqa: #501
-    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_raw/info/pub',  # noqa: #501
-    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_time_resampled/info/pub',  # noqa: #501
+    '/diagnostics/message_tracking_tag',
+    '/control/trajectory_follower/mpc_follower/debug/markers/message_tracking_tag',  # noqa: #501
+    '/control/trajectory_follower/mpc_follower/debug/steering_cmd/message_tracking_tag',  # noqa: #501
+    '/localization/debug/ellipse_marker/message_tracking_tag',
+    '/localization/pose_twist_fusion_filter/debug/message_tracking_tag',
+    '/localization/pose_twist_fusion_filter/debug/measured_pose/message_tracking_tag',  # noqa: #501
+    '/localization/pose_twist_fusion_filter/debug/stop_flag/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/drivable_area/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/markers/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/area_with_objects/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/clearance_map/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/marker/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/object_clearance_map/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/lane_driving/motion_planning/obstacle_avoidance_planner/debug/smoothed_points/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/backward_filtered_trajectory/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/forward_filtered_trajectory/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/merged_filtered_trajectory/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_external_velocity_limited/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_lateral_acc_filtered/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_raw/message_tracking_tag',  # noqa: #501
+    '/planning/scenario_planning/motion_velocity_smoother/debug/trajectory_time_resampled/message_tracking_tag',  # noqa: #501
     ]
 LEAVES = [
     '/initialpose',
@@ -81,7 +81,7 @@ LEAVES = [
     '/sensing/imu/imu_data',
     '/vehicle/status/twist',
     ]
-PUB_INFO = 'topic_infos.pkl'
+MESSAGE_TRACKING_TAG = 'topic_infos.pkl'
 TIMER_SEC = 1.0
 TARGET_TOPIC = '/sensing/lidar/concatenated/pointcloud'
 STOPS = [
@@ -132,7 +132,7 @@ class LatencyStat(object):
 
         Parameters
         ----------
-        r: pubinfo_traverse.SolverResults
+        r: message_tracking_tag_traverse.SolverResults
 
         """
         self.dur_ms_list.append(r.dur_ms)
@@ -188,7 +188,7 @@ class PerTopicLatencyStat(object):
 
         Parameters
         ----------
-        r: pubinfo_traverse.SolverResults
+        r: message_tracking_tag_traverse.SolverResults
 
         """
         self.data.setdefault(r.topic, LatencyStat()).add(r)
@@ -283,14 +283,14 @@ def calc_one_hot(results):
     return results.apply_with_depth(calc)
 
 
-def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
+def handle_stat(stamps, message_tracking_tags, target_topic, solver, stops, dumps=False):
     """
     Calculate latency statistics.
 
     Parameters
     ----------
     stamps:
-    pubinfos:
+    message_tracking_tags:
     target_topic:
     solver:
     stops:
@@ -312,7 +312,7 @@ def handle_stat(stamps, pubinfos, target_topic, solver, stops, dumps=False):
     print(f'idx: {idx}')
     for target_stamp in stamps[:idx]:
         results = solver.solve2(
-            pubinfos, target_topic, target_stamp,
+            message_tracking_tags, target_topic, target_stamp,
             stops=stops)
 
         if dumps:
@@ -465,7 +465,7 @@ class LatencyViewerNode(Node):
         excludes_topic = (
             self.get_parameter('excludes_topics')
             .get_parameter_value().string_array_value)
-        topics = self.get_pub_info_topics(excludes=excludes_topic)
+        topics = self.get_message_tracking_tag_topics(excludes=excludes_topic)
         logs = []
 
         qos = QoSProfile(
@@ -476,7 +476,7 @@ class LatencyViewerNode(Node):
         for topic in topics:
             logs.append(topic)
             sub = self.create_subscription(
-                PubInfo,
+                MessageTrackingTag,
                 topic,
                 self.listener_callback,
                 qos)
@@ -493,7 +493,7 @@ class LatencyViewerNode(Node):
             graph = pickle.load(open(graph_pkl, 'rb'))
             self.solver = InputSensorStampSolver(graph)
 
-        self.pub_infos = PubInfosObj()
+        self.message_tracking_tags = MessageTrackingTagsObj()
 
         timer_sec = (
             self.get_parameter('timer_sec')
@@ -543,10 +543,10 @@ class LatencyViewerNode(Node):
 
         self.skips = skips
 
-    def listener_callback(self, pub_info_msg):
-        """Handle PubInfo message."""
+    def listener_callback(self, message_tracking_tag_msg):
+        """Handle MessageTrackingTag message."""
         st = time.time()
-        output_info = pub_info_msg.output_info
+        output_info = message_tracking_tag_msg.output_info
 
         topic = output_info.topic_name
         stamp = time2str(output_info.header_stamp)
@@ -560,7 +560,7 @@ class LatencyViewerNode(Node):
             s = f'skew topic={topic} ' + \
                 f'msg_seq={this_seq}({time2str(output_info.header_stamp)})' + \
                 f' saved_seq={seq}'
-            stamps = self.pub_infos.stamps(topic)
+            stamps = self.message_tracking_tags.stamps(topic)
             if stamps or len(stamps) > 0:
                 last_stamp = sorted(stamps)[-1]
                 s += f'({last_stamp})'
@@ -569,7 +569,7 @@ class LatencyViewerNode(Node):
             s = f'may drop topic={topic} ' + \
                 f'msg_seq={this_seq}({time2str(output_info.header_stamp)})' + \
                 f' saved_seq={seq}'
-            stamps = self.pub_infos.stamps(topic)
+            stamps = self.message_tracking_tags.stamps(topic)
             if stamps or len(stamps) > 0:
                 last_stamp = sorted(stamps)[-1]
                 s += f'({last_stamp})'
@@ -578,19 +578,21 @@ class LatencyViewerNode(Node):
         else:
             self.topic_seq[topic] = this_seq
 
-        # add pubinfo
-        pub_info = PubInfoObj(output_info.topic_name,
-                              output_info.pub_time,
-                              output_info.pub_time_steady,
-                              output_info.has_header_stamp,
-                              output_info.header_stamp)
-        for input_info in pub_info_msg.input_infos:
-            pub_info.add_input_info(input_info.topic_name,
-                                    input_info.sub_time,
-                                    input_info.sub_time_steady,
-                                    input_info.has_header_stamp,
-                                    input_info.header_stamp)
-        self.pub_infos.add(pub_info)
+        # add message_tracking_tag
+        message_tracking_tag = MessageTrackingTagObj(
+            output_info.topic_name,
+            output_info.pub_time,
+            output_info.pub_time_steady,
+            output_info.has_header_stamp,
+            output_info.header_stamp)
+        for input_info in message_tracking_tag_msg.input_infos:
+            message_tracking_tag.add_input_info(
+                input_info.topic_name,
+                input_info.sub_time,
+                input_info.sub_time_steady,
+                input_info.has_header_stamp,
+                input_info.header_stamp)
+        self.message_tracking_tags.add(message_tracking_tag)
 
         et = time.time()
 
@@ -612,14 +614,14 @@ class LatencyViewerNode(Node):
         list of string
 
         """
-        pubinfos = self.pub_infos
+        message_tracking_tags = self.message_tracking_tags
         target_topic = self.target_topic
         solver = self.solver
         stops = self.stops
         dumps = self.dumps
 
         stats = handle_stat(stamps,
-                            pubinfos,
+                            message_tracking_tags,
                             target_topic,
                             solver,
                             stops,
@@ -677,7 +679,7 @@ class LatencyViewerNode(Node):
         array of strings for log
 
         """
-        pubinfos = self.pub_infos
+        message_tracking_tags = self.message_tracking_tags
         target_topic = self.target_topic
         solver = self.solver
         stops = self.stops
@@ -691,7 +693,7 @@ class LatencyViewerNode(Node):
             idx = 0
 
         target_stamp = stamps[idx]
-        results = solver.solve2(pubinfos, target_topic, target_stamp,
+        results = solver.solve2(message_tracking_tags, target_topic, target_stamp,
                                 stops=stops)
 
         if self.dumps:
@@ -721,10 +723,10 @@ class LatencyViewerNode(Node):
     def timer_callback(self):
         """Clear old data."""
         st = time.time()
-        pubinfos = self.pub_infos
+        message_tracking_tags = self.message_tracking_tags
         target_topic = self.target_topic
 
-        stamps = sorted(pubinfos.stamps(target_topic))
+        stamps = sorted(message_tracking_tags.stamps(target_topic))
         logs = []
         str_stamp = stamps[0] if len(stamps) > 0 else ''
         logs.append(f'stamps: {len(stamps)}, {str_stamp}')
@@ -733,7 +735,7 @@ class LatencyViewerNode(Node):
             return
 
         # check header.stamp field existence
-        if not pubinfos.get(target_topic, stamps[0]).out_info.has_stamp:
+        if not message_tracking_tags.get(target_topic, stamps[0]).out_info.has_stamp:
             logs.append('**WARNING** target topic has no stamp field')
             self.printer.print_(logs)
             return
@@ -744,7 +746,7 @@ class LatencyViewerNode(Node):
                 self.wait_init += 1
                 return
             logs.append('init solver')
-            graph = TopicGraph(pubinfos, skips=self.skips)
+            graph = TopicGraph(message_tracking_tags, skips=self.skips)
             self.solver = InputSensorStampSolver(graph)
 
         mode = self.get_parameter('mode').get_parameter_value().string_value
@@ -757,11 +759,11 @@ class LatencyViewerNode(Node):
         et1 = time.time()
         handle_ms = (et1 - st) * 1000
 
-        # cleanup PubInfos
+        # cleanup MessageTrackingTags
         (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split('.'))
         until_stamp = TimeMsg(sec=latest_sec - self.keep_info_sec,
                               nanosec=latest_ns)
-        pubinfos.erase_until(until_stamp)
+        message_tracking_tags.erase_until(until_stamp)
         et2 = time.time()
         cleanup_ms = (et2 - et1) * 1000
 
@@ -772,7 +774,7 @@ class LatencyViewerNode(Node):
                 f' cleanup_ms={cleanup_ms}'
             self.get_logger().info(s)
 
-    def get_pub_info_topics(self, excludes=[]):
+    def get_message_tracking_tag_topics(self, excludes=[]):
         """
         Get all topic infos.
 
@@ -783,16 +785,16 @@ class LatencyViewerNode(Node):
         Returns
         -------
         map
-          a list of pubinfo topics
+          a list of message_tracking_tag topics
 
         """
         # short sleep between node creation and get_topic_names_and_types
         # https://github.com/ros2/ros2/issues/1057
         # We need this sleep with autoware,
-        # but don't need in dev environment(i.e. PubInfo in rosbag)
+        # but don't need in dev environment(i.e. MessageTrackingTag in rosbag)
         time.sleep(0.5)
 
-        msg_type = 'tilde_msg/msg/PubInfo'
+        msg_type = 'tilde_msg/msg/MessageTrackingTag'
         topic_and_types = self.get_topic_names_and_types()
         filtered_topic_and_types = \
             filter(lambda x: msg_type in x[1], topic_and_types)

@@ -26,21 +26,25 @@ namespace tilde_deadline_detector
 ForwardEstimator::ForwardEstimator()
 {}
 
-void ForwardEstimator::add(std::unique_ptr<PubInfoMsg> _pub_info, bool is_sensor)
+void ForwardEstimator::add(
+  std::unique_ptr<MessageTrackingTagMsg> _message_tracking_tag,
+  bool is_sensor)
 {
-  if (!_pub_info->output_info.has_header_stamp) {return;}
+  if (!_message_tracking_tag->output_info.has_header_stamp) {return;}
 
-  std::shared_ptr<PubInfoMsg> pub_info = std::move(_pub_info);
+  std::shared_ptr<MessageTrackingTagMsg> message_tracking_tag = std::move(_message_tracking_tag);
 
-  const auto & topic_name = pub_info->output_info.topic_name;
-  const auto stamp = rclcpp::Time(pub_info->output_info.header_stamp);
+  const auto & topic_name = message_tracking_tag->output_info.topic_name;
+  const auto stamp = rclcpp::Time(message_tracking_tag->output_info.header_stamp);
 
   // no input => it may be sensor source
-  if (is_sensor || pub_info->input_infos.size() == 0) {
+  if (is_sensor || message_tracking_tag->input_infos.size() == 0) {
     // TODO(y-okumura-isp): what if timer fires without no new input in explicit API case
 
-    sources_[topic_name][stamp] = pub_info;
-    message_sources_[topic_name][stamp].insert(std::weak_ptr<PubInfoMsg>(pub_info));
+    sources_[topic_name][stamp] = message_tracking_tag;
+    message_sources_[topic_name][stamp].insert(
+      std::weak_ptr<MessageTrackingTagMsg>(
+        message_tracking_tag));
     topic_sensors_[topic_name].insert(topic_name);
 
     auto pending_messages_topic_it = pending_messages_.find(topic_name);
@@ -84,7 +88,7 @@ void ForwardEstimator::add(std::unique_ptr<PubInfoMsg> _pub_info, bool is_sensor
     // we keep pending_messages_[topic_name] because it is fixed size resources
   }
   // have input => get reference
-  for (const auto & input : pub_info->input_infos) {
+  for (const auto & input : message_tracking_tag->input_infos) {
     // get sources of input
     if (!input.has_header_stamp) {continue;}
     const auto & input_topic = input.topic_name;

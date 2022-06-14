@@ -6,7 +6,7 @@ import rosbag2_py
 from rosidl_runtime_py.utilities import get_message
 from rclpy.serialization import deserialize_message
 
-from pub_info import time2str, PubInfo, PubInfos
+from message_tracking_tag import time2str, Message_Tracking_Tag, Message_Tracking_Tags
 
 def get_rosbag_options(path, serialization_format='cdr'):
     storage_options = rosbag2_py.StorageOptions(uri=path, storage_id='sqlite3')
@@ -33,14 +33,14 @@ def main(args):
     cnt = 0
 
     # topic => list of record
-    out_per_topic = PubInfos()
+    out_per_topic = Message_Tracking_Tags()
 
     skip_topic_vs_count = {}
 
     while reader.has_next() and cnt <= args.cnt:
         (topic, data, t) = reader.read_next()
         # TODO: need more accurate check
-        if not "/info/pub" in topic:
+        if not "/message_traking_tag" in topic:
             continue
 
         msg_type = get_message(type_map[topic])
@@ -50,7 +50,7 @@ def main(args):
         out_stamp = msg.output_info.header_stamp
         out_stamp_s = time2str(out_stamp)
 
-        pub_info = PubInfo(out_topic, out_stamp)
+        message_tracking_tag = Message_Tracking_Tag(out_topic, out_stamp)
 
         for input_info in msg.input_infos:
             in_topic = input_info.topic_name
@@ -65,9 +65,9 @@ def main(args):
             in_stamp = input_info.header_stamp
             in_stamp_s = time2str(in_stamp)
 
-            pub_info.add_input_info(in_topic, in_has_stamp, in_stamp)
+            message_tracking_tag.add_input_info(in_topic, in_has_stamp, in_stamp)
 
-        out_per_topic.add(pub_info)
+        out_per_topic.add(message_tracking_tag)
 
     pickle.dump(out_per_topic, open("topic_infos.pkl", "wb"), protocol=pickle.HIGHEST_PROTOCOL)
 

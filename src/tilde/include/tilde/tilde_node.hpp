@@ -29,7 +29,7 @@
 
 #include "rmw/types.h"
 
-#include "tilde_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
 #include "tilde_publisher.hpp"
 
 #include "tilde/tp.h"
@@ -173,7 +173,7 @@ public:
   )
   {
     auto pub = create_publisher<MessageT, AllocatorT, PublisherT>(topic_name, qos, options);
-    auto info_topic = std::string(pub->get_topic_name()) + "/info/pub";
+    auto info_topic = std::string(pub->get_topic_name()) + "/message_tracking_tag";
     auto info_pub = create_publisher<TildePublisherBase::InfoMsg>(
       info_topic, rclcpp::QoS(1), options);
 

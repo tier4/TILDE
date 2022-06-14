@@ -2,7 +2,7 @@
 
 ## Description
 
-Sample application which uses topic info or PubInfo.
+Sample application which uses topic info or MessageTrackingTag.
 
 ## Requirement
 
@@ -19,12 +19,12 @@ You can use some tools.
 - (1) latency viewer: online latency viewer
   - run your application
   - run `latency_viewer`
-- (2) parse_pub_info & ipython: analyze latency from rosbag
+- (2) parse_message_tracking_tag & ipython: analyze latency from rosbag
   - run your application and record rosbag2
-  - run `parse_pub_info` to get PubInfo pkl.
+  - run `parse_message_tracking_tag` to get MessageTrackingTag pkl.
   - run ipython and do what you want
 - (3) tilde_vis (not well maintained)
-  - save `/*/info/pub` to rosbag
+  - save `/*/message_tracking_tag` to rosbag
   - then, run `tilde_vis`
 - (4) visualization by CARET
   - you can visualize message flows by CARET jupyter notebook
@@ -38,7 +38,7 @@ The latency viewer outputs E2E latency online, just like `vmstat` or `top`.
 ### Run
 
 Run the latency viewer **after** running the target application.
-Latency viewer grasps your application topic graph in constructor by discovering and listening `PubInfo` type topics.
+Latency viewer grasps your application topic graph in constructor by discovering and listening `MessageTrackingTag` type topics.
 
 Latency viewer shows latencies from `target_topic` to source topics.
 Here is the example command.
@@ -127,7 +127,7 @@ Hit
 | r, /                | filter lines by regex. Hit Enter for periodic update. |
 | q, F                | stop "move" mode and restart periodic update          |
 
-## (2) parse_pub_info
+## (2) parse_message_tracking_tag
 
 ### About
 
@@ -136,11 +136,11 @@ Read rosbag2 file, and create pkl file.
 ### Run
 
 ```bash
-ros2 run tilde_vis parse_pub_info <path/to/rosbag/dbfile>
+ros2 run tilde_vis parse_message_tracking_tag <path/to/rosbag/dbfile>
 ```
 
 `topic_infos.pkl` is created.
-You can get `pub_info.PubInfos` by reading this pkl file.
+You can get `message_tracking_tag.MessageTrackingTags` by reading this pkl file.
 
 ## (3) tilde_vis
 

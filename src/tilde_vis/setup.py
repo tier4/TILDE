@@ -23,8 +23,8 @@ setup(
         'console_scripts': [
             'tilde_vis = tilde_vis.tilde_vis:main',
             'latency_viewer = tilde_vis.latency_viewer:main',
-            'pubinfo_traverse = tilde_vis.pubinfo_traverse:main',
-            'parse_pub_info = tilde_vis.parse_pub_info:main',
+            'message_tracking_tag_traverse = tilde_vis.message_tracking_tag_traverse:main',
+            'parse_message_tracking_tag = tilde_vis.parse_message_tracking_tag:main',
         ],
     },
 )

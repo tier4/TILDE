@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Convert rosbag of PubInfo to pkl file."""
+"""Convert rosbag of MessageTrackingTag to pkl file."""
 
 import argparse
 import pickle
@@ -22,7 +22,7 @@ from rclpy.serialization import deserialize_message
 import rosbag2_py
 from rosidl_runtime_py.utilities import get_message
 
-from tilde_vis.pub_info import PubInfo, PubInfos
+from tilde_vis.message_tracking_tag import MessageTrackingTag, MessageTrackingTags
 
 
 def get_rosbag_options(path, serialization_format='cdr'):
@@ -51,7 +51,7 @@ def run(args):
                 for i in range(len(topic_types))}
 
     # topic => list of record
-    out_per_topic = PubInfos()
+    out_per_topic = MessageTrackingTags()
 
     skip_topic_vs_count = {}
 
@@ -62,14 +62,14 @@ def run(args):
 
         (topic, data, t) = reader.read_next()
         # TODO: need more accurate check
-        if '/info/pub' not in topic:
+        if '/message_tracking_tag' not in topic:
             continue
 
         msg_type = get_message(type_map[topic])
         msg = deserialize_message(data, msg_type)
 
-        pub_info = PubInfo.fromMsg(msg)
-        out_per_topic.add(pub_info)
+        message_tracking_tag = MessageTrackingTag.fromMsg(msg)
+        out_per_topic.add(message_tracking_tag)
 
         if 0 < cnt and cnt % 1000 == 0:
             print(cnt)
@@ -88,7 +88,7 @@ def main():
     parser.add_argument('bag_path')
     parser.add_argument(
         '--cnt', type=int, default=-1,
-        help='number of messages to dump (whole */info/pub, not per topic)')
+        help='number of messages to dump (whole */message_tracking_tag, not per topic)')
     args = parser.parse_args()
 
     run(args)

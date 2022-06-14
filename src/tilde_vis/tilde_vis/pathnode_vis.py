@@ -157,7 +157,7 @@ class PathVisNode(Node):
                           .bool_value
         info_name = '/info/sub'
         if watches_pub:
-            info_name = '/info/pub'
+            info_name = '/message_tracking_tag'
             topics = LIDAR_PREPROCESS_PUB
 
         self.statistics = TopicInfoStatistics(topics, window)

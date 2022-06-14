@@ -37,8 +37,8 @@ using PointCloud2Ptr = std::shared_ptr<PointCloud2>;
 using PointCloud2ConstPtr = std::shared_ptr<PointCloud2 const>;
 
 using Clock = rosgraph_msgs::msg::Clock;
-using PubInfo = tilde_msg::msg::PubInfo;
-using PubInfoPtr = PubInfo::UniquePtr;
+using MessageTrackingTag = tilde_msg::msg::MessageTrackingTag;
+using MessageTrackingTagPtr = MessageTrackingTag::UniquePtr;
 using TimeMsg = builtin_interfaces::msg::Time;
 
 using PointCloudPublisher = std::shared_ptr<rclcpp::Publisher<PointCloud2>>;

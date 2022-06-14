@@ -23,8 +23,8 @@ from tilde_vis.latency_viewer import (
     calc_one_hot,
     update_stat,
     )
-from tilde_vis.pub_info import PubInfo, PubInfos
-from tilde_vis.pubinfo_traverse import (
+from tilde_vis.message_tracking_tag import MessageTrackingTag, MessageTrackingTags
+from tilde_vis.message_tracking_tag_traverse import (
     InputSensorStampSolver,
     TopicGraph,
     )
@@ -71,21 +71,23 @@ def get_scenario1():
     nw_dur = Duration(nanoseconds=1 * 10**6)  # 1 [ms]
     cb_dur = Duration(nanoseconds=10 * 10**6)  # 10 [ms]
 
-    pubinfo_topic1_t1 = \
-        PubInfo('topic1',
-                t1.to_msg(),
-                t1_steady.to_msg(),
-                True,
-                t1.to_msg())
+    message_tracking_tag_topic1_t1 = \
+        MessageTrackingTag(
+            'topic1',
+            t1.to_msg(),
+            t1_steady.to_msg(),
+            True,
+            t1.to_msg())
 
     topic2_t1_times = get_topic2_times(t1, t1_steady)
-    pubinfo_topic2_t1 = \
-        PubInfo('topic2',
-                topic2_t1_times['pub'].to_msg(),
-                topic2_t1_times['pub_steady'].to_msg(),
-                True,
-                t1.to_msg())
-    pubinfo_topic2_t1.add_input_info(
+    message_tracking_tag_topic2_t1 = \
+        MessageTrackingTag(
+            'topic2',
+            topic2_t1_times['pub'].to_msg(),
+            topic2_t1_times['pub_steady'].to_msg(),
+            True,
+            t1.to_msg())
+    message_tracking_tag_topic2_t1.add_input_info(
         'topic1',
         topic2_t1_times['sub'],
         topic2_t1_times['sub_steady'],
@@ -93,22 +95,23 @@ def get_scenario1():
         t1.to_msg())
 
     topic3_t1_times = get_topic3_times(t1, t1_steady)
-    pubinfo_topic3_t1 = \
-        PubInfo('topic3',
-                topic3_t1_times['pub'].to_msg(),
-                topic3_t1_times['pub_steady'].to_msg(),
-                True,
-                t1.to_msg())
-    pubinfo_topic3_t1.add_input_info(
+    message_tracking_tag_topic3_t1 = \
+        MessageTrackingTag(
+            'topic3',
+            topic3_t1_times['pub'].to_msg(),
+            topic3_t1_times['pub_steady'].to_msg(),
+            True,
+            t1.to_msg())
+    message_tracking_tag_topic3_t1.add_input_info(
         'topic2',
         topic3_t1_times['sub'],
         topic3_t1_times['sub_steady'],
         True,
         t1.to_msg())
 
-    return [pubinfo_topic1_t1,
-            pubinfo_topic2_t1,
-            pubinfo_topic3_t1]
+    return [message_tracking_tag_topic1_t1,
+            message_tracking_tag_topic2_t1,
+            message_tracking_tag_topic3_t1]
 
 
 def dur_plus(lhs, rhs):
@@ -134,42 +137,45 @@ def gen_scenario2(
 
     Returns
     -------
-    list of PubInfos such as
-    (pubinfo of topic1, pubinfo of topic2, ...)
+    list of MessageTrackingTags such as
+    (message_tracking_tag of topic1, message_tracking_tag of topic2, ...)
 
     """
-    pubinfo_topic1 = \
-        PubInfo('topic1',
-                st.to_msg(),
-                st_steady.to_msg(),
-                True,
-                st.to_msg())
+    message_tracking_tag_topic1 = \
+        MessageTrackingTag(
+            'topic1',
+            st.to_msg(),
+            st_steady.to_msg(),
+            True,
+            st.to_msg())
 
     topic2_stamp = st + nw_dur
-    pubinfo_topic2 = \
-        PubInfo('topic2',
-                st.to_msg(),
-                st_steady.to_msg(),
-                True,
-                topic2_stamp.to_msg())
+    message_tracking_tag_topic2 = \
+        MessageTrackingTag(
+            'topic2',
+            st.to_msg(),
+            st_steady.to_msg(),
+            True,
+            topic2_stamp.to_msg())
 
     sub_dur3 = nw_dur
     pub_dur3 = dur_plus(sub_dur3, cb_dur)
     topic3_stamp = st + pub_dur3
-    pubinfo_topic3 = \
-        PubInfo('topic3',
-                (st + pub_dur3).to_msg(),
-                (st_steady + pub_dur3).to_msg(),
-                True,
-                topic3_stamp.to_msg())
-    pubinfo_topic3.add_input_info(
+    message_tracking_tag_topic3 = \
+        MessageTrackingTag(
+            'topic3',
+            (st + pub_dur3).to_msg(),
+            (st_steady + pub_dur3).to_msg(),
+            True,
+            topic3_stamp.to_msg())
+    message_tracking_tag_topic3.add_input_info(
         'topic1',
         (st + sub_dur3).to_msg(),
         (st_steady + sub_dur3).to_msg(),
         True,
         st.to_msg()
         )
-    pubinfo_topic3.add_input_info(
+    message_tracking_tag_topic3.add_input_info(
         'topic2',
         (st + sub_dur3).to_msg(),
         (st_steady + sub_dur3).to_msg(),
@@ -179,13 +185,14 @@ def gen_scenario2(
     sub_dur4 = dur_plus(pub_dur3, nw_dur)
     pub_dur4 = dur_plus(sub_dur4, cb_dur)
     topic4_stamp = st + pub_dur4
-    pubinfo_topic4 = \
-        PubInfo('topic4',
-                (st + pub_dur4).to_msg(),
-                (st_steady + pub_dur4).to_msg(),
-                True,
-                topic4_stamp.to_msg())
-    pubinfo_topic4.add_input_info(
+    message_tracking_tag_topic4 = \
+        MessageTrackingTag(
+            'topic4',
+            (st + pub_dur4).to_msg(),
+            (st_steady + pub_dur4).to_msg(),
+            True,
+            topic4_stamp.to_msg())
+    message_tracking_tag_topic4.add_input_info(
         'topic3',
         (st + sub_dur4).to_msg(),
         (st_steady + sub_dur4).to_msg(),
@@ -193,10 +200,10 @@ def gen_scenario2(
         topic3_stamp.to_msg())
 
     return [
-        pubinfo_topic1,
-        pubinfo_topic2,
-        pubinfo_topic3,
-        pubinfo_topic4,
+        message_tracking_tag_topic1,
+        message_tracking_tag_topic2,
+        message_tracking_tag_topic3,
+        message_tracking_tag_topic4,
         ]
 
 
@@ -204,11 +211,11 @@ class TestTopicGraph(unittest.TestCase):
 
     def test_straight(self):
         infos = get_scenario1()
-        pubinfos = PubInfos()
+        message_tracking_tags = MessageTrackingTags()
         for info in infos:
-            pubinfos.add(info)
+            message_tracking_tags.add(info)
 
-        graph = TopicGraph(pubinfos, skips={})
+        graph = TopicGraph(message_tracking_tags, skips={})
 
         self.assertEqual(graph.topics[0], 'topic1')
         self.assertEqual(graph.topics[1], 'topic2')
@@ -232,11 +239,11 @@ class TestTopicGraph(unittest.TestCase):
         cb_dur = Duration(nanoseconds=10 * 10**6)  # 10 [ms]
 
         infos = gen_scenario2(t0, t0_steady, nw_dur, cb_dur)
-        pubinfos = PubInfos()
+        message_tracking_tags = MessageTrackingTags()
         for info in infos:
-            pubinfos.add(info)
+            message_tracking_tags.add(info)
 
-        graph = TopicGraph(pubinfos, skips={})
+        graph = TopicGraph(message_tracking_tags, skips={})
 
         self.assertEqual(graph.topics[0], 'topic1')
         self.assertEqual(graph.topics[1], 'topic2')
@@ -257,9 +264,9 @@ class TestTopicGraph(unittest.TestCase):
 
     def test_scenario2_with_loss(self):
         """
-        Graph creation with lossy PubInfos.
+        Graph creation with lossy MessageTrackingTags.
 
-        t0: pubinfo only topic1 and topic3
+        t0: message_tracking_tag only topic1 and topic3
         t1: only topic2
         t2: only topic4
         """
@@ -275,14 +282,14 @@ class TestTopicGraph(unittest.TestCase):
         infos_t0 = gen_scenario2(t0, t0_steady, nw_dur, cb_dur)
         infos_t1 = gen_scenario2(t1, t1_steady, nw_dur, cb_dur)
         infos_t2 = gen_scenario2(t2, t2_steady, nw_dur, cb_dur)
-        pubinfos = PubInfos()
+        message_tracking_tags = MessageTrackingTags()
 
-        pubinfos.add(infos_t0[0])
-        pubinfos.add(infos_t0[2])
-        pubinfos.add(infos_t1[1])
-        pubinfos.add(infos_t2[3])
+        message_tracking_tags.add(infos_t0[0])
+        message_tracking_tags.add(infos_t0[2])
+        message_tracking_tags.add(infos_t1[1])
+        message_tracking_tags.add(infos_t2[3])
 
-        graph = TopicGraph(pubinfos, skips={})
+        graph = TopicGraph(message_tracking_tags, skips={})
 
         self.assertEqual(graph.topics[0], 'topic1')
         self.assertEqual(graph.topics[1], 'topic2')
@@ -306,15 +313,15 @@ class TestTreeNode(unittest.TestCase):
 
     def test_solve2_straight(self):
         infos = get_scenario1()
-        pubinfos = PubInfos()
+        message_tracking_tags = MessageTrackingTags()
         for info in infos:
-            pubinfos.add(info)
-        graph = TopicGraph(pubinfos, skips={})
+            message_tracking_tags.add(info)
+        graph = TopicGraph(message_tracking_tags, skips={})
         solver = InputSensorStampSolver(graph)
 
-        tgt_stamp = sorted(pubinfos.stamps('topic3'))[0]
+        tgt_stamp = sorted(message_tracking_tags.stamps('topic3'))[0]
         results = solver.solve2(
-            pubinfos,
+            message_tracking_tags,
             'topic3',
             tgt_stamp
         )
@@ -344,7 +351,7 @@ class TestTreeNode(unittest.TestCase):
         nw_dur = Duration(nanoseconds=1 * 10**6)  # 1 [ms]
         cb_dur = Duration(nanoseconds=10 * 10**6)  # 10 [ms]
 
-        pubinfos = PubInfos()
+        message_tracking_tags = MessageTrackingTags()
         st = t0
         st_steady = t0_steady
 
@@ -356,18 +363,18 @@ class TestTreeNode(unittest.TestCase):
 
             infos = gen_scenario2(st, st_steady, nw_dur, cb_dur)
             for info in infos:
-                pubinfos.add(info)
+                message_tracking_tags.add(info)
             st += period
             st_steady += period
 
-        graph = TopicGraph(pubinfos, skips={})
+        graph = TopicGraph(message_tracking_tags, skips={})
         solver = InputSensorStampSolver(graph)
 
-        sorted_stamps = sorted(pubinfos.stamps('topic4'))
+        sorted_stamps = sorted(message_tracking_tags.stamps('topic4'))
 
         tgt_stamp = sorted_stamps[75]
         results = solver.solve2(
-            pubinfos,
+            message_tracking_tags,
             'topic4',
             tgt_stamp)
 
@@ -424,25 +431,25 @@ class TestTreeNode(unittest.TestCase):
 
         def init_solver():
             infos = gen_scenario2(t0, t0_steady, nw_dur, cb_dur)
-            pubinfos = PubInfos()
+            message_tracking_tags = MessageTrackingTags()
             for info in infos:
-                pubinfos.add(info)
-            graph = TopicGraph(pubinfos, skips={})
+                message_tracking_tags.add(info)
+            graph = TopicGraph(message_tracking_tags, skips={})
             solver = InputSensorStampSolver(graph)
             return solver
 
-        def get_pubinfos_with_only_topic4():
+        def get_message_tracking_tags_with_only_topic4():
             t1 = t0 + period
             t1_steady = t0_steady + period
             infos = gen_scenario2(t1, t1_steady, nw_dur, cb_dur)
-            pubinfos = PubInfos()
-            pubinfos.add(infos[-1])
-            return pubinfos
+            message_tracking_tags = MessageTrackingTags()
+            message_tracking_tags.add(infos[-1])
+            return message_tracking_tags
 
         solver = init_solver()
-        tgt_pubinfos = get_pubinfos_with_only_topic4()
+        tgt_message_tracking_tags = get_message_tracking_tags_with_only_topic4()
 
-        return (solver, tgt_pubinfos)
+        return (solver, tgt_message_tracking_tags)
 
     def test_solve_empty(self):
         # setup
@@ -468,20 +475,20 @@ class TestTreeNode(unittest.TestCase):
         self.assertEqual(len(result_topic1.data), 0)
 
     def test_solve2_with_loss(self):
-        """Solve with lossy PubInfos."""
-        solver, tgt_pubinfos = self.setup_only_topic4_scenario()
+        """Solve with lossy MessageTrackingTags."""
+        solver, tgt_message_tracking_tags = self.setup_only_topic4_scenario()
 
         tgt_topic = 'topic4'
-        tgt_stamps = tgt_pubinfos.stamps(tgt_topic)
+        tgt_stamps = tgt_message_tracking_tags.stamps(tgt_topic)
 
         self.assertEqual(len(tgt_stamps), 1)
-        results = solver.solve2(tgt_pubinfos, tgt_topic, tgt_stamps[0])
+        results = solver.solve2(tgt_message_tracking_tags, tgt_topic, tgt_stamps[0])
 
         # is there full graph?
         result_topic4 = results
         self.assertEqual(result_topic4.name, 'topic4')
         self.assertEqual(len(result_topic4.data), 1)
-        self.assertTrue(isinstance(result_topic4.data[0], PubInfo))
+        self.assertTrue(isinstance(result_topic4.data[0], MessageTrackingTag))
 
         result_topic3 = result_topic4.name2child['topic3']
         self.assertEqual(result_topic3.name, 'topic3')
@@ -519,20 +526,20 @@ class TestTreeNode(unittest.TestCase):
         nw_dur.append(Duration(nanoseconds=30 * 10**6))
         cb_dur.append(Duration(nanoseconds=3 * 10**6))
 
-        pubinfos = PubInfos()
+        message_tracking_tags = MessageTrackingTags()
 
         for i in range(len(t)):
             infos = gen_scenario2(t[i], ts[i],
                                   nw_dur[i], cb_dur[i])
             for info in infos:
-                pubinfos.add(info)
+                message_tracking_tags.add(info)
 
-        graph = TopicGraph(pubinfos, skips={})
+        graph = TopicGraph(message_tracking_tags, skips={})
         solver = InputSensorStampSolver(graph)
 
-        tgt_stamp = sorted(pubinfos.stamps('topic4'))[-1]
+        tgt_stamp = sorted(message_tracking_tags.stamps('topic4'))[-1]
         results = solver.solve2(
-            pubinfos,
+            message_tracking_tags,
             'topic4',
             tgt_stamp)
         results = update_stat(results)

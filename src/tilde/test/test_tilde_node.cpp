@@ -25,12 +25,12 @@
 
 #include "tilde/tilde_node.hpp"
 #include "tilde/tilde_publisher.hpp"
-#include "tilde_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
 #include "tilde_msg/msg/test_top_level_stamp.hpp"
 
 using tilde::TildeNode;
 using tilde::InputInfo;
-using tilde_msg::msg::PubInfo;
+using tilde_msg::msg::MessageTrackingTag;
 
 class TestTildeNode : public ::testing::Test
 {
@@ -59,7 +59,7 @@ std::string str(const builtin_interfaces::msg::Time & time)
  * consider the following system:
  *   sensor_node -> main_node -> checker_node
  *
- * Check main_node PubInfo stamps by checker_node.
+ * Check main_node MessageTrackingTag stamps by checker_node.
  * The type of message is PointCloud2.
  */
 TEST_F(TestTildeNode, simple_case) {
@@ -96,21 +96,22 @@ TEST_F(TestTildeNode, simple_case) {
     });
 
   bool checker_sub_called = false;
-  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::PubInfo>(
-    "out_topic/info/pub", 1,
-    [&checker_sub_called, clock_msg](tilde_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
+  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::MessageTrackingTag>(
+    "out_topic/message_tracking_tag", 1,
+    [&checker_sub_called,
+    clock_msg](tilde_msg::msg::MessageTrackingTag::UniquePtr message_tracking_tag_msg) -> void
     {
       checker_sub_called = true;
       std::cout << "checker_sub_callback" << std::endl;
-      std::cout << "pub_info_msg: \n" <<
-        "pub_time: " << str(pub_info_msg->output_info.pub_time) << "\n" <<
-        "pub_time_steady: " << str(pub_info_msg->output_info.pub_time_steady) << "\n" <<
+      std::cout << "message_tracking_tag_msg: \n" <<
+        "pub_time: " << str(message_tracking_tag_msg->output_info.pub_time) << "\n" <<
+        "pub_time_steady: " << str(message_tracking_tag_msg->output_info.pub_time_steady) << "\n" <<
         std::endl;
       EXPECT_EQ(
-        pub_info_msg->output_info.pub_time,
+        message_tracking_tag_msg->output_info.pub_time,
         clock_msg.clock);
       EXPECT_EQ(
-        pub_info_msg->output_info.has_header_stamp,
+        message_tracking_tag_msg->output_info.has_header_stamp,
         true);
     });
 
@@ -129,7 +130,7 @@ TEST_F(TestTildeNode, simple_case) {
  * consider the following system:
  *   sensor_node -> main_node -> checker_node
  *
- * Check main_node PubInfo stamps by checker_node.
+ * Check main_node MessageTrackingTag stamps by checker_node.
  * The type of message is std_msgs::msg::String.
  */
 TEST_F(TestTildeNode, no_header_case) {
@@ -166,21 +167,22 @@ TEST_F(TestTildeNode, no_header_case) {
     });
 
   bool checker_sub_called = false;
-  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::PubInfo>(
-    "out_topic/info/pub", 1,
-    [&checker_sub_called, clock_msg](tilde_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
+  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::MessageTrackingTag>(
+    "out_topic/message_tracking_tag", 1,
+    [&checker_sub_called,
+    clock_msg](tilde_msg::msg::MessageTrackingTag::UniquePtr message_tracking_tag_msg) -> void
     {
       checker_sub_called = true;
       std::cout << "checker_sub_callback" << std::endl;
-      std::cout << "pub_info_msg: \n" <<
-        "pub_time: " << str(pub_info_msg->output_info.pub_time) << "\n" <<
-        "pub_time_steady: " << str(pub_info_msg->output_info.pub_time_steady) << "\n" <<
+      std::cout << "message_tracking_tag_msg: \n" <<
+        "pub_time: " << str(message_tracking_tag_msg->output_info.pub_time) << "\n" <<
+        "pub_time_steady: " << str(message_tracking_tag_msg->output_info.pub_time_steady) << "\n" <<
         std::endl;
       EXPECT_EQ(
-        pub_info_msg->output_info.pub_time,
+        message_tracking_tag_msg->output_info.pub_time,
         clock_msg.clock);
       EXPECT_EQ(
-        pub_info_msg->output_info.has_header_stamp,
+        message_tracking_tag_msg->output_info.has_header_stamp,
         false);
     });
 
@@ -234,11 +236,12 @@ TEST_F(TestTildeNode, enable_tilde) {
     });
 
   bool checker_sub_called = false;
-  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::PubInfo>(
-    "out_topic/info/pub", 1,
-    [&checker_sub_called, clock_msg](tilde_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
+  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::MessageTrackingTag>(
+    "out_topic/message_tracking_tag", 1,
+    [&checker_sub_called,
+    clock_msg](tilde_msg::msg::MessageTrackingTag::UniquePtr message_tracking_tag_msg) -> void
     {
-      (void) pub_info_msg;
+      (void) message_tracking_tag_msg;
       checker_sub_called = true;
       EXPECT_TRUE(false);  // expect never comes here
     });
@@ -343,13 +346,14 @@ TEST_F(TestTildeNode, publish_top_level_stamp) {
 
   // prepare checker subscription
   bool checker_sub_called = false;
-  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::PubInfo>(
-    "out_topic/info/pub", 1,
-    [&checker_sub_called, &clock_msg](tilde_msg::msg::PubInfo::UniquePtr pub_info_msg) -> void
+  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::MessageTrackingTag>(
+    "out_topic/message_tracking_tag", 1,
+    [&checker_sub_called,
+    &clock_msg](tilde_msg::msg::MessageTrackingTag::UniquePtr message_tracking_tag_msg) -> void
     {
-      (void) pub_info_msg;
+      (void) message_tracking_tag_msg;
       checker_sub_called = true;
-      EXPECT_TRUE(pub_info_msg->output_info.has_header_stamp);
+      EXPECT_TRUE(message_tracking_tag_msg->output_info.has_header_stamp);
     });
 
   // publish

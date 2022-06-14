@@ -2,7 +2,7 @@
 
 ## Description
 
-Deadline detector by TILDE PubInfo.
+Deadline detector by TILDE MessageTrackingTag.
 You can detect deadlines in some scenarios:
 
 - from the sensor to some node
@@ -39,7 +39,7 @@ Here is a set of parameters.
 | name                | about                                                                               |
 | ------------------- | ----------------------------------------------------------------------------------- |
 | `ignore_topics`     | don't subscribe these topics                                                        |
-| `sensor_topics`     | regard nodes as sensors if PubInfo has no input_infos or the topic is in this list. |
+| `sensor_topics`     | regard nodes as sensors if MessageTrackingTag has no input_infos or the topic is in this list. |
 | `target_topics`     | topics of which you want to detect deadline                                         |
 | `deadline_ms`       | list of deadline [ms] in `target_topics` order.                                     |
 | `expire_ms`         | internal data lifetime                                                              |

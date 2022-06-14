@@ -22,11 +22,11 @@ from bokeh.plotting import figure, show
 import numpy as np
 import pandas as pd
 
-from tilde_vis.pub_info import (
-    PubInfo,
-    PubInfos
+from tilde_vis.message_tracking_tag import (
+    MessageTrackingTag,
+    MessageTrackingTags
 )
-from tilde_vis.pubinfo_traverse import (
+from tilde_vis.message_tracking_tag_traverse import (
     InputSensorStampSolver,
     TopicGraph
 )
@@ -83,14 +83,14 @@ def read_msgs(rosbag_path):
     return msg_topics
 
 
-def read_pubinfo(raw_msgs):
-    """Convert raw messages to PubInfos."""
-    pubinfos = PubInfos()
+def read_message_tracking_tag(raw_msgs):
+    """Convert raw messages to MessageTrackingTags."""
+    message_tracking_tags = MessageTrackingTags()
     for i in range(5):
-        msgs = raw_msgs[f'/topic{i+1}/info/pub']
+        msgs = raw_msgs[f'/topic{i+1}/message_tracking_tag']
         for msg in msgs:
-            pubinfos.add(PubInfo.fromMsg(msg))
-    return pubinfos
+            message_tracking_tags.add(MessageTrackingTag.fromMsg(msg))
+    return message_tracking_tags
 
 
 def get_uuid2msg(raw_msgs):
@@ -189,17 +189,17 @@ class Trace(object):
             f'used_uuids={self.used_uuids}')
 
 
-def vis_tilde(pub_infos):
+def vis_tilde(message_tracking_tags):
     """Visualize tilde result."""
     tgt_topic = '/topic5'
-    topic5_stamps = pub_infos.stamps(tgt_topic)
+    topic5_stamps = message_tracking_tags.stamps(tgt_topic)
 
-    graph = TopicGraph(pub_infos)
+    graph = TopicGraph(message_tracking_tags)
     solver = InputSensorStampSolver(graph)
 
     ds = []
     for stamp in topic5_stamps:
-        tilde_path = solver.solve2(pub_infos, tgt_topic, stamp)
+        tilde_path = solver.solve2(message_tracking_tags, tgt_topic, stamp)
 
         traces = []
 
@@ -263,8 +263,8 @@ def main():
     """Main."""
     bagfile = 'rosbag2_2022_02_16-18_12_46'
     raw_msgs = read_msgs(bagfile)
-    pub_infos = read_pubinfo(raw_msgs)
-    ds = vis_tilde(pub_infos)
+    message_tracking_tags = read_message_tracking_tag(raw_msgs)
+    ds = vis_tilde(message_tracking_tags)
     df = pd.DataFrame.from_dict(ds)
 
     plot_latency_table(df)

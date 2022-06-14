@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Internal data structures for PubInfo."""
+"""Internal data structures for MessageTrackingTag."""
 
 from rclpy.time import Time
 
@@ -23,12 +23,12 @@ def time2str(t):
 
 
 class TopicInfo(object):
-    """Represent output_info and input_infos of PubInfo message."""
+    """Represent output_info and input_infos of MessageTrackingTag message."""
 
     def __init__(self, topic, pubsub_stamp, pubsub_stamp_steady,
                  has_stamp, stamp):
         """
-        Hold information similar to PubInfo in/out info.
+        Hold information similar to MessageTrackingTag in/out info.
 
         Parameters
         ----------
@@ -55,11 +55,11 @@ class TopicInfo(object):
         return f'TopicInfo(topic={self.topic}, stamp={stamp_s})'
 
 
-class PubInfo(object):
+class MessageTrackingTag(object):
     """
-    Hold information similar to PubInfoMsg.
+    Hold information similar to MessageTrackingTagMsg.
 
-    TODO(y-okumura-isp): Can we use PubInfoMsg directly?
+    TODO(y-okumura-isp): Can we use MessageTrackingTagMsg directly?
 
     """
 
@@ -99,7 +99,7 @@ class PubInfo(object):
 
     def __str__(self):
         """Get string."""
-        s = 'PubInfo: \n'
+        s = 'MessageTrackingTag: \n'
         s += f'  out_info={self.out_info}\n'
         for _, infos in self.in_infos.items():
             for info in infos:
@@ -112,64 +112,67 @@ class PubInfo(object):
         return self.out_info.topic
 
     @staticmethod
-    def fromMsg(pub_info_msg):
+    def fromMsg(message_tracking_tag_msg):
         """
-        Convert PubInfoMsg to PubInfo.
+        Convert MessageTrackingTagMsg to MessageTrackingTag.
 
         Parameters
         ----------
-        pub_info_msg: PubInfoMsg
+        message_tracking_tag_msg: MessageTrackingTagMsg
 
         Returns
         -------
-        PubInfo
+        MessageTrackingTag
 
         """
-        output_info = pub_info_msg.output_info
-        pub_info = PubInfo(output_info.topic_name,
-                           output_info.pub_time,
-                           output_info.pub_time_steady,
-                           output_info.has_header_stamp,
-                           output_info.header_stamp)
-        for input_info in pub_info_msg.input_infos:
-            pub_info.add_input_info(input_info.topic_name,
-                                    input_info.sub_time,
-                                    input_info.sub_time_steady,
-                                    input_info.has_header_stamp,
-                                    input_info.header_stamp)
-        return pub_info
+        output_info = message_tracking_tag_msg.output_info
+        message_tracking_tag = MessageTrackingTag(
+            output_info.topic_name,
+            output_info.pub_time,
+            output_info.pub_time_steady,
+            output_info.has_header_stamp,
+            output_info.header_stamp)
+        for input_info in message_tracking_tag_msg.input_infos:
+            message_tracking_tag.add_input_info(
+                input_info.topic_name,
+                input_info.sub_time,
+                input_info.sub_time_steady,
+                input_info.has_header_stamp,
+                input_info.header_stamp)
+        return message_tracking_tag
 
 
-class PubInfos(object):
+class MessageTrackingTags(object):
     """
-    Hold topic vs PubInfo.
+    Hold topic vs MessageTrackingTag.
 
     We have double-key dictionary internally, i.e.
-    we can get PubInfo by topic_vs_pubinfo[topic_name][stamp].
+    we can get MessageTrackingTag by
+    topic_vs_message_tracking_tag[topic_name][stamp].
 
     """
 
     def __init__(self):
         """Constructor."""
-        # {topic => {stamp_str => PubInfo}}
-        self.topic_vs_pubinfos = {}
+        # {topic => {stamp_str => MessageTrackingTag}}
+        self.topic_vs_message_tracking_tags = {}
 
-    def add(self, pubinfo):
-        """Add a PubInfo."""
-        out_topic = pubinfo.out_info.topic
-        out_stamp = time2str(pubinfo.out_info.stamp)
-        if out_topic not in self.topic_vs_pubinfos.keys():
-            self.topic_vs_pubinfos[out_topic] = {}
-        infos = self.topic_vs_pubinfos[out_topic]
+    def add(self, message_tracking_tag):
+        """Add a MessageTrackingTag."""
+        out_topic = message_tracking_tag.out_info.topic
+        out_stamp = time2str(message_tracking_tag.out_info.stamp)
+        if out_topic not in self.topic_vs_message_tracking_tags.keys():
+            self.topic_vs_message_tracking_tags[out_topic] = {}
+        infos = self.topic_vs_message_tracking_tags[out_topic]
 
         if out_stamp not in infos.keys():
             infos[out_stamp] = {}
 
-        infos[out_stamp] = pubinfo
+        infos[out_stamp] = message_tracking_tag
 
     def erase_until(self, stamp):
         """
-        Erase added pubinfo where out_stamp < stamp.
+        Erase added message_tracking_tag where out_stamp < stamp.
 
         Parameters
         ----------
@@ -181,7 +184,7 @@ class PubInfos(object):
             Compare time.
 
             Helper function to compare stamps i.e.
-            self.topic_vs_pubinfos[*].keys().
+            self.topic_vs_message_tracking_tags[*].keys().
 
             As stamps are string, it is not appropriate to compare as string.
             Builtin_msg.msg.Time does not implement `<=>`, we use rclpy.Time,
@@ -196,7 +199,7 @@ class PubInfos(object):
 
         thres_stamp = time2str(stamp)
         erases = {}
-        for (topic, infos) in self.topic_vs_pubinfos.items():
+        for (topic, infos) in self.topic_vs_message_tracking_tags.items():
             for stamp in infos.keys():
                 if time_ge(thres_stamp, stamp):
                     continue
@@ -204,22 +207,22 @@ class PubInfos(object):
 
         for (topic, stamps) in erases.items():
             for stamp in stamps:
-                del self.topic_vs_pubinfos[topic][stamp]
+                del self.topic_vs_message_tracking_tags[topic][stamp]
 
     def topics(self):
-        """Get topic names which has registered PubInfo."""
-        return list(self.topic_vs_pubinfos.keys())
+        """Get topic names which has registered MessageTrackingTag."""
+        return list(self.topic_vs_message_tracking_tags.keys())
 
     def stamps(self, topic):
         """Get List[stamps]."""
-        if topic not in self.topic_vs_pubinfos.keys():
+        if topic not in self.topic_vs_message_tracking_tags.keys():
             return []
 
-        return list(self.topic_vs_pubinfos[topic].keys())
+        return list(self.topic_vs_message_tracking_tags[topic].keys())
 
     def get(self, topic, stamp=None, idx=None):
         """
-        Get a PubInfo.
+        Get a MessageTrackingTag.
 
         Parameters
         ----------
@@ -228,17 +231,17 @@ class PubInfos(object):
 
         Return
         ------
-        PubInfo or None
+        MessageTrackingTag or None
 
         """
         ret = None
-        if topic not in self.topic_vs_pubinfos.keys():
+        if topic not in self.topic_vs_message_tracking_tags.keys():
             return None
 
         if stamp is None and idx is None:
-            return list(self.topic_vs_pubinfos[topic].values())[0]
+            return list(self.topic_vs_message_tracking_tags[topic].values())[0]
 
-        infos = self.topic_vs_pubinfos[topic]
+        infos = self.topic_vs_message_tracking_tags[topic]
 
         if stamp in infos.keys():
             ret = infos[stamp]
@@ -263,11 +266,11 @@ class PubInfos(object):
         """
         ret = set()
 
-        if topic not in self.topic_vs_pubinfos.keys():
+        if topic not in self.topic_vs_message_tracking_tags.keys():
             return ret
 
-        for pubinfo in self.topic_vs_pubinfos[topic].values():
-            for t in pubinfo.in_infos.keys():
+        for message_tracking_tag in self.topic_vs_message_tracking_tags[topic].values():
+            for t in message_tracking_tag.in_infos.keys():
                 ret.add(t)
         return ret
 

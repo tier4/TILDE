@@ -20,7 +20,7 @@ import rclpy
 from rclpy.time import Time
 
 from tilde_msg.msg import (
-    PubInfo as PubInfoMsg,
+    MessageTrackingTag as MessageTrackingTagMsg,
     )
 from tilde_vis.data_as_tree import TreeNode
 from tilde_vis.latency_viewer import (
@@ -28,8 +28,8 @@ from tilde_vis.latency_viewer import (
     LatencyViewerNode,
     update_stat,
     )
-from tilde_vis.pub_info import (
-    PubInfo
+from tilde_vis.message_tracking_tag import (
+    MessageTrackingTag
     )
 
 
@@ -82,26 +82,26 @@ def get_solver_result_simple(
     tree_node1 = tree_node2.get_child('topic1')
 
     stamp1 = t1_pub
-    pubinfo3 = PubInfo(
+    message_tracking_tag3 = MessageTrackingTag(
         'topic3',
         t3_pub, t3_pub, True, stamp1)
-    pubinfo3.add_input_info(
+    message_tracking_tag3.add_input_info(
         'topic2', t2_sub, t2_sub,
         True, stamp1)
-    tree_node3.add_data(pubinfo3)
+    tree_node3.add_data(message_tracking_tag3)
 
-    pubinfo2 = PubInfo(
+    message_tracking_tag2 = MessageTrackingTag(
         'topic2',
         t2_pub, t2_pub, True, stamp1)
-    pubinfo2.add_input_info(
+    message_tracking_tag2.add_input_info(
         'topic1', t1_sub, t1_sub,
         True, stamp1)
-    tree_node2.add_data(pubinfo2)
+    tree_node2.add_data(message_tracking_tag2)
 
-    pubinfo1 = PubInfo(
+    message_tracking_tag1 = MessageTrackingTag(
         'topic1',
         t1_pub, t1_pub, True, stamp1)
-    tree_node1.add_data(pubinfo1)
+    tree_node1.add_data(message_tracking_tag1)
 
     return tree_node3
 
@@ -151,32 +151,32 @@ class TestListenerCallback(unittest.TestCase):
     def test_seq(self):
         topic_name = 'topic'
         node = LatencyViewerNode()
-        msg = PubInfoMsg()
+        msg = MessageTrackingTagMsg()
         msg.output_info.topic_name = topic_name
 
         msg.output_info.seq = 0
         msg.output_info.header_stamp = TimeMsg(sec=10, nanosec=0)
         node.listener_callback(msg)
         self.assertTrue(topic_name in node.topic_seq)
-        self.assertEqual(len(node.pub_infos.stamps(topic_name)), 1)
+        self.assertEqual(len(node.message_tracking_tags.stamps(topic_name)), 1)
         self.assertEqual(node.topic_seq[topic_name], 0)
 
         msg.output_info.seq = 1
         msg.output_info.header_stamp = TimeMsg(sec=11, nanosec=0)
         node.listener_callback(msg)
-        self.assertEqual(len(node.pub_infos.stamps(topic_name)), 2)
+        self.assertEqual(len(node.message_tracking_tags.stamps(topic_name)), 2)
         self.assertEqual(node.topic_seq[topic_name], 1)
 
         msg.output_info.seq = 3
         msg.output_info.header_stamp = TimeMsg(sec=13, nanosec=0)
         node.listener_callback(msg)
-        self.assertEqual(len(node.pub_infos.stamps(topic_name)), 3)
+        self.assertEqual(len(node.message_tracking_tags.stamps(topic_name)), 3)
         self.assertEqual(node.topic_seq[topic_name], 3)
 
         msg.output_info.seq = 2
         msg.output_info.header_stamp = TimeMsg(sec=12, nanosec=0)
         node.listener_callback(msg)
-        self.assertEqual(len(node.pub_infos.stamps(topic_name)), 4)
+        self.assertEqual(len(node.message_tracking_tags.stamps(topic_name)), 4)
         self.assertEqual(node.topic_seq[topic_name], 3)
 
         node.destroy_node()
@@ -184,7 +184,7 @@ class TestListenerCallback(unittest.TestCase):
     def test_seq_non_zero_start(self):
         topic_name = 'topic'
         node = LatencyViewerNode()
-        msg = PubInfoMsg()
+        msg = MessageTrackingTagMsg()
         msg.output_info.topic_name = topic_name
 
         msg.output_info.seq = 10
@@ -221,16 +221,16 @@ class TestTimerCallback(unittest.TestCase):
         node = LatencyViewerNode()
         node.target_topic = topic_name
 
-        msg = PubInfoMsg()
+        msg = MessageTrackingTagMsg()
         msg.output_info.topic_name = topic_name
         msg.output_info.seq = 0
         msg.output_info.has_header_stamp = False
         msg.output_info.header_stamp = TimeMsg(sec=10, nanosec=0)
 
         node.listener_callback(msg)
-        self.assertEqual(len(node.pub_infos.topics()), 1)
-        self.assertEqual(node.pub_infos.topics()[0], topic_name)
-        stamps = node.pub_infos.stamps(topic_name)
+        self.assertEqual(len(node.message_tracking_tags.topics()), 1)
+        self.assertEqual(node.message_tracking_tags.topics()[0], topic_name)
+        stamps = node.message_tracking_tags.stamps(topic_name)
         self.assertEqual(len(stamps), 1)
 
         node.wait_init = node.wait_sec_to_init_graph + 1
@@ -247,16 +247,16 @@ class TestTimerCallback(unittest.TestCase):
 
         node.target_topic = topic_name
 
-        msg = PubInfoMsg()
+        msg = MessageTrackingTagMsg()
         msg.output_info.topic_name = topic_name
         msg.output_info.seq = 0
         msg.output_info.has_header_stamp = True
         msg.output_info.header_stamp = TimeMsg(sec=10, nanosec=0)
 
         node.listener_callback(msg)
-        self.assertEqual(len(node.pub_infos.topics()), 1)
-        self.assertEqual(node.pub_infos.topics()[0], topic_name)
-        stamps = node.pub_infos.stamps(topic_name)
+        self.assertEqual(len(node.message_tracking_tags.topics()), 1)
+        self.assertEqual(node.message_tracking_tags.topics()[0], topic_name)
+        stamps = node.message_tracking_tags.stamps(topic_name)
         self.assertEqual(len(stamps), 1)
 
         node.wait_init = node.wait_sec_to_init_graph + 1

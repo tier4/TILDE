@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tree like data structure for PubInfo traversal."""
+"""Tree like data structure for MessageTrackingTag traversal."""
 
 
 class TreeNode(object):

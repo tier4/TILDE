@@ -89,7 +89,7 @@ public:
 
         if (msg_pc_) {
           // We should call explicit API because we don't use String msg.
-          // See RelayTimerWithBuffer to know how explicit API changes the PubInfo
+          // See RelayTimerWithBuffer to know how explicit API changes the MessageTrackingTag
 
           auto stamp = msg_pc_->header.stamp;
 

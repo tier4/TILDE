@@ -25,7 +25,7 @@
 #include "sensor_msgs/msg/point_cloud2.hpp"
 
 #include "tilde/tilde_node.hpp"
-#include "tilde_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
 #include "tilde_msg/msg/sub_topic_time_info.hpp"
 
 #include "tilde_deadline_detector/tilde_deadline_detector_node.hpp"
@@ -46,18 +46,19 @@ public:
   }
 };
 
-TEST_F(TestTildeDeadlineDetectorNode, get_pub_info_topics)
+TEST_F(TestTildeDeadlineDetectorNode, get_message_tracking_tag_topics)
 {
   auto tilde_node = tilde::TildeNode("tilde_node");
   auto pub = tilde_node.create_tilde_publisher<sensor_msgs::msg::PointCloud2>("topic", 1);
   auto pub2 = tilde_node.create_publisher<sensor_msgs::msg::PointCloud2>("topic2", 1);
-  auto pub3 = tilde_node.create_publisher<sensor_msgs::msg::PointCloud2>("topic2/info/pub", 1);
+  auto pub3 = tilde_node.create_publisher<sensor_msgs::msg::PointCloud2>(
+    "topic2/message_tracking_tag", 1);
 
   std::this_thread::sleep_for(std::chrono::seconds(3));
 
   auto det_node = TildeDeadlineDetectorNode("node");
-  auto topics = det_node.get_pub_info_topics();
+  auto topics = det_node.get_message_tracking_tag_topics();
 
   EXPECT_EQ(topics.size(), 1u);
-  EXPECT_EQ(*topics.begin(), "/topic/info/pub");
+  EXPECT_EQ(*topics.begin(), "/topic/message_tracking_tag");
 }
