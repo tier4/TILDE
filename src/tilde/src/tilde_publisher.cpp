@@ -133,7 +133,7 @@ void TildePublisherBase::fill_input_info(tilde_msg::msg::PubInfo & info_msg)
   }
 }
 
-void TildePublisherBase::set_explicit_subtime(
+void TildePublisherBase::set_explicit_subscription_time(
   const std::string & sub_topic,
   const std::shared_ptr<const InputInfo> p)
 {
@@ -195,7 +195,7 @@ void TildePublisherBase::print_input_infos()
   std::cout << "print_input_infos\n";
   for (auto & [topic, pinfo] : input_infos_) {
     std::cout << "  " << topic << "\n";
-    std::cout << "  subtime: " <<
+    std::cout << "  sub_time: " <<
       time2str(pinfo->sub_time) <<
       "\n  stamp: " <<
       time2str(pinfo->header_stamp) <<

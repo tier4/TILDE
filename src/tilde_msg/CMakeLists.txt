@@ -16,6 +16,7 @@ set(msg_files
   "msg/SubTopicTimeInfo.msg"
   "msg/PubTopicTimeInfo.msg"
   "msg/PubInfo.msg"
+  "msg/TestTopLevelStamp.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}

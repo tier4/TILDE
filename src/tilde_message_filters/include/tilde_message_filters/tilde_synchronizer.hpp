@@ -1604,28 +1604,28 @@ private:
     const auto & topic = topic_names_[I];
     if (topic.empty()) {return;}
 
-    rclcpp::Time subtime, subtime_steady;
+    rclcpp::Time sub_time, sub_time_steady;
     if constexpr (std::is_same_v<CallbackArgT, UniquePtr>||
       std::is_same_v<CallbackArgT, SharedConstPtr>||
       std::is_same_v<CallbackArgT, ConstRefSharedConstPtr>||
       std::is_same_v<CallbackArgT, SharedPtr>) {
-      node_->find_subtime(
+      node_->find_subscription_time(
         msg.get(), topic,
-        subtime, subtime_steady);
+        sub_time, sub_time_steady);
 
       // update implicit input info
       node_->register_message_as_input(
         msg.get(), topic,
-        subtime, subtime_steady);
+        sub_time, sub_time_steady);
     } else if constexpr (std::is_same_v<CallbackArgT, ConstRef>) {
-      node_->find_subtime(
+      node_->find_subscription_time(
         &msg, topic,
-        subtime, subtime_steady);
+        sub_time, sub_time_steady);
 
       // update implicit input info
       node_->register_message_as_input(
         &msg, topic,
-        subtime, subtime_steady);
+        sub_time, sub_time_steady);
     } else {
       // todo(y-okumura-isp): implement me
     }
