@@ -123,8 +123,8 @@ classDiagram
     +seq: 0
     +Node: NodeC
     +output_info
-    +intput_infos[0]: InputInfo_TopicA
-    +input_info[1]: InputInfo_TOpicB
+    +input_infos[0]: InputInfo_TopicA
+    +input_infos[1]: InputInfo_TOpicB
   }
   class OutputInfo {
     +topic: "topic_c"
@@ -301,7 +301,7 @@ sequenceDiagram
                buffer       +- callback-+
 /left    -->  L1 L2 L3  ->  | L2        |
                             |           |
-/right   -->  R1 R2     ->  | R1        |  --> /cancatenate
+/right   -->  R1 R2     ->  | R1        |  --> /concatenate
                             |           |
 /top     -->  T1 T2 T3  ->  | T2        |
                             |           |
