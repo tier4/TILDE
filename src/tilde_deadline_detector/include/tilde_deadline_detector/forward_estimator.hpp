@@ -26,7 +26,7 @@
 #include <unordered_set>
 
 #include "rclcpp/rclcpp.hpp"
-#include "tilde_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
 
 namespace tilde_deadline_detector
 {
@@ -41,12 +41,13 @@ class ForwardEstimator
 {
 public:
   using TopicName = std::string;
-  using PubInfoMsg = tilde_msg::msg::PubInfo;
+  using MessageTrackingTagMsg = tilde_msg::msg::MessageTrackingTag;
   using HeaderStamp = rclcpp::Time;
-  using RefToSource = std::weak_ptr<PubInfoMsg>;
+  using RefToSource = std::weak_ptr<MessageTrackingTagMsg>;
 
-  /// sensor sources: [sensor_topic][sensor_header_stamp] = PubInfoMsg
-  using Sources = std::map<TopicName, std::map<HeaderStamp, std::shared_ptr<PubInfoMsg>>>;
+  /// sensor sources: [sensor_topic][sensor_header_stamp] = MessageTrackingTagMsg
+  using Sources =
+    std::map<TopicName, std::map<HeaderStamp, std::shared_ptr<MessageTrackingTagMsg>>>;
   /// input sensor topics of the target topic
   using TopicVsSensors = std::map<TopicName, std::set<TopicName>>;
   /// to know sources
@@ -62,8 +63,8 @@ public:
 
   ForwardEstimator();
 
-  /// add PubInfo
-  void add(std::unique_ptr<PubInfoMsg> pub_info, bool is_sensor = false);
+  /// add MessageTrackingTag
+  void add(std::unique_ptr<MessageTrackingTagMsg> message_tracking_tag, bool is_sensor = false);
 
   /// get all sensor time
   /**
@@ -82,8 +83,8 @@ public:
    * \return the oldest header.stamp of all sensors.
    *
    * Calculated latency is best effort i.e.
-   * when it cannot gather all sensor PubInfo,
-   * it returns the longest latency in gathered PubInfo.
+   * when it cannot gather all sensor MessageTrackingTag,
+   * it returns the longest latency in gathered MessageTrackingTag.
    */
   std::optional<rclcpp::Time> get_oldest_sensor_stamp(
     const std::string & topic_name,
@@ -91,14 +92,14 @@ public:
 
   /// delete old data
   /**
-   * \param threas Time point to delete data whose stamp <= threshold
+   * \param threshold Time point to delete data whose stamp <= threshold
    */
   void delete_expired(const rclcpp::Time & threshold);
 
   void debug_print(bool verbose = false) const;
 
 private:
-  /// all shared_ptr<PubInfo> of sensors to control pointer life time
+  /// all shared_ptr<MessageTrackingTag> of sensors to control pointer life time
   Sources sources_;
 
   /// input sensor information of (topic vs stamp).
@@ -110,7 +111,7 @@ private:
   /// pending messages
   PendingMessages pending_messages_;
 
-  void update_pending(std::shared_ptr<PubInfoMsg> pub_info);
+  void update_pending(std::shared_ptr<MessageTrackingTagMsg> message_tracking_tag);
 };
 
 }  // namespace tilde_deadline_detector

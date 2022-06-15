@@ -26,7 +26,7 @@
 #include "rclcpp/clock.hpp"
 #include "rclcpp/macros.hpp"
 
-#include "tilde_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
 
 #include "tilde/tp.h"
 
@@ -184,7 +184,7 @@ rclcpp::Time get_timestamp(rclcpp::Time t, ...);
 class TildePublisherBase
 {
 public:
-  using InfoMsg = tilde_msg::msg::PubInfo;
+  using InfoMsg = tilde_msg::msg::MessageTrackingTag;
 
   /// Constructor
   /**
@@ -226,7 +226,7 @@ public:
    * Specify all messages you use before publishing the message.
    *
    * TildePublisher gets corresponding InputInfo from topic name + stamp.
-   * If not found, input_info.header_stamp in PubInfo is filled
+   * If not found, input_info.header_stamp in MessageTrackingTag is filled
    * but sub_time and sub_time_steady are zero cleared.
    *
    * \param[in] sub_topic used topic
@@ -244,12 +244,12 @@ public:
    *
    * \param[out] info_msg Target message
    */
-  void fill_input_info(tilde_msg::msg::PubInfo & info_msg);
+  void fill_input_info(tilde_msg::msg::MessageTrackingTag & info_msg);
 
   /// Set how long to hold InputInfo
   /**
    * TildePublisher holds InputInfo of every message just a seconds to
-   * fill in sub_time and sub_time_steady fields of PubInfo
+   * fill in sub_time and sub_time_steady fields of MessageTrackingTag
    * for explicit API.
    * You can adjust how many seconds to hold InputInfo.
    * The default is 2 seconds.
@@ -287,7 +287,7 @@ private:
   std::map<std::string, std::shared_ptr<const InputInfo>> input_infos_;
 
   // explicit InputInfo
-  // If this is set, FW creates PubInfo only by this info
+  // If this is set, FW creates MessageTrackingTag only by this info
   bool is_explicit_;
   std::map<std::string, std::vector<InputInfo>> explicit_input_infos_;
   // topic, header stamp vs sub callback time
@@ -308,14 +308,14 @@ private:
   using MessageAllocator = typename MessageAllocatorTraits::allocator_type;
   using MessageDeleter = rclcpp::allocator::Deleter<MessageAllocator, MessageT>;
   using PublisherT = rclcpp::Publisher<MessageT, AllocatorT>;
-  using PubInfoPublisher = rclcpp::Publisher<InfoMsg>;
+  using MessageTrackingTagPublisher = rclcpp::Publisher<InfoMsg>;
 
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(TildePublisher)
 
   /// Default constructor
   TildePublisher(
-    std::shared_ptr<PubInfoPublisher> info_pub,
+    std::shared_ptr<MessageTrackingTagPublisher> info_pub,
     std::shared_ptr<PublisherT> pub,
     const std::string & node_fqn,
     std::shared_ptr<rclcpp::Clock> clock,
@@ -352,7 +352,7 @@ public:
 
   /**
    * publish() variant
-   * can send a main message but cannot send the corresponding PubInfo
+   * can send a main message but cannot send the corresponding MessageTrackingTag
    */
   void
   publish(const rcl_serialized_message_t & serialized_msg)
@@ -364,7 +364,7 @@ public:
 
   /**
    * publish() variant
-   * can send a main message but cannot send the corresponding PubInfo
+   * can send a main message but cannot send the corresponding MessageTrackingTag
    */
   void
   publish(const rclcpp::SerializedMessage & serialized_msg)
@@ -375,7 +375,7 @@ public:
 
   /**
    * publish() variant
-   * can send a main message but cannot send the corresponding PubInfo
+   * can send a main message but cannot send the corresponding MessageTrackingTag
    */
   void
   publish(rclcpp::LoanedMessage<MessageT, AllocatorT> && loaned_msg)
@@ -406,19 +406,19 @@ public:
   }
 
 private:
-  std::shared_ptr<PubInfoPublisher> info_pub_;
+  std::shared_ptr<MessageTrackingTagPublisher> info_pub_;
   std::shared_ptr<PublisherT> pub_;
   const std::string node_fqn_;
   bool enable_;
 
-  /// Publish PubInfo
+  /// Publish MessageTrackingTag
   /**
    * \param has_header_stamp whether main message has header.stamp
    * \param t header stamp
    */
   void publish_info(bool has_header_stamp, rclcpp::Time && t)
   {
-    auto msg = std::make_unique<tilde_msg::msg::PubInfo>();
+    auto msg = std::make_unique<tilde_msg::msg::MessageTrackingTag>();
     msg->header.stamp = clock_->now();
     // msg->header.frame_id  // Nothing todo
 

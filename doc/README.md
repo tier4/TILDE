@@ -53,9 +53,9 @@ TILDE では以下の様なユースケースを想定ユースケースして�
 
 ## 動作原理
 
-TILDE ではメイントピックの publish 時に PubInfo というメタ情報を `<topic名>/info/pub` に publish します。  
-PubInfo は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。  
-PubInfo の詳細やオーバーヘッドについては [mechanism](./mechanism.md) をご覧下さい。
+TILDE ではメイントピックの publish 時に MessageTrackingTag というメタ情報を `<topic名>/message_tracking_tag` に publish します。  
+MessageTrackingTag は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。  
+MessageTrackingTag の詳細やオーバーヘッドについては [mechanism](./mechanism.md) をご覧下さい。
 
 ## API
 
@@ -70,7 +70,7 @@ TILDE では ROS2 rclcpp と同じ引数で名前少し異なる API 群を用�
   - [tilde::TildePublisher::publish()](../src/tilde/include/tilde/tilde_publisher.hpp)
 - Subscription
   - [tilde::Node::create_tilde_subscription()](../src/tilde/include/tilde/tilde_node.hpp)
-- PubInfo explicit API
+- MessageTrackingTag explicit API
   - [tilde::TildePublisherBase::set_explicit_input_info()](../src/tilde/include/tilde/tilde_publisher.hpp)
   - [tilde::TildePublisherBase::set_max_sub_callback_infos_sec()](../src/tilde/include/tilde/tilde_publisher.hpp)
 - Deadline detection
@@ -83,7 +83,7 @@ rclcpp::Node の子クラスです。
 
 - `enable_tilde`
   - boolean.
-  - false の場合 TILDE の機能がオフになる。つまり Subscription callback でのフックや publish 時の PubInfo 送信が抑制される。
+  - false の場合 TILDE の機能がオフになる。つまり Subscription callback でのフックや publish 時の MessageTrackingTag 送信が抑制される。
   - 2022/03/02 現在初期化時のみ指定可能。
 
 ## インストール, 組み込み
@@ -104,7 +104,7 @@ rclcpp::Node の子クラスです。
 - package.xml に tilde を追加
   - `<depend>tilde</depend>`
 - CMakeLists.txt に tilde を追加
-- メッセージをバッファしているノードがあれば PubInfo explicit API の呼び出しを追加
+- メッセージをバッファしているノードがあれば MessageTrackingTag explicit API の呼び出しを追加
 
 サンプルプロジェクトは [tilde_sample](../src/tilde_sample) をご覧下さい。
 

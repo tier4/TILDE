@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "rclcpp/rclcpp.hpp"
-#include "tilde_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
 
 #include "tilde_deadline_detector/forward_estimator.hpp"
 
@@ -40,7 +40,7 @@ struct PerformanceCounter
 
 class TildeDeadlineDetectorNode : public rclcpp::Node
 {
-  using PubInfoSubscription = rclcpp::Subscription<tilde_msg::msg::PubInfo>;
+  using MessageTrackingTagSubscription = rclcpp::Subscription<tilde_msg::msg::MessageTrackingTag>;
 
 public:
   RCLCPP_PUBLIC
@@ -61,7 +61,7 @@ public:
   RCLCPP_PUBLIC
   virtual ~TildeDeadlineDetectorNode();
 
-  std::set<std::string> get_pub_info_topics() const;
+  std::set<std::string> get_message_tracking_tag_topics() const;
 
 private:
   ForwardEstimator fe;
@@ -76,14 +76,14 @@ private:
   // TODO(y-okumura-isp): delete related codes
   rclcpp::Time latest_;
 
-  std::vector<PubInfoSubscription::SharedPtr> subs_;
+  std::vector<MessageTrackingTagSubscription::SharedPtr> subs_;
   rclcpp::TimerBase::SharedPtr timer_;
 
-  PerformanceCounter pubinfo_callback_counter_;
+  PerformanceCounter message_tracking_tag_callback_counter_;
   PerformanceCounter timer_callback_counter_;
 
   void init();
-  void pubinfo_callback(tilde_msg::msg::PubInfo::UniquePtr msg);
+  void message_tracking_tag_callback(tilde_msg::msg::MessageTrackingTag::UniquePtr msg);
 };
 
 }  // namespace tilde_deadline_detector

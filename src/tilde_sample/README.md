@@ -28,11 +28,11 @@ $ ros2 launch tilde_sample publisher_relay_with_header.launch.py
 (snip)
 ```
 
-See PubInfo by `ros2 topic echo <topic>/info/pub`.
-In this example, you can see `PubInfo.outpub_info.stamp` is filled.
+See MessageTrackingTag by `ros2 topic echo <topic>/message_tracking_tag`.
+In this example, you can see `MessageTrackingTag.output_info.stamp` is filled.
 
 ```bash
-$ ros2 topic echo /relay_with_stamp/info/pub
+$ ros2 topic echo /relay_with_stamp/message_tracking_tag
 header:
   stamp:
     sec: 1646122380
@@ -76,11 +76,11 @@ $ ros2 launch tilde_sample publisher_relay_without_header.launch.py
 [relay_timer-2] [INFO] [1646122584.882195449] [relay_timer]: RelayTimer pub String seq: 3
 ```
 
-In this example, you can see `PubInfo.outpub_info.has_header` is false,
+In this example, you can see `MessageTrackingTag.output_info.has_header` is false,
 and `stamp` has no meaning.
 
 ```bash
-ros2 topic echo /relay_without_stamp/info/pub
+ros2 topic echo /relay_without_stamp/message_tracking_tag
 ```
 
 <details>
@@ -129,7 +129,7 @@ input_infos:
 ros2 launch tilde_sample multi_publisher_relay.launch.py
 ```
 
-In this example, two publshers are launched.
+In this example, two publishers are launched.
 One has the standard header field, and another doesn't.
 
 RelayTimer is launched for the subscription, and relays
@@ -137,12 +137,12 @@ both publisher messages.
 
 You can see:
 
-- PubInfo has multiple input_info field
+- MessageTrackingTag has multiple input_info field
 
 #### multiple input + with stamp
 
 ```bash
-$ ros2 topic echo /relay_with_stamp/info/pub
+$ ros2 topic echo /relay_with_stamp/message_tracking_tag
 [publisher_with_stamp-1] [INFO] [1646122873.266387175] [talker_with_stamp]: Publishing PointCloud2: 5 stamp: 1646122873266132674
 [relay_timer-3] [INFO] [1646122873.266819191] [relay_timer]: RelayTimer sub PointCloud2 seq: 5 stamp: 1646122873266132674
 [publisher_without_stamp-2] [INFO] [1646122873.270087090] [talker_without_stamp]: Publishing String: '5' at '1646122873269881680'
@@ -200,10 +200,10 @@ input_infos:
 
 #### multiple input + without stamp
 
-Now, let's see `/relay_without_stamp` PubInfo
+Now, let's see `/relay_without_stamp` MessageTrackingTag
 
 ```bash
-ros2 topic echo /relay_without_stamp/info/pub
+ros2 topic echo /relay_without_stamp/message_tracking_tag
 ```
 
 Result:
@@ -259,17 +259,17 @@ input_infos:
 ros2 launch tilde_sample multi_publisher_buffered_relay.launch.py
 ```
 
-In this example, two publshers are launched as in (3).
+In this example, two publishers are launched as in (3).
 
 For the subscription side, RelayTimerWithBuffer is launched.
 
 As RelayTimerWithBuffer uses explicit API,
-you can see PubInfo has single input_info field.
+you can see MessageTrackingTag has single input_info field.
 
 ### buffer with stamp
 
 ```bash
-$ ros2 topic echo /relay_buffer_with_stamp/info/pub
+$ ros2 topic echo /relay_buffer_with_stamp/message_tracking_tag
 header:
   stamp:
     sec: 1646123155
@@ -309,7 +309,7 @@ We cannot call explicit API because this topic has no `header.stamp`.
 So, there are two input info entries.
 
 ```bash
-$ ros2 topic echo /relay_buffer_without_stamp/info/pub
+$ ros2 topic echo /relay_buffer_without_stamp/message_tracking_tag
 header:
   stamp:
     sec: 1646123029

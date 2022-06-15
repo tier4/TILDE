@@ -27,7 +27,7 @@ ROS2 のトピック通信は、一般に以下の様な有向グラフ(DAG)を�
 
 ![tilde_dag](./images/tilde_dag.svg)
 
-TILDE では、各ノードでメインのトピックを publish する際に PubInfo という「メイントピックを構成する入力トピックの情報(トピック)」を同時に publish します。  
+TILDE では、各ノードでメインのトピックを publish する際に MessageTrackingTag という「メイントピックを構成する入力トピックの情報(トピック)」を同時に publish します。  
 メッセージの特定の為、メインのトピックは ROS2 の [std_msgs/msg/Header](https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/Header.msg) フィールドを持ち stamp フィールドに適切な値を設定している必要があります。
 
 以下の図の様なケースを考えます。
@@ -43,19 +43,18 @@ graph LR
   PlanningNode --stamp=10-->/planning/base
 ```
 
-FusionNode は以下の様な PubInfo を送信します。
+FusionNode は以下の様な MessageTrackingTag を送信します。
 
-- **PubInfo(FusionNode)**: stamp=8 の `/sensor/fusion` は以下のトピックを参照した
+- **MessageTrackingTag(FusionNode)**: stamp=8 の `/sensor/fusion` は以下のトピックを参照した
   - t=5 に受信した stamp=4 の `/sensor/topic/A`
   - t=7 に受信した stamp=6 の `/sensor/topic/B`
   - 他、トピックの送信時刻などの付属情報
 
-PlanningNode も同様の PubInfo を送信します。
+PlanningNode も同様の MessageTrackingTag を送信します。
 
-- **PubInfo(PlanningNode)**: stamp=10 の `/planning/base` は以下のトピックを参照した
+- **MessageTrackingTag(PlanningNode)**: stamp=10 の `/planning/base` は以下のトピックを参照した
   - t=8 に受信した stamp=8 の `/sensor/fusion`
   - t=4 に受信した stamp=3 の `/sensor/topic/B`
-  - `/planning/fback` は未受信
 
 これらの情報から、stamp=10 の `/planning/base` は以下のセンサー情報を元に算出されたと分かります。
 
@@ -64,7 +63,7 @@ PlanningNode も同様の PubInfo を送信します。
   - `/sensor/topic/B`: stamp=6 のもの(`/sensor/fusion` 経由) と stamp=3 のもの(直接受信)
 
 同様の推論を繰り返すことで「stamp=X の `/control/cmd` はいつのセンサー情報を用いたか?」という問いに答えることができます。
-PubInfo を元に、DAG を逆向きに遡ってデータの紐付けを行うことからこの様な推論を **PubInfo の探索** と呼称します。
+MessageTrackingTag を元に、DAG を逆向きに遡ってデータの紐付けを行うことからこの様な推論を **MessageTrackingTag の探索** と呼称します。
 
 ## オンラインレイテンシ計測
 
@@ -77,14 +76,14 @@ PubInfo を元に、DAG を逆向きに遡ってデータの紐付けを行う�
 
 他のノードでも同様の推論が可能です。
 
-また、 PubInfo の探索を途中で止めることでノード間にかかった時間も分かります。  
+また、 MessageTrackingTag の探索を途中で止めることでノード間にかかった時間も分かります。  
 例えば 「/sensor/fusion が送信されてから /control/cmd が送信されるまで X 秒かかった」などの推論ができます。
 
 この様にして TILDE を用いてレンテンシを計測することが可能です。
 
 ### オンライン性
 
-PubInfo は topic で送信される為、計測対象のシステムを動かしながら PubInfo を解析することが可能です。  
+MessageTrackingTag は topic で送信される為、計測対象のシステムを動かしながら MessageTrackingTag を解析することが可能です。  
 latency viewer では top や vmstat の様にシステムを動かしながらレンテンシを見ることができます。  
 TILDE ではこの様にシステムを動かしながらメトリククを計算できる性質を **オンライン** と呼称しています。
 
@@ -115,4 +114,4 @@ NodeA、NodeB はタイマーで動作すると考えます。
   - TargetNode 実行時に「最後に topicB を受信した」を取得できる為、この様な問題を検出できます。
 - (2) 間接的な入力トピックの遅延 (case2)
   - NodeB は正しい周波数で動作しているが NodeA が停止・あるいは topicA の遅延などで、NodeB が参照している情報が古い可能性があります。
-  - TILDE では PubInfo を辿ることで、センサーや途中のトピックの諸元を調べることができるため、この様な問題を検出できます。
+  - TILDE では MessageTrackingTag を辿ることで、センサーや途中のトピックの諸元を調べることができるため、この様な問題を検出できます。

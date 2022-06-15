@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""PubInfo Traverser."""
+"""MessageTrackingTag Traverser."""
 
 import argparse
 from collections import defaultdict, deque
@@ -24,7 +24,7 @@ import time
 from rclpy.time import Time
 
 from tilde_vis.data_as_tree import TreeNode
-from tilde_vis.pub_info import time2str
+from tilde_vis.message_tracking_tag import time2str
 
 
 def str_stamp2time(str_stamp):
@@ -124,7 +124,7 @@ class InputSensorStampSolver(object):
         self.skips = graph.skips
         self.empty_results = {}
 
-    def solve(self, pubinfos, tgt_topic, tgt_stamp,
+    def solve(self, message_tracking_tags, tgt_topic, tgt_stamp,
               stops=[]):
         """
         Traverse from (tgt_topic, tgt_stamp)-message.
@@ -156,9 +156,9 @@ class InputSensorStampSolver(object):
         parentQ = deque()
 
         start = str_stamp2time(tgt_stamp)
-        start_pub_info = pubinfos.get(tgt_topic, tgt_stamp)
-        start_pub_time = start_pub_info.out_info.pubsub_stamp
-        start_pub_time_steady = start_pub_info.out_info.pubsub_stamp_steady
+        start_message_tracking_tag = message_tracking_tags.get(tgt_topic, tgt_stamp)
+        start_pub_time = start_message_tracking_tag.out_info.pubsub_stamp
+        start_pub_time_steady = start_message_tracking_tag.out_info.pubsub_stamp_steady
 
         dists[tgt_topic][tgt_stamp] = 1
         queue.append((tgt_topic, tgt_stamp,
@@ -190,11 +190,11 @@ class InputSensorStampSolver(object):
                 continue
 
             # get next edges
-            next_pubinfo = pubinfos.get(topic, stamp)
-            if not next_pubinfo:
+            next_message_tracking_tag = message_tracking_tags.get(topic, stamp)
+            if not next_message_tracking_tag:
                 continue
 
-            for in_infos in next_pubinfo.in_infos.values():
+            for in_infos in next_message_tracking_tag.in_infos.values():
                 for in_info in in_infos:
                     nx_topic = in_info.topic
                     if nx_topic in skips:
@@ -210,14 +210,14 @@ class InputSensorStampSolver(object):
 
         return ret
 
-    def solve2(self, pubinfos, tgt_topic, tgt_stamp,
+    def solve2(self, message_tracking_tags, tgt_topic, tgt_stamp,
                stops=[]):
         """
         Traverse DAG from output to input.
 
         Parameters
         ----------
-        pubinfos: pubinfos [PubInfos]
+        message_tracking_tags: message_tracking_tags [MessageTrackingTags]
         tgt_topic: output topic [string]
         tgt_stamp: output header stamp [string]
         stops: stop list
@@ -226,10 +226,10 @@ class InputSensorStampSolver(object):
         ------
         TreeNode
         - Tree structure represents TopicGraph.
-          This means that even if some PubInfos loss in some timing,
+          This means that even if some MessageTrackingTags loss in some timing,
           returned TreeNode preserve entire graph.
         - .name means topic
-        - .data is PubInfo of the topic. [] whn PubInfo loss
+        - .data is MessageTrackingTag of the topic. [] whn MessageTrackingTag loss
 
         """
         skips = self.skips
@@ -248,18 +248,18 @@ class InputSensorStampSolver(object):
         while len(queue) != 0:
             topic, stamp, current_result = queue.popleft()
 
-            next_pubinfo = pubinfos.get(topic, stamp)
-            if next_pubinfo is not None:
-                current_result.add_data(next_pubinfo)
+            next_message_tracking_tag = message_tracking_tags.get(topic, stamp)
+            if next_message_tracking_tag is not None:
+                current_result.add_data(next_message_tracking_tag)
             else:
-                # print(f"pubinfo of {topic} {stamp} not found")
+                # print(f"message_tracking_tag of {topic} {stamp} not found")
                 continue
 
             # NDT-EKF has loop, so stop
             if topic in stops:
                 continue
 
-            for in_infos in next_pubinfo.in_infos.values():
+            for in_infos in next_message_tracking_tag.in_infos.values():
                 for in_info in in_infos:
                     nx_topic = in_info.topic
                     if nx_topic in skips:
@@ -326,19 +326,19 @@ class InputSensorStampSolver(object):
 class TopicGraph(object):
     """Construct topic graph by ignoring stamps."""
 
-    def __init__(self, pubinfos, skips={}):
+    def __init__(self, message_tracking_tags, skips={}):
         """
         Constructor.
 
         Parameters
         ----------
-        pubinfos: PubInfos
+        message_tracking_tags: MessageTrackingTags
         skips: skip topics. {downstream: upstream} by input-to-output order
                ex) {"/sensing/lidar/top/rectified/pointcloud_ex":
                     "/sensing/lidar/top/mirror_cropped/pointcloud_ex"}
 
         """
-        self.topics = sorted(pubinfos.all_topics())
+        self.topics = sorted(message_tracking_tags.all_topics())
         self.t2i = {t: i for i, t in enumerate(self.topics)}
         self.skips = skips
         n = len(self.topics)
@@ -348,7 +348,7 @@ class TopicGraph(object):
         # edges from subscription to publisher
         self.rev_edges = [set() for _ in range(n)]
         for out_topic in self.topics:
-            in_topics = pubinfos.in_topics(out_topic)
+            in_topics = message_tracking_tags.in_topics(out_topic)
 
             out_id = self.t2i[out_topic]
             for in_topic in in_topics:
@@ -453,12 +453,12 @@ class TopicGraph(object):
 def run(args):
     """Run."""
     pickle_file = args.pickle_file
-    pubinfos = pickle.load(open(pickle_file, 'rb'))
+    message_tracking_tags = pickle.load(open(pickle_file, 'rb'))
 
     tgt_topic = args.topic
-    tgt_stamp = sorted(pubinfos.stamps(tgt_topic))[args.stamp_index]
+    tgt_stamp = sorted(message_tracking_tags.stamps(tgt_topic))[args.stamp_index]
 
-    graph = TopicGraph(pubinfos)
+    graph = TopicGraph(message_tracking_tags)
 
     print('dump')
     graph.dump('graph.json')
@@ -473,7 +473,7 @@ def run(args):
 
     st = time.time()
     solver = InputSensorStampSolver(graph)
-    solver.solve(pubinfos, tgt_topic, tgt_stamp)
+    solver.solve(message_tracking_tags, tgt_topic, tgt_stamp)
     et = time.time()
 
     print(f'solve {(et-st) * 1000} [ms]')

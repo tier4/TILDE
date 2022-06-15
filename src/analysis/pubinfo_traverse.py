@@ -9,7 +9,7 @@ import rclpy
 from rclpy.clock import Clock, ClockType
 from rclpy.time import Time
 
-from pub_info import time2str, PubInfo, PubInfos
+from message_tracking_tag import time2str, Message_Tracking_Tag, Message_Tracking_Tags
 
 def str_stamp2time(timestamp: str):
     sec, nanosec = timestamp.split(".")
@@ -20,7 +20,7 @@ class InputSensorStampSolver(object):
         # {topic: {stamp: {sensor_topic: [stamps]}}}
         self.topic_stamp_to_sensor_stamp = {}
 
-    def solve(self, pubinfos, tgt_topic, tgt_stamp):
+    def solve(self, message_tracking_tags, tgt_topic, tgt_stamp):
         """
         topic: target topic
         stamp: target stamp(str)
@@ -29,7 +29,7 @@ class InputSensorStampSolver(object):
 
         Calculate topic_stamp_to_sensor_stamp internally.
         """
-        graph = TopicGraph(pubinfos)
+        graph = TopicGraph(message_tracking_tags)
         path_bfs = graph.bfs_rev(tgt_topic)
         is_leaf = {t: b for (t, b) in path_bfs}
 
@@ -64,11 +64,11 @@ class InputSensorStampSolver(object):
                 continue
 
             # get next edges
-            next_pubinfo = pubinfos.get(topic, stamp)
-            if not next_pubinfo:
+            next_message_tracking_tag = message_tracking_tags.get(topic, stamp)
+            if not next_message_tracking_tag:
                 continue
 
-            for in_infos in next_pubinfo.in_infos.values():
+            for in_infos in next_message_tracking_tag.in_infos.values():
                 for in_info in in_infos:
                     nx_topic = in_info.topic
                     nx_stamp = time2str(in_info.stamp)
@@ -96,8 +96,8 @@ class InputSensorStampSolver(object):
 class TopicGraph(object):
     "Construct topic graph by ignoring stamps"
 
-    def __init__(self, pubinfos):
-        self.topics = sorted(pubinfos.all_topics())
+    def __init__(self, message_tracking_tags):
+        self.topics = sorted(message_tracking_tags.all_topics())
         self.t2i = {t: i for i, t in enumerate(self.topics)}
         n = len(self.topics)
 
@@ -106,7 +106,7 @@ class TopicGraph(object):
         # from out -> in
         self.rev_edges = [set() for _ in range(n)]
         for out_topic in self.topics:
-            in_topics = pubinfos.in_topics(out_topic)
+            in_topics = message_tracking_tags.in_topics(out_topic)
 
             out_id = self.t2i[out_topic]
             for in_topic in in_topics:
@@ -172,12 +172,12 @@ class TopicGraph(object):
 
 def main(args):
     pickle_file = args.pickle_file
-    pubinfos = pickle.load(open(pickle_file, "rb"))
+    message_tracking_tags = pickle.load(open(pickle_file, "rb"))
 
     tgt_topic = args.topic
-    tgt_stamp = sorted(pubinfos.stamps(tgt_topic))[args.stamp_index]
+    tgt_stamp = sorted(message_tracking_tags.stamps(tgt_topic))[args.stamp_index]
 
-    graph = TopicGraph(pubinfos)
+    graph = TopicGraph(message_tracking_tags)
     bfs_path = graph.bfs_rev(tgt_topic)
 
     # print(f"BFS from {tgt_topic}")
@@ -187,7 +187,7 @@ def main(args):
 
     st = time.time()
     solver = InputSensorStampSolver()
-    solver.solve(pubinfos, tgt_topic, tgt_stamp)
+    solver.solve(message_tracking_tags, tgt_topic, tgt_stamp)
     et = time.time()
 
     print(f"solve {(et-st) * 1000} [ms]")

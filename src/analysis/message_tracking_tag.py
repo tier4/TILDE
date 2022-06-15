@@ -13,9 +13,9 @@ class TopicInfo(object):
         stamp_s = time2str(self.stamp) if self.has_stamp else "NA"
         return f"TopicInfo(topic={self.topic}, stamp={stamp_s})"
 
-class PubInfo(object):
+class Message_Tracking_Tag(object):
     """
-    PubInfo
+    Message_Tracking_Tag
       - out_info = TopicInfo
       - in_infos = {topic_name => list of TopicInfo}
     """
@@ -28,7 +28,7 @@ class PubInfo(object):
         self.in_infos.setdefault(in_topic, []).append(TopicInfo(in_topic, has_stamp, stamp))
 
     def __str__(self):
-        s = "PubInfo: \n"
+        s = "Message_Tracking_Tag: \n"
         s += f"  out_info={self.out_info}\n"
         for _, ti in self.in_infos.items():
             s += f"  in_infos={ti}\n"
@@ -38,39 +38,39 @@ class PubInfo(object):
     def out_topic(self):
         return self.out_info.topic
 
-class PubInfos(object):
+class Message_Tracking_Tags(object):
     '''
-    topic vs PubInfo
+    topic vs Message_Tracking_Tag
 
     We have double-key dictionary internally, i.e.
-    we can get PubInfo by topic_vs_pubinfo[topic_name][stamp].
+    we can get Message_Tracking_Tag by topic_vs_message_tracking_tag[topic_name][stamp].
     '''
     def __init__(self):
-        self.topic_vs_pubinfos = {}
+        self.topic_vs_message_tracking_tags = {}
 
-    def add(self, pubinfo):
-        out_topic = pubinfo.out_info.topic
-        out_stamp = time2str(pubinfo.out_info.stamp)
-        if not out_topic in self.topic_vs_pubinfos.keys():
-            self.topic_vs_pubinfos[out_topic] = {}
-        infos = self.topic_vs_pubinfos[out_topic]
+    def add(self, message_tracking_tag):
+        out_topic = message_tracking_tag.out_info.topic
+        out_stamp = time2str(message_tracking_tag.out_info.stamp)
+        if not out_topic in self.topic_vs_message_tracking_tags.keys():
+            self.topic_vs_message_tracking_tags[out_topic] = {}
+        infos = self.topic_vs_message_tracking_tags[out_topic]
 
         if out_stamp not in infos.keys():
             infos[out_stamp] = {}
 
-        infos[out_stamp] = pubinfo
+        infos[out_stamp] = message_tracking_tag
 
     def topics(self):
-        return list(self.topic_vs_pubinfos.keys())
+        return list(self.topic_vs_message_tracking_tags.keys())
 
     def stamps(self, topic):
         """
         return List[stamps]
         """
-        if topic not in self.topic_vs_pubinfos.keys():
+        if topic not in self.topic_vs_message_tracking_tags.keys():
             return []
 
-        return list(self.topic_vs_pubinfos[topic].keys())
+        return list(self.topic_vs_message_tracking_tags[topic].keys())
 
     def get(self, topic, stamp=None, idx=None):
         """
@@ -78,13 +78,13 @@ class PubInfos(object):
         stamp: str
         """
         ret = None
-        if topic not in self.topic_vs_pubinfos.keys():
+        if topic not in self.topic_vs_message_tracking_tags.keys():
             return None
 
         if stamp is None and idx is None:
-            return list(self.topic_vs_pubinfos[topic].values())[0]
+            return list(self.topic_vs_message_tracking_tags[topic].values())[0]
 
-        infos = self.topic_vs_pubinfos[topic]
+        infos = self.topic_vs_message_tracking_tags[topic]
 
         if stamp in infos.keys():
             ret = infos[stamp]
@@ -105,11 +105,11 @@ class PubInfos(object):
         """
         ret = set()
 
-        if topic not in self.topic_vs_pubinfos.keys():
+        if topic not in self.topic_vs_message_tracking_tags.keys():
             return ret
 
-        for pubinfo in self.topic_vs_pubinfos[topic].values():
-            for t in pubinfo.in_infos.keys():
+        for message_tracking_tag in self.topic_vs_message_tracking_tags[topic].values():
+            for t in message_tracking_tag.in_infos.keys():
                 ret.add(t)
         return ret
 

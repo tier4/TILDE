@@ -44,7 +44,7 @@ public:
       [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
       {
         (void) msg;
-        RCLCPP_INFO(this->get_logger(), "recieved");
+        RCLCPP_INFO(this->get_logger(), "received");
       };
     sub_pc_ = this->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
       "in", qos, sub_callback);

@@ -20,11 +20,11 @@
 #include "rclcpp/rclcpp.hpp"
 
 #include "tilde/tilde_publisher.hpp"
-#include "tilde_msg/msg/pub_info.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
 
 using tilde::TildePublisherBase;
 using tilde::InputInfo;
-using tilde_msg::msg::PubInfo;
+using tilde_msg::msg::MessageTrackingTag;
 
 class TestTildePublisher : public ::testing::Test
 {
@@ -59,7 +59,7 @@ TEST_F(TestTildePublisher, set_implicit_and_fill_input_info) {
     TOPIC,
     info);
 
-  tilde_msg::msg::PubInfo msg;
+  tilde_msg::msg::MessageTrackingTag msg;
   pub.fill_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
@@ -98,7 +98,7 @@ TEST_F(TestTildePublisher, add_explicit_input_info_sub_time_not_found) {
   pub.add_explicit_input_info(
     TOPIC, search_stamp);
 
-  tilde_msg::msg::PubInfo msg;
+  tilde_msg::msg::MessageTrackingTag msg;
   pub.fill_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
@@ -138,7 +138,7 @@ TEST_F(TestTildePublisher, set_explicit_subscription_time_success_then_purged) {
     TOPIC,
     stamp_base + rclcpp::Duration(5, 0));
 
-  tilde_msg::msg::PubInfo msg;
+  tilde_msg::msg::MessageTrackingTag msg;
   pub.fill_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 1ul);
@@ -228,7 +228,7 @@ TEST_F(TestTildePublisher, set_multiple_topic) {
     TOPIC2,
     stamp_base2);
 
-  tilde_msg::msg::PubInfo msg;
+  tilde_msg::msg::MessageTrackingTag msg;
   pub.fill_input_info(msg);
 
   EXPECT_EQ(msg.input_infos.size(), 2ul);
@@ -285,7 +285,7 @@ TEST_F(TestTildePublisher, no_explicit_after_add_explicit) {
 
   /// publish
   {
-    tilde_msg::msg::PubInfo msg;
+    tilde_msg::msg::MessageTrackingTag msg;
     pub.fill_input_info(msg);
 
     /// check
@@ -300,7 +300,7 @@ TEST_F(TestTildePublisher, no_explicit_after_add_explicit) {
   // (test case1) publish without subscription
   /// publish
   {
-    tilde_msg::msg::PubInfo msg;
+    tilde_msg::msg::MessageTrackingTag msg;
     pub.fill_input_info(msg);
     /// check
     EXPECT_EQ(msg.input_infos.size(), 0ul);
@@ -329,7 +329,7 @@ TEST_F(TestTildePublisher, no_explicit_after_add_explicit) {
 
   /// publish
   {
-    tilde_msg::msg::PubInfo msg;
+    tilde_msg::msg::MessageTrackingTag msg;
     pub.fill_input_info(msg);
     /// check
     EXPECT_EQ(msg.input_infos.size(), 0ul);

@@ -47,8 +47,8 @@ using PointCloud2Ptr = std::shared_ptr<PointCloud2>;
 using PointCloud2ConstPtr = std::shared_ptr<PointCloud2 const>;
 
 using Clock = rosgraph_msgs::msg::Clock;
-using PubInfo = tilde_msg::msg::PubInfo;
-using PubInfoPtr = PubInfo::UniquePtr;
+using MessageTrackingTag = tilde_msg::msg::MessageTrackingTag;
+using MessageTrackingTagPtr = MessageTrackingTag::UniquePtr;
 using TimeMsg = builtin_interfaces::msg::Time;
 
 using PointCloudPublisher = std::shared_ptr<rclcpp::Publisher<PointCloud2>>;
@@ -165,9 +165,9 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
 
   // validation node
   bool val_callback_called = false;
-  auto val_sub = val_node->create_subscription<PubInfo>(
-    "out/info/pub", qos,
-    [this, &val_callback_called](PubInfoPtr pi) -> void
+  auto val_sub = val_node->create_subscription<MessageTrackingTag>(
+    "out/message_tracking_tag", qos,
+    [this, &val_callback_called](MessageTrackingTagPtr pi) -> void
     {
       val_callback_called = true;
       EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
@@ -260,9 +260,9 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
 
   // validation node
   bool val_callback_called = false;
-  auto val_sub = val_node->create_subscription<PubInfo>(
-    "out/info/pub", qos,
-    [this, &val_callback_called](PubInfoPtr pi) -> void
+  auto val_sub = val_node->create_subscription<MessageTrackingTag>(
+    "out/message_tracking_tag", qos,
+    [this, &val_callback_called](MessageTrackingTagPtr pi) -> void
     {
       val_callback_called = true;
       EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
@@ -341,9 +341,9 @@ TEST_F(TestSynchronizer, work_with_passthrough)
 
   // validation node
   bool val_callback_called = false;
-  auto val_sub = val_node->create_subscription<PubInfo>(
-    "out/info/pub", qos,
-    [this, &val_callback_called](PubInfoPtr pi) -> void
+  auto val_sub = val_node->create_subscription<MessageTrackingTag>(
+    "out/message_tracking_tag", qos,
+    [this, &val_callback_called](MessageTrackingTagPtr pi) -> void
     {
       val_callback_called = true;
       EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
@@ -414,11 +414,11 @@ TEST_F(TestSynchronizer, order_inversion)
     });
 
   bool val_callback_called = false;
-  auto val_sub = val_node->create_subscription<PubInfo>(
-    "out/info/pub", qos,
+  auto val_sub = val_node->create_subscription<MessageTrackingTag>(
+    "out/message_tracking_tag", qos,
     [this, &val_callback_called,
     t1_sec, t2_sec, t3_sec,
-    t1_nsec, t2_nsec, t3_nsec](PubInfoPtr pi) -> void
+    t1_nsec, t2_nsec, t3_nsec](MessageTrackingTagPtr pi) -> void
     {
       val_callback_called = true;
       EXPECT_EQ(pi->output_info.header_stamp.sec, t2_sec);

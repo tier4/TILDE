@@ -101,7 +101,7 @@ void TildePublisherBase::add_explicit_input_info(
   }
 }
 
-void TildePublisherBase::fill_input_info(tilde_msg::msg::PubInfo & info_msg)
+void TildePublisherBase::fill_input_info(tilde_msg::msg::MessageTrackingTag & info_msg)
 {
   info_msg.input_infos.clear();
 
