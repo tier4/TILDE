@@ -60,7 +60,7 @@ Found のうち、半角スペース始まりは topic、そうでないもの�
 ある地点からグラフを BFS してノードやトピックを出力する。
 
 ```bash
-$ ./myscripts/graph_around.py /localization/pose_twist_fusion_filter/ekf_localizer --depth 2
+$ ./graph_around.py /localization/pose_twist_fusion_filter/ekf_localizer --depth 2
 
 depth: 0
 now: '/localization/pose_twist_fusion_filter/ekf_localizer|'

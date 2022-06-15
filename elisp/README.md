@@ -14,7 +14,7 @@ Open the log file, and `M-x tilde-view-mode`.
 Of course, you need read tilde-view-mode.el in advance
 by putting load path, or `M-x eval-buffer` or other fancy way.
 
-## Keymap
+## Key Bindings
 
 The latency viewer log file has space-index structure.
 In the non batch mode, latency viewer shows lines between `/target/topic`.
@@ -47,4 +47,4 @@ Hit "n" or "p" to move BLOCKs.
 Hit "w" to widen.
 
 We can use the narrow view mode, just like latency viewer non-batch mode.
-Morever, we can combine foldings.
+We can also move the block with the region folded.

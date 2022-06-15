@@ -136,7 +136,7 @@ Read rosbag2 file, and create pkl file.
 ### Run
 
 ```bash
-ros2 run tilde_vis parse_message_tracking_tag <path/to/rosbag/dbfile>
+ros2 run tilde_vis parse_message_tracking_tag <path/to/rosbag/db_file>
 ```
 
 `topic_infos.pkl` is created.
