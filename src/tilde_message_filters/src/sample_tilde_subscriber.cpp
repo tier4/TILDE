@@ -41,7 +41,6 @@ struct NonConstHelper
 
   void cb(const MsgPtr msg)
   {
-    std::cout << "NonConstHelper::cb" << std::endl;
     pub_->publish(*msg);
   }
 
@@ -53,7 +52,6 @@ std::shared_ptr<tilde::TildePublisher<Msg>> g_pub_callback_fn_;
 
 void callback_fn(MsgConstPtr msg)
 {
-  std::cout << "callback_fn" << std::endl;
   g_pub_callback_fn_->publish(*msg);
 }
 
@@ -61,7 +59,6 @@ template<typename CallbackT>
 void func(CallbackT && callback)  // add [[deprecated]] to show deduced type
 {
   auto callback_addr = &callback;
-  std::cout << callback_addr << std::endl;
 }
 
 

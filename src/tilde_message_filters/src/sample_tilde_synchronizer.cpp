@@ -44,8 +44,6 @@ public:
   explicit SampleTildeSynchronizer2(const rclcpp::NodeOptions & options)
   : TildeNode("sample_tilde_sync2", options)
   {
-    std::cout << "hee" << std::endl;
-
     rclcpp::QoS qos(rclcpp::KeepLast(7));
     auto rmw_qos = qos.get_rmw_qos_profile();
 
@@ -66,7 +64,6 @@ public:
       std::bind(
         &SampleTildeSynchronizer2::sub_callback, this,
         std::placeholders::_1, std::placeholders::_2));
-    std::cout << "hoo" << std::endl;
   }
 
 private:
@@ -79,7 +76,6 @@ private:
     const MsgConstPtr & msg2)
   {
     (void) msg2;
-    std::cout << "sub_callback" << std::endl;
     pub_->publish(*msg1);
   }
 };
@@ -95,8 +91,6 @@ public:
   explicit SampleTildeSynchronizer3(const rclcpp::NodeOptions & options)
   : TildeNode("sample_tilde_sync3", options)
   {
-    std::cout << "hee" << std::endl;
-
     rclcpp::QoS qos(rclcpp::KeepLast(7));
     auto rmw_qos = qos.get_rmw_qos_profile();
 
@@ -120,7 +114,6 @@ public:
         std::placeholders::_2,
         std::placeholders::_3
     ));
-    std::cout << "hoo" << std::endl;
   }
 
 private:
@@ -135,7 +128,6 @@ private:
     (void) msg1;
     (void) msg2;
     (void) msg3;
-    std::cout << "sub_callback" << std::endl;
   }
 };
 

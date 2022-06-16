@@ -50,11 +50,9 @@ public:
 
     declare_parameter<int64_t>(TIMER_MS, TIMER_MS_DEFAULT);
     auto timer_ms = get_parameter(TIMER_MS).get_value<int64_t>();
-    std::cout << "timer_ms: " << timer_ms << std::endl;
 
     declare_parameter<int64_t>(N_PUBLISHERS, n_publishers_);
     n_publishers_ = get_parameter(N_PUBLISHERS).get_value<int64_t>();
-    std::cout << "n_publishers: " << n_publishers_ << std::endl;
     assert(n_publishers_ >= 2);
 
     // Create a publisher with a custom Quality of Service profile.
@@ -114,7 +112,6 @@ public:
 
     declare_parameter<int64_t>(TIMER_MS, TIMER_MS_DEFAULT);
     auto timer_ms = get_parameter(TIMER_MS).get_value<int64_t>();
-    std::cout << "timer_ms: " << timer_ms << std::endl;
 
     // Create a function for when messages are to be sent.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
