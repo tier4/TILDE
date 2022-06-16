@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
@@ -541,4 +542,45 @@ TEST(TestForwardEstimator, get_oldest_sensor_stamp)
   } else {
     FAIL() << "zombie oldest_without_21";
   }
+}
+
+TEST(TestForwardEstimator, skip_topic)
+{
+  // DAG
+  // A -> B -> C
+  // skip B
+
+  const std::string topic1 = "topicA";
+  const std::string topic2 = "topicB";
+  const std::string topic3 = "topicC";
+
+  std::map<std::string, std::string> skip_out_to_in;
+  skip_out_to_in[topic2] = topic1;
+
+  auto time11 = get_time(11, 110);
+  auto message_tracking_tag11 = create_message_tracking_tag(topic1, time11);
+
+  // skipped message should have the same timestamp as input message
+  auto message_tracking_tag21 = create_message_tracking_tag(topic2, time11);
+  add_input_info(message_tracking_tag21.get(), message_tracking_tag11.get());
+
+  auto time31 = get_time(31, 310);
+  auto message_tracking_tag31 = create_message_tracking_tag(topic3, time31);
+  add_input_info(message_tracking_tag31.get(), message_tracking_tag21.get());
+
+  auto fe = ForwardEstimator();
+  fe.set_skip_out_to_in(skip_out_to_in);
+
+  fe.add(std::move(message_tracking_tag11));
+  // ignore 21 to verify skip
+  fe.add(std::move(message_tracking_tag31));
+
+  auto input_sources31 = fe.get_input_sources(
+    topic3, time31);
+
+  EXPECT_EQ(input_sources31.size(), 1u);
+  auto s = input_sources31.begin();
+  EXPECT_EQ(s->first, topic1);
+  EXPECT_EQ(s->second.size(), 1u);
+  EXPECT_EQ(*s->second.begin(), time11);
 }

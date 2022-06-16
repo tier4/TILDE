@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <map>
 #include <set>
@@ -107,9 +108,28 @@ void TildeDeadlineDetectorNode::init()
   auto deadline_ms = declare_parameter<std::vector<int64_t>>(
     "deadline_ms", std::vector<int64_t>{});
 
+  auto skips_main_out = declare_parameter<std::vector<std::string>>(
+    "skips_main_out", std::vector<std::string>{});
+  auto skips_main_in = declare_parameter<std::vector<std::string>>(
+    "skips_main_in", std::vector<std::string>{});
+
+  assert(skips_main_out.size() == skips_main_in.size());
+
+  std::map<std::string, std::string> skips_out_to_in;
+  for (auto out_it = skips_main_out.begin(),
+    in_it = skips_main_in.begin();
+    (out_it != skips_main_out.end() &&
+    in_it != skips_main_in.end());
+    out_it++, in_it++)
+  {
+    skips_out_to_in[*out_it] = *in_it;
+  }
+  fe.set_skip_out_to_in(skips_out_to_in);
+
   expire_ms_ = declare_parameter<int64_t>("expire_ms", 3 * 1000);
   cleanup_ms_ = declare_parameter<int64_t>("cleanup_ms", 3 * 1000);
   print_report_ = declare_parameter<bool>("print_report", false);
+  print_pending_messages_ = declare_parameter<bool>("print_pending_messages", false);
 
   bool clock_work_around = declare_parameter<bool>("clock_work_around", false);
   bool show_performance = declare_parameter<bool>("show_performance", false);
@@ -220,6 +240,16 @@ void TildeDeadlineDetectorNode::message_tracking_tag_callback(
   if (print_report_) {
     auto is = fe.get_input_sources(target, stamp);
     print_report(target, stamp, is);
+  }
+
+  if (print_pending_messages_) {
+    std::cout << "pending message counts:\n";
+    for (const auto & pending_message_count : fe.get_pending_message_counts()) {
+      if (pending_message_count.second == 0) {continue;}
+      std::cout << pending_message_count.first << ": " <<
+        pending_message_count.second << "\n";
+    }
+    std::cout << std::endl;
   }
 
   // auto deadline_ms = topic_vs_deadline_ms_[target];
