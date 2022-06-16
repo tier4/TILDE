@@ -51,28 +51,4 @@ Here is a set of parameters.
 |                   | `print_report`           | whether to print internal data                                                                 |
 |                   | `print_pending_messages` | whether to print pending messages                                                              |
 
-This is a sample parameter yaml file.
-
-```text
-tilde_deadline_detector_node:
-  ros__parameters:
-    sensor_topics: [
-      "/sensing/lidar/front_lower/self_cropped/pointcloud_ex",
-      "/sensing/lidar/front_upper/self_cropped/pointcloud_ex",
-      "/sensing/lidar/left_lower/self_cropped/pointcloud_ex",
-      "/sensing/lidar/left_upper/self_cropped/pointcloud_ex",
-      "/sensing/lidar/rear_lower/self_cropped/pointcloud_ex",
-      "/sensing/lidar/rear_upper/self_cropped/pointcloud_ex",
-      "/sensing/lidar/right_lower/self_cropped/pointcloud_ex",
-      "/sensing/lidar/right_upper/self_cropped/pointcloud_ex",
-      "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias",
-    ]
-    target_topics: [
-      /localization/pose_twist_fusion_filter/kinematic_state
-    ]
-    # specify deadline ms for topics in target_topics order.
-    # 0 means no deadline, and negative values are replaced by 0
-    deadline_ms: [
-      0,
-    ]
-```
+See [autoware_sensors.yaml](autoware_sensors.yaml) for a sample parameter yaml file.
