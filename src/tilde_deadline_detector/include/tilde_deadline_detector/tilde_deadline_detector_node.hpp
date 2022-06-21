@@ -24,6 +24,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "tilde_msg/msg/message_tracking_tag.hpp"
+#include "tilde_msg/msg/deadline_notification.hpp"
 
 #include "tilde_deadline_detector/forward_estimator.hpp"
 
@@ -80,6 +81,8 @@ private:
 
   std::vector<MessageTrackingTagSubscription::SharedPtr> subs_;
   rclcpp::TimerBase::SharedPtr timer_;
+
+  rclcpp::Publisher<tilde_msg::msg::DeadlineNotification>::SharedPtr notification_pub_;
 
   PerformanceCounter message_tracking_tag_callback_counter_;
   PerformanceCounter timer_callback_counter_;

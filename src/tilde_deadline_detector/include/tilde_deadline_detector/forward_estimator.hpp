@@ -73,6 +73,16 @@ public:
   /// add MessageTrackingTag
   void add(std::unique_ptr<MessageTrackingTagMsg> message_tracking_tag, bool is_sensor = false);
 
+  /// get sources of give message
+  /**
+   * \param topic_name Target topic name
+   * \param stamp Target header stamp
+   * \return set of references to sources
+   */
+  RefToSources get_ref_to_sources(
+    const std::string & topic_name,
+    const HeaderStamp & stamp) const;
+
   /// get all sensor time
   /**
    * \param topic_name Target topic name

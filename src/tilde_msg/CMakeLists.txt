@@ -17,7 +17,7 @@ set(msg_files
   "msg/PubTopicTimeInfo.msg"
   "msg/MessageTrackingTag.msg"
   "msg/TestTopLevelStamp.msg"
-  "msg/Sources.msg"
+  "msg/Source.msg"
   "msg/DeadlineNotification.msg"
 )
 

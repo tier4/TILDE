@@ -146,6 +146,24 @@ std::string _time2str(const builtin_interfaces::msg::Time & time)
   return ret.str();
 }
 
+ForwardEstimator::RefToSources ForwardEstimator::get_ref_to_sources(
+  const std::string & topic_name,
+  const HeaderStamp & stamp) const
+{
+  RefToSources ret;
+  auto message_sources_topic_it = message_sources_.find(topic_name);
+  if (message_sources_topic_it == message_sources_.end()) {
+    return ret;
+  }
+
+  auto stamps_sources_it = message_sources_topic_it->second.find(stamp);
+  if (stamps_sources_it == message_sources_topic_it->second.end()) {
+    return ret;
+  }
+
+  return stamps_sources_it->second;
+}
+
 ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
   const std::string & topic_name,
   const HeaderStamp & stamp) const

@@ -52,3 +52,8 @@ Here is a set of parameters.
 |                   | `print_pending_messages` | whether to print pending messages                                                              |
 
 See [autoware_sensors.yaml](autoware_sensors.yaml) for a sample parameter yaml file.
+
+## Notification
+
+If the target topic overruns, `deadline_notification` topic is published.
+The message type is [DeadlineNotification.msg](../tilde_msg/msg/DeadlineNotification.msg).
