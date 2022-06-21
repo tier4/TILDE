@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <algorithm>
+#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -25,6 +26,12 @@ namespace tilde_deadline_detector
 
 ForwardEstimator::ForwardEstimator()
 {}
+
+void ForwardEstimator::set_skip_out_to_in(
+  const std::map<std::string, std::string> & skip_out_to_in)
+{
+  skip_out_to_in_ = skip_out_to_in;
+}
 
 void ForwardEstimator::add(
   std::unique_ptr<MessageTrackingTagMsg> _message_tracking_tag,
@@ -91,7 +98,12 @@ void ForwardEstimator::add(
   for (const auto & input : message_tracking_tag->input_infos) {
     // get sources of input
     if (!input.has_header_stamp) {continue;}
-    const auto & input_topic = input.topic_name;
+
+    auto out_to_in_it = skip_out_to_in_.find(input.topic_name);
+    const auto & input_topic =
+      out_to_in_it != skip_out_to_in_.end() ?
+      out_to_in_it->second : input.topic_name;
+
     const auto & input_stamp = rclcpp::Time(input.header_stamp);
     const auto & input_source_topics = topic_sensors_[input_topic];
 
@@ -258,6 +270,18 @@ void ForwardEstimator::debug_print(bool verbose) const
       "message_sources: " << n_message_sources << " " <<
       "topic_sensors: " << n_topic_sensors << std::endl;
   }
+}
+
+std::map<ForwardEstimator::TopicName, size_t>
+ForwardEstimator::get_pending_message_counts() const
+{
+  std::map<TopicName, size_t> ret;
+
+  for (const auto & pending_message : pending_messages_) {
+    ret[pending_message.first] = pending_message.second.size();
+  }
+
+  return ret;
 }
 
 }  // namespace tilde_deadline_detector

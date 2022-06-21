@@ -86,6 +86,9 @@ TIMER_SEC = 1.0
 TARGET_TOPIC = '/sensing/lidar/concatenated/pointcloud'
 STOPS = [
     '/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias',  # noqa: #501
+    '/perception/occupancy_grid_map/map',
+    '/perception/object_recognition/detection/detection_by_tracker/objects',
+    '/perception/object_recognition/tracking/objects',
     ]
 DUMP_DIR = 'dump.d'
 

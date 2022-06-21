@@ -339,8 +339,6 @@ public:
       [this, callback](
       CallbackArgT0 msg0,
       CallbackArgT1 msg1) {
-        std::cout << "hooked2" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
 
@@ -373,8 +371,6 @@ public:
       CallbackArgT0 msg0,
       CallbackArgT1 msg1,
       CallbackArgT2 msg2) {
-        std::cout << "hooked3" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -412,8 +408,6 @@ public:
       CallbackArgT1 msg1,
       CallbackArgT2 msg2,
       CallbackArgT3 msg3) {
-        std::cout << "hooked4" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -455,8 +449,6 @@ public:
       CallbackArgT2 msg2,
       CallbackArgT3 msg3,
       CallbackArgT4 msg4) {
-        std::cout << "hooked5" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -503,8 +495,6 @@ public:
       CallbackArgT3 msg3,
       CallbackArgT4 msg4,
       CallbackArgT5 msg5) {
-        std::cout << "hooked6" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -556,8 +546,6 @@ public:
       CallbackArgT4 msg4,
       CallbackArgT5 msg5,
       CallbackArgT6 msg6) {
-        std::cout << "hooked7" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -614,8 +602,6 @@ public:
       CallbackArgT5 msg5,
       CallbackArgT6 msg6,
       CallbackArgT7 msg7) {
-        std::cout << "hooked8" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -677,8 +663,6 @@ public:
       CallbackArgT6 msg6,
       CallbackArgT7 msg7,
       CallbackArgT8 msg8) {
-        std::cout << "hooked9" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -722,8 +706,6 @@ public:
       [this, callback](
       CallbackArgT0 msg0,
       CallbackArgT1 msg1) {
-        std::cout << "hooked2" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
 
@@ -756,8 +738,6 @@ public:
       CallbackArgT0 msg0,
       CallbackArgT1 msg1,
       CallbackArgT2 msg2) {
-        std::cout << "hooked3" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -795,8 +775,6 @@ public:
       CallbackArgT1 msg1,
       CallbackArgT2 msg2,
       CallbackArgT3 msg3) {
-        std::cout << "hooked4" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -838,8 +816,6 @@ public:
       CallbackArgT2 msg2,
       CallbackArgT3 msg3,
       CallbackArgT4 msg4) {
-        std::cout << "hooked5" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -886,8 +862,6 @@ public:
       CallbackArgT3 msg3,
       CallbackArgT4 msg4,
       CallbackArgT5 msg5) {
-        std::cout << "hooked6" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -939,8 +913,6 @@ public:
       CallbackArgT4 msg4,
       CallbackArgT5 msg5,
       CallbackArgT6 msg6) {
-        std::cout << "hooked7" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -997,8 +969,6 @@ public:
       CallbackArgT5 msg5,
       CallbackArgT6 msg6,
       CallbackArgT7 msg7) {
-        std::cout << "hooked8" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -1060,8 +1030,6 @@ public:
       CallbackArgT6 msg6,
       CallbackArgT7 msg7,
       CallbackArgT8 msg8) {
-        std::cout << "hooked9" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -1111,8 +1079,6 @@ public:
       CallbackArgT0 msg0,
       CallbackArgT1 msg1) -> void
       {
-        std::cout << "hooked2" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
 
@@ -1152,8 +1118,6 @@ public:
       CallbackArgT1 msg1,
       CallbackArgT2 msg2) -> void
       {
-        std::cout << "hooked3" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -1199,8 +1163,6 @@ public:
       CallbackArgT2 msg2,
       CallbackArgT3 msg3) -> void
       {
-        std::cout << "hooked4" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -1252,8 +1214,6 @@ public:
       CallbackArgT3 msg3,
       CallbackArgT4 msg4) -> void
       {
-        std::cout << "hooked5" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -1311,8 +1271,6 @@ public:
       CallbackArgT4 msg4,
       CallbackArgT5 msg5) -> void
       {
-        std::cout << "hooked6" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -1376,8 +1334,6 @@ public:
       CallbackArgT5 msg5,
       CallbackArgT6 msg6) -> void
       {
-        std::cout << "hooked7" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -1447,8 +1403,6 @@ public:
       CallbackArgT6 msg6,
       CallbackArgT7 msg7) -> void
       {
-        std::cout << "hooked8" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);
@@ -1524,8 +1478,6 @@ public:
       CallbackArgT7 msg7,
       CallbackArgT8 msg8) -> void
       {
-        std::cout << "hooked9" << std::endl;
-
         register_ith_message_as_input<0>(msg0);
         register_ith_message_as_input<1>(msg1);
         register_ith_message_as_input<2>(msg2);

@@ -61,7 +61,14 @@ public:
   using Message = std::tuple<TopicName, HeaderStamp>;
   using PendingMessages = std::map<TopicName, std::map<HeaderStamp, std::set<Message>>>;
 
+  /// Constructor
   ForwardEstimator();
+
+  /// skip_out_to_in_ setter
+  /**
+   * \param skip_out_to_in skip topic setting
+   */
+  void set_skip_out_to_in(const std::map<std::string, std::string> & skip_out_to_in);
 
   /// add MessageTrackingTag
   void add(std::unique_ptr<MessageTrackingTagMsg> message_tracking_tag, bool is_sensor = false);
@@ -98,9 +105,18 @@ public:
 
   void debug_print(bool verbose = false) const;
 
+  /// get pending message counts
+  /**
+   * \return pending topic name vs the number of waited stamps.
+   */
+  std::map<TopicName, size_t> get_pending_message_counts() const;
+
 private:
   /// all shared_ptr<MessageTrackingTag> of sensors to control pointer life time
   Sources sources_;
+
+  /// skip topic setting
+  std::map<std::string, std::string> skip_out_to_in_;
 
   /// input sensor information of (topic vs stamp).
   MessageSources message_sources_;

@@ -150,13 +150,11 @@ public:
   >
   message_filters::Connection registerCallback(const C & callback)
   {
-    std::cout << "ptn1" << std::endl;
     const auto topic = getTopicFQDN();
 
     auto new_callback =
       [this, callback, topic](CallbackArgT msg) -> void
       {
-        std::cout << "hooked1!" << std::endl;
         auto pnode = get_node();
 
         // msg.get() in below codes:
@@ -185,8 +183,6 @@ public:
     typename MessageDeleter = std::default_delete<M>>
   message_filters::Connection registerCallback(const std::function<void(P)> & callback)
   {
-    std::cout << "ptn2" << std::endl;
-
     // We may use SFINAE instead of if constexpr to shorten this function.
     // But SFINAE may change the entry point. On the other hand, `if constexpr` does not change it.
     if constexpr (!is_subscription_message<P, M, MessageDeleter>()) {
@@ -199,8 +195,6 @@ public:
       auto new_callback =
         [this, callback, topic](P msg) -> void
         {
-          std::cout << "hooked2!" << std::endl;
-
           auto pnode = get_node();
 
           // we use msg.get() because
@@ -228,7 +222,6 @@ public:
   template<typename P>
   message_filters::Connection registerCallback(void (* callback)(P))
   {
-    std::cout << "ptn3" << std::endl;
     const auto topic = getTopicFQDN();
     // We use lambda not original function pointer
     // because we cannot convert captured lambda to function pointer.
@@ -236,7 +229,6 @@ public:
     auto new_callback =
       [this, callback, topic](P msg) -> void
       {
-        std::cout << "hooked3!" << std::endl;
         auto pnode = get_node();
 
         // we use msg.get() because
@@ -263,13 +255,11 @@ public:
   template<typename T, typename P>
   message_filters::Connection registerCallback(void (T::* callback)(P), T * t)
   {
-    std::cout << "ptn4" << std::endl;
     const auto topic = getTopicFQDN();
     auto bind_callback = std::bind(callback, t, std::placeholders::_1);
     auto new_callback =
       [this, bind_callback, topic](P msg) -> void
       {
-        std::cout << "hooked4!" << std::endl;
         auto pnode = get_node();
 
         // we use msg.get() because
