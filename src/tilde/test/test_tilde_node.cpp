@@ -265,21 +265,25 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   auto main_node = std::make_shared<TildeNode>("mainNode", options);
 
   auto sensor_pub = sensor_node->create_publisher<sensor_msgs::msg::PointCloud2>(
-    "in_topic", 1);
+    "/in_topic", 1);
   auto clock_pub = sensor_node->create_publisher<rosgraph_msgs::msg::Clock>(
     "/clock", 1);
 
   // prepare pub/sub
   auto main_pub = main_node->create_tilde_publisher<sensor_msgs::msg::PointCloud2>(
-    "out_topic", 1);
+    "/out_topic", 1);
   auto main_sub = main_node->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
-    "in_topic", 1,
+    "/in_topic", 1,
     [&main_pub](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
     {
       std::cout << "main_sub_callback" << std::endl;
       (void)msg;
       main_pub->publish(std::move(msg));
     });
+
+  using rclcpp::node_interfaces::get_node_topics_interface;
+  auto node_topics_interface = get_node_topics_interface(main_node);
+  auto in_topic_resolved_name = node_topics_interface->resolve_topic_name("/in_topic");
 
   // publish @123.456
   rosgraph_msgs::msg::Clock clock_msg1;
@@ -289,6 +293,9 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   clock_pub->publish(clock_msg1);
   rclcpp::spin_some(sensor_node);
   rclcpp::spin_some(main_node);
+
+  EXPECT_EQ(sensor_node->now(), clock_msg1.clock);
+  EXPECT_EQ(main_node->now(), clock_msg1.clock);
 
   sensor_msgs::msg::PointCloud2 sensor_msg1;
   sensor_msg1.header.stamp = sensor_node->now();
@@ -305,6 +312,9 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   rclcpp::spin_some(sensor_node);
   rclcpp::spin_some(main_node);
 
+  EXPECT_EQ(sensor_node->now(), clock_msg2.clock);
+  EXPECT_EQ(main_node->now(), clock_msg2.clock);
+
   sensor_msgs::msg::PointCloud2 sensor_msg2;
   sensor_msg2.header.stamp = sensor_node->now();
   sensor_pub->publish(sensor_msg2);
@@ -314,7 +324,7 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   // check
   rclcpp::Time subscription_time, subscription_time_steady;
   auto found = main_node->find_subscription_time(
-    &sensor_msg1, "/in_topic",
+    &sensor_msg1, in_topic_resolved_name,
     subscription_time, subscription_time_steady);
   EXPECT_TRUE(found);
   builtin_interfaces::msg::Time subscription_time_msg = subscription_time;
