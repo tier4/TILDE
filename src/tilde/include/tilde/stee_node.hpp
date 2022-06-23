@@ -17,8 +17,31 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+namespace tilde
+{
 class SteeNode : public rclcpp::Node
 {
+  public:
+  RCLCPP_SMART_PTR_DEFINITIONS(SteeNode)
+
+  /// see corresponding rclcpp::Node constructor
+  RCLCPP_PUBLIC
+  explicit SteeNode(
+    const std::string & node_name,
+    const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+
+  /// see corresponding rclcpp::Node constructor
+  RCLCPP_PUBLIC
+  explicit SteeNode(
+    const std::string & node_name,
+    const std::string & namespace_,
+    const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+
+  RCLCPP_PUBLIC
+  virtual ~SteeNode();
+
 };
+
+}  // namespace tilde
 
 #endif  // TILDE__STEE_NODE_HPP_
