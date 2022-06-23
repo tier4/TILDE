@@ -87,10 +87,10 @@ install(
 add_library(${PROJECT_NAME} SHARED
   "src/tilde_node.cpp"
   "src/tilde_publisher.cpp"
+  "src/stee_node.cpp"
   "src/tp.c"
 )
 target_link_libraries(${PROJECT_NAME} ${LTTNGUST_LIBRARIES})
-
 ament_target_dependencies(${PROJECT_NAME}
   "rclcpp"
   "tilde_msg"
