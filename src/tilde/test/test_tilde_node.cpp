@@ -81,6 +81,7 @@ TEST_F(TestTildeNode, simple_case) {
 
   clock_pub->publish(clock_msg);
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
 
   // prepare pub/sub
@@ -121,7 +122,9 @@ TEST_F(TestTildeNode, simple_case) {
   sensor_pub->publish(std::move(sensor_msg));
 
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(checker_node);
   EXPECT_TRUE(checker_sub_called);
 }
@@ -152,6 +155,7 @@ TEST_F(TestTildeNode, no_header_case) {
 
   clock_pub->publish(clock_msg);
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
 
   // prepare pub/sub
@@ -191,7 +195,9 @@ TEST_F(TestTildeNode, no_header_case) {
   sensor_pub->publish(std::move(msg));
 
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(checker_node);
   EXPECT_TRUE(checker_sub_called);
 }
@@ -221,6 +227,7 @@ TEST_F(TestTildeNode, enable_tilde) {
 
   clock_pub->publish(clock_msg);
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
 
   // prepare pub/sub
@@ -252,7 +259,9 @@ TEST_F(TestTildeNode, enable_tilde) {
   sensor_pub->publish(std::move(sensor_msg));
 
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(checker_node);
   EXPECT_EQ(checker_sub_called, false);
 }
@@ -307,6 +316,7 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   sensor_msg1.header.stamp = sensor_node->now();
   sensor_pub->publish(sensor_msg1);
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
 
   // publish @124.321
@@ -331,6 +341,7 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   sensor_msg2.header.stamp = sensor_node->now();
   sensor_pub->publish(sensor_msg2);
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
 
   // check
@@ -364,6 +375,7 @@ TEST_F(TestTildeNode, publish_top_level_stamp) {
 
   clock_pub->publish(clock_msg);
   rclcpp::spin_some(main_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(checker_node);
 
   // prepare checker subscription
@@ -386,6 +398,7 @@ TEST_F(TestTildeNode, publish_top_level_stamp) {
   main_pub->publish(msg);
 
   rclcpp::spin_some(main_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(checker_node);
 
   EXPECT_TRUE(checker_sub_called);
