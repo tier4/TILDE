@@ -17,6 +17,7 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -84,28 +85,24 @@ struct Process
 {
   /// stamp getter for non-const pointer without header field
   /**
-   * Return dummy stamp as M has no header field.
-   *
-   * \param[in] t dummy stamp
    * \param[in] m message
    */
-  static rclcpp::Time get_timestamp(rclcpp::Time t, M * m)
+  static std::optional<rclcpp::Time> get_timestamp(M * m)
   {
     (void) m;
-    return t;
+    return {};
   }
 
   /// stamp getter for const pointer without header field
   /**
    * Return dummy stamp as M has no header field.
    *
-   * \param[in] t dummy stamp
    * \param[in] m message
    */
-  static rclcpp::Time get_timestamp_from_const(rclcpp::Time t, const M * m)
+  static std::optional<rclcpp::Time> get_timestamp_from_const(const M * m)
   {
     (void) m;
-    return t;
+    return {};
   }
 };
 
@@ -117,12 +114,10 @@ struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
   /**
    * Return header.stamp
    *
-   * \param[in] t dummy stamp
    * \param[in] m message
    */
-  static rclcpp::Time get_timestamp(rclcpp::Time t, M * m)
+  static std::optional<rclcpp::Time> get_timestamp(M * m)
   {
-    (void) t;
     return m->header.stamp;
   }
 
@@ -130,12 +125,10 @@ struct Process<M, typename std::enable_if<HasHeader<M>::value>::type>
   /**
    * Return header.stamp
    *
-   * \param[in] t dummy stamp
    * \param[in] m message
    */
-  static rclcpp::Time get_timestamp_from_const(rclcpp::Time t, const M * m)
+  static std::optional<rclcpp::Time> get_timestamp_from_const(const M * m)
   {
-    (void) t;
     return m->header.stamp;
   }
 };
@@ -148,12 +141,10 @@ struct Process<M, typename std::enable_if<HasStampWithoutHeader<M>::value>::type
   /**
    * Return header.stamp
    *
-   * \param[in] t dummy stamp
    * \param[in] m message
    */
-  static rclcpp::Time get_timestamp(rclcpp::Time t, M * m)
+  static std::optional<rclcpp::Time> get_timestamp(M * m)
   {
-    (void) t;
     return m->stamp;
   }
 
@@ -161,12 +152,10 @@ struct Process<M, typename std::enable_if<HasStampWithoutHeader<M>::value>::type
   /**
    * Return header.stamp
    *
-   * \param[in] t dummy stamp
    * \param[in] m message
    */
-  static rclcpp::Time get_timestamp_from_const(rclcpp::Time t, const M * m)
+  static std::optional<rclcpp::Time> get_timestamp_from_const(const M * m)
   {
-    (void) t;
     return m->stamp;
   }
 };
@@ -332,9 +321,8 @@ public:
   publish(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
     if (enable_) {
-      rclcpp::Time t(0, 100, clock_->get_clock_type());
-      auto stamp = Process<MessageT>::get_timestamp(t, msg.get());
-      publish_info((t != stamp), std::move(stamp));
+      auto stamp = Process<MessageT>::get_timestamp(msg.get());
+      publish_info(stamp);
     }
     pub_->publish(std::move(msg));
   }
@@ -343,9 +331,8 @@ public:
   publish(const MessageT & msg)
   {
     if (enable_) {
-      rclcpp::Time t(0, 100, clock_->get_clock_type());
-      auto stamp = Process<MessageT>::get_timestamp_from_const(t, &msg);
-      publish_info((t != stamp), std::move(stamp));
+      auto stamp = Process<MessageT>::get_timestamp_from_const(&msg);
+      publish_info(stamp);
     }
     pub_->publish(msg);
   }
@@ -416,8 +403,10 @@ private:
    * \param has_header_stamp whether main message has header.stamp
    * \param t header stamp
    */
-  void publish_info(bool has_header_stamp, rclcpp::Time && t)
+  void publish_info(const std::optional<rclcpp::Time> & t)
   {
+    bool has_header_stamp = t ? true : false;
+
     auto msg = std::make_unique<tilde_msg::msg::MessageTrackingTag>();
     msg->header.stamp = clock_->now();
     // msg->header.frame_id  // Nothing todo
@@ -430,7 +419,7 @@ private:
     msg->output_info.pub_time_steady = steady_clock_->now();
     msg->output_info.has_header_stamp = has_header_stamp;
     if (has_header_stamp) {
-      msg->output_info.header_stamp = t;
+      msg->output_info.header_stamp = *t;
     }
 
     fill_input_info(*msg);
