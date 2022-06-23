@@ -291,9 +291,10 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   clock_msg1.clock.nanosec = 456;
 
   clock_pub->publish(clock_msg1);
-  for(int i = 0;
-      i < 10 || !(main_node->now() == clock_msg1.clock && sensor_node->now() == clock_msg1.clock);
-      i++) {
+  for (int i = 0;
+    i < 10 || !(main_node->now() == clock_msg1.clock && sensor_node->now() == clock_msg1.clock);
+    i++)
+  {
     rclcpp::spin_some(sensor_node);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     rclcpp::spin_some(main_node);
@@ -314,9 +315,10 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   clock_msg2.clock.nanosec = 321;
 
   clock_pub->publish(clock_msg2);
-  for(int i = 0;
-     i < 10 || !(main_node->now() == clock_msg2.clock && sensor_node->now() == clock_msg2.clock);
-      i++) {
+  for (int i = 0;
+    i < 10 || !(main_node->now() == clock_msg2.clock && sensor_node->now() == clock_msg2.clock);
+    i++)
+  {
     rclcpp::spin_some(sensor_node);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     rclcpp::spin_some(main_node);
