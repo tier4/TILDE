@@ -14,12 +14,12 @@ TILDE が MessageTrackingTag という付加的なトピックをやりとりす
 
 - [TILDE の動作原理](#tilde-の動作原理)
   - [Table of Contents](#table-of-contents)
-  - [MessageTrackingTag](#message_tracking_tag)
+  - [MessageTrackingTag](#messagetrackingtag)
   - [例](#例)
     - [DAG と動作概要](#dag-と動作概要)
     - [stamp](#stamp)
-    - [NodeC の MessageTrackingTag](#nodec-の-message_tracking_tag)
-  - [MessageTrackingTag の作成メカニズム](#message_tracking_tag-の作成メカニズム)
+    - [NodeC の MessageTrackingTag](#nodec-の-messagetrackingtag)
+  - [MessageTrackingTag の作成メカニズム](#messagetrackingtag-の作成メカニズム)
     - [概要](#概要)
     - [class](#class)
     - [create_tilde_publisher](#create_tilde_publisher)
@@ -288,7 +288,7 @@ sequenceDiagram
 
 ## Explicit API
 
-[NodeC の MessageTrackingTag](#nodec-の-message_tracking_tag) では「メインメッセージ送信前に受信した最新のメッセージ」に紐付けられると記述しました。
+[NodeC の MessageTrackingTag](#nodec-の-messagetrackingtag) では「メインメッセージ送信前に受信した最新のメッセージ」に紐付けられると記述しました。
 受信メッセージを内部でバッファして選択的に利用している、あるいは入力トピックが複数ありそれぞれバッファリングしている等、入力トピックと出力トピックが明示的に紐付かないノードでは explicit API を使って明示的に紐付け情報を設定することが可能です。
 
 下図は 4 入力、 1 出力のノードの例です。
