@@ -81,6 +81,7 @@ TEST_F(TestTildeNode, simple_case) {
 
   clock_pub->publish(clock_msg);
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
 
   // prepare pub/sub
@@ -121,7 +122,9 @@ TEST_F(TestTildeNode, simple_case) {
   sensor_pub->publish(std::move(sensor_msg));
 
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(checker_node);
   EXPECT_TRUE(checker_sub_called);
 }
@@ -152,6 +155,7 @@ TEST_F(TestTildeNode, no_header_case) {
 
   clock_pub->publish(clock_msg);
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
 
   // prepare pub/sub
@@ -191,7 +195,9 @@ TEST_F(TestTildeNode, no_header_case) {
   sensor_pub->publish(std::move(msg));
 
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(checker_node);
   EXPECT_TRUE(checker_sub_called);
 }
@@ -221,6 +227,7 @@ TEST_F(TestTildeNode, enable_tilde) {
 
   clock_pub->publish(clock_msg);
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
 
   // prepare pub/sub
@@ -252,7 +259,9 @@ TEST_F(TestTildeNode, enable_tilde) {
   sensor_pub->publish(std::move(sensor_msg));
 
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(checker_node);
   EXPECT_EQ(checker_sub_called, false);
 }
@@ -265,15 +274,15 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   auto main_node = std::make_shared<TildeNode>("mainNode", options);
 
   auto sensor_pub = sensor_node->create_publisher<sensor_msgs::msg::PointCloud2>(
-    "in_topic", 1);
+    "/in_topic", 1);
   auto clock_pub = sensor_node->create_publisher<rosgraph_msgs::msg::Clock>(
     "/clock", 1);
 
   // prepare pub/sub
   auto main_pub = main_node->create_tilde_publisher<sensor_msgs::msg::PointCloud2>(
-    "out_topic", 1);
+    "/out_topic", 1);
   auto main_sub = main_node->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
-    "in_topic", 1,
+    "/in_topic", 1,
     [&main_pub](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
     {
       std::cout << "main_sub_callback" << std::endl;
@@ -281,19 +290,33 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
       main_pub->publish(std::move(msg));
     });
 
+  using rclcpp::node_interfaces::get_node_topics_interface;
+  auto node_topics_interface = get_node_topics_interface(main_node);
+  auto in_topic_resolved_name = node_topics_interface->resolve_topic_name("/in_topic");
+
   // publish @123.456
   rosgraph_msgs::msg::Clock clock_msg1;
   clock_msg1.clock.sec = 123;
   clock_msg1.clock.nanosec = 456;
 
   clock_pub->publish(clock_msg1);
-  rclcpp::spin_some(sensor_node);
-  rclcpp::spin_some(main_node);
+  for (int i = 0;
+    i < 10 || !(main_node->now() == clock_msg1.clock && sensor_node->now() == clock_msg1.clock);
+    i++)
+  {
+    rclcpp::spin_some(sensor_node);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    rclcpp::spin_some(main_node);
+  }
+
+  EXPECT_EQ(sensor_node->now(), clock_msg1.clock);
+  EXPECT_EQ(main_node->now(), clock_msg1.clock);
 
   sensor_msgs::msg::PointCloud2 sensor_msg1;
   sensor_msg1.header.stamp = sensor_node->now();
   sensor_pub->publish(sensor_msg1);
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
 
   // publish @124.321
@@ -302,19 +325,29 @@ TEST_F(TestTildeNode, register_message_as_input_find_subscription_time) {
   clock_msg2.clock.nanosec = 321;
 
   clock_pub->publish(clock_msg2);
-  rclcpp::spin_some(sensor_node);
-  rclcpp::spin_some(main_node);
+  for (int i = 0;
+    i < 10 || !(main_node->now() == clock_msg2.clock && sensor_node->now() == clock_msg2.clock);
+    i++)
+  {
+    rclcpp::spin_some(sensor_node);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    rclcpp::spin_some(main_node);
+  }
+
+  EXPECT_EQ(sensor_node->now(), clock_msg2.clock);
+  EXPECT_EQ(main_node->now(), clock_msg2.clock);
 
   sensor_msgs::msg::PointCloud2 sensor_msg2;
   sensor_msg2.header.stamp = sensor_node->now();
   sensor_pub->publish(sensor_msg2);
   rclcpp::spin_some(sensor_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(main_node);
 
   // check
   rclcpp::Time subscription_time, subscription_time_steady;
   auto found = main_node->find_subscription_time(
-    &sensor_msg1, "/in_topic",
+    &sensor_msg1, in_topic_resolved_name,
     subscription_time, subscription_time_steady);
   EXPECT_TRUE(found);
   builtin_interfaces::msg::Time subscription_time_msg = subscription_time;
@@ -342,6 +375,7 @@ TEST_F(TestTildeNode, publish_top_level_stamp) {
 
   clock_pub->publish(clock_msg);
   rclcpp::spin_some(main_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(checker_node);
 
   // prepare checker subscription
@@ -364,6 +398,7 @@ TEST_F(TestTildeNode, publish_top_level_stamp) {
   main_pub->publish(msg);
 
   rclcpp::spin_some(main_node);
+  rclcpp::Rate(50).sleep();
   rclcpp::spin_some(checker_node);
 
   EXPECT_TRUE(checker_sub_called);
