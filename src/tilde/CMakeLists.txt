@@ -66,6 +66,16 @@ if(BUILD_TESTING)
     "sensor_msgs"
     "std_msgs")
 
+  ament_add_gtest(test_stee_node
+    test/test_stee_node.cpp)
+  target_include_directories(test_stee_node
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+  ament_target_dependencies(test_stee_node
+    "rclcpp")
+
+
 endif()
 
 include_directories(include)
