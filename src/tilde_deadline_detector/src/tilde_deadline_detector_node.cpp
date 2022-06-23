@@ -28,6 +28,8 @@
 #include "builtin_interfaces/msg/time.hpp"
 
 #include "tilde_deadline_detector/tilde_deadline_detector_node.hpp"
+#include "tilde_msg/msg/source.hpp"
+#include "tilde_msg/msg/deadline_notification.hpp"
 
 using tilde_msg::msg::MessageTrackingTag;
 using std::chrono::milliseconds;
@@ -198,6 +200,9 @@ void TildeDeadlineDetectorNode::init()
         this->fe.debug_print();
       }
     });
+
+  notification_pub_ = create_publisher<tilde_msg::msg::DeadlineNotification>(
+    "deadline_notification", rclcpp::QoS(1).best_effort());
 }
 
 void print_report(
@@ -223,6 +228,7 @@ void TildeDeadlineDetectorNode::message_tracking_tag_callback(
 
   auto target = message_tracking_tag->output_info.topic_name;
   auto stamp = message_tracking_tag->output_info.header_stamp;
+  auto pub_time_steady = message_tracking_tag->output_info.pub_time_steady;
 
   // work around for non `/clock` bag file
   latest_ = std::max(rclcpp::Time(stamp), latest_);
@@ -235,8 +241,7 @@ void TildeDeadlineDetectorNode::message_tracking_tag_callback(
     return;
   }
 
-  // fe.debug_print();
-
+  // send warning if overruns
   if (print_report_) {
     auto is = fe.get_input_sources(target, stamp);
     print_report(target, stamp, is);
@@ -252,10 +257,39 @@ void TildeDeadlineDetectorNode::message_tracking_tag_callback(
     std::cout << std::endl;
   }
 
-  // auto deadline_ms = topic_vs_deadline_ms_[target];
+  // check deadline and send notification if necessary
+  tilde_msg::msg::DeadlineNotification notification_msg;
+  notification_msg.header.stamp = this->now();
+  notification_msg.topic_name = target;
+  notification_msg.stamp = stamp;
 
-  // TODO(y-okumura-isp) send warning to diagnostic
+  auto deadline_ms = topic_vs_deadline_ms_[target];
+  notification_msg.deadline_setting =
+    rclcpp::Duration::from_nanoseconds(RCUTILS_MS_TO_NS(deadline_ms));
 
+  auto is_overrun = false;
+  auto sources = fe.get_ref_to_sources(target, stamp);
+  for (const auto & weak_src : sources) {
+    auto src = weak_src.lock();
+    if (!src) {continue;}
+    tilde_msg::msg::Source source_msg;
+    source_msg.topic = src->output_info.topic_name;
+    source_msg.stamp = src->output_info.header_stamp;
+    auto elapsed = rclcpp::Time(pub_time_steady) -
+      rclcpp::Time(src->output_info.pub_time_steady);
+    source_msg.elapsed = elapsed;
+    if (RCUTILS_MS_TO_NS(deadline_ms) <= elapsed.nanoseconds()) {
+      source_msg.is_overrun = true;
+      is_overrun = true;
+    }
+    notification_msg.sources.push_back(source_msg);
+  }
+
+  if (is_overrun) {
+    notification_pub_->publish(notification_msg);
+  }
+
+  // update performance counter
   auto et = std::chrono::steady_clock::now();
   message_tracking_tag_callback_counter_.add(
     std::chrono::duration_cast<std::chrono::milliseconds>(et - st).count());

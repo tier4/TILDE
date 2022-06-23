@@ -17,6 +17,8 @@ set(msg_files
   "msg/PubTopicTimeInfo.msg"
   "msg/MessageTrackingTag.msg"
   "msg/TestTopLevelStamp.msg"
+  "msg/Source.msg"
+  "msg/DeadlineNotification.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
