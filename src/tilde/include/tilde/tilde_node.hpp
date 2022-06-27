@@ -214,19 +214,15 @@ public:
   {
     // prepare InputInfo
 
-    rclcpp::Time header_stamp;
-    // TODO(y-okumura-isp): introduce has_timestamp()
-    rclcpp::Time t(0, 100, this->now().get_clock_type());
-
-    header_stamp = Process<MessageT>::get_timestamp_from_const(t, p_msg);
+    auto header_stamp = Process<MessageT>::get_timestamp_from_const(p_msg);
 
     auto input_info = std::make_shared<InputInfo>();
 
     input_info->sub_time = subscription_time;
     input_info->sub_time_steady = subscription_time_steady;
-    if (header_stamp != t) {
+    if (header_stamp) {
       input_info->has_header_stamp = true;
-      input_info->header_stamp = header_stamp;
+      input_info->header_stamp = *header_stamp;
     }
 
     // TODO(y-okumura-isp): consider race condition in multi threaded executor.
@@ -261,22 +257,19 @@ public:
     rclcpp::Time & subscription_time_steady)
   {
     // get header stamp
-    rclcpp::Time header_stamp;
-    rclcpp::Time t(0, 100, this->now().get_clock_type());
-
-    header_stamp = Process<MessageT>::get_timestamp_from_const(t, p_msg);
+    auto header_stamp = Process<MessageT>::get_timestamp_from_const(p_msg);
 
     InputInfo input_info;
 
-    if (header_stamp != t) {
+    if (header_stamp) {
       input_info.has_header_stamp = true;
-      input_info.header_stamp = header_stamp;
+      input_info.header_stamp = *header_stamp;
     }
 
     bool found = false;
-    if (header_stamp != t && tilde_pubs_.size() > 0) {
+    if (header_stamp && tilde_pubs_.size() > 0) {
       auto pub = tilde_pubs_.begin()->second;
-      found = pub->get_input_info(resolved_topic_name, header_stamp, input_info);
+      found = pub->get_input_info(resolved_topic_name, *header_stamp, input_info);
     }
 
     if (found) {
