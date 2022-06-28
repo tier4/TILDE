@@ -70,3 +70,38 @@ TEST_F(TestSteeNode, stee_publisher_unique_ptr) {
   EXPECT_TRUE(received_main);
   EXPECT_TRUE(received_converted);
 }
+
+TEST_F(TestSteeNode, stee_publisher_const_reference) {
+  rclcpp::NodeOptions options;
+  options.append_parameter_override("use_sim_time", true);
+  auto main_node = std::make_shared<SteeNode>("stee_node", options);
+  auto stee_pub = main_node->create_stee_publisher<PointCloud2>("topic", 1);
+
+  auto checker_node = std::make_shared<rclcpp::Node>("checker_node");
+  bool received_main = false;
+  auto main_sub = checker_node->create_subscription<PointCloud2>(
+      "topic", 1,
+      [&received_main](const PointCloud2 & msg) -> void
+      {
+        EXPECT_EQ(msg.header.frame_id, "unique");
+        received_main = true;
+      });
+  bool received_converted = false;
+  auto converted_sub = checker_node->create_subscription<SteePointCloud2>(
+      "topic/stee", 1,
+      [&received_converted](const SteePointCloud2 & msg) -> void
+      {
+        EXPECT_EQ(msg.body.header.frame_id, "unique");
+        received_converted = true;
+      });
+
+  PointCloud2 msg;
+  msg.header.frame_id = "unique";
+
+  stee_pub->publish(msg);
+
+  rclcpp::spin_some(checker_node);
+
+  EXPECT_TRUE(received_main);
+  EXPECT_TRUE(received_converted);
+}

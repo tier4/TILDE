@@ -59,10 +59,79 @@ public:
   publish(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
     auto converted_msg = std::make_unique<ConvertedMessageT>();
-    // Can we avoid copy?
+    // TODO(y-okumura-isp): Can we avoid copy?
     converted_msg->body = *msg;
+    // TOOD(y-okumura-isp): fill sources
+
     converted_pub_->publish(std::move(converted_msg));
     pub_->publish(std::move(msg));
+  }
+
+  void
+  publish(const MessageT & msg)
+  {
+    ConvertedMessageT converted_msg;
+    // TODO(y-okumura-isp): Can we avoid copy?
+    converted_msg.body = msg;
+    // TOOD(y-okumura-isp): fill sources
+
+    converted_pub_->publish(converted_msg);
+    pub_->publish(msg);
+  }
+
+  /**
+   * publish() variant
+   * We can send a main message but cannot send the corresponding MessageTrackingTag
+   */
+  void
+  publish(const rcl_serialized_message_t & serialized_msg)
+  {
+    std::cout << "publish serialized message (not supported)" << std::endl;
+    // publish_info(get_timestamp(clock_->now(), msg.get()));
+    pub_->publish(serialized_msg);
+  }
+
+  /**
+   * publish() variant
+   * We can send a main message but cannot send the corresponding MessageTrackingTag
+   */
+  void
+  publish(const rclcpp::SerializedMessage & serialized_msg)
+  {
+    std::cout << "publish SerializedMessage (not supported)" << std::endl;
+    pub_->publish(serialized_msg);
+  }
+
+  /**
+   * publish() variant
+   * We can send a main message but cannot send the corresponding MessageTrackingTag
+   */
+  void
+  publish(rclcpp::LoanedMessage<MessageT, AllocatorT> && loaned_msg)
+  {
+    std::cout << "publish LoanedMessage (not supported)" << std::endl;
+    pub_->publish(loaned_msg);
+  }
+
+  size_t
+  get_subscription_count() const
+  {
+    return pub_->get_subscription_count() +
+        converted_pub_->get_subscription_count();
+  }
+
+  size_t
+  get_intra_process_subscription_count() const
+  {
+    return pub_->get_intra_process_subscription_count() +
+        converted_pub_->get_intra_process_subscription_count();
+  }
+
+  RCLCPP_PUBLIC
+  const char *
+  get_topic_name() const
+  {
+    return pub_->get_topic_name();
   }
 
 private:
