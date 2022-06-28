@@ -11,6 +11,7 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 set(msg_files
   "msg/SubTopicTimeInfo.msg"
@@ -19,11 +20,14 @@ set(msg_files
   "msg/TestTopLevelStamp.msg"
   "msg/Source.msg"
   "msg/DeadlineNotification.msg"
+
+  "msg/SteeSource.msg"
+  "msg/SteePointCloud2.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
-  DEPENDENCIES builtin_interfaces std_msgs
+  DEPENDENCIES builtin_interfaces std_msgs sensor_msgs
 )
 ament_export_dependencies(rosidl_default_runtime)
 
