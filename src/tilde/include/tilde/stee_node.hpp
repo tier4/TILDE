@@ -17,11 +17,14 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include "tilde/stee_publisher.hpp"
+#include "tilde/message_conversion.hpp"
+
 namespace tilde
 {
 class SteeNode : public rclcpp::Node
 {
-  public:
+public:
   RCLCPP_SMART_PTR_DEFINITIONS(SteeNode)
 
   /// see corresponding rclcpp::Node constructor
@@ -40,6 +43,35 @@ class SteeNode : public rclcpp::Node
   RCLCPP_PUBLIC
   virtual ~SteeNode();
 
+  template<
+    typename MessageT,
+    typename ConvertedMessageT = ConvertedMessageType<MessageT>,
+    typename AllocatorT = std::allocator<void>,
+    typename PublisherT = rclcpp::Publisher<MessageT, AllocatorT>,
+    typename ConvertedPublisherT = rclcpp::Publisher<ConvertedMessageT, AllocatorT>,
+    typename SteePublisherT = SteePublisher<MessageT, ConvertedMessageT, AllocatorT>>
+  std::shared_ptr<SteePublisherT>
+  create_stee_publisher(
+      const std::string & topic_name,
+      const rclcpp::QoS & qos,
+      const rclcpp::PublisherOptionsWithAllocator<AllocatorT> & options =
+      rclcpp::PublisherOptionsWithAllocator<AllocatorT>())
+  {
+    auto pub = create_publisher<MessageT, AllocatorT, PublisherT>(
+        topic_name, qos, options);
+    auto converted_pub = create_publisher<ConvertedMessageT, AllocatorT, ConvertedPublisherT>(
+        topic_name + "/stee", qos, options);
+    auto stee_pub = std::make_shared<SteePublisherT>(
+        pub, converted_pub,
+        get_fully_qualified_name(),
+        this->get_clock(),
+        steady_clock_);
+    return stee_pub;
+  }
+
+private:
+  void init();
+  std::shared_ptr<rclcpp::Clock> steady_clock_;
 };
 
 }  // namespace tilde

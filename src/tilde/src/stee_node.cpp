@@ -12,34 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <string>
 
 #include "tilde/stee_node.hpp"
 
-#include "sensor_msgs/msg/point_cloud2.hpp"
-
 using tilde::SteeNode;
-using sensor_msgs::msg::PointCloud2;
 
-class TestSteeNode : public ::testing::Test
+SteeNode::SteeNode(
+  const std::string & node_name,
+  const rclcpp::NodeOptions & options)
+: Node(node_name, options)
 {
-public:
-  void SetUp() override
-  {
-    rclcpp::init(0, nullptr);
-  }
+  init();
+}
 
-  void TearDown() override
-  {
-    rclcpp::shutdown();
-  }
-};
+SteeNode::SteeNode(
+  const std::string & node_name,
+  const std::string & namespace_,
+  const rclcpp::NodeOptions & options)
+: Node(node_name, namespace_, options)
+{
+  init();
+}
 
-TEST_F(TestSteeNode, stee_publisher_allocation) {
-  rclcpp::NodeOptions options;
-  options.append_parameter_override("use_sim_time", true);
-  auto main_node = std::make_shared<SteeNode>("stee_node", options);
-  auto stee_pub = main_node->create_stee_publisher<PointCloud2>("topic", 1);
+SteeNode::~SteeNode()
+{
+}
 
-  SUCCEED();
+void SteeNode::init()
+{
+  steady_clock_.reset(new rclcpp::Clock(RCL_STEADY_TIME));
 }
