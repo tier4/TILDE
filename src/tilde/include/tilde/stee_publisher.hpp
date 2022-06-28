@@ -55,6 +55,16 @@ public:
   {
   }
 
+  void
+  publish(std::unique_ptr<MessageT, MessageDeleter> msg)
+  {
+    auto converted_msg = std::make_unique<ConvertedMessageT>();
+    // Can we avoid copy?
+    converted_msg->body = *msg;
+    converted_pub_->publish(std::move(converted_msg));
+    pub_->publish(std::move(msg));
+  }
+
 private:
   std::shared_ptr<PublisherT> pub_;
   std::shared_ptr<ConvertedPublisherT> converted_pub_;
