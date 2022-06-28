@@ -72,8 +72,12 @@ if(BUILD_TESTING)
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
+  target_link_libraries(test_stee_node
+    ${PROJECT_NAME})
   ament_target_dependencies(test_stee_node
-    "rclcpp")
+    "rclcpp"
+    "tilde_msg"
+    "sensor_msgs")
 
 
 endif()
