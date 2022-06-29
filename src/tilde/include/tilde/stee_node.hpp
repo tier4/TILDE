@@ -61,7 +61,7 @@ public:
     typename ConvertedMessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
       ConvertedMessageT,
       AllocatorT>,
-    typename SteeSubscriptionT = SteeSubscription<MessageT, ConvertedSubscriptionT, AllocatorT,
+    typename SteeSubscriptionT = SteeSubscription<MessageT, ConvertedMessageT, AllocatorT,
                                                   MessageMemoryStrategyT, ConvertedMessageMemoryStrategyT>
   >
   std::shared_ptr<SteeSubscriptionT>
@@ -75,12 +75,18 @@ public:
       MessageMemoryStrategyT::create_default()
   ))
   {
-    // std::shared_ptr<SubscriptionT> sub{nullptr};
-    // std::shared_ptr<ConvertedSubscriptionT> converted_sub{nullptr};
+    std::shared_ptr<SubscriptionT> sub{nullptr};
+    std::shared_ptr<ConvertedSubscriptionT> converted_sub{nullptr};
     std::shared_ptr<SteeSubscriptionT> stee_sub;
 
     // TODO(y-okumura-isp): make instance variable
-    // bool eneble_stee = true;
+    bool enable_stee = true;
+
+    if(enable_stee) {
+      stee_sub->set_converted_sub(converted_sub);
+    } else {
+      stee_sub->set_sub(sub);
+    }
 
     (void) topic_name;
     (void) qos;
