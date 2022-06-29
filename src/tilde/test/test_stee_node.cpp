@@ -17,6 +17,7 @@
 #include "tilde/stee_node.hpp"
 
 #include "sensor_msgs/msg/point_cloud2.hpp"
+#include "tilde_msg/msg/stee_point_cloud2.hpp"
 
 using tilde::SteeNode;
 using sensor_msgs::msg::PointCloud2;
@@ -106,17 +107,40 @@ TEST_F(TestSteeNode, stee_publisher_const_reference) {
   EXPECT_TRUE(received_converted);
 }
 
-TEST_F(TestSteeNode, stee_subscription) {
+TEST_F(TestSteeNode, stee_subscription_unique_pointer) {
   rclcpp::NodeOptions options;
   options.append_parameter_override("use_sim_time", true);
-  auto main_node = std::make_shared<SteeNode>("stee_node", options);
+  auto sensor_node = std::make_shared<SteeNode>("sensor_node", options);
+  auto checker_node = std::make_shared<SteeNode>("checker_node", options);
+  auto checker_node2 = std::make_shared<rclcpp::Node>("checker_node2", options);
 
-  auto sub = main_node->create_stee_subscription<PointCloud2>(
+  auto pub = sensor_node->create_stee_publisher<PointCloud2>("topic", 1);
+
+  bool received = false;
+  auto sub = checker_node->create_stee_subscription<PointCloud2>(
       "topic", 1,
-      [](PointCloud2::UniquePtr msg) -> void
+      [&received](PointCloud2::UniquePtr msg) -> void
       {
-        (void) msg;
+        received = true;
+        EXPECT_EQ(msg->header.frame_id, "recv_unique");
       });
 
-  SUCCEED();
+  bool received2 = false;
+  auto sub2 = checker_node2->create_subscription<SteePointCloud2>(
+      "topic/stee", 1,
+      [&received2](SteePointCloud2::UniquePtr msg) -> void
+      {
+        received2 = true;
+        EXPECT_EQ(msg->body.header.frame_id, "recv_unique");
+      });
+
+  PointCloud2 msg;
+  msg.header.frame_id = "recv_unique";
+
+  pub->publish(msg);
+  rclcpp::spin_some(checker_node);
+  rclcpp::spin_some(checker_node2);
+
+  EXPECT_TRUE(received);
+  EXPECT_TRUE(received2);
 }

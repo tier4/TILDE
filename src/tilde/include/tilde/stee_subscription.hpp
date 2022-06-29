@@ -50,21 +50,22 @@ public:
   /**
    * Hold only one of sub or converted_sub.
    */
-  SteeSubscription() {}
+  SteeSubscription()
+  {}
 
   void set_sub(std::shared_ptr<SubscriptionT> sub) {
-    assert(!converted_sub_);
+    assert(converted_sub_ == nullptr);
     sub_ = sub;
   }
 
   void set_converted_sub(std::shared_ptr<ConvertedSubscriptionT> converted_sub) {
-    assert(!sub_);
+    assert(sub_ == nullptr);
     converted_sub_ = converted_sub;
   }
 
 private:
-  std::shared_ptr<SubscriptionT> sub_{nullptr};
-  std::shared_ptr<ConvertedSubscriptionT> converted_sub_{nullptr};
+  std::shared_ptr<SubscriptionT> sub_;
+  std::shared_ptr<ConvertedSubscriptionT> converted_sub_;
 };
 
 }

@@ -23,6 +23,9 @@
 
 namespace tilde
 {
+template<class>
+inline constexpr bool always_false_v = false;
+
 class SteeNode : public rclcpp::Node
 {
 public:
@@ -49,6 +52,7 @@ public:
     typename ConvertedMessageT = ConvertedMessageType<MessageT>,
     typename CallbackT,
     typename AllocatorT = std::allocator<void>,
+    typename MessageDeleter = std::default_delete<MessageT>,
     typename CallbackMessageT =
     typename rclcpp::subscription_traits::has_message_type<CallbackT>::type,
     typename CallbackArgT =
@@ -77,16 +81,50 @@ public:
   {
     std::shared_ptr<SubscriptionT> sub{nullptr};
     std::shared_ptr<ConvertedSubscriptionT> converted_sub{nullptr};
-    std::shared_ptr<SteeSubscriptionT> stee_sub;
+    auto stee_sub = std::make_shared<SteeSubscriptionT>();
 
     // TODO(y-okumura-isp): make instance variable
     bool enable_stee = true;
 
     if(enable_stee) {
-      /*
+      using rclcpp::node_interfaces::get_node_topics_interface;
+      auto node_topics_interface = get_node_topics_interface(this);
+      auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
+      auto converted_topic_name = resolved_topic_name + "/stee";
+
+      auto new_callback =
+          [this, callback](std::unique_ptr<ConvertedMessageT> converted_msg) -> void
+          {
+            using ConstRef = const MessageT &;
+            using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
+            using SharedConstPtr = std::shared_ptr<const MessageT>;
+            using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;
+            using SharedPtr = std::shared_ptr<MessageT>;
+
+            if constexpr (std::is_same_v<CallbackArgT, ConstRef>) {
+                callback(converted_msg->body);
+            } else if constexpr (std::is_same_v<CallbackArgT, UniquePtr>) {
+                auto pmsg = std::make_unique<MessageT>(std::move(converted_msg->body));
+                callback(std::move(pmsg));
+            } else if constexpr (std::is_same_v<CallbackArgT, SharedConstPtr>) {
+                auto pmsg = std::make_shared<const MessageT>(std::move(converted_msg->body));
+                callback(pmsg);
+            } else if constexpr (std::is_same_v<CallbackArgT, ConstRefSharedConstPtr>) {
+                const auto pmsg = std::make_shared<const MessageT>(std::move(converted_msg->body));
+                callback(pmsg);
+            } else if constexpr (std::is_same_v<CallbackArgT, SharedPtr>) {
+                auto pmsg = std::make_shared<MessageT>(std::move(converted_msg->body));
+                callback(pmsg);
+            } else {
+              static_assert(always_false_v<CallbackArgT>, "non-exhaustive visitor");
+            }
+          };
+
+      // TODO(y-okumura-isp): how to prepare converted_msg_mem_strategy
       converted_sub = create_subscription<ConvertedMessageT>(
-          topic_name + "/stee", qos,
-      */
+          converted_topic_name, qos,
+          new_callback,
+          options);
       stee_sub->set_converted_sub(converted_sub);
     } else {
       sub = create_subscription<MessageT>(
