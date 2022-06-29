@@ -30,7 +30,7 @@ template<
     CallbackMessageT,
     AllocatorT>,
   typename ConvertedMessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
-    CallbackMessageT,
+    ConvertedCallbackMessageT,
     AllocatorT>
   >
 class SteeSubscription
@@ -52,12 +52,12 @@ public:
    */
   SteeSubscription() {}
 
-  void set(std::shared_ptr<SubscriptionT> sub) {
+  void set_sub(std::shared_ptr<SubscriptionT> sub) {
     assert(!converted_sub_);
     sub_ = sub;
   }
 
-  void set(std::shared_ptr<ConvertedCallbackMessageT> converted_sub) {
+  void set_converted_sub(std::shared_ptr<ConvertedSubscriptionT> converted_sub) {
     assert(!sub_);
     converted_sub_ = converted_sub;
   }
