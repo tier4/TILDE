@@ -83,16 +83,17 @@ public:
     bool enable_stee = true;
 
     if(enable_stee) {
+      /*
+      converted_sub = create_subscription<ConvertedMessageT>(
+          topic_name + "/stee", qos,
+      */
       stee_sub->set_converted_sub(converted_sub);
     } else {
+      sub = create_subscription<MessageT>(
+          topic_name, qos,
+          callback, options, msg_mem_strategy);
       stee_sub->set_sub(sub);
     }
-
-    (void) topic_name;
-    (void) qos;
-    (void) callback;
-    (void) options;
-    (void) msg_mem_strategy;
 
     return stee_sub;
   }
