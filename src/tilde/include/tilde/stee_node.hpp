@@ -18,6 +18,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 #include "tilde/stee_publisher.hpp"
+#include "tilde/stee_subscription.hpp"
 #include "tilde/message_conversion.hpp"
 
 namespace tilde
@@ -42,6 +43,53 @@ public:
 
   RCLCPP_PUBLIC
   virtual ~SteeNode();
+
+  template<
+    typename MessageT,
+    typename ConvertedMessageT = ConvertedMessageType<MessageT>,
+    typename CallbackT,
+    typename AllocatorT = std::allocator<void>,
+    typename CallbackMessageT =
+    typename rclcpp::subscription_traits::has_message_type<CallbackT>::type,
+    typename CallbackArgT =
+    typename rclcpp::function_traits::function_traits<CallbackT>::template argument_type<0>,
+    typename SubscriptionT = rclcpp::Subscription<CallbackMessageT, AllocatorT>,
+    typename ConvertedSubscriptionT = rclcpp::Subscription<ConvertedMessageT, AllocatorT>,
+    typename MessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
+      CallbackMessageT,
+      AllocatorT>,
+    typename ConvertedMessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
+      ConvertedMessageT,
+      AllocatorT>,
+    typename SteeSubscriptionT = SteeSubscription<MessageT, ConvertedSubscriptionT, AllocatorT,
+                                                  MessageMemoryStrategyT, ConvertedMessageMemoryStrategyT>
+  >
+  std::shared_ptr<SteeSubscriptionT>
+  create_stee_subscription(
+    const std::string & topic_name,
+    const rclcpp::QoS & qos,
+    CallbackT && callback,
+    const rclcpp::SubscriptionOptionsWithAllocator<AllocatorT> & options =
+    rclcpp::SubscriptionOptionsWithAllocator<AllocatorT>(),
+    typename MessageMemoryStrategyT::SharedPtr msg_mem_strategy = (
+      MessageMemoryStrategyT::create_default()
+  ))
+  {
+    // std::shared_ptr<SubscriptionT> sub{nullptr};
+    // std::shared_ptr<ConvertedSubscriptionT> converted_sub{nullptr};
+    std::shared_ptr<SteeSubscriptionT> stee_sub;
+
+    // TODO(y-okumura-isp): make instance variable
+    // bool eneble_stee = true;
+
+    (void) topic_name;
+    (void) qos;
+    (void) callback;
+    (void) options;
+    (void) msg_mem_strategy;
+
+    return stee_sub;
+  }
 
   template<
     typename MessageT,

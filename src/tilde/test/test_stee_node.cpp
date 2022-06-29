@@ -105,3 +105,18 @@ TEST_F(TestSteeNode, stee_publisher_const_reference) {
   EXPECT_TRUE(received_main);
   EXPECT_TRUE(received_converted);
 }
+
+TEST_F(TestSteeNode, stee_subscription) {
+  rclcpp::NodeOptions options;
+  options.append_parameter_override("use_sim_time", true);
+  auto main_node = std::make_shared<SteeNode>("stee_node", options);
+
+  auto sub = main_node->create_stee_subscription<PointCloud2>(
+      "topic", 1,
+      [](PointCloud2::UniquePtr msg) -> void
+      {
+        (void) msg;
+      });
+
+  SUCCEED();
+}
