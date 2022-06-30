@@ -16,6 +16,7 @@ void SteeSourcesTable::set(
     const SteeSourcesTable::SourcesMsg & sources_msg)
 {
   sources_[topic][stamp] = sources_msg;
+  latest_[topic] = stamp;
 
   auto max_stamps = default_max_stamps_per_topic_;
   auto max_it = max_stamps_per_topic_.find(topic);
@@ -34,10 +35,21 @@ SteeSourcesTable::get_latest_sources() const
 {
   SteeSourcesTable::TopicSources ret;
 
-  for(const auto & topic_it : sources_) {
-    const auto & topic = topic_it.first;
-    const auto & sources = topic_it.second.crbegin()->second;
-    ret[topic] = sources;
+  for(const auto & latest_it : latest_) {
+    const auto & topic = latest_it.first;
+    const auto & stamp = latest_it.second;
+
+    auto sources_it = sources_.find(topic);
+    if (sources_it == sources_.end()) {
+      continue;
+    }
+
+    const auto & stamp_sources = sources_it->second;
+    auto stamp_sources_it = stamp_sources.find(stamp);
+    if (stamp_sources_it != stamp_sources.end()) {
+      const auto & sources = stamp_sources_it->second;
+      ret[topic] = sources;
+    }
   }
 
   return ret;

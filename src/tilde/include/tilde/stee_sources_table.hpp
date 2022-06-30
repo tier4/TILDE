@@ -37,6 +37,8 @@ public:
   // main data structure
   using Sources =
       std::map<TopicName, std::map<Stamp, SourcesMsg>>;
+  // implicit relation
+  using Latest = std::map<TopicName, Stamp>;
 
   /// Constructor
   SteeSourcesTable(
@@ -76,6 +78,8 @@ private:
   std::map<TopicName, size_t> max_stamps_per_topic_;
   /// Sources
   Sources sources_;
+  /// Implicit repation
+  Latest latest_;
 };
 
 }  // namespace tilde

@@ -212,6 +212,50 @@ TEST_F(TestSteeSourcesTable, source_topic_has_multiple_stamp) {
             in12_steady);
 }
 
+TEST_F(TestSteeSourcesTable, source_topic_has_multiple_stamp_skew) {
+  SteeSourcesTable table(100);
+
+  /**
+   * node topology:
+   *   in1  --> topic1
+   *
+   * topic1 has two stamps, t11 and t12 where t11 < t12.
+   * But message arrival order is t12 -> t11.
+   * Thus t11 is the latest message (i.e. skew)
+   */
+
+  // topic1 msg2 input
+  SteeSourcesTable::SourcesMsg sources12;
+  auto in12_stamp = get_time(120, 00);
+  auto in12_steady = get_time(0, 12);
+  add_sources("in1", in12_stamp, in12_steady, sources12);
+
+  auto topic12_stamp = get_time(120, 12);
+  table.set("topic1", topic12_stamp, sources12);
+
+  // topic1 msg1 input
+  SteeSourcesTable::SourcesMsg sources11;
+  auto in11_stamp = get_time(110, 0);
+  auto in11_steady = get_time(0, 11);
+  add_sources("in1", in11_stamp, in11_steady, sources11);
+
+  auto topic11_stamp = get_time(110, 11);
+  table.set("topic1", topic11_stamp, sources11);
+
+  // test for get_latest sources
+  auto latest_sources = table.get_latest_sources();
+  EXPECT_EQ(latest_sources.size(), 1u);
+  EXPECT_EQ(latest_sources.begin()->first, "topic1");
+
+  const auto & in_sources = latest_sources.begin()->second;
+  EXPECT_EQ(in_sources.size(), 1u);
+  const auto & in_source = *in_sources.begin();
+  EXPECT_EQ(in_source.topic, "in1");
+  EXPECT_EQ(in_source.stamp, in11_stamp);
+  EXPECT_EQ(in_source.first_subscription_steady_time,
+            in11_steady);
+}
+
 TEST_F(TestSteeSourcesTable, stamp_deletion) {
   SteeSourcesTable table(1);
 
