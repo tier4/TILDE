@@ -37,46 +37,216 @@ rclcpp::Time get_time(int32_t sec, uint32_t nsec)
 }
 
 void add_sources(const std::string & in_topic,
-                 int32_t stamp_sec, uint32_t stamp_nsec,
-                 int32_t steady_sec, uint32_t steady_nsec,
+                 const rclcpp::Time & stamp,
+                 const rclcpp::Time & steady,
                  std::vector<SteeSource> & out)
 {
   SteeSource s;
   s.topic = in_topic;
-  s.stamp = get_time(stamp_sec, stamp_nsec);
-  s.first_subscription_steady_time = get_time(steady_sec, steady_nsec);
+  s.stamp = stamp;
+  s.first_subscription_steady_time = steady;
   out.emplace_back(std::move(s));
 }
 
-TEST_F(TestSteeSourcesTable, set_and_get) {
+TEST_F(TestSteeSourcesTable, set_one_entry) {
   SteeSourcesTable table(100);
 
-  int32_t base_sec = 100;
-  uint32_t base_nsec = 0;
-  int32_t base_sec_steady = 0;
-  int32_t base_nsec_steady = 100;
+  /**
+   * node topology:
+   *   "in" -> "topic1"
+   */
 
-  // system input
+  // in
+  auto in_stamp = get_time(100, 0);
+  auto in_steady = get_time(0, 10);
+  SteeSourcesTable::SourcesMsg sources_msg;
+  add_sources("in", in_stamp, in_steady, sources_msg);
+
+  // topic1
+  auto topic11_stamp = get_time(101, 0);
+  table.set("topic1", topic11_stamp, sources_msg);
+
+  auto check =
+      [&in_stamp, &in_steady](const SteeSourcesTable::SourcesMsg & msg) -> void
+      {
+        EXPECT_EQ(msg.size(), 1u);
+
+        auto in_source = msg[0];
+        EXPECT_EQ(in_source.topic, "in");
+        EXPECT_EQ(in_source.stamp, in_stamp);
+        EXPECT_EQ(in_source.first_subscription_steady_time,
+                  in_steady);
+      };
+
+  // test for get_latest_sources
+  {
+    auto latest_sources = table.get_latest_sources();
+
+    EXPECT_EQ(latest_sources.size(), 1u);
+    EXPECT_EQ(latest_sources.begin()->first, "topic1");
+
+    auto in_sources = latest_sources.begin()->second;
+    check(in_sources);
+  }
+
+  // test for get_sources
+  {
+    auto in_sources = table.get_sources("topic1", topic11_stamp);
+    EXPECT_EQ(in_sources.size(), 1u);
+
+    check(in_sources);
+  }
+
+  // test for get_sources, not found cases
+  {
+    auto not_found1 = table.get_sources("topic2", topic11_stamp);
+    EXPECT_EQ(not_found1.size(), 0u);
+
+    auto stamp2 = get_time(0, 1);
+    auto not_found2 = table.get_sources("topic1", stamp2);
+    EXPECT_EQ(not_found2.size(), 0u);
+  }
+}
+
+TEST_F(TestSteeSourcesTable, set_one_entry_multiple_source_topics) {
+  SteeSourcesTable table(100);
+
+  /**
+   * node topology:
+   *   in1  --> topic1
+   *   in2  /
+   */
+
   SteeSourcesTable::SourcesMsg sources;
-  add_sources("in", base_sec, base_nsec, base_sec_steady, base_nsec_steady, sources);
+  auto in11_stamp = get_time(100, 0);
+  auto in11_steady = get_time(0, 10);
+  add_sources("in1", in11_stamp, in11_steady, sources);
+
+  auto in21_stamp = get_time(100, 10);
+  auto in21_steady = get_time(0, 20);
+  add_sources("in2", in21_stamp, in21_steady, sources);
 
   // topic1 input
-  int32_t delte1_sec = 10;
-  table.set("topic1", get_time(base_sec + delte1_sec, base_nsec), sources);
+  auto topic11_stamp = get_time(110, 0);
+  table.set("topic1", topic11_stamp, sources);
 
+  auto check =
+      [&in11_stamp, &in11_steady,
+       &in21_stamp, &in21_steady](const SteeSourcesTable::SourcesMsg & msg) -> void
+      {
+        EXPECT_EQ(msg.size(), 2u);
+        for(const auto & in_source : msg) {
+          if(in_source.topic == "in1") {
+            EXPECT_EQ(in_source.stamp,
+                      in11_stamp);
+            EXPECT_EQ(in_source.first_subscription_steady_time,
+                      in11_steady);
+          } else if(in_source.topic == "in2") {
+            EXPECT_EQ(in_source.stamp,
+                      in21_stamp);
+            EXPECT_EQ(in_source.first_subscription_steady_time,
+                      in21_steady);
+          } else {
+            FAIL() << "unknown source topic";
+          }
+        }
+      };
+
+  // test for get_latest_sources
+  {
+    auto latest_sources = table.get_latest_sources();
+
+    EXPECT_EQ(latest_sources.size(), 1u);
+    EXPECT_EQ(latest_sources.begin()->first, "topic1");
+
+    auto in_sources = latest_sources.begin()->second;
+    check(in_sources);
+  }
+
+  // test for get_sources
+  {
+    auto in_sources = table.get_sources("topic1", topic11_stamp);
+    check(in_sources);
+  }
+}
+
+TEST_F(TestSteeSourcesTable, source_topic_has_multiple_stamp) {
+  SteeSourcesTable table(100);
+
+  /**
+   * node topology:
+   *   in1  --> topic1
+   *
+   * topic1 has multiple stamps.
+   */
+
+  // topic1 msg1 input
+  SteeSourcesTable::SourcesMsg sources11;
+  auto in11_stamp = get_time(110, 0);
+  auto in11_steady = get_time(0, 11);
+  add_sources("in1", in11_stamp, in11_steady, sources11);
+
+  auto topic11_stamp = get_time(110, 11);
+  table.set("topic1", topic11_stamp, sources11);
+
+  // topic1 msg2 input
+  SteeSourcesTable::SourcesMsg sources12;
+  auto in12_stamp = get_time(120, 00);
+  auto in12_steady = get_time(0, 12);
+  add_sources("in1", in12_stamp, in12_steady, sources12);
+
+  auto topic12_stamp = get_time(120, 12);
+  table.set("topic1", topic12_stamp, sources12);
+
+  // test for get_latest sources
   auto latest_sources = table.get_latest_sources();
-
   EXPECT_EQ(latest_sources.size(), 1u);
   EXPECT_EQ(latest_sources.begin()->first, "topic1");
 
-  auto in_sources = latest_sources.begin()->second;
+  const auto & in_sources = latest_sources.begin()->second;
   EXPECT_EQ(in_sources.size(), 1u);
-
-  auto in_source = in_sources[0];
-  EXPECT_EQ(in_source.topic, "in");
-  EXPECT_EQ(in_source.stamp,
-            get_time(base_sec, base_nsec));
+  const auto & in_source = *in_sources.begin();
+  EXPECT_EQ(in_source.topic, "in1");
+  EXPECT_EQ(in_source.stamp, in12_stamp);
   EXPECT_EQ(in_source.first_subscription_steady_time,
-            get_time(base_sec_steady, base_nsec_steady));
+            in12_steady);
 }
+
+TEST_F(TestSteeSourcesTable, stamp_deletion) {
+  SteeSourcesTable table(1);
+
+  /**
+   * node topology:
+   *   in1  --> topic1
+   *
+   * topic1 has multiple stamps.
+   */
+
+  // topic1 msg1 input
+  SteeSourcesTable::SourcesMsg sources11;
+  auto in11_stamp = get_time(110, 0);
+  auto in11_steady = get_time(0, 11);
+  add_sources("in1", in11_stamp, in11_steady, sources11);
+
+  auto topic11_stamp = get_time(110, 11);
+  table.set("topic1", topic11_stamp, sources11);
+
+  EXPECT_EQ(table.get_sources("topic1", topic11_stamp).size(),
+            1u);
+
+  // topic1 msg2 input
+  SteeSourcesTable::SourcesMsg sources12;
+  auto in12_stamp = get_time(120, 00);
+  auto in12_steady = get_time(0, 12);
+  add_sources("in1", in12_stamp, in12_steady, sources12);
+
+  auto topic12_stamp = get_time(120, 12);
+  table.set("topic1", topic12_stamp, sources12);
+
+  // check topic1 msg1 is purged
+  EXPECT_EQ(table.get_sources("topic1", topic11_stamp).size(),
+            0u);
+}
+
+
 

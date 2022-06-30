@@ -23,8 +23,8 @@ void SteeSourcesTable::set(
     max_stamps = max_it->second;
   }
 
-  auto stamp_vs_sources = sources_[topic];
-  if (stamp_vs_sources.size() == max_stamps) {
+  auto & stamp_vs_sources = sources_[topic];
+  while (stamp_vs_sources.size() > max_stamps) {
     stamp_vs_sources.erase(stamp_vs_sources.begin());
   }
 }
