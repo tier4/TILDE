@@ -79,6 +79,18 @@ if(BUILD_TESTING)
     "tilde_msg"
     "sensor_msgs")
 
+  ament_add_gtest(test_stee_source_table
+    test/test_stee_source_table.cpp)
+  target_include_directories(test_stee_source_table
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+  target_link_libraries(test_stee_source_table
+    ${PROJECT_NAME})
+  ament_target_dependencies(test_stee_source_table
+    "rclcpp"
+    "tilde_msg"
+    "sensor_msgs")
 
 endif()
 
@@ -91,6 +103,7 @@ install(
 add_library(${PROJECT_NAME} SHARED
   "src/tilde_node.cpp"
   "src/tilde_publisher.cpp"
+  "src/stee_sources_table.cpp"
   "src/stee_node.cpp"
   "src/tp.c"
 )
