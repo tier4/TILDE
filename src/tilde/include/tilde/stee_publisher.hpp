@@ -16,6 +16,8 @@
 #define TILDE__STEE_PUBLISHER_HPP_
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/clock.hpp"
@@ -28,8 +30,8 @@ namespace tilde
 {
 
 template<typename MessageT,
-         typename ConvertedMessageT,
-         typename AllocatorT = std::allocator<void>>
+  typename ConvertedMessageT,
+  typename AllocatorT = std::allocator<void>>
 class SteePublisher : public TildePublisherBase
 {
 private:
@@ -61,7 +63,7 @@ public:
     auto converted_msg = std::make_unique<ConvertedMessageT>();
     // TODO(y-okumura-isp): Can we avoid copy?
     converted_msg->body = *msg;
-    // TOOD(y-okumura-isp): fill sources
+    // TODO(y-okumura-isp): fill sources
 
     converted_pub_->publish(std::move(converted_msg));
     pub_->publish(std::move(msg));
@@ -73,7 +75,7 @@ public:
     ConvertedMessageT converted_msg;
     // TODO(y-okumura-isp): Can we avoid copy?
     converted_msg.body = msg;
-    // TOOD(y-okumura-isp): fill sources
+    // TODO(y-okumura-isp): fill sources
 
     converted_pub_->publish(converted_msg);
     pub_->publish(msg);
@@ -117,14 +119,14 @@ public:
   get_subscription_count() const
   {
     return pub_->get_subscription_count() +
-        converted_pub_->get_subscription_count();
+           converted_pub_->get_subscription_count();
   }
 
   size_t
   get_intra_process_subscription_count() const
   {
     return pub_->get_intra_process_subscription_count() +
-        converted_pub_->get_intra_process_subscription_count();
+           converted_pub_->get_intra_process_subscription_count();
   }
 
   RCLCPP_PUBLIC

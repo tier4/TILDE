@@ -15,6 +15,10 @@
 #ifndef TILDE__STEE_NODE_HPP_
 #define TILDE__STEE_NODE_HPP_
 
+#include <string>
+#include <memory>
+#include <utility>
+
 #include "rclcpp/rclcpp.hpp"
 
 #include "tilde/stee_publisher.hpp"
@@ -62,11 +66,12 @@ public:
     typename MessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
       CallbackMessageT,
       AllocatorT>,
-    typename ConvertedMessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
+    typename ConvertedMessageMemoryStrategyT =
+    rclcpp::message_memory_strategy::MessageMemoryStrategy<
       ConvertedMessageT,
       AllocatorT>,
     typename SteeSubscriptionT = SteeSubscription<MessageT, ConvertedMessageT, AllocatorT,
-                                                  MessageMemoryStrategyT, ConvertedMessageMemoryStrategyT>
+    MessageMemoryStrategyT, ConvertedMessageMemoryStrategyT>
   >
   std::shared_ptr<SteeSubscriptionT>
   create_stee_subscription(
@@ -86,50 +91,53 @@ public:
     // TODO(y-okumura-isp): make instance variable
     bool enable_stee = true;
 
-    if(enable_stee) {
+    if (enable_stee) {
       using rclcpp::node_interfaces::get_node_topics_interface;
       auto node_topics_interface = get_node_topics_interface(this);
       auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
       auto converted_topic_name = resolved_topic_name + "/stee";
 
       auto new_callback =
-          [this, callback](std::unique_ptr<ConvertedMessageT> converted_msg) -> void
-          {
-            using ConstRef = const MessageT &;
-            using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
-            using SharedConstPtr = std::shared_ptr<const MessageT>;
-            using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;
-            using SharedPtr = std::shared_ptr<MessageT>;
+        [this, callback](std::unique_ptr<ConvertedMessageT> converted_msg) -> void
+        {
+          using ConstRef = const MessageT &;
+          using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
+          using SharedConstPtr = std::shared_ptr<const MessageT>;
+          using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;
+          using SharedPtr = std::shared_ptr<MessageT>;
 
-            if constexpr (std::is_same_v<CallbackArgT, ConstRef>) {
-                callback(converted_msg->body);
-            } else if constexpr (std::is_same_v<CallbackArgT, UniquePtr>) {
-                auto pmsg = std::make_unique<MessageT>(std::move(converted_msg->body));
-                callback(std::move(pmsg));
-            } else if constexpr (std::is_same_v<CallbackArgT, SharedConstPtr>) {
-                auto pmsg = std::make_shared<const MessageT>(std::move(converted_msg->body));
-                callback(pmsg);
-            } else if constexpr (std::is_same_v<CallbackArgT, ConstRefSharedConstPtr>) {
-                const auto pmsg = std::make_shared<const MessageT>(std::move(converted_msg->body));
-                callback(pmsg);
-            } else if constexpr (std::is_same_v<CallbackArgT, SharedPtr>) {
-                auto pmsg = std::make_shared<MessageT>(std::move(converted_msg->body));
-                callback(pmsg);
-            } else {
-              static_assert(always_false_v<CallbackArgT>, "non-exhaustive visitor");
-            }
-          };
+          // We added NOLINT because
+          // google/cpplint cannot handle `if constexpr` well.
+          // https://github.com/cpplint/cpplint/pull/136 is not applied.
+          if constexpr (std::is_same_v<CallbackArgT, ConstRef>) {  // NOLINT
+            callback(converted_msg->body);
+          } else if constexpr (std::is_same_v<CallbackArgT, UniquePtr>) {  // NOLINT
+            auto msg = std::make_unique<MessageT>(std::move(converted_msg->body));
+            callback(std::move(msg));
+          } else if constexpr (std::is_same_v<CallbackArgT, SharedConstPtr>) {  // NOLINT
+            auto msg = std::make_shared<const MessageT>(std::move(converted_msg->body));
+            callback(msg);
+          } else if constexpr (std::is_same_v<CallbackArgT, ConstRefSharedConstPtr>) {  // NOLINT
+            const auto msg = std::make_shared<const MessageT>(std::move(converted_msg->body));
+            callback(msg);
+          } else if constexpr (std::is_same_v<CallbackArgT, SharedPtr>) {  // NOLINT
+            auto msg = std::make_shared<MessageT>(std::move(converted_msg->body));
+            callback(msg);
+          } else {
+            static_assert(always_false_v<CallbackArgT>, "non-exhaustive visitor");
+          }
+        };
 
       // TODO(y-okumura-isp): how to prepare converted_msg_mem_strategy
       converted_sub = create_subscription<ConvertedMessageT>(
-          converted_topic_name, qos,
-          new_callback,
-          options);
+        converted_topic_name, qos,
+        new_callback,
+        options);
       stee_sub->set_converted_sub(converted_sub);
     } else {
       sub = create_subscription<MessageT>(
-          topic_name, qos,
-          callback, options, msg_mem_strategy);
+        topic_name, qos,
+        callback, options, msg_mem_strategy);
       stee_sub->set_sub(sub);
     }
 
@@ -145,20 +153,20 @@ public:
     typename SteePublisherT = SteePublisher<MessageT, ConvertedMessageT, AllocatorT>>
   std::shared_ptr<SteePublisherT>
   create_stee_publisher(
-      const std::string & topic_name,
-      const rclcpp::QoS & qos,
-      const rclcpp::PublisherOptionsWithAllocator<AllocatorT> & options =
-      rclcpp::PublisherOptionsWithAllocator<AllocatorT>())
+    const std::string & topic_name,
+    const rclcpp::QoS & qos,
+    const rclcpp::PublisherOptionsWithAllocator<AllocatorT> & options =
+    rclcpp::PublisherOptionsWithAllocator<AllocatorT>())
   {
     auto pub = create_publisher<MessageT, AllocatorT, PublisherT>(
-        topic_name, qos, options);
+      topic_name, qos, options);
     auto converted_pub = create_publisher<ConvertedMessageT, AllocatorT, ConvertedPublisherT>(
-        topic_name + "/stee", qos, options);
+      topic_name + "/stee", qos, options);
     auto stee_pub = std::make_shared<SteePublisherT>(
-        pub, converted_pub,
-        get_fully_qualified_name(),
-        this->get_clock(),
-        steady_clock_);
+      pub, converted_pub,
+      get_fully_qualified_name(),
+      this->get_clock(),
+      steady_clock_);
     return stee_pub;
   }
 

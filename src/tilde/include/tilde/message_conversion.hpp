@@ -27,10 +27,11 @@ namespace tilde
 // define your type
 using TypeTable = std::tuple<
   Pair<sensor_msgs::msg::PointCloud2, tilde_msg::msg::SteePointCloud2>
-  >;
+>;
 
 template<typename Key>
-struct _ConvertedType {
+struct _ConvertedType
+{
   using type = typename Get<Key, TypeTable>::type;
 };
 

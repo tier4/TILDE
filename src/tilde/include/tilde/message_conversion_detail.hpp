@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #ifndef TILDE__MESSAGE_CONVERSION_DETAIL_HPP_
-#define TILDE__MESSAGE_CONVERSION_DETAILHPP_
+#define TILDE__MESSAGE_CONVERSION_DETAIL_HPP_
 
 #include <tuple>
 
@@ -21,7 +21,8 @@ namespace tilde
 {
 
 template<class K, class V>
-struct Pair {
+struct Pair
+{
   using Key = K;
   using Value = V;
 };
@@ -30,17 +31,19 @@ template<typename Key, typename T>
 struct Get;
 
 template<typename Key, typename Head>
-struct Get<Key, std::tuple<Head>> {
+struct Get<Key, std::tuple<Head>>
+{
   using type = typename std::conditional<std::is_same<Key, typename Head::Key>::value,
-                                         typename Head::Value,
-                                         std::nullptr_t>::type;
+      typename Head::Value,
+      std::nullptr_t>::type;
 };
 
-template<typename Key, typename Head, typename ...Tail>
-struct Get<Key, std::tuple<Head, Tail...>> {
+template<typename Key, typename Head, typename ... Tail>
+struct Get<Key, std::tuple<Head, Tail...>>
+{
   using type = typename std::conditional<std::is_same<Key, typename Head::Key>::value,
-                                         typename Head::Value,
-                                         typename Get<Key, std::tuple<Tail...>>::type>::type;
+      typename Head::Value,
+      typename Get<Key, std::tuple<Tail...>>::type>::type;
 };
 
 }  // namespace tilde
