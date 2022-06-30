@@ -25,6 +25,8 @@
 #include "tilde/stee_subscription.hpp"
 #include "tilde/message_conversion.hpp"
 
+#include "tilde_msg/msg/stee_source.hpp"
+
 namespace tilde
 {
 template<class>
