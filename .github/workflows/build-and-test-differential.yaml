@@ -22,7 +22,7 @@ jobs:
             build-depends-repos: build_depends.repos
     steps:
       - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.9.1
+        uses: styfle/cancel-workflow-action@0.10.0
 
       - name: Check out repository
         uses: actions/checkout@v3
@@ -35,12 +35,6 @@ jobs:
       - name: Get modified packages
         id: get-modified-packages
         uses: autowarefoundation/autoware-github-actions/get-modified-packages@v1
-
-      - name: Install python3-pytest-cov
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pytest-cov
-        shell: bash
 
       - name: Build
         if: ${{ steps.get-modified-packages.outputs.modified-packages != '' }}
