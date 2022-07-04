@@ -1,19 +1,35 @@
+// Copyright 2021 Research Institute of Systems Planning, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include <map>
+
 #include "tilde/stee_sources_table.hpp"
 
 using tilde::SteeSourcesTable;
 
 SteeSourcesTable::SteeSourcesTable(
-    size_t default_max_stamps_per_topic,
-    std::map<SteeSourcesTable::TopicName, size_t> max_stamps_per_topic)
-    : default_max_stamps_per_topic_(default_max_stamps_per_topic),
-      max_stamps_per_topic_(max_stamps_per_topic)
+  size_t default_max_stamps_per_topic,
+  std::map<SteeSourcesTable::TopicName, size_t> max_stamps_per_topic)
+: default_max_stamps_per_topic_(default_max_stamps_per_topic),
+  max_stamps_per_topic_(max_stamps_per_topic)
 {
 }
 
 void SteeSourcesTable::set(
-    const SteeSourcesTable::TopicName & topic,
-    const SteeSourcesTable::Stamp & stamp,
-    const SteeSourcesTable::SourcesMsg & sources_msg)
+  const SteeSourcesTable::TopicName & topic,
+  const SteeSourcesTable::Stamp & stamp,
+  const SteeSourcesTable::SourcesMsg & sources_msg)
 {
   sources_[topic][stamp] = sources_msg;
   latest_[topic] = stamp;
@@ -35,7 +51,7 @@ SteeSourcesTable::get_latest_sources() const
 {
   SteeSourcesTable::TopicSources ret;
 
-  for(const auto & latest_it : latest_) {
+  for (const auto & latest_it : latest_) {
     const auto & topic = latest_it.first;
     const auto & stamp = latest_it.second;
 
@@ -56,8 +72,8 @@ SteeSourcesTable::get_latest_sources() const
 }
 
 SteeSourcesTable::SourcesMsg SteeSourcesTable::get_sources(
-    const SteeSourcesTable::TopicName & topic,
-    const SteeSourcesTable::Stamp & stamp) const
+  const SteeSourcesTable::TopicName & topic,
+  const SteeSourcesTable::Stamp & stamp) const
 {
   SteeSourcesTable::SourcesMsg empty;
 
@@ -73,4 +89,3 @@ SteeSourcesTable::SourcesMsg SteeSourcesTable::get_sources(
 
   return it_stamp_vs_sources->second;
 }
-

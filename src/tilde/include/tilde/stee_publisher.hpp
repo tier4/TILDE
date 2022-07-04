@@ -15,7 +15,9 @@
 #ifndef TILDE__STEE_PUBLISHER_HPP_
 #define TILDE__STEE_PUBLISHER_HPP_
 
+#include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -23,16 +25,17 @@
 #include "rclcpp/clock.hpp"
 #include "rclcpp/macros.hpp"
 
+#include "tilde/stee_sources_table.hpp"
 #include "tilde/tilde_publisher.hpp"
+
 #include "tilde_msg/msg/stee_source.hpp"
 
 namespace tilde
 {
-
 template<typename MessageT,
   typename ConvertedMessageT,
   typename AllocatorT = std::allocator<void>>
-class SteePublisher : public TildePublisherBase
+class SteePublisher
 {
 private:
   using MessageAllocatorTraits = rclcpp::allocator::AllocRebind<MessageT, AllocatorT>;
@@ -46,14 +49,17 @@ public:
 
   /// Default constructor
   SteePublisher(
+    std::shared_ptr<SteeSourcesTable> source_table,
     std::shared_ptr<PublisherT> pub,
     std::shared_ptr<ConvertedPublisherT> converted_pub,
     const std::string & node_fqn,
     std::shared_ptr<rclcpp::Clock> clock,
     std::shared_ptr<rclcpp::Clock> steady_clock)
-  : TildePublisherBase(clock, steady_clock, node_fqn),
+  : source_table_(source_table),
     pub_(pub),
-    converted_pub_(converted_pub)
+    converted_pub_(converted_pub),
+    node_fqn_(node_fqn),
+    clock_(clock), steady_clock_(steady_clock)
   {
   }
 
@@ -63,7 +69,7 @@ public:
     auto converted_msg = std::make_unique<ConvertedMessageT>();
     // TODO(y-okumura-isp): Can we avoid copy?
     converted_msg->body = *msg;
-    // TODO(y-okumura-isp): fill sources
+    set_sources(converted_msg.get());
 
     converted_pub_->publish(std::move(converted_msg));
     pub_->publish(std::move(msg));
@@ -75,7 +81,7 @@ public:
     ConvertedMessageT converted_msg;
     // TODO(y-okumura-isp): Can we avoid copy?
     converted_msg.body = msg;
-    // TODO(y-okumura-isp): fill sources
+    set_sources(&converted_msg);
 
     converted_pub_->publish(converted_msg);
     pub_->publish(msg);
@@ -136,9 +142,49 @@ public:
     return pub_->get_topic_name();
   }
 
+  RCLCPP_PUBLIC
+  void add_explicit_input_info(
+    const std::string & sub_topic,
+    const rclcpp::Time & stamp)
+  {
+    explicit_info_[sub_topic].insert(stamp);
+  }
+
 private:
+  std::shared_ptr<const SteeSourcesTable> source_table_;
   std::shared_ptr<PublisherT> pub_;
   std::shared_ptr<ConvertedPublisherT> converted_pub_;
+  const std::string node_fqn_;
+  std::shared_ptr<rclcpp::Clock> clock_;
+  std::shared_ptr<rclcpp::Clock> steady_clock_;
+
+  bool is_explicit{false};
+  // explicit input data
+  std::map<std::string, std::set<rclcpp::Time>> explicit_info_;
+
+  void set_sources(ConvertedMessageT * converted_msg)
+  {
+    if (!is_explicit) {
+      auto topic_sources = source_table_->get_latest_sources();
+      for (auto & topic_source : topic_sources) {
+        for (auto & source : topic_source.second) {
+          converted_msg->sources.emplace_back(std::move(source));
+        }
+      }
+    } else {
+      for (const auto & topic_stamps : explicit_info_) {
+        const auto & topic = topic_stamps.first;
+        for (const auto & stamp : topic_stamps.second) {
+          auto sources = source_table_->get_sources(
+            topic,
+            stamp);
+          for (auto & source : sources) {
+            converted_msg->sources.emplace_back(std::move(source));
+          }
+        }
+      }
+    }
+  }
 };
 
 }  // namespace tilde

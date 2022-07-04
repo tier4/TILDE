@@ -18,6 +18,7 @@
 #include <string>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -101,21 +102,22 @@ public:
       auto converted_topic_name = resolved_topic_name + "/stee";
 
       auto new_callback =
-          [this, &resolved_topic_name, callback](std::unique_ptr<ConvertedMessageT> converted_msg) -> void
-          {
-            using ConstRef = const MessageT &;
-            using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
-            using SharedConstPtr = std::shared_ptr<const MessageT>;
-            using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;
-            using SharedPtr = std::shared_ptr<MessageT>;
+        [this, resolved_topic_name,
+          callback](std::unique_ptr<ConvertedMessageT> converted_msg) -> void
+        {
+          using ConstRef = const MessageT &;
+          using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
+          using SharedConstPtr = std::shared_ptr<const MessageT>;
+          using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;
+          using SharedPtr = std::shared_ptr<MessageT>;
 
-            // We added NOLINT because
-            // google/cpplint cannot handle `if constexpr` well.
-            // https://github.com/cpplint/cpplint/pull/136 is not applied.
-            if constexpr (std::is_same_v<CallbackArgT, ConstRef>) {  // NOLINT
-              set_source_table<MessageT>(resolved_topic_name, &converted_msg);
-              callback(converted_msg->body);
-            } else if constexpr (std::is_same_v<CallbackArgT, UniquePtr>) {  // NOLINT
+          // We added NOLINT because
+          // google/cpplint cannot handle `if constexpr` well.
+          // https://github.com/cpplint/cpplint/pull/136 is not applied.
+          if constexpr (std::is_same_v<CallbackArgT, ConstRef>) {    // NOLINT
+            set_source_table<MessageT>(resolved_topic_name, &converted_msg);
+            callback(converted_msg->body);
+          } else if constexpr (std::is_same_v<CallbackArgT, UniquePtr>) {    // NOLINT
             set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
             auto msg = std::make_unique<MessageT>(std::move(converted_msg->body));
             callback(std::move(msg));
@@ -171,6 +173,7 @@ public:
     auto converted_pub = create_publisher<ConvertedMessageT, AllocatorT, ConvertedPublisherT>(
       topic_name + "/stee", qos, options);
     auto stee_pub = std::make_shared<SteePublisherT>(
+      source_table_,
       pub, converted_pub,
       get_fully_qualified_name(),
       this->get_clock(),
@@ -182,23 +185,24 @@ private:
   void init();
   std::shared_ptr<rclcpp::Clock> steady_clock_;
 
-  std::unique_ptr<SteeSourcesTable> source_table_;
+  std::shared_ptr<SteeSourcesTable> source_table_;
 
   template<
     class MessageT,
     class ConvertedMessageT = ConvertedMessageType<MessageT>>
   void set_source_table(
-      const std::string & topic,
-      const ConvertedMessageT * msg)
+    const std::string & topic,
+    const ConvertedMessageT * msg)
   {
     auto stamp = Process<MessageT>::get_timestamp_from_const(&(msg->body));
 
-    if(!stamp) return;
+    if (!stamp) {return;}
 
     if (msg->sources.size() > 0) {
-      source_table_->set(topic,
-                         *stamp,
-                         msg->sources);
+      source_table_->set(
+        topic,
+        *stamp,
+        msg->sources);
     } else {
       std::vector<tilde_msg::msg::SteeSource> sources;
       tilde_msg::msg::SteeSource source_msg;
@@ -206,9 +210,10 @@ private:
       source_msg.stamp = *stamp;
       source_msg.first_subscription_steady_time = steady_clock_->now();
       sources.emplace_back(std::move(source_msg));
-      source_table_->set(topic,
-                         *stamp,
-                         sources);
+      source_table_->set(
+        topic,
+        *stamp,
+        sources);
     }
   }
 };
