@@ -191,3 +191,58 @@ TEST_F(TestSteeNode, stee_subscription_shared_const) {
   EXPECT_TRUE(received2);
 }
 
+TEST_F(TestSteeNode, one_sub_one_pub) {
+  rclcpp::NodeOptions options;
+  options.append_parameter_override("use_sim_time", true);
+
+  auto sensor_node = std::make_shared<SteeNode>("sensor_node", options);
+  auto main_node = std::make_shared<SteeNode>("main_node", options);
+  auto checker_node = std::make_shared<rclcpp::Node>("checker_node2", options);
+  const std::string test_string = "recv_shared_const";
+
+  auto sensor_pub = sensor_node->create_stee_publisher<PointCloud2>("sensor", 1);
+
+  auto main_pub = main_node->create_stee_publisher<PointCloud2>("main", 1);
+  bool main_received = false;
+  // simulate use defined callback
+  auto main_sub = main_node->create_stee_subscription<PointCloud2>(
+    "sensor", 1,
+    [test_string, &main_received](std::shared_ptr<const PointCloud2> msg) -> void
+    {
+      main_received = true;
+      EXPECT_EQ(msg->header.frame_id, "by_sensor");
+    });
+
+  bool checker_received = false;
+  auto checker_sub = checker_node->create_subscription<SteePointCloud2>(
+    "main/stee", 1,
+    [test_string, &checker_received](std::shared_ptr<const SteePointCloud2> msg) -> void
+    {
+      checker_received = true;
+      EXPECT_EQ(msg->body.header.frame_id, "by_main");
+      EXPECT_EQ(msg->sources.size(), 1u);
+      const auto & source = msg->sources[0];
+      EXPECT_EQ(source.topic, "/sensor");
+      EXPECT_EQ(source.stamp.sec, 1);
+      EXPECT_EQ(source.stamp.nanosec, 100lu);
+    });
+
+  // publish sensor
+  PointCloud2 msg;
+  msg.header.stamp = rclcpp::Time(1, 100);
+  msg.header.frame_id = "by_sensor";
+
+  sensor_pub->publish(msg);
+  rclcpp::spin_some(main_node);
+
+  EXPECT_TRUE(main_received);
+  EXPECT_FALSE(checker_received);
+
+  // publish main
+  msg.header.stamp = rclcpp::Time(2, 200);
+  msg.header.frame_id = "by_main";
+  main_pub->publish(msg);
+
+  rclcpp::spin_some(checker_node);
+  EXPECT_TRUE(checker_received);
+}

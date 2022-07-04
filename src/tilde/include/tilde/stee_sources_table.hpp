@@ -17,6 +17,8 @@
 
 #include <map>
 #include <optional>
+#include <string>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -36,14 +38,14 @@ public:
   using TopicSources = std::map<TopicName, SourcesMsg>;
   // main data structure
   using Sources =
-      std::map<TopicName, std::map<Stamp, SourcesMsg>>;
+    std::map<TopicName, std::map<Stamp, SourcesMsg>>;
   // implicit relation
   using Latest = std::map<TopicName, Stamp>;
 
   /// Constructor
   SteeSourcesTable(
-      size_t default_max_stamps_per_topic,
-      std::map<TopicName, size_t> max_stamps_per_topic = std::map<TopicName, size_t>());
+    size_t default_max_stamps_per_topic,
+    std::map<TopicName, size_t> max_stamps_per_topic = std::map<TopicName, size_t>());
 
   /// Set input sources.
   /**
@@ -51,9 +53,10 @@ public:
    * \param[in] stamp message stamp
    * \@aram[in] sources_msg stee sources in the message
    */
-  void set(const TopicName & topic,
-           const Stamp & stamp,
-           const SourcesMsg & sources_msg);
+  void set(
+    const TopicName & topic,
+    const Stamp & stamp,
+    const SourcesMsg & sources_msg);
 
   /// Get the latest sources.
   /**
@@ -68,8 +71,9 @@ public:
    * \param[in] stamp message stamp
    * \return empty if not found
    */
-  SourcesMsg get_sources(const TopicName & topic,
-                         const Stamp & stamp) const;
+  SourcesMsg get_sources(
+    const TopicName & topic,
+    const Stamp & stamp) const;
 
 private:
   /// default maximum number of stamps to Sources
