@@ -42,4 +42,6 @@ SteeNode::~SteeNode()
 void SteeNode::init()
 {
   steady_clock_.reset(new rclcpp::Clock(RCL_STEADY_TIME));
+  // TODO(y-okumura-isp): set appropriate max stamps
+  source_table_.reset(new SteeSourcesTable(100));
 }
