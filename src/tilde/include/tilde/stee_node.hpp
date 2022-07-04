@@ -21,9 +21,10 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include "tilde/message_conversion.hpp"
 #include "tilde/stee_publisher.hpp"
 #include "tilde/stee_subscription.hpp"
-#include "tilde/message_conversion.hpp"
+#include "tilde/stee_sources_table.hpp"
 
 #include "tilde_msg/msg/stee_source.hpp"
 
@@ -100,29 +101,34 @@ public:
       auto converted_topic_name = resolved_topic_name + "/stee";
 
       auto new_callback =
-        [this, callback](std::unique_ptr<ConvertedMessageT> converted_msg) -> void
-        {
-          using ConstRef = const MessageT &;
-          using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
-          using SharedConstPtr = std::shared_ptr<const MessageT>;
-          using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;
-          using SharedPtr = std::shared_ptr<MessageT>;
+          [this, &resolved_topic_name, callback](std::unique_ptr<ConvertedMessageT> converted_msg) -> void
+          {
+            using ConstRef = const MessageT &;
+            using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
+            using SharedConstPtr = std::shared_ptr<const MessageT>;
+            using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;
+            using SharedPtr = std::shared_ptr<MessageT>;
 
-          // We added NOLINT because
-          // google/cpplint cannot handle `if constexpr` well.
-          // https://github.com/cpplint/cpplint/pull/136 is not applied.
-          if constexpr (std::is_same_v<CallbackArgT, ConstRef>) {  // NOLINT
-            callback(converted_msg->body);
-          } else if constexpr (std::is_same_v<CallbackArgT, UniquePtr>) {  // NOLINT
+            // We added NOLINT because
+            // google/cpplint cannot handle `if constexpr` well.
+            // https://github.com/cpplint/cpplint/pull/136 is not applied.
+            if constexpr (std::is_same_v<CallbackArgT, ConstRef>) {  // NOLINT
+              set_source_table<MessageT>(resolved_topic_name, &converted_msg);
+              callback(converted_msg->body);
+            } else if constexpr (std::is_same_v<CallbackArgT, UniquePtr>) {  // NOLINT
+            set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
             auto msg = std::make_unique<MessageT>(std::move(converted_msg->body));
             callback(std::move(msg));
           } else if constexpr (std::is_same_v<CallbackArgT, SharedConstPtr>) {  // NOLINT
+            set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
             auto msg = std::make_shared<const MessageT>(std::move(converted_msg->body));
             callback(msg);
           } else if constexpr (std::is_same_v<CallbackArgT, ConstRefSharedConstPtr>) {  // NOLINT
+            set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
             const auto msg = std::make_shared<const MessageT>(std::move(converted_msg->body));
             callback(msg);
           } else if constexpr (std::is_same_v<CallbackArgT, SharedPtr>) {  // NOLINT
+            set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
             auto msg = std::make_shared<MessageT>(std::move(converted_msg->body));
             callback(msg);
           } else {
@@ -175,6 +181,36 @@ public:
 private:
   void init();
   std::shared_ptr<rclcpp::Clock> steady_clock_;
+
+  std::unique_ptr<SteeSourcesTable> source_table_;
+
+  template<
+    class MessageT,
+    class ConvertedMessageT = ConvertedMessageType<MessageT>>
+  void set_source_table(
+      const std::string & topic,
+      const ConvertedMessageT * msg)
+  {
+    auto stamp = Process<MessageT>::get_timestamp_from_const(&(msg->body));
+
+    if(!stamp) return;
+
+    if (msg->sources.size() > 0) {
+      source_table_->set(topic,
+                         *stamp,
+                         msg->sources);
+    } else {
+      std::vector<tilde_msg::msg::SteeSource> sources;
+      tilde_msg::msg::SteeSource source_msg;
+      source_msg.topic = topic;
+      source_msg.stamp = *stamp;
+      source_msg.first_subscription_steady_time = steady_clock_->now();
+      sources.emplace_back(std::move(source_msg));
+      source_table_->set(topic,
+                         *stamp,
+                         sources);
+    }
+  }
 };
 
 }  // namespace tilde
