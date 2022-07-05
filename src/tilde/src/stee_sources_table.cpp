@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cassert>
 #include <map>
 
 #include "tilde/stee_sources_table.hpp"
@@ -31,6 +32,7 @@ void SteeSourcesTable::set(
   const SteeSourcesTable::Stamp & stamp,
   const SteeSourcesTable::SourcesMsg & sources_msg)
 {
+  assert(stamp.get_clock_type() == RCL_ROS_TIME);
   sources_[topic][stamp] = sources_msg;
   latest_[topic] = stamp;
 
@@ -75,6 +77,7 @@ SteeSourcesTable::SourcesMsg SteeSourcesTable::get_sources(
   const SteeSourcesTable::TopicName & topic,
   const SteeSourcesTable::Stamp & stamp) const
 {
+  assert(stamp.get_clock_type() == RCL_ROS_TIME);
   SteeSourcesTable::SourcesMsg empty;
 
   auto it = sources_.find(topic);

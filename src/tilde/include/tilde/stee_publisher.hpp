@@ -147,6 +147,8 @@ public:
     const std::string & sub_topic,
     const rclcpp::Time & stamp)
   {
+    assert(stamp.get_clock_type() == RCL_ROS_TIME);
+    is_explicit = true;
     explicit_info_[sub_topic].insert(stamp);
   }
 
