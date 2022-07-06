@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(tilde_msg REQUIRED)
 find_package(rmw REQUIRED)
 find_package(LTTngUST REQUIRED)
@@ -119,8 +120,27 @@ ament_export_targets(${PROJECT_NAME})
 ament_export_libraries(${PROJECT_NAME})
 ament_export_dependencies(rclcpp tilde_msg)
 
+add_library(stee_republisher_node SHARED
+  src/stee_republisher_node.cpp)
+ament_target_dependencies(stee_republisher_node
+  "rclcpp_components")
+target_link_libraries(stee_republisher_node
+  ${PROJECT_NAME})
+rclcpp_components_register_node(stee_republisher_node
+  PLUGIN "tilde::SteeRepublisherNode"
+  EXECUTABLE stee_republisher_node_exe)
+
 install(
-  TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+install(
+  TARGETS stee_republisher_node stee_republisher_node_exe
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

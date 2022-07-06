@@ -143,6 +143,11 @@ public:
         converted_topic_name, qos,
         new_callback,
         options);
+
+      if (converted_sub->get_publisher_count() == 0) {
+        RCLCPP_WARN(this->get_logger(), "no SteePublisher: '%s'", converted_topic_name.c_str());
+      }
+
       stee_sub->set_converted_sub(converted_sub);
     } else {
       sub = create_subscription<MessageT>(
@@ -168,13 +173,42 @@ public:
     const rclcpp::PublisherOptionsWithAllocator<AllocatorT> & options =
     rclcpp::PublisherOptionsWithAllocator<AllocatorT>())
   {
+    using rclcpp::node_interfaces::get_node_topics_interface;
+    auto node_topics_interface = get_node_topics_interface(this);
+    auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
+
     auto pub = create_publisher<MessageT, AllocatorT, PublisherT>(
-      topic_name, qos, options);
+      resolved_topic_name, qos, options);
+    auto converted_pub = create_publisher<ConvertedMessageT, AllocatorT, ConvertedPublisherT>(
+      resolved_topic_name + "/stee", qos, options);
+    auto stee_pub = std::make_shared<SteePublisherT>(
+      source_table_,
+      pub, converted_pub,
+      get_fully_qualified_name(),
+      this->get_clock(),
+      steady_clock_);
+    return stee_pub;
+  }
+
+  template<
+    typename MessageT,
+    typename ConvertedMessageT = ConvertedMessageType<MessageT>,
+    typename AllocatorT = std::allocator<void>,
+    typename PublisherT = rclcpp::Publisher<MessageT, AllocatorT>,
+    typename ConvertedPublisherT = rclcpp::Publisher<ConvertedMessageT, AllocatorT>,
+    typename SteePublisherT = SteePublisher<MessageT, ConvertedMessageT, AllocatorT>>
+  std::shared_ptr<SteePublisherT>
+  create_stee_republisher(
+    const std::string & topic_name,
+    const rclcpp::QoS & qos,
+    const rclcpp::PublisherOptionsWithAllocator<AllocatorT> & options =
+    rclcpp::PublisherOptionsWithAllocator<AllocatorT>())
+  {
     auto converted_pub = create_publisher<ConvertedMessageT, AllocatorT, ConvertedPublisherT>(
       topic_name + "/stee", qos, options);
     auto stee_pub = std::make_shared<SteePublisherT>(
       source_table_,
-      pub, converted_pub,
+      nullptr, converted_pub,
       get_fully_qualified_name(),
       this->get_clock(),
       steady_clock_);

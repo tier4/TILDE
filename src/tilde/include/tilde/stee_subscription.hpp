@@ -19,12 +19,14 @@
 
 #include "rclcpp/subscription.hpp"
 
+#include "tilde/message_conversion.hpp"
+
 namespace tilde
 {
 
 template<
   typename CallbackMessageT,
-  typename ConvertedCallbackMessageT,
+  typename ConvertedCallbackMessageT = ConvertedMessageType<CallbackMessageT>,
   typename AllocatorT = std::allocator<void>,
   typename MessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
     CallbackMessageT,
