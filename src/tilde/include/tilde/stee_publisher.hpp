@@ -25,6 +25,7 @@
 #include "rclcpp/clock.hpp"
 #include "rclcpp/macros.hpp"
 
+#include "tilde/message_conversion.hpp"
 #include "tilde/stee_sources_table.hpp"
 #include "tilde/tilde_publisher.hpp"
 
@@ -33,7 +34,7 @@
 namespace tilde
 {
 template<typename MessageT,
-  typename ConvertedMessageT,
+  typename ConvertedMessageT = ConvertedMessageType<MessageT>,
   typename AllocatorT = std::allocator<void>>
 class SteePublisher
 {
@@ -72,7 +73,10 @@ public:
     set_sources(converted_msg.get());
 
     converted_pub_->publish(std::move(converted_msg));
-    pub_->publish(std::move(msg));
+
+    if (pub_) {
+      pub_->publish(std::move(msg));
+    }
   }
 
   void
@@ -84,7 +88,10 @@ public:
     set_sources(&converted_msg);
 
     converted_pub_->publish(converted_msg);
-    pub_->publish(msg);
+
+    if (pub_) {
+      pub_->publish(msg);
+    }
   }
 
   /**
@@ -96,7 +103,9 @@ public:
   {
     std::cout << "publish serialized message (not supported)" << std::endl;
     // publish_info(get_timestamp(clock_->now(), msg.get()));
-    pub_->publish(serialized_msg);
+    if (pub_) {
+      pub_->publish(serialized_msg);
+    }
   }
 
   /**
@@ -107,7 +116,9 @@ public:
   publish(const rclcpp::SerializedMessage & serialized_msg)
   {
     std::cout << "publish SerializedMessage (not supported)" << std::endl;
-    pub_->publish(serialized_msg);
+    if (pub_) {
+      pub_->publish(serialized_msg);
+    }
   }
 
   /**
@@ -118,28 +129,41 @@ public:
   publish(rclcpp::LoanedMessage<MessageT, AllocatorT> && loaned_msg)
   {
     std::cout << "publish LoanedMessage (not supported)" << std::endl;
-    pub_->publish(loaned_msg);
+    if (pub_) {
+      pub_->publish(loaned_msg);
+    }
   }
 
   size_t
   get_subscription_count() const
   {
-    return pub_->get_subscription_count() +
-           converted_pub_->get_subscription_count();
+    size_t ret = 0;
+    if (pub_) {
+      ret += pub_->get_subscription_count();
+    }
+
+    return ret + converted_pub_->get_subscription_count();
   }
 
   size_t
   get_intra_process_subscription_count() const
   {
-    return pub_->get_intra_process_subscription_count() +
-           converted_pub_->get_intra_process_subscription_count();
+    size_t ret = 0;
+    if (pub_) {
+      ret = pub_->get_intra_process_subscription_count() ;
+    }
+    return ret + converted_pub_->get_intra_process_subscription_count();
   }
 
   RCLCPP_PUBLIC
   const char *
   get_topic_name() const
   {
-    return pub_->get_topic_name();
+    if (pub_) {
+      return pub_->get_topic_name();
+    }
+
+    return converted_pub_->get_topic_name();
   }
 
   RCLCPP_PUBLIC
