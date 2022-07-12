@@ -13,6 +13,7 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 set(msg_files
   "msg/SubTopicTimeInfo.msg"
@@ -23,17 +24,27 @@ set(msg_files
   "msg/DeadlineNotification.msg"
 
   "msg/SteeSource.msg"
+
+  # sensor_msgs
   "msg/SteePointCloud2.msg"
 
+  # geometry_msgs
   "msg/SteePolygonStamped.msg"
   "msg/SteePoseStamped.msg"
   "msg/SteePoseWithCovarianceStamped.msg"
+
+  # nav_msgs
+  "msg/SteeOccupancyGrid.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
-  DEPENDENCIES builtin_interfaces std_msgs sensor_msgs
+  DEPENDENCIES builtin_interfaces std_msgs sensor_msgs geometry_msgs nav_msgs
 )
-ament_export_dependencies(rosidl_default_runtime)
+ament_export_dependencies(
+  rosidl_default_runtime
+  sensor_msgs
+  geometry_msgs
+  nav_msgs)
 
 ament_package()
