@@ -27,6 +27,7 @@ set(msg_files
 
   # sensor_msgs
   "msg/SteePointCloud2.msg"
+  "msg/SteeImu.msg"
 
   # geometry_msgs
   "msg/SteePolygonStamped.msg"
