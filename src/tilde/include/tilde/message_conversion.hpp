@@ -21,13 +21,21 @@
 
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "tilde_msg/msg/stee_point_cloud2.hpp"
+#include "tilde_msg/msg/stee_polygon_stamped.hpp"
+#include "tilde_msg/msg/stee_pose_stamped.hpp"
+#include "tilde_msg/msg/stee_pose_with_covariance_stamped.hpp"
+#include "tilde_msg/msg/stee_occupancy_grid.hpp"
 
 namespace tilde
 {
 // define your type
 using TypeTable = std::tuple<
-  Pair<sensor_msgs::msg::PointCloud2, tilde_msg::msg::SteePointCloud2>
->;
+  Pair<sensor_msgs::msg::PointCloud2, tilde_msg::msg::SteePointCloud2>,
+  Pair<geometry_msgs::msg::PolygonStamped, tilde_msg::msg::SteePolygonStamped>,
+  Pair<geometry_msgs::msg::PoseStamped, tilde_msg::msg::SteePoseStamped>,
+  Pair<geometry_msgs::msg::PoseWithCovarianceStamped, tilde_msg::msg::SteePoseWithCovarianceStamped>,
+  Pair<nav_msgs::msg::OccupancyGrid, tilde_msg::msg::SteeOccupancyGrid>
+  >;
 
 template<typename Key>
 struct _ConvertedType
