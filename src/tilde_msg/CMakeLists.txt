@@ -12,6 +12,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 set(msg_files
   "msg/SubTopicTimeInfo.msg"
@@ -23,6 +24,10 @@ set(msg_files
 
   "msg/SteeSource.msg"
   "msg/SteePointCloud2.msg"
+
+  "msg/SteePolygonStamped.msg"
+  "msg/SteePoseStamped.msg"
+  "msg/SteePoseWithCovarianceStamped.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
