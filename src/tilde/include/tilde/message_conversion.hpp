@@ -27,6 +27,8 @@
 #include "tilde_msg/msg/stee_polygon_stamped.hpp"
 #include "tilde_msg/msg/stee_pose_stamped.hpp"
 #include "tilde_msg/msg/stee_pose_with_covariance_stamped.hpp"
+#include "tilde_msg/msg/stee_twist_stamped.hpp"
+#include "tilde_msg/msg/stee_twist_with_covariance_stamped.hpp"
 
 // nav_msgs
 #include "tilde_msg/msg/stee_occupancy_grid.hpp"
@@ -41,6 +43,8 @@ using TypeTable = std::tuple<
   Pair<geometry_msgs::msg::PolygonStamped, tilde_msg::msg::SteePolygonStamped>,
   Pair<geometry_msgs::msg::PoseStamped, tilde_msg::msg::SteePoseStamped>,
   Pair<geometry_msgs::msg::PoseWithCovarianceStamped, tilde_msg::msg::SteePoseWithCovarianceStamped>,
+  Pair<geometry_msgs::msg::TwistStamped, tilde_msg::msg::SteeTwistStamped>,
+  Pair<geometry_msgs::msg::TwistWithCovarianceStamped, tilde_msg::msg::SteeTwistWithCovarianceStamped>,
 
   Pair<nav_msgs::msg::OccupancyGrid, tilde_msg::msg::SteeOccupancyGrid>
   >;

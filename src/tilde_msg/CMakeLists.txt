@@ -33,6 +33,8 @@ set(msg_files
   "msg/SteePolygonStamped.msg"
   "msg/SteePoseStamped.msg"
   "msg/SteePoseWithCovarianceStamped.msg"
+  "msg/SteeTwistStamped.msg"
+  "msg/SteeTwistWithCovarianceStamped.msg"
 
   # nav_msgs
   "msg/SteeOccupancyGrid.msg"
