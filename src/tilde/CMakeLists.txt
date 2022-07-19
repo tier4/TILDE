@@ -121,14 +121,23 @@ ament_export_libraries(${PROJECT_NAME})
 ament_export_dependencies(rclcpp tilde_msg)
 
 add_library(stee_republisher_node SHARED
-  src/stee_republisher_node.cpp)
+  src/stee_republisher_node_pointcloud2.cpp
+  src/stee_republisher_node_imu.cpp
+  src/stee_republisher_node_map.cpp
+  )
 ament_target_dependencies(stee_republisher_node
   "rclcpp_components")
 target_link_libraries(stee_republisher_node
   ${PROJECT_NAME})
 rclcpp_components_register_node(stee_republisher_node
   PLUGIN "tilde::SteeRepublisherNode"
-  EXECUTABLE stee_republisher_node_exe)
+  EXECUTABLE stee_republisher_node_pointcloud2_exe)
+rclcpp_components_register_node(stee_republisher_node
+  PLUGIN "tilde::SteeRepublisherNodeImu"
+  EXECUTABLE stee_republisher_node_imu_exe)
+rclcpp_components_register_node(stee_republisher_node
+  PLUGIN "tilde::SteeRepublisherNodeMap"
+  EXECUTABLE stee_republisher_node_map_exe)
 
 install(
   TARGETS ${PROJECT_NAME}
@@ -140,7 +149,10 @@ install(
 )
 
 install(
-  TARGETS stee_republisher_node stee_republisher_node_exe
+  TARGETS stee_republisher_node
+  stee_republisher_node_pointcloud2_exe
+  stee_republisher_node_imu_exe
+  stee_republisher_node_map_exe
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
