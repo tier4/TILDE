@@ -32,6 +32,7 @@
 
 // nav_msgs
 #include "tilde_msg/msg/stee_occupancy_grid.hpp"
+#include "tilde_msg/msg/stee_odometry.hpp"
 
 namespace tilde
 {
@@ -46,7 +47,8 @@ using TypeTable = std::tuple<
   Pair<geometry_msgs::msg::TwistStamped, tilde_msg::msg::SteeTwistStamped>,
   Pair<geometry_msgs::msg::TwistWithCovarianceStamped, tilde_msg::msg::SteeTwistWithCovarianceStamped>,
 
-  Pair<nav_msgs::msg::OccupancyGrid, tilde_msg::msg::SteeOccupancyGrid>
+  Pair<nav_msgs::msg::OccupancyGrid, tilde_msg::msg::SteeOccupancyGrid>,
+  Pair<nav_msgs::msg::Odometry, tilde_msg::msg::SteeOdometry>
   >;
 
 template<typename Key>
