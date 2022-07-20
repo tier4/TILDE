@@ -38,6 +38,7 @@ set(msg_files
 
   # nav_msgs
   "msg/SteeOccupancyGrid.msg"
+  "msg/SteeOdometry.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
