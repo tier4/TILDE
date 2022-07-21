@@ -111,26 +111,39 @@ public:
           using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;
           using SharedPtr = std::shared_ptr<MessageT>;
 
+          auto not_stop_topic =
+              stop_topics_.find(resolved_topic_name) == stop_topics_.end();
+
           // We added NOLINT because
           // google/cpplint cannot handle `if constexpr` well.
           // https://github.com/cpplint/cpplint/pull/136 is not applied.
           if constexpr (std::is_same_v<CallbackArgT, ConstRef>) {    // NOLINT
-            set_source_table<MessageT>(resolved_topic_name, &converted_msg);
+            if (not_stop_topic) {
+              set_source_table<MessageT>(resolved_topic_name, &converted_msg);
+            }
             callback(converted_msg->body);
           } else if constexpr (std::is_same_v<CallbackArgT, UniquePtr>) {    // NOLINT
-            set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
+            if (not_stop_topic) {
+              set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
+            }
             auto msg = std::make_unique<MessageT>(std::move(converted_msg->body));
             callback(std::move(msg));
           } else if constexpr (std::is_same_v<CallbackArgT, SharedConstPtr>) {  // NOLINT
-            set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
+            if (not_stop_topic) {
+              set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
+            }
             auto msg = std::make_shared<const MessageT>(std::move(converted_msg->body));
             callback(msg);
           } else if constexpr (std::is_same_v<CallbackArgT, ConstRefSharedConstPtr>) {  // NOLINT
-            set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
+            if (not_stop_topic) {
+              set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
+            }
             const auto msg = std::make_shared<const MessageT>(std::move(converted_msg->body));
             callback(msg);
           } else if constexpr (std::is_same_v<CallbackArgT, SharedPtr>) {  // NOLINT
-            set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
+            if (not_stop_topic) {
+              set_source_table<MessageT>(resolved_topic_name, converted_msg.get());
+            }
             auto msg = std::make_shared<MessageT>(std::move(converted_msg->body));
             callback(msg);
           } else {
@@ -220,6 +233,17 @@ private:
   std::shared_ptr<rclcpp::Clock> steady_clock_;
 
   std::shared_ptr<SteeSourcesTable> source_table_;
+
+  /// stop topics for preventing loop topic structure
+  /**
+   * set this by ROS2 parameter.
+   *   key: stee_stop_topics
+   *   value: string[]
+   *
+   * TODO(y-okumura-isp): read this parameter dynamically.
+   * We can set it only by startup option for now.
+   */
+  std::set<std::string> stop_topics_;
 
   template<
     class MessageT,

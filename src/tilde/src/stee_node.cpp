@@ -44,4 +44,12 @@ void SteeNode::init()
   steady_clock_.reset(new rclcpp::Clock(RCL_STEADY_TIME));
   // TODO(y-okumura-isp): set appropriate max stamps
   source_table_.reset(new SteeSourcesTable(100));
+
+  auto stop_topics_vec = declare_parameter<std::vector<std::string>>(
+      "stee_stop_topics", std::vector<std::string>{
+        "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias",
+      });
+  for (const auto & t : stop_topics_vec) {
+    stop_topics_.insert(t);
+  }
 }
