@@ -34,6 +34,13 @@
 #include "tilde_msg/msg/stee_occupancy_grid.hpp"
 #include "tilde_msg/msg/stee_odometry.hpp"
 
+// autoware_auto_perception_msgs
+#include "tilde_msg/msg/stee_detected_objects.hpp"
+#include "tilde_msg/msg/stee_predicted_objects.hpp"
+#include "tilde_msg/msg/stee_tracked_objects.hpp"
+#include "tilde_msg/msg/stee_traffic_light_roi_array.hpp"
+#include "tilde_msg/msg/stee_traffic_signal_array.hpp"
+
 namespace tilde
 {
 // define your type
@@ -48,7 +55,14 @@ using TypeTable = std::tuple<
   Pair<geometry_msgs::msg::TwistWithCovarianceStamped, tilde_msg::msg::SteeTwistWithCovarianceStamped>,
 
   Pair<nav_msgs::msg::OccupancyGrid, tilde_msg::msg::SteeOccupancyGrid>,
-  Pair<nav_msgs::msg::Odometry, tilde_msg::msg::SteeOdometry>
+  Pair<nav_msgs::msg::Odometry, tilde_msg::msg::SteeOdometry>,
+
+  Pair<autoware_auto_perception_msgs::msg::DetectedObjects, tilde_msg::msg::SteeDetectedObjects>,
+  Pair<autoware_auto_perception_msgs::msg::PredictedObjects, tilde_msg::msg::SteePredictedObjects>,
+  Pair<autoware_auto_perception_msgs::msg::TrackedObjects, tilde_msg::msg::SteeTrackedObjects>,
+  Pair<autoware_auto_perception_msgs::msg::TrafficLightRoiArray, tilde_msg::msg::SteeTrafficLightRoiArray>,
+  Pair<autoware_auto_perception_msgs::msg::TrafficSignalArray, tilde_msg::msg::SteeTrafficSignalArray>
+
   >;
 
 template<typename Key>
