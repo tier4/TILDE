@@ -15,6 +15,10 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 
+find_package(autoware_auto_geometry_msgs REQUIRED)
+find_package(autoware_auto_perception_msgs REQUIRED)
+
+
 set(msg_files
   "msg/SubTopicTimeInfo.msg"
   "msg/PubTopicTimeInfo.msg"
@@ -39,16 +43,32 @@ set(msg_files
   # nav_msgs
   "msg/SteeOccupancyGrid.msg"
   "msg/SteeOdometry.msg"
-)
+
+  # autoware_auto_perception_msgs
+  "msg/SteeDetectedObjects.msg"
+  "msg/SteePredictedObjects.msg"
+  "msg/SteeTrackedObjects.msg"
+  "msg/SteeTrafficLightRoiArray.msg"
+  "msg/SteeTrafficSignalArray.msg"
+  )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
-  DEPENDENCIES builtin_interfaces std_msgs sensor_msgs geometry_msgs nav_msgs
+  DEPENDENCIES
+  builtin_interfaces
+  std_msgs
+  sensor_msgs
+  geometry_msgs nav_msgs
+  autoware_auto_geometry_msgs
+  autoware_auto_perception_msgs
 )
 ament_export_dependencies(
   rosidl_default_runtime
   sensor_msgs
   geometry_msgs
-  nav_msgs)
+  nav_msgs
+  autoware_auto_geometry_msgs
+  autoware_auto_perception_msgs
+  )
 
 ament_package()
