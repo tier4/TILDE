@@ -41,6 +41,11 @@
 #include "tilde_msg/msg/stee_traffic_light_roi_array.hpp"
 #include "tilde_msg/msg/stee_traffic_signal_array.hpp"
 
+// autoware_auto_planning_msgs
+#include "tilde_msg/msg/stee_path_with_lane_id.hpp"
+#include "tilde_msg/msg/stee_path.hpp"
+#include "tilde_msg/msg/stee_trajectory.hpp"
+
 namespace tilde
 {
 // define your type
@@ -61,8 +66,11 @@ using TypeTable = std::tuple<
   Pair<autoware_auto_perception_msgs::msg::PredictedObjects, tilde_msg::msg::SteePredictedObjects>,
   Pair<autoware_auto_perception_msgs::msg::TrackedObjects, tilde_msg::msg::SteeTrackedObjects>,
   Pair<autoware_auto_perception_msgs::msg::TrafficLightRoiArray, tilde_msg::msg::SteeTrafficLightRoiArray>,
-  Pair<autoware_auto_perception_msgs::msg::TrafficSignalArray, tilde_msg::msg::SteeTrafficSignalArray>
+  Pair<autoware_auto_perception_msgs::msg::TrafficSignalArray, tilde_msg::msg::SteeTrafficSignalArray>,
 
+  Pair<autoware_auto_planning_msgs::msg::PathWithLaneId, tilde_msg::msg::SteePathWithLaneId>,
+  Pair<autoware_auto_planning_msgs::msg::Path, tilde_msg::msg::SteePath>,
+  Pair<autoware_auto_planning_msgs::msg::Trajectory, tilde_msg::msg::SteeTrajectory>
   >;
 
 template<typename Key>
