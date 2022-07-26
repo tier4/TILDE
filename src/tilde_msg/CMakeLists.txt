@@ -17,7 +17,7 @@ find_package(nav_msgs REQUIRED)
 
 find_package(autoware_auto_geometry_msgs REQUIRED)
 find_package(autoware_auto_perception_msgs REQUIRED)
-
+find_package(autoware_auto_planning_msgs REQUIRED)
 
 set(msg_files
   "msg/SubTopicTimeInfo.msg"
@@ -50,6 +50,11 @@ set(msg_files
   "msg/SteeTrackedObjects.msg"
   "msg/SteeTrafficLightRoiArray.msg"
   "msg/SteeTrafficSignalArray.msg"
+
+  # autoware_auto_planning_msgs
+  "msg/SteePathWithLaneId.msg"
+  "msg/SteePath.msg"
+  "msg/SteeTrajectory.msg"
   )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -61,6 +66,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   geometry_msgs nav_msgs
   autoware_auto_geometry_msgs
   autoware_auto_perception_msgs
+  autoware_auto_planning_msgs
 )
 ament_export_dependencies(
   rosidl_default_runtime
@@ -69,6 +75,7 @@ ament_export_dependencies(
   nav_msgs
   autoware_auto_geometry_msgs
   autoware_auto_perception_msgs
+  autoware_auto_planning_msgs
   )
 
 ament_package()
