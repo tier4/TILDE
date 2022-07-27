@@ -46,6 +46,12 @@
 #include "tilde_msg/msg/stee_path.hpp"
 #include "tilde_msg/msg/stee_trajectory.hpp"
 
+// autoware_auto_control_msgs
+#include "tilde_msg/msg/stee_ackermann_control_command.hpp"
+#include "tilde_msg/msg/stee_ackermann_lateral_command.hpp"
+#include "tilde_msg/msg/stee_longitudinal_command.hpp"
+
+
 namespace tilde
 {
 // define your type
@@ -70,7 +76,11 @@ using TypeTable = std::tuple<
 
   Pair<autoware_auto_planning_msgs::msg::PathWithLaneId, tilde_msg::msg::SteePathWithLaneId>,
   Pair<autoware_auto_planning_msgs::msg::Path, tilde_msg::msg::SteePath>,
-  Pair<autoware_auto_planning_msgs::msg::Trajectory, tilde_msg::msg::SteeTrajectory>
+  Pair<autoware_auto_planning_msgs::msg::Trajectory, tilde_msg::msg::SteeTrajectory>,
+
+  Pair<autoware_auto_control_msgs::msg::AckermannControlCommand, tilde_msg::msg::SteeAckermannControlCommand>,
+  Pair<autoware_auto_control_msgs::msg::AckermannLateralCommand, tilde_msg::msg::SteeAckermannLateralCommand>,
+  Pair<autoware_auto_control_msgs::msg::LongitudinalCommand, tilde_msg::msg::SteeLongitudinalCommand>
   >;
 
 template<typename Key>
