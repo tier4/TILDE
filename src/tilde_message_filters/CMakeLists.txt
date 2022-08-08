@@ -17,6 +17,7 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 find_package(tilde)
 find_package(message_filters)
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -131,6 +132,7 @@ if(BUILD_TESTING)
   ament_target_dependencies(test_from_original_subscriber
     "tilde"
     "message_filters"
+    "rclcpp_lifecycle"
     "sensor_msgs"
     "std_msgs")
 
