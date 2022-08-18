@@ -90,6 +90,7 @@ public:
   Clock send_clock_and_spin(int32_t sec, uint32_t nsec)
   {
     auto clock = send_clock(sec, nsec);
+    rclcpp::Rate(50).sleep();
     spin();
     return clock;
   }
@@ -154,6 +155,7 @@ TEST_F(TestTildeSubscriber, hold_sub_time)
 
   // t=t1
   send_clock(t1_sec, t1_nsec);
+  rclcpp::Rate(50).sleep();
   spin();
   EXPECT_CLOCK(sub_node->now(), t1_sec, t1_nsec);
 
@@ -162,10 +164,12 @@ TEST_F(TestTildeSubscriber, hold_sub_time)
   msg.header.stamp.nanosec = t2_nsec;
   msg.header.frame_id = 1;
   pub1->publish(msg);
+  rclcpp::Rate(50).sleep();
   spin();
 
   // t=t3
   send_clock(t3_sec, t3_nsec);
+  rclcpp::Rate(50).sleep();
   spin();
   EXPECT_CLOCK(sub_node->now(), t3_sec, t3_nsec);
 
