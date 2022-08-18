@@ -100,6 +100,7 @@ public:
   Clock send_clock_and_spin(int32_t sec, uint32_t nsec)
   {
     auto clock = send_clock(sec, nsec);
+    rclcpp::Rate(50).sleep();
     spin();
     return clock;
   }
@@ -205,6 +206,7 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
 
   // apply "/clock"
   send_clock(123, 456);
+  rclcpp::Rate(50).sleep();
   spin();
   EXPECT_CLOCK(sub_node->now(), 123, 456u);
 
@@ -215,10 +217,12 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
   // pub1 & sub
   msg.header.frame_id = 1;
   pub1->publish(msg);
+  rclcpp::Rate(50).sleep();
   spin();
 
   // update clock
   send_clock(124, 321);
+  rclcpp::Rate(50).sleep();
   spin();
   EXPECT_CLOCK(sub_node->now(), 124, 321);
 
@@ -226,6 +230,7 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
   EXPECT_FALSE(val_callback_called);
   msg.header.frame_id = 2;
   pub2->publish(msg);
+  rclcpp::Rate(50).sleep();
   spin();
 
   // verify
@@ -282,6 +287,7 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
 
   // apply "/clock"
   send_clock(123, 456);
+  rclcpp::Rate(50).sleep();
   spin();
   EXPECT_CLOCK(sub_node->now(), 123, 456u);
 
@@ -292,10 +298,12 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
   // pub1 & sub
   msg.header.frame_id = 1;
   pub1->publish(msg);
+  rclcpp::Rate(50).sleep();
   spin();
 
   // update clock
   send_clock(124, 321);
+  rclcpp::Rate(50).sleep();
   spin();
   EXPECT_CLOCK(sub_node->now(), 124, 321);
 
@@ -303,6 +311,7 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
   EXPECT_FALSE(val_callback_called);
   msg.header.frame_id = 2;
   pub2->publish(msg);
+  rclcpp::Rate(50).sleep();
   spin();
 
   // verify
@@ -363,6 +372,7 @@ TEST_F(TestSynchronizer, work_with_passthrough)
 
   // apply "/clock"
   send_clock(123, 456);
+  rclcpp::Rate(50).sleep();
   spin();
   EXPECT_CLOCK(sub_node->now(), 123, 456u);
 
@@ -373,11 +383,13 @@ TEST_F(TestSynchronizer, work_with_passthrough)
   // pub1 & sub
   msg.header.frame_id = 1;
   pub1->publish(msg);
+  rclcpp::Rate(50).sleep();
   spin();
 
   // update clock
   send_clock(124, 321);
   spin();
+  rclcpp::Rate(50).sleep();
   EXPECT_CLOCK(sub_node->now(), 124, 321);
 
   // verify
@@ -443,6 +455,7 @@ TEST_F(TestSynchronizer, order_inversion)
 
   // t=t1
   send_clock(t1_sec, t1_nsec);
+  rclcpp::Rate(50).sleep();
   spin();
   EXPECT_CLOCK(sub_node->now(), t1_sec, t1_nsec);
 
@@ -451,10 +464,12 @@ TEST_F(TestSynchronizer, order_inversion)
   msg.header.stamp.nanosec = t2_nsec;
   msg.header.frame_id = 1;
   pub1->publish(msg);
+  rclcpp::Rate(50).sleep();
   spin();
 
   // t=t2
   send_clock(t2_sec, t2_nsec);
+  rclcpp::Rate(50).sleep();
   spin();
   EXPECT_CLOCK(sub_node->now(), t2_sec, t2_nsec);
 
@@ -464,10 +479,12 @@ TEST_F(TestSynchronizer, order_inversion)
   msg.header.stamp.nanosec = t1_nsec;
   msg.header.frame_id = 1;
   pub1->publish(msg);
+  rclcpp::Rate(50).sleep();
   spin();
 
   // t=t3
   send_clock(t3_sec, t3_nsec);
+  rclcpp::Rate(50).sleep();
   spin();
   EXPECT_CLOCK(sub_node->now(), t3_sec, t3_nsec);
 
@@ -477,6 +494,7 @@ TEST_F(TestSynchronizer, order_inversion)
   msg.header.stamp.nanosec = t2_nsec;
   msg.header.frame_id = 2;
   pub2->publish(msg);
+  rclcpp::Rate(50).sleep();
   spin();
 
   // verify
