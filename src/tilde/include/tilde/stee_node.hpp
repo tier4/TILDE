@@ -74,8 +74,11 @@ public:
     rclcpp::message_memory_strategy::MessageMemoryStrategy<
       ConvertedMessageT,
       AllocatorT>,
-    typename SteeSubscriptionT = SteeSubscription<MessageT, ConvertedMessageT, AllocatorT,
-    MessageMemoryStrategyT, ConvertedMessageMemoryStrategyT>
+    typename SteeSubscriptionT = SteeSubscription<
+      MessageT, ConvertedMessageT, AllocatorT,
+      typename rclcpp::TypeAdapter<MessageT>::custom_type,
+      typename rclcpp::TypeAdapter<MessageT>::ros_message_type,
+      MessageMemoryStrategyT, ConvertedMessageMemoryStrategyT>
   >
   std::shared_ptr<SteeSubscriptionT>
   create_stee_subscription(
