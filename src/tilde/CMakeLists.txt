@@ -93,6 +93,19 @@ if(BUILD_TESTING)
     "tilde_msg"
     "sensor_msgs")
 
+  ament_add_gtest(test_stee_multithread
+    test/test_stee_multithread.cpp)
+  target_include_directories(test_stee_multithread
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+  target_link_libraries(test_stee_multithread
+    ${PROJECT_NAME})
+  ament_target_dependencies(test_stee_multithread
+    "rclcpp"
+    "tilde_msg"
+    "sensor_msgs"
+    "std_msgs")
 endif()
 
 include_directories(include)

@@ -32,6 +32,7 @@ void SteeSourcesTable::set(
   const SteeSourcesTable::Stamp & stamp,
   const SteeSourcesTable::SourcesMsg & sources_msg)
 {
+  std::lock_guard<std::mutex> lock(mtx_);
   assert(stamp.get_clock_type() == RCL_ROS_TIME);
   sources_[topic][stamp] = sources_msg;
   latest_[topic] = stamp;
@@ -52,6 +53,7 @@ SteeSourcesTable::TopicSources
 SteeSourcesTable::get_latest_sources() const
 {
   SteeSourcesTable::TopicSources ret;
+  std::lock_guard<std::mutex> lock(mtx_);
 
   for (const auto & latest_it : latest_) {
     const auto & topic = latest_it.first;
@@ -77,6 +79,7 @@ SteeSourcesTable::SourcesMsg SteeSourcesTable::get_sources(
   const SteeSourcesTable::TopicName & topic,
   const SteeSourcesTable::Stamp & stamp) const
 {
+  std::lock_guard<std::mutex> lock(mtx_);
   assert(stamp.get_clock_type() == RCL_ROS_TIME);
   SteeSourcesTable::SourcesMsg empty;
 

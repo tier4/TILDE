@@ -16,6 +16,7 @@
 #define TILDE__STEE_SOURCES_TABLE_HPP_
 
 #include <map>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
@@ -80,6 +81,9 @@ private:
   size_t default_max_stamps_per_topic_;
   /// maximum number of stamps to Sources
   std::map<TopicName, size_t> max_stamps_per_topic_;
+
+  /// mutex for sources_ and latest_
+  mutable std::mutex mtx_;
   /// Sources
   Sources sources_;
   /// Implicit repation
