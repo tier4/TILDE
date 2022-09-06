@@ -209,6 +209,7 @@ private:
           }
         }
       }
+      explicit_info_.clear();
     }
   }
 };
