@@ -16,7 +16,7 @@
   <depend>liblttng-ust-dev</depend>
 
   <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+  <test_depend>caret_lint_common</test_depend>
   <test_depend>sensor_msgs</test_depend>
 
   <export>
