@@ -123,8 +123,7 @@ ament_export_dependencies(rclcpp tilde_msg)
 add_library(stee_republisher_node SHARED
   src/stee_republisher_node_pointcloud2.cpp
   src/stee_republisher_node_imu.cpp
-  src/stee_republisher_node_map.cpp
-  )
+  src/stee_republisher_node_map.cpp)
 ament_target_dependencies(stee_republisher_node
   "rclcpp_components")
 target_link_libraries(stee_republisher_node
