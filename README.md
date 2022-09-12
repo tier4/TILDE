@@ -15,5 +15,6 @@
 
 ```bash
 . /path/to/ros2_galactic/install/setup.bash
-colcon build --symlink-install
+vcs import src < build_depends.repos
+colcon build --symlink-install --cmake-args --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
