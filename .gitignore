@@ -4,3 +4,5 @@ __pycache__
 /log/
 /*npy
 /*/*npy
+src/autoware_common
+src/autoware_msg
