@@ -61,7 +61,7 @@ public:
   /// Get the latest sources.
   /**
    * \param[in] topic resolved topic name
-   * \return empyt if no topic
+   * \return empty if no topic
    */
   TopicSources get_latest_sources() const;
 
@@ -82,7 +82,7 @@ private:
   std::map<TopicName, size_t> max_stamps_per_topic_;
   /// Sources
   Sources sources_;
-  /// Implicit repation
+  /// Implicit relation
   Latest latest_;
 };
 
