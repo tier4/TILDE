@@ -5,6 +5,14 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if($ENV{ROS_DISTRO} STREQUAL "galactic")
+  message("gggga")
+  add_compile_definitions("TILDE_ROS_VERSION=202103")
+else()
+  message("hhhha")
+  add_compile_definitions("TILDE_ROS_VERSION=202203")
+endif()
+
 # find dependencies
 find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in

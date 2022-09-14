@@ -74,11 +74,16 @@ public:
     rclcpp::message_memory_strategy::MessageMemoryStrategy<
       ConvertedMessageT,
       AllocatorT>,
+#if TILDE_ROS_VERSION <= 202103
+    typename SteeSubscriptionT = SteeSubscription<MessageT, ConvertedMessageT, AllocatorT,
+      MessageMemoryStrategyT, ConvertedMessageMemoryStrategyT>
+#else
     typename SteeSubscriptionT = SteeSubscription<
       MessageT, ConvertedMessageT, AllocatorT,
       typename rclcpp::TypeAdapter<MessageT>::custom_type,
       typename rclcpp::TypeAdapter<MessageT>::ros_message_type,
       MessageMemoryStrategyT, ConvertedMessageMemoryStrategyT>
+#endif
   >
   std::shared_ptr<SteeSubscriptionT>
   create_stee_subscription(
