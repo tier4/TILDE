@@ -123,7 +123,7 @@ class LatencyStat(object):
     """Latency statistics."""
 
     def __init__(self):
-        """Initilize data."""
+        """Initialize data."""
         self.dur_ms_list = []
         self.dur_pub_ms_list = []
         self.dur_pub_ms_steady_list = []
