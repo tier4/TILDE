@@ -76,7 +76,6 @@ if(BUILD_TESTING)
   # set(ament_cmake_cpplint_FOUND TRUE)
   list(APPEND AMENT_LINT_AUTO_EXCLUDE
     ament_cmake_cpplint
-    ament_cmake_uncrustify
     ament_cmake_cppcheck
   )
   ament_lint_auto_find_test_dependencies()
@@ -86,12 +85,6 @@ if(BUILD_TESTING)
   ament_cpplint(EXCLUDE
     "test/test_from_original_subscriber.cpp"
     "test/test_from_original_synchronizer.cpp")
-
-  # we skip uncrustify of borrowed files
-  find_package(ament_cmake_uncrustify)
-  ament_uncrustify(--exclude
-    "test_from_original_subscriber.cpp"
-    "test_from_original_synchronizer.cpp")
 
   # TODO(y-okumura-isp): syntaxError but success to build & UT
   find_package(ament_cmake_cppcheck)
