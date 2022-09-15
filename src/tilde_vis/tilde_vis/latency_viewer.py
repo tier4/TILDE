@@ -123,7 +123,7 @@ class LatencyStat(object):
     """Latency statistics."""
 
     def __init__(self):
-        """Constructor."""
+        """Initilize data."""
         self.dur_ms_list = []
         self.dur_pub_ms_list = []
         self.dur_pub_ms_steady_list = []
@@ -182,7 +182,7 @@ class PerTopicLatencyStat(object):
     """Per topic latency statistics."""
 
     def __init__(self):
-        """Constructor."""
+        """Initialize data."""
         self.data = {}
 
     def add(self, r):
@@ -435,7 +435,7 @@ class LatencyViewerNode(Node):
 
     def __init__(self, stdscr=None):
         """
-        Constructor.
+        Initialize Node.
 
         Parameters
         ----------
@@ -763,7 +763,7 @@ class LatencyViewerNode(Node):
         handle_ms = (et1 - st) * 1000
 
         # cleanup MessageTrackingTags
-        (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split('.'))
+        (latest_sec, latest_ns) = (int(x) for x in stamps[-1].split('.'))
         until_stamp = TimeMsg(sec=latest_sec - self.keep_info_sec,
                               nanosec=latest_ns)
         message_tracking_tags.erase_until(until_stamp)
@@ -801,7 +801,7 @@ class LatencyViewerNode(Node):
         topic_and_types = self.get_topic_names_and_types()
         filtered_topic_and_types = \
             filter(lambda x: msg_type in x[1], topic_and_types)
-        topics = map(lambda x: x[0], filtered_topic_and_types)
+        topics = (x[0] for x in filtered_topic_and_types)
         topics = filter(lambda x: x not in excludes, topics)
 
         return topics
@@ -817,7 +817,7 @@ def main_curses(stdscr, args=None):
 
 
 def main(args=None):
-    """Main."""
+    """Run main."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--batch', action='store_true',

@@ -26,7 +26,7 @@
 #include <string>
 #include <utility>
 
-using namespace std::chrono_literals;
+using namespace std::chrono_literals;  // NOLINT
 
 const int64_t TIMER_MS_DEFAULT = 1000;
 

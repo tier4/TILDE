@@ -66,7 +66,7 @@ class MessageTrackingTag(object):
     def __init__(self, out_topic, pub_time, pub_time_steady,
                  has_stamp, out_stamp):
         """
-        Constructor.
+        Initialize data.
 
         Parameters
         ----------
@@ -153,7 +153,7 @@ class MessageTrackingTags(object):
     """
 
     def __init__(self):
-        """Constructor."""
+        """Initialize data."""
         # {topic => {stamp_str => MessageTrackingTag}}
         self.topic_vs_message_tracking_tags = {}
 
@@ -191,8 +191,8 @@ class MessageTrackingTags(object):
             although clock_type has no meaning.
 
             """
-            [lhs_sec, lhs_nano_sec] = map(lambda x: int(x), lhs.split('.'))
-            [rhs_sec, rhs_nano_sec] = map(lambda x: int(x), rhs.split('.'))
+            lhs_sec, lhs_nano_sec = (int(x) for x in lhs.split('.'))
+            rhs_sec, rhs_nano_sec = (int(x) for x in rhs.split('.'))
             lhs_time = Time(seconds=lhs_sec, nanoseconds=lhs_nano_sec)
             rhs_time = Time(seconds=rhs_sec, nanoseconds=rhs_nano_sec)
             return lhs_time <= rhs_time

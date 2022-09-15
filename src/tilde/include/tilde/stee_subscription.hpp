@@ -24,55 +24,39 @@ namespace tilde
 {
 
 #if TILDE_ROS_VERSION <= 202103
-template<
+template <
   typename CallbackMessageT,
   typename ConvertedCallbackMessageT = ConvertedMessageType<CallbackMessageT>,
   typename AllocatorT = std::allocator<void>,
-  typename MessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
-    CallbackMessageT,
-    AllocatorT>,
-  typename ConvertedMessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
-    ConvertedCallbackMessageT,
-    AllocatorT>
->
+  typename MessageMemoryStrategyT =
+    rclcpp::message_memory_strategy::MessageMemoryStrategy<CallbackMessageT, AllocatorT>,
+  typename ConvertedMessageMemoryStrategyT =
+    rclcpp::message_memory_strategy::MessageMemoryStrategy<ConvertedCallbackMessageT, AllocatorT> >
 #else
-template<
-  typename MessageT,
-  typename ConvertedMessageT = ConvertedMessageType<MessageT>,
+template <
+  typename MessageT, typename ConvertedMessageT = ConvertedMessageType<MessageT>,
   typename AllocatorT = std::allocator<void>,
   typename SubscribedT = typename rclcpp::TypeAdapter<MessageT>::custom_type,
   typename ROSMessageT = typename rclcpp::TypeAdapter<MessageT>::ros_message_type,
-  typename MessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
-    ROSMessageT,
-    AllocatorT>,
-  typename ConvertedMessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
-    ConvertedMessageT,
-    AllocatorT>
->
+  typename MessageMemoryStrategyT =
+    rclcpp::message_memory_strategy::MessageMemoryStrategy<ROSMessageT, AllocatorT>,
+  typename ConvertedMessageMemoryStrategyT =
+    rclcpp::message_memory_strategy::MessageMemoryStrategy<ConvertedMessageT, AllocatorT> >
 #endif
 class SteeSubscription
 {
 private:
 #if TILDE_ROS_VERSION <= 202103
-  using SubscriptionT = rclcpp::Subscription<CallbackMessageT,
-                                             AllocatorT,
-                                             MessageMemoryStrategyT>;
-  using ConvertedSubscriptionT = rclcpp::Subscription<ConvertedCallbackMessageT,
-                                                      AllocatorT,
-                                                      ConvertedMessageMemoryStrategyT>;
+  using SubscriptionT = rclcpp::Subscription<CallbackMessageT, AllocatorT, MessageMemoryStrategyT>;
+  using ConvertedSubscriptionT =
+    rclcpp::Subscription<ConvertedCallbackMessageT, AllocatorT, ConvertedMessageMemoryStrategyT>;
 #else
   using SubscriptionT =
-      rclcpp::Subscription<MessageT,
-                           AllocatorT,
-                           SubscribedT,
-                           ROSMessageT,
-                           MessageMemoryStrategyT>;
-  using ConvertedSubscriptionT =
-      rclcpp::Subscription<ConvertedMessageT,
-                           AllocatorT,
-                           typename rclcpp::TypeAdapter<ConvertedMessageT>::custom_type,
-                           typename rclcpp::TypeAdapter<ConvertedMessageT>::ros_message_type,
-                           ConvertedMessageMemoryStrategyT>;
+    rclcpp::Subscription<MessageT, AllocatorT, SubscribedT, ROSMessageT, MessageMemoryStrategyT>;
+  using ConvertedSubscriptionT = rclcpp::Subscription<
+    ConvertedMessageT, AllocatorT, typename rclcpp::TypeAdapter<ConvertedMessageT>::custom_type,
+    typename rclcpp::TypeAdapter<ConvertedMessageT>::ros_message_type,
+    ConvertedMessageMemoryStrategyT>;
 #endif
 
 public:

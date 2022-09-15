@@ -40,7 +40,7 @@ class SolverResult(object):
                  dur_pub_ms, dur_pub_ms_steady,
                  is_leaf, parent):
         """
-        Constructor.
+        Initialize data.
 
         Parameters
         ----------
@@ -98,7 +98,7 @@ class SolverResults(object):
     """SolverResults."""
 
     def __init__(self):
-        """Constructor."""
+        """Initialize data."""
         self.data = []  # list of Result
 
     def add(self, *args):
@@ -117,7 +117,7 @@ class InputSensorStampSolver(object):
     """InputSensorStampSolver."""
 
     def __init__(self, graph):
-        """Constructor."""
+        """Initialize solver."""
         # {topic: {stamp: {sensor_topic: [stamps]}}}
         self.topic_stamp_to_sensor_stamp = {}
         self.graph = graph
@@ -328,7 +328,7 @@ class TopicGraph(object):
 
     def __init__(self, message_tracking_tags, skips={}):
         """
-        Constructor.
+        Initialize graph.
 
         Parameters
         ----------
@@ -363,8 +363,8 @@ class TopicGraph(object):
         out = {}
         out['topics'] = self.topics
         out['topic2id'] = self.t2i
-        out['topic_edges'] = [list(l) for l in self.topic_edges]
-        out['rev_edges'] = [list(l) for l in self.rev_edges]
+        out['topic_edges'] = [list(edge) for edge in self.topic_edges]
+        out['rev_edges'] = [list(edge) for edge in self.rev_edges]
 
         json.dump(out, open(fname, 'wt'))
 
@@ -480,7 +480,7 @@ def run(args):
 
 
 def main():
-    """Main."""
+    """Run main."""
     parser = argparse.ArgumentParser()
     parser.add_argument('pickle_file')
     parser.add_argument('stamp_index', type=int, default=0,

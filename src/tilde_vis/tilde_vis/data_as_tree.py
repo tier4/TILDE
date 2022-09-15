@@ -24,7 +24,7 @@ class TreeNode(object):
     """
 
     def __init__(self, name):
-        """Constructor."""
+        """Initialize tree structure."""
         self.name = name
         self.children = []
         self.name2child = {}

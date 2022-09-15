@@ -173,7 +173,7 @@ class Trace(object):
     """Trace data for CARET."""
 
     def __init__(self, node_name, uuid, stamp, is_publish, uuids):
-        """Constructor."""
+        """Initialize trace."""
         self.node_name = node_name  # "<topic>"
         self.uuid = uuid  # "<topic>_<stamp>"
         self.steady_t = stamp
@@ -260,7 +260,7 @@ def plot_latency_table(df):
 
 
 def main():
-    """Main."""
+    """Run main."""
     bagfile = 'rosbag2_2022_02_16-18_12_46'
     raw_msgs = read_msgs(bagfile)
     message_tracking_tags = read_message_tracking_tag(raw_msgs)

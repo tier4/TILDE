@@ -5,7 +5,7 @@ import argparse
 from collections import deque
 
 import rclpy
-from rosgraph2_impl import Edge, Graph
+from rosgraph2_impl import Edge
 
 from graph_common import find_key, get_graph
 
@@ -14,6 +14,7 @@ EXCLUDE_TOPICS = [
     "/rosout",
     "/clock",
     ]
+
 
 def main(args):
     frm = args.frm
