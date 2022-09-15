@@ -12,19 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_components/register_node_macro.hpp"
+#include "tilde/tilde_node.hpp"
+#include "tilde_message_filters/tilde_subscriber.hpp"
+
+#include "sensor_msgs/msg/point_cloud2.hpp"
+
 #include <chrono>
 #include <cstdio>
 #include <memory>
 #include <utility>
-
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_components/register_node_macro.hpp"
-
-#include "tilde/tilde_node.hpp"
-
-#include "sensor_msgs/msg/point_cloud2.hpp"
-
-#include "tilde_message_filters/tilde_subscriber.hpp"
 
 using namespace std::chrono_literals;
 
@@ -36,13 +34,9 @@ namespace sample_tilde_message_filter
 {
 struct NonConstHelper
 {
-  explicit NonConstHelper(std::shared_ptr<tilde::TildePublisher<Msg>> pub)
-  : pub_(pub) {}
+  explicit NonConstHelper(std::shared_ptr<tilde::TildePublisher<Msg>> pub) : pub_(pub) {}
 
-  void cb(const MsgPtr msg)
-  {
-    pub_->publish(*msg);
-  }
+  void cb(const MsgPtr msg) { pub_->publish(*msg); }
 
   MsgPtr msg_;
   std::shared_ptr<tilde::TildePublisher<Msg>> pub_;
@@ -50,17 +44,13 @@ struct NonConstHelper
 
 std::shared_ptr<tilde::TildePublisher<Msg>> g_pub_callback_fn_;
 
-void callback_fn(MsgConstPtr msg)
-{
-  g_pub_callback_fn_->publish(*msg);
-}
+void callback_fn(MsgConstPtr msg) { g_pub_callback_fn_->publish(*msg); }
 
-template<typename CallbackT>
+template <typename CallbackT>
 void func(CallbackT && callback)  // add [[deprecated]] to show deduced type
 {
   auto callback_addr = &callback;
 }
-
 
 // Create a Talker class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
@@ -79,24 +69,20 @@ public:
     // lambda lvalue
     // registerCallback(const C& callback) with C = sample_tilde_message_filter::..::(lambda)...
     pub_lambda_lvalue_ = create_tilde_publisher<Msg>("out_lambda_lvalue", 1);
-    auto sub_callback =
-      [this](MsgConstPtr msg) -> void
-      {
-        RCLCPP_INFO(this->get_logger(), "sub_callback");
-        // use reference because rclcpp::Publisher::publish does not have shared_ptr version
-        pub_lambda_lvalue_->publish(*msg);
-      };
+    auto sub_callback = [this](MsgConstPtr msg) -> void {
+      RCLCPP_INFO(this->get_logger(), "sub_callback");
+      // use reference because rclcpp::Publisher::publish does not have shared_ptr version
+      pub_lambda_lvalue_->publish(*msg);
+    };
     sub_pc_.registerCallback(sub_callback);
 
     // lambda rvalue
     // const C& callback (be aware `C& callback` not defined)
     pub_lambda_rvalue_ = create_tilde_publisher<Msg>("out_lambda_rvalue", 1);
-    sub_pc_.registerCallback(
-      [this](MsgConstPtr msg) -> void
-      {
-        RCLCPP_INFO(this->get_logger(), "rvalue lambda");
-        pub_lambda_rvalue_->publish(*msg);
-      });
+    sub_pc_.registerCallback([this](MsgConstPtr msg) -> void {
+      RCLCPP_INFO(this->get_logger(), "rvalue lambda");
+      pub_lambda_rvalue_->publish(*msg);
+    });
 
     /* type check
     std::cout << &sub_callback << std::endl;

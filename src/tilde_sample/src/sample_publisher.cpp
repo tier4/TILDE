@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_components/register_node_macro.hpp"
+#include "tilde/tilde_node.hpp"
+#include "tilde/tilde_publisher.hpp"
+
+#include "sensor_msgs/msg/point_cloud2.hpp"
+#include "std_msgs/msg/string.hpp"
+
 #include <chrono>
 #include <cstdio>
 #include <memory>
 #include <string>
 #include <utility>
-
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_components/register_node_macro.hpp"
-
-#include "std_msgs/msg/string.hpp"
-#include "sensor_msgs/msg/point_cloud2.hpp"
-
-#include "tilde/tilde_node.hpp"
-#include "tilde/tilde_publisher.hpp"
 
 using namespace std::chrono_literals;
 
@@ -52,23 +51,20 @@ public:
 
     // Create a function for when messages are to be sent.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-    auto publish_message =
-      [this]() -> void
-      {
-        auto time_now = this->now();
+    auto publish_message = [this]() -> void {
+      auto time_now = this->now();
 
-        msg_pc_ = std::make_unique<sensor_msgs::msg::PointCloud2>();
-        msg_pc_->header.stamp = time_now;
-        msg_pc_->header.frame_id = std::to_string(count_);
-        pub_pc_->publish(std::move(msg_pc_));
+      msg_pc_ = std::make_unique<sensor_msgs::msg::PointCloud2>();
+      msg_pc_->header.stamp = time_now;
+      msg_pc_->header.frame_id = std::to_string(count_);
+      pub_pc_->publish(std::move(msg_pc_));
 
-        RCLCPP_INFO(
-          this->get_logger(), "Publishing PointCloud2: %ld stamp: %lu",
-          count_,
-          time_now.nanoseconds());
+      RCLCPP_INFO(
+        this->get_logger(), "Publishing PointCloud2: %ld stamp: %lu", count_,
+        time_now.nanoseconds());
 
-        count_++;
-      };
+      count_++;
+    };
 
     // Create a publisher with a custom Quality of Service profile.
     rclcpp::QoS qos(rclcpp::KeepLast(7));
@@ -105,22 +101,18 @@ public:
 
     // Create a function for when messages are to be sent.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-    auto publish_message =
-      [this]() -> void
-      {
-        auto time_now = this->now();
+    auto publish_message = [this]() -> void {
+      auto time_now = this->now();
 
-        msg_string_ = std::make_unique<std_msgs::msg::String>();
-        msg_string_->data = std::to_string(count_);
-        pub_string_->publish(std::move(msg_string_));
+      msg_string_ = std::make_unique<std_msgs::msg::String>();
+      msg_string_->data = std::to_string(count_);
+      pub_string_->publish(std::move(msg_string_));
 
-        RCLCPP_INFO(
-          this->get_logger(), "Publishing String: '%ld' at '%lu'",
-          count_,
-          time_now.nanoseconds());
+      RCLCPP_INFO(
+        this->get_logger(), "Publishing String: '%ld' at '%lu'", count_, time_now.nanoseconds());
 
-        count_++;
-      };
+      count_++;
+    };
 
     // Create a publisher with a custom Quality of Service profile.
     rclcpp::QoS qos(rclcpp::KeepLast(7));

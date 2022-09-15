@@ -12,38 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rclcpp/rclcpp.hpp"
+#include "tilde/tilde_publisher.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
+
 #include <gtest/gtest.h>
 
 #include <memory>
 #include <string>
 
-#include "rclcpp/rclcpp.hpp"
-
-#include "tilde/tilde_publisher.hpp"
-#include "tilde_msg/msg/message_tracking_tag.hpp"
-
-using tilde::TildePublisherBase;
 using tilde::InputInfo;
+using tilde::TildePublisherBase;
 using tilde_msg::msg::MessageTrackingTag;
 
 class TestTildePublisher : public ::testing::Test
 {
 public:
-  void SetUp()
-  {
-  }
+  void SetUp() {}
 };
 
-void expect_near(
-  const rclcpp::Time && lhs,
-  const rclcpp::Time && rhs,
-  uint64_t thres_ms = 1)
+void expect_near(const rclcpp::Time && lhs, const rclcpp::Time && rhs, uint64_t thres_ms = 1)
 {
   uint64_t thres_ns = thres_ms * 1000 * 1000;
   EXPECT_NEAR(lhs.nanoseconds(), rhs.nanoseconds(), thres_ns);
 }
 
-TEST_F(TestTildePublisher, set_implicit_and_fill_input_info) {
+TEST_F(TestTildePublisher, set_implicit_and_fill_input_info)
+{
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
 
@@ -55,9 +50,7 @@ TEST_F(TestTildePublisher, set_implicit_and_fill_input_info) {
   info->header_stamp = rclcpp::Time(0, 1);
   const std::string TOPIC = "sample_topic";
 
-  pub.set_implicit_input_info(
-    TOPIC,
-    info);
+  pub.set_implicit_input_info(TOPIC, info);
 
   tilde_msg::msg::MessageTrackingTag msg;
   pub.fill_input_info(msg);
@@ -66,13 +59,13 @@ TEST_F(TestTildePublisher, set_implicit_and_fill_input_info) {
   EXPECT_EQ(msg.input_infos[0].topic_name, TOPIC);
   EXPECT_EQ(msg.input_infos[0].sub_time, rclcpp::Time(1, 0));
   expect_near(
-    rclcpp::Time(msg.input_infos[0].sub_time_steady, RCL_STEADY_TIME),
-    steady_clock->now());
+    rclcpp::Time(msg.input_infos[0].sub_time_steady, RCL_STEADY_TIME), steady_clock->now());
   EXPECT_EQ(msg.input_infos[0].has_header_stamp, true);
   EXPECT_EQ(msg.input_infos[0].header_stamp, rclcpp::Time(0, 1));
 }
 
-TEST_F(TestTildePublisher, add_explicit_input_info_sub_time_not_found) {
+TEST_F(TestTildePublisher, add_explicit_input_info_sub_time_not_found)
+{
   // set input_info & explicit_input_info
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
@@ -95,8 +88,7 @@ TEST_F(TestTildePublisher, add_explicit_input_info_sub_time_not_found) {
 
   // use TOPIC + search_stamp explicit info
   // although corresponding explicit sub_time doesn't exist
-  pub.add_explicit_input_info(
-    TOPIC, search_stamp);
+  pub.add_explicit_input_info(TOPIC, search_stamp);
 
   tilde_msg::msg::MessageTrackingTag msg;
   pub.fill_input_info(msg);
@@ -109,7 +101,8 @@ TEST_F(TestTildePublisher, add_explicit_input_info_sub_time_not_found) {
   EXPECT_EQ(msg.input_infos[0].header_stamp, search_stamp);
 }
 
-TEST_F(TestTildePublisher, set_explicit_subscription_time_success_then_purged) {
+TEST_F(TestTildePublisher, set_explicit_subscription_time_success_then_purged)
+{
   // set input_info & explicit_input_info
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
@@ -129,14 +122,11 @@ TEST_F(TestTildePublisher, set_explicit_subscription_time_success_then_purged) {
     input_info->has_header_stamp = true;
     input_info->header_stamp = stamp_base + rclcpp::Duration(i, 0);
 
-    pub.set_explicit_subscription_time(
-      TOPIC, input_info);
+    pub.set_explicit_subscription_time(TOPIC, input_info);
   }
 
   // normal case, middle of data
-  pub.add_explicit_input_info(
-    TOPIC,
-    stamp_base + rclcpp::Duration(5, 0));
+  pub.add_explicit_input_info(TOPIC, stamp_base + rclcpp::Duration(5, 0));
 
   tilde_msg::msg::MessageTrackingTag msg;
   pub.fill_input_info(msg);
@@ -149,9 +139,7 @@ TEST_F(TestTildePublisher, set_explicit_subscription_time_success_then_purged) {
   EXPECT_EQ(msg.input_infos[0].header_stamp, stamp_base + rclcpp::Duration(5, 0));
 
   // boundary condition: the 1st element exists
-  pub.add_explicit_input_info(
-    TOPIC,
-    stamp_base);
+  pub.add_explicit_input_info(TOPIC, stamp_base);
 
   pub.fill_input_info(msg);
 
@@ -169,12 +157,9 @@ TEST_F(TestTildePublisher, set_explicit_subscription_time_success_then_purged) {
   input_info->sub_time_steady = recv_base_steady + rclcpp::Duration(10, 0);
   input_info->has_header_stamp = true;
   input_info->header_stamp = stamp_base + rclcpp::Duration(10, 0);
-  pub.set_explicit_subscription_time(
-    TOPIC, input_info);
+  pub.set_explicit_subscription_time(TOPIC, input_info);
 
-  pub.add_explicit_input_info(
-    TOPIC,
-    stamp_base);
+  pub.add_explicit_input_info(TOPIC, stamp_base);
 
   pub.fill_input_info(msg);
 
@@ -187,7 +172,8 @@ TEST_F(TestTildePublisher, set_explicit_subscription_time_success_then_purged) {
   EXPECT_EQ(msg.input_infos[0].header_stamp, stamp_base);
 }
 
-TEST_F(TestTildePublisher, set_multiple_topic) {
+TEST_F(TestTildePublisher, set_multiple_topic)
+{
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
   TildePublisherBase pub(clock, steady_clock, "node_name");
@@ -206,11 +192,8 @@ TEST_F(TestTildePublisher, set_multiple_topic) {
   input_info->has_header_stamp = true;
   input_info->header_stamp = stamp_base;
 
-  pub.set_explicit_subscription_time(
-    TOPIC1, input_info);
-  pub.add_explicit_input_info(
-    TOPIC1,
-    stamp_base);
+  pub.set_explicit_subscription_time(TOPIC1, input_info);
+  pub.add_explicit_input_info(TOPIC1, stamp_base);
 
   auto recv_base2 = recv_base + rclcpp::Duration(2, 1);
   auto recv_base2_steady = recv_base_steady + rclcpp::Duration(2, 1);
@@ -222,11 +205,8 @@ TEST_F(TestTildePublisher, set_multiple_topic) {
   input_info2->has_header_stamp = true;
   input_info2->header_stamp = stamp_base2;
 
-  pub.set_explicit_subscription_time(
-    TOPIC2, input_info2);
-  pub.add_explicit_input_info(
-    TOPIC2,
-    stamp_base2);
+  pub.set_explicit_subscription_time(TOPIC2, input_info2);
+  pub.add_explicit_input_info(TOPIC2, stamp_base2);
 
   tilde_msg::msg::MessageTrackingTag msg;
   pub.fill_input_info(msg);
@@ -252,7 +232,8 @@ TEST_F(TestTildePublisher, set_multiple_topic) {
   EXPECT_EQ(msg.input_infos[idx2].header_stamp, stamp_base2);
 }
 
-TEST_F(TestTildePublisher, no_explicit_after_add_explicit) {
+TEST_F(TestTildePublisher, no_explicit_after_add_explicit)
+{
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
   TildePublisherBase pub(clock, steady_clock, "node_name");
@@ -274,14 +255,11 @@ TEST_F(TestTildePublisher, no_explicit_after_add_explicit) {
     input_info->header_stamp = stamp_base;
 
     pub.set_implicit_input_info(TOPIC, input_info);
-    pub.set_explicit_subscription_time(
-      TOPIC, input_info);
+    pub.set_explicit_subscription_time(TOPIC, input_info);
   }
 
   /// use explicit API
-  pub.add_explicit_input_info(
-    TOPIC,
-    stamp_base);
+  pub.add_explicit_input_info(TOPIC, stamp_base);
 
   /// publish
   {
@@ -319,12 +297,10 @@ TEST_F(TestTildePublisher, no_explicit_after_add_explicit) {
     input_info->has_header_stamp = true;
     input_info->header_stamp = stamp_base2;
 
-    pub.set_explicit_subscription_time(
-      TOPIC, input_info);
+    pub.set_explicit_subscription_time(TOPIC, input_info);
 
     pub.set_implicit_input_info(TOPIC, input_info);
-    pub.set_explicit_subscription_time(
-      TOPIC, input_info);
+    pub.set_explicit_subscription_time(TOPIC, input_info);
   }
 
   /// publish
@@ -336,7 +312,8 @@ TEST_F(TestTildePublisher, no_explicit_after_add_explicit) {
   }
 }
 
-TEST_F(TestTildePublisher, get_input_info) {
+TEST_F(TestTildePublisher, get_input_info)
+{
   auto clock = std::make_shared<rclcpp::Clock>();
   auto steady_clock = std::make_shared<rclcpp::Clock>(RCL_STEADY_TIME);
   TildePublisherBase pub(clock, steady_clock, "node_name");

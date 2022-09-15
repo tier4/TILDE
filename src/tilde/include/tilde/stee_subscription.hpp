@@ -15,35 +15,28 @@
 #ifndef TILDE__STEE_SUBSCRIPTION_HPP_
 #define TILDE__STEE_SUBSCRIPTION_HPP_
 
-#include <memory>
-
 #include "rclcpp/subscription.hpp"
-
 #include "tilde/message_conversion.hpp"
+
+#include <memory>
 
 namespace tilde
 {
 
-template<
+template <
   typename CallbackMessageT,
   typename ConvertedCallbackMessageT = ConvertedMessageType<CallbackMessageT>,
   typename AllocatorT = std::allocator<void>,
-  typename MessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
-    CallbackMessageT,
-    AllocatorT>,
-  typename ConvertedMessageMemoryStrategyT = rclcpp::message_memory_strategy::MessageMemoryStrategy<
-    ConvertedCallbackMessageT,
-    AllocatorT>
->
+  typename MessageMemoryStrategyT =
+    rclcpp::message_memory_strategy::MessageMemoryStrategy<CallbackMessageT, AllocatorT>,
+  typename ConvertedMessageMemoryStrategyT =
+    rclcpp::message_memory_strategy::MessageMemoryStrategy<ConvertedCallbackMessageT, AllocatorT> >
 class SteeSubscription
 {
 private:
-  using SubscriptionT = rclcpp::Subscription<CallbackMessageT,
-      AllocatorT,
-      MessageMemoryStrategyT>;
-  using ConvertedSubscriptionT = rclcpp::Subscription<ConvertedCallbackMessageT,
-      AllocatorT,
-      ConvertedMessageMemoryStrategyT>;
+  using SubscriptionT = rclcpp::Subscription<CallbackMessageT, AllocatorT, MessageMemoryStrategyT>;
+  using ConvertedSubscriptionT =
+    rclcpp::Subscription<ConvertedCallbackMessageT, AllocatorT, ConvertedMessageMemoryStrategyT>;
 
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(SteeSubscription)
@@ -52,8 +45,7 @@ public:
   /**
    * Hold only one of sub or converted_sub.
    */
-  SteeSubscription()
-  {}
+  SteeSubscription() {}
 
   void set_sub(std::shared_ptr<SubscriptionT> sub)
   {

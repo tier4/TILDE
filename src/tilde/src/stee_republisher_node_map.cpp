@@ -25,32 +25,28 @@ namespace tilde
 class SteeRepublisherNodeMap : public SteeNode
 {
 public:
-  explicit SteeRepublisherNodeMap(
-      const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
-      : SteeNode("stee_republisher_node", options)
+  explicit SteeRepublisherNodeMap(const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
+  : SteeNode("stee_republisher_node", options)
   {
     init();
   }
 
   explicit SteeRepublisherNodeMap(
-      const std::string & node_name,
-      const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
-      : SteeNode(node_name, options)
+    const std::string & node_name, const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
+  : SteeNode(node_name, options)
   {
     init();
   }
 
   explicit SteeRepublisherNodeMap(
-    const std::string & node_name,
-    const std::string & namespace_,
+    const std::string & node_name, const std::string & namespace_,
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
-      : SteeNode(node_name, namespace_, options)
+  : SteeNode(node_name, namespace_, options)
   {
     init();
   }
 
-  virtual ~SteeRepublisherNodeMap()
-  {}
+  virtual ~SteeRepublisherNodeMap() {}
 
 private:
   std::vector<std::string> original_input_topics_;
@@ -65,30 +61,22 @@ private:
 
   void init()
   {
-    original_input_topics_ = declare_parameter<std::vector<std::string>>(
-        "input_topics", std::vector<std::string>{});
-    original_output_topic_ = declare_parameter<std::string>(
-        "output_topic", "");
+    original_input_topics_ =
+      declare_parameter<std::vector<std::string>>("input_topics", std::vector<std::string>{});
+    original_output_topic_ = declare_parameter<std::string>("output_topic", "");
 
-    for(const auto & input_topic : original_input_topics_) {
+    for (const auto & input_topic : original_input_topics_) {
       auto sub = create_stee_subscription<PointCloud2>(
-          input_topic,
-          rclcpp::QoS(1),
-          [](PointCloud2::UniquePtr msg) {
-            (void) msg;
-          });
+        input_topic, rclcpp::QoS(1), [](PointCloud2::UniquePtr msg) { (void)msg; });
       input_stee_subscriptions_.push_back(sub);
     }
 
     output_republisher_ = create_stee_republisher<PointCloud2>(
-        original_output_topic_,
-        rclcpp::QoS(1).transient_local());
+      original_output_topic_, rclcpp::QoS(1).transient_local());
     output_subscription_ = create_subscription<PointCloud2>(
-        original_output_topic_,
-        rclcpp::QoS(1).transient_local(),
-        [this](PointCloud2::UniquePtr msg) {
-          output_republisher_->publish(std::move(msg));
-        });  // TODO(y-okumura-isp): parameterize QoS
+      original_output_topic_, rclcpp::QoS(1).transient_local(), [this](PointCloud2::UniquePtr msg) {
+        output_republisher_->publish(std::move(msg));
+      });  // TODO(y-okumura-isp): parameterize QoS
   }
 };
 

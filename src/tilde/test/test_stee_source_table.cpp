@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "tilde/stee_sources_table.hpp"
+
 #include <gtest/gtest.h>
 
 #include <string>
-#include <vector>
 #include <utility>
-
-#include "tilde/stee_sources_table.hpp"
+#include <vector>
 
 using tilde::SteeSourcesTable;
 using tilde_msg::msg::SteeSource;
@@ -26,24 +26,15 @@ using tilde_msg::msg::SteeSource;
 class TestSteeSourcesTable : public ::testing::Test
 {
 public:
-  void SetUp() override
-  {
-  }
+  void SetUp() override {}
 
-  void TearDown() override
-  {
-  }
+  void TearDown() override {}
 };
 
-rclcpp::Time get_time(int32_t sec, uint32_t nsec)
-{
-  return rclcpp::Time(sec, nsec);
-}
+rclcpp::Time get_time(int32_t sec, uint32_t nsec) { return rclcpp::Time(sec, nsec); }
 
 void add_sources(
-  const std::string & in_topic,
-  const rclcpp::Time & stamp,
-  const rclcpp::Time & steady,
+  const std::string & in_topic, const rclcpp::Time & stamp, const rclcpp::Time & steady,
   std::vector<SteeSource> & out)
 {
   SteeSource s;
@@ -53,7 +44,8 @@ void add_sources(
   out.emplace_back(std::move(s));
 }
 
-TEST_F(TestSteeSourcesTable, set_one_entry) {
+TEST_F(TestSteeSourcesTable, set_one_entry)
+{
   SteeSourcesTable table(100);
 
   /**
@@ -71,18 +63,14 @@ TEST_F(TestSteeSourcesTable, set_one_entry) {
   auto topic11_stamp = get_time(101, 0);
   table.set("topic1", topic11_stamp, sources_msg);
 
-  auto check =
-    [&in_stamp, &in_steady](const SteeSourcesTable::SourcesMsg & msg) -> void
-    {
-      EXPECT_EQ(msg.size(), 1u);
+  auto check = [&in_stamp, &in_steady](const SteeSourcesTable::SourcesMsg & msg) -> void {
+    EXPECT_EQ(msg.size(), 1u);
 
-      auto in_source = msg[0];
-      EXPECT_EQ(in_source.topic, "in");
-      EXPECT_EQ(in_source.stamp, in_stamp);
-      EXPECT_EQ(
-        in_source.first_subscription_steady_time,
-        in_steady);
-    };
+    auto in_source = msg[0];
+    EXPECT_EQ(in_source.topic, "in");
+    EXPECT_EQ(in_source.stamp, in_stamp);
+    EXPECT_EQ(in_source.first_subscription_steady_time, in_steady);
+  };
 
   // test for get_latest_sources
   {
@@ -114,7 +102,8 @@ TEST_F(TestSteeSourcesTable, set_one_entry) {
   }
 }
 
-TEST_F(TestSteeSourcesTable, set_one_entry_multiple_source_topics) {
+TEST_F(TestSteeSourcesTable, set_one_entry_multiple_source_topics)
+{
   SteeSourcesTable table(100);
 
   /**
@@ -136,31 +125,21 @@ TEST_F(TestSteeSourcesTable, set_one_entry_multiple_source_topics) {
   auto topic11_stamp = get_time(110, 0);
   table.set("topic1", topic11_stamp, sources);
 
-  auto check =
-    [&in11_stamp, &in11_steady,
-      &in21_stamp, &in21_steady](const SteeSourcesTable::SourcesMsg & msg) -> void
-    {
-      EXPECT_EQ(msg.size(), 2u);
-      for (const auto & in_source : msg) {
-        if (in_source.topic == "in1") {
-          EXPECT_EQ(
-            in_source.stamp,
-            in11_stamp);
-          EXPECT_EQ(
-            in_source.first_subscription_steady_time,
-            in11_steady);
-        } else if (in_source.topic == "in2") {
-          EXPECT_EQ(
-            in_source.stamp,
-            in21_stamp);
-          EXPECT_EQ(
-            in_source.first_subscription_steady_time,
-            in21_steady);
-        } else {
-          FAIL() << "unknown source topic";
-        }
+  auto check = [&in11_stamp, &in11_steady, &in21_stamp,
+                &in21_steady](const SteeSourcesTable::SourcesMsg & msg) -> void {
+    EXPECT_EQ(msg.size(), 2u);
+    for (const auto & in_source : msg) {
+      if (in_source.topic == "in1") {
+        EXPECT_EQ(in_source.stamp, in11_stamp);
+        EXPECT_EQ(in_source.first_subscription_steady_time, in11_steady);
+      } else if (in_source.topic == "in2") {
+        EXPECT_EQ(in_source.stamp, in21_stamp);
+        EXPECT_EQ(in_source.first_subscription_steady_time, in21_steady);
+      } else {
+        FAIL() << "unknown source topic";
       }
-    };
+    }
+  };
 
   // test for get_latest_sources
   {
@@ -180,7 +159,8 @@ TEST_F(TestSteeSourcesTable, set_one_entry_multiple_source_topics) {
   }
 }
 
-TEST_F(TestSteeSourcesTable, source_topic_has_multiple_stamp) {
+TEST_F(TestSteeSourcesTable, source_topic_has_multiple_stamp)
+{
   SteeSourcesTable table(100);
 
   /**
@@ -218,12 +198,11 @@ TEST_F(TestSteeSourcesTable, source_topic_has_multiple_stamp) {
   const auto & in_source = *in_sources.begin();
   EXPECT_EQ(in_source.topic, "in1");
   EXPECT_EQ(in_source.stamp, in12_stamp);
-  EXPECT_EQ(
-    in_source.first_subscription_steady_time,
-    in12_steady);
+  EXPECT_EQ(in_source.first_subscription_steady_time, in12_steady);
 }
 
-TEST_F(TestSteeSourcesTable, source_topic_has_multiple_stamp_skew) {
+TEST_F(TestSteeSourcesTable, source_topic_has_multiple_stamp_skew)
+{
   SteeSourcesTable table(100);
 
   /**
@@ -263,12 +242,11 @@ TEST_F(TestSteeSourcesTable, source_topic_has_multiple_stamp_skew) {
   const auto & in_source = *in_sources.begin();
   EXPECT_EQ(in_source.topic, "in1");
   EXPECT_EQ(in_source.stamp, in11_stamp);
-  EXPECT_EQ(
-    in_source.first_subscription_steady_time,
-    in11_steady);
+  EXPECT_EQ(in_source.first_subscription_steady_time, in11_steady);
 }
 
-TEST_F(TestSteeSourcesTable, stamp_deletion) {
+TEST_F(TestSteeSourcesTable, stamp_deletion)
+{
   SteeSourcesTable table(1);
 
   /**
@@ -287,9 +265,7 @@ TEST_F(TestSteeSourcesTable, stamp_deletion) {
   auto topic11_stamp = get_time(110, 11);
   table.set("topic1", topic11_stamp, sources11);
 
-  EXPECT_EQ(
-    table.get_sources("topic1", topic11_stamp).size(),
-    1u);
+  EXPECT_EQ(table.get_sources("topic1", topic11_stamp).size(), 1u);
 
   // topic1 msg2 input
   SteeSourcesTable::SourcesMsg sources12;
@@ -301,7 +277,5 @@ TEST_F(TestSteeSourcesTable, stamp_deletion) {
   table.set("topic1", topic12_stamp, sources12);
 
   // check topic1 msg1 is purged
-  EXPECT_EQ(
-    table.get_sources("topic1", topic11_stamp).size(),
-    0u);
+  EXPECT_EQ(table.get_sources("topic1", topic11_stamp).size(), 0u);
 }

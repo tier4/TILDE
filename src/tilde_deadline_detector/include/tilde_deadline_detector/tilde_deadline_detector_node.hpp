@@ -15,18 +15,17 @@
 #ifndef TILDE_DEADLINE_DETECTOR__TILDE_DEADLINE_DETECTOR_NODE_HPP_
 #define TILDE_DEADLINE_DETECTOR__TILDE_DEADLINE_DETECTOR_NODE_HPP_
 
+#include "rclcpp/rclcpp.hpp"
+#include "tilde_deadline_detector/forward_estimator.hpp"
+#include "tilde_msg/msg/deadline_notification.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
+
 #include <gtest/gtest_prod.h>
 
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
-
-#include "rclcpp/rclcpp.hpp"
-#include "tilde_msg/msg/message_tracking_tag.hpp"
-#include "tilde_msg/msg/deadline_notification.hpp"
-
-#include "tilde_deadline_detector/forward_estimator.hpp"
 
 namespace tilde_deadline_detector
 {
@@ -46,14 +45,12 @@ class TildeDeadlineDetectorNode : public rclcpp::Node
 public:
   RCLCPP_PUBLIC
   explicit TildeDeadlineDetectorNode(
-    const std::string & node_name,
-    const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+    const std::string & node_name, const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   /// see corresponding rclcpp::Node constructor
   RCLCPP_PUBLIC
   explicit TildeDeadlineDetectorNode(
-    const std::string & node_name,
-    const std::string & namespace_,
+    const std::string & node_name, const std::string & namespace_,
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   RCLCPP_PUBLIC

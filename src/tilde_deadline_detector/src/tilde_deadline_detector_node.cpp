@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "tilde_deadline_detector/tilde_deadline_detector_node.hpp"
+
+#include "builtin_interfaces/msg/time.hpp"
+#include "rcutils/time.h"
+#include "tilde_msg/msg/deadline_notification.hpp"
+#include "tilde_msg/msg/source.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <map>
 #include <set>
-#include <string>
 #include <sstream>
+#include <string>
 #include <thread>
 #include <utility>
 #include <vector>
 
-#include "rcutils/time.h"
-
-#include "builtin_interfaces/msg/time.hpp"
-
-#include "tilde_deadline_detector/tilde_deadline_detector_node.hpp"
-#include "tilde_msg/msg/source.hpp"
-#include "tilde_msg/msg/deadline_notification.hpp"
-
-using tilde_msg::msg::MessageTrackingTag;
 using std::chrono::milliseconds;
+using tilde_msg::msg::MessageTrackingTag;
 
 namespace tilde_deadline_detector
 {
@@ -53,16 +52,14 @@ void PerformanceCounter::add(float v)
 }
 
 TildeDeadlineDetectorNode::TildeDeadlineDetectorNode(
-  const std::string & node_name,
-  const rclcpp::NodeOptions & options)
+  const std::string & node_name, const rclcpp::NodeOptions & options)
 : Node(node_name, options)
 {
   init();
 }
 
 TildeDeadlineDetectorNode::TildeDeadlineDetectorNode(
-  const std::string & node_name,
-  const std::string & namespace_,
+  const std::string & node_name, const std::string & namespace_,
   const rclcpp::NodeOptions & options)
 : Node(node_name, namespace_, options)
 {
@@ -75,8 +72,7 @@ TildeDeadlineDetectorNode::TildeDeadlineDetectorNode(const rclcpp::NodeOptions &
   init();
 }
 
-TildeDeadlineDetectorNode::~TildeDeadlineDetectorNode()
-{}
+TildeDeadlineDetectorNode::~TildeDeadlineDetectorNode() {}
 
 std::set<std::string> TildeDeadlineDetectorNode::get_message_tracking_tag_topics() const
 {
@@ -96,34 +92,29 @@ std::set<std::string> TildeDeadlineDetectorNode::get_message_tracking_tag_topics
 
 void TildeDeadlineDetectorNode::init()
 {
-  auto ignores = declare_parameter<std::vector<std::string>>(
-    "ignore_topics", std::vector<std::string>{});
+  auto ignores =
+    declare_parameter<std::vector<std::string>>("ignore_topics", std::vector<std::string>{});
 
-  auto tmp_sensor_topics = declare_parameter<std::vector<std::string>>(
-    "sensor_topics", std::vector<std::string>{});
+  auto tmp_sensor_topics =
+    declare_parameter<std::vector<std::string>>("sensor_topics", std::vector<std::string>{});
   sensor_topics_.insert(tmp_sensor_topics.begin(), tmp_sensor_topics.end());
 
-  auto tmp_target_topics = declare_parameter<std::vector<std::string>>(
-    "target_topics", std::vector<std::string>{});
+  auto tmp_target_topics =
+    declare_parameter<std::vector<std::string>>("target_topics", std::vector<std::string>{});
   target_topics_.insert(tmp_target_topics.begin(), tmp_target_topics.end());
 
-  auto deadline_ms = declare_parameter<std::vector<int64_t>>(
-    "deadline_ms", std::vector<int64_t>{});
+  auto deadline_ms = declare_parameter<std::vector<int64_t>>("deadline_ms", std::vector<int64_t>{});
 
-  auto skips_main_out = declare_parameter<std::vector<std::string>>(
-    "skips_main_out", std::vector<std::string>{});
-  auto skips_main_in = declare_parameter<std::vector<std::string>>(
-    "skips_main_in", std::vector<std::string>{});
+  auto skips_main_out =
+    declare_parameter<std::vector<std::string>>("skips_main_out", std::vector<std::string>{});
+  auto skips_main_in =
+    declare_parameter<std::vector<std::string>>("skips_main_in", std::vector<std::string>{});
 
   assert(skips_main_out.size() == skips_main_in.size());
 
   std::map<std::string, std::string> skips_out_to_in;
-  for (auto out_it = skips_main_out.begin(),
-    in_it = skips_main_in.begin();
-    (out_it != skips_main_out.end() &&
-    in_it != skips_main_in.end());
-    out_it++, in_it++)
-  {
+  for (auto out_it = skips_main_out.begin(), in_it = skips_main_in.begin();
+       (out_it != skips_main_out.end() && in_it != skips_main_in.end()); out_it++, in_it++) {
     skips_out_to_in[*out_it] = *in_it;
   }
   fe.set_skip_out_to_in(skips_out_to_in);
@@ -165,17 +156,14 @@ void TildeDeadlineDetectorNode::init()
     auto sub = create_subscription<MessageTrackingTag>(
       topic, qos,
       std::bind(
-        &TildeDeadlineDetectorNode::message_tracking_tag_callback, this,
-        std::placeholders::_1));
+        &TildeDeadlineDetectorNode::message_tracking_tag_callback, this, std::placeholders::_1));
     subs_.push_back(sub);
   }
 
   latest_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   timer_ = create_wall_timer(
-    milliseconds(cleanup_ms_),
-    [this, clock_work_around, show_performance]() -> void
-    {
+    milliseconds(cleanup_ms_), [this, clock_work_around, show_performance]() -> void {
       auto st = std::chrono::steady_clock::now();
 
       auto t = this->now();
@@ -191,12 +179,12 @@ void TildeDeadlineDetectorNode::init()
         std::chrono::duration_cast<std::chrono::milliseconds>(et - st).count());
 
       if (show_performance) {
-        std::cout << "message_tracking_tag_callback: " <<
-        "  avg: " << message_tracking_tag_callback_counter_.avg << "\n" <<
-        "  max: " << message_tracking_tag_callback_counter_.max << "\n" <<
-        "timer_callback: " <<
-        "  avg: " << timer_callback_counter_.avg << "\n" <<
-        "  max: " << timer_callback_counter_.max << std::endl;
+        std::cout << "message_tracking_tag_callback: "
+                  << "  avg: " << message_tracking_tag_callback_counter_.avg << "\n"
+                  << "  max: " << message_tracking_tag_callback_counter_.max << "\n"
+                  << "timer_callback: "
+                  << "  avg: " << timer_callback_counter_.avg << "\n"
+                  << "  max: " << timer_callback_counter_.max << std::endl;
         this->fe.debug_print();
       }
     });
@@ -206,8 +194,7 @@ void TildeDeadlineDetectorNode::init()
 }
 
 void print_report(
-  const std::string & topic,
-  const builtin_interfaces::msg::Time & stamp,
+  const std::string & topic, const builtin_interfaces::msg::Time & stamp,
   const ForwardEstimator::InputSources & is)
 {
   std::cout << topic << ": " << time2str(stamp) << "\n";
@@ -250,9 +237,10 @@ void TildeDeadlineDetectorNode::message_tracking_tag_callback(
   if (print_pending_messages_) {
     std::cout << "pending message counts:\n";
     for (const auto & pending_message_count : fe.get_pending_message_counts()) {
-      if (pending_message_count.second == 0) {continue;}
-      std::cout << pending_message_count.first << ": " <<
-        pending_message_count.second << "\n";
+      if (pending_message_count.second == 0) {
+        continue;
+      }
+      std::cout << pending_message_count.first << ": " << pending_message_count.second << "\n";
     }
     std::cout << std::endl;
   }
@@ -271,12 +259,13 @@ void TildeDeadlineDetectorNode::message_tracking_tag_callback(
   auto sources = fe.get_ref_to_sources(target, stamp);
   for (const auto & weak_src : sources) {
     auto src = weak_src.lock();
-    if (!src) {continue;}
+    if (!src) {
+      continue;
+    }
     tilde_msg::msg::Source source_msg;
     source_msg.topic = src->output_info.topic_name;
     source_msg.stamp = src->output_info.header_stamp;
-    auto elapsed = rclcpp::Time(pub_time_steady) -
-      rclcpp::Time(src->output_info.pub_time_steady);
+    auto elapsed = rclcpp::Time(pub_time_steady) - rclcpp::Time(src->output_info.pub_time_steady);
     source_msg.elapsed = elapsed;
     if (RCUTILS_MS_TO_NS(deadline_ms) <= elapsed.nanoseconds()) {
       source_msg.is_overrun = true;

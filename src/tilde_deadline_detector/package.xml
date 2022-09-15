@@ -10,13 +10,13 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+  <test_depend>caret_lint_common</test_depend>
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
+  <depend>sensor_msgs</depend>
   <depend>tilde</depend>
   <depend>tilde_msg</depend>
-  <depend>sensor_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

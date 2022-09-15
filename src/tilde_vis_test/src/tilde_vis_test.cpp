@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_components/register_node_macro.hpp"
+#include "tilde/tilde_node.hpp"
+#include "tilde/tilde_publisher.hpp"
+
+#include "sensor_msgs/msg/point_cloud2.hpp"
+#include "std_msgs/msg/string.hpp"
+
 #include <chrono>
 #include <cstdio>
 #include <memory>
-#include <utility>
 #include <string>
-
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_components/register_node_macro.hpp"
-
-#include "std_msgs/msg/string.hpp"
-#include "sensor_msgs/msg/point_cloud2.hpp"
-
-#include "tilde/tilde_node.hpp"
-#include "tilde/tilde_publisher.hpp"
+#include <utility>
 
 using namespace std::chrono_literals;
 
@@ -42,8 +41,7 @@ const char out_topic[] = "out";
 class Sensor : public rclcpp::Node
 {
 public:
-  explicit Sensor(const rclcpp::NodeOptions & options)
-  : Node("sensor", options)
+  explicit Sensor(const rclcpp::NodeOptions & options) : Node("sensor", options)
   {
     const std::string TIMER_DUR = "timer_us";
     const int64_t TIMER_DUR_DEFAULT_NS = 100 * 1000;
@@ -54,13 +52,11 @@ public:
 
     pub_pc_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(in_topic, qos);
 
-    auto timer_callback =
-      [this]() -> void
-      {
-        auto msg = std::make_unique<sensor_msgs::msg::PointCloud2>();
-        msg->header.stamp = this->now();
-        pub_pc_->publish(std::move(msg));
-      };
+    auto timer_callback = [this]() -> void {
+      auto msg = std::make_unique<sensor_msgs::msg::PointCloud2>();
+      msg->header.stamp = this->now();
+      pub_pc_->publish(std::move(msg));
+    };
     auto dur = std::chrono::duration<int64_t, std::micro>(timer_dur);
     timer_ = this->create_wall_timer(dur, timer_callback);
   }
@@ -73,23 +69,16 @@ private:
 class Relay : public tilde::TildeNode
 {
 public:
-  explicit Relay(const rclcpp::NodeOptions & options)
-  : TildeNode("relay", options)
+  explicit Relay(const rclcpp::NodeOptions & options) : TildeNode("relay", options)
   {
     rclcpp::QoS qos(rclcpp::KeepLast(7));
 
-    pub_pc_ = this->create_tilde_publisher<sensor_msgs::msg::PointCloud2>(
-      out_topic, qos);
+    pub_pc_ = this->create_tilde_publisher<sensor_msgs::msg::PointCloud2>(out_topic, qos);
 
     sub_pc_ = this->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
-      in_topic, qos,
-      [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
-      {
-        (void) msg;
-        RCLCPP_INFO(
-          this->get_logger(),
-          "Relay get message cnt_ = %d",
-          cnt_);
+      in_topic, qos, [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void {
+        (void)msg;
+        RCLCPP_INFO(this->get_logger(), "Relay get message cnt_ = %d", cnt_);
         pub_pc_->publish(std::move(msg));
         cnt_++;
       });
@@ -104,23 +93,16 @@ private:
 class Filter : public tilde::TildeNode
 {
 public:
-  explicit Filter(const rclcpp::NodeOptions & options)
-  : TildeNode("filter", options)
+  explicit Filter(const rclcpp::NodeOptions & options) : TildeNode("filter", options)
   {
     rclcpp::QoS qos(rclcpp::KeepLast(7));
 
-    pub_str_ = this->create_tilde_publisher<std_msgs::msg::String>(
-      out_topic, qos);
+    pub_str_ = this->create_tilde_publisher<std_msgs::msg::String>(out_topic, qos);
 
     sub_pc_ = this->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
-      in_topic, qos,
-      [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
-      {
-        (void) msg;
-        RCLCPP_INFO(
-          this->get_logger(),
-          "Filter get message cnt_ = %d",
-          cnt_);
+      in_topic, qos, [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void {
+        (void)msg;
+        RCLCPP_INFO(this->get_logger(), "Filter get message cnt_ = %d", cnt_);
         auto out_msg = std::make_unique<std_msgs::msg::String>();
         out_msg->data = "hello";
         pub_str_->publish(std::move(out_msg));
@@ -133,7 +115,6 @@ private:
   tilde::TildePublisher<std_msgs::msg::String>::SharedPtr pub_str_;
   int cnt_{0};
 };
-
 
 }  // namespace tilde_vis_test
 

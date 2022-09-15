@@ -1,7 +1,5 @@
 # TILDE の動作原理
 
-**best viewed with [mermaid-diagrams](https://chrome.google.com/webstore/detail/mermaid-diagrams/phfcghedmopjadpojhmmaffjmfiakfil/related) or [GitHub + Mermaid](https://chrome.google.com/webstore/detail/github-+-mermaid/goiiopgdnkogdbjmncgedmgpoajilohe)**
-
 TILDE は、ユーザプログラムがメイントピックを publish するのに併せて MessageTrackingTag というトピックを `<topic名>/message_tracking_tag` に publish します。  
 MessageTrackingTag は数百バイト程度のメッセージで、メイントピックを構成する入力トピックの情報が記載されます。
 

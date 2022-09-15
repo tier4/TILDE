@@ -12,6 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "builtin_interfaces/msg/time.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "tilde/tilde_node.hpp"
+#include "tilde_deadline_detector/tilde_deadline_detector_node.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
+#include "tilde_msg/msg/sub_topic_time_info.hpp"
+
+#include "sensor_msgs/msg/point_cloud2.hpp"
+
 #include <gtest/gtest.h>
 
 #include <chrono>
@@ -21,30 +30,14 @@
 #include <utility>
 #include <vector>
 
-#include "rclcpp/rclcpp.hpp"
-#include "builtin_interfaces/msg/time.hpp"
-#include "sensor_msgs/msg/point_cloud2.hpp"
-
-#include "tilde/tilde_node.hpp"
-#include "tilde_msg/msg/message_tracking_tag.hpp"
-#include "tilde_msg/msg/sub_topic_time_info.hpp"
-
-#include "tilde_deadline_detector/tilde_deadline_detector_node.hpp"
-
 using tilde_deadline_detector::TildeDeadlineDetectorNode;
 
 class TestTildeDeadlineDetectorNode : public ::testing::Test
 {
 public:
-  void SetUp() override
-  {
-    rclcpp::init(0, nullptr);
-  }
+  void SetUp() override { rclcpp::init(0, nullptr); }
 
-  void TearDown() override
-  {
-    rclcpp::shutdown();
-  }
+  void TearDown() override { rclcpp::shutdown(); }
 };
 
 builtin_interfaces::msg::Time get_time(int sec, int nsec)
@@ -65,8 +58,8 @@ TEST_F(TestTildeDeadlineDetectorNode, get_message_tracking_tag_topics)
   auto tilde_node = tilde::TildeNode("tilde_node");
   auto pub = tilde_node.create_tilde_publisher<sensor_msgs::msg::PointCloud2>("topic", 1);
   auto pub2 = tilde_node.create_publisher<sensor_msgs::msg::PointCloud2>("topic2", 1);
-  auto pub3 = tilde_node.create_publisher<sensor_msgs::msg::PointCloud2>(
-    "topic2/message_tracking_tag", 1);
+  auto pub3 =
+    tilde_node.create_publisher<sensor_msgs::msg::PointCloud2>("topic2/message_tracking_tag", 1);
 
   auto det_node = TildeDeadlineDetectorNode("node");
   auto topics = det_node.get_message_tracking_tag_topics();
@@ -75,10 +68,8 @@ TEST_F(TestTildeDeadlineDetectorNode, get_message_tracking_tag_topics)
   EXPECT_EQ(*topics.begin(), "/topic/message_tracking_tag");
 }
 
-tilde_msg::msg::MessageTrackingTag
-get_message_tracking_tag(
-  const std::string & topic,
-  builtin_interfaces::msg::Time stamp,
+tilde_msg::msg::MessageTrackingTag get_message_tracking_tag(
+  const std::string & topic, builtin_interfaces::msg::Time stamp,
   builtin_interfaces::msg::Time pub_steady)
 {
   tilde_msg::msg::MessageTrackingTag tag;
@@ -90,8 +81,7 @@ get_message_tracking_tag(
 }
 
 void add_input_info(
-  tilde_msg::msg::MessageTrackingTag & tag,
-  const tilde_msg::msg::MessageTrackingTag & in_tag)
+  tilde_msg::msg::MessageTrackingTag & tag, const tilde_msg::msg::MessageTrackingTag & in_tag)
 {
   tilde_msg::msg::SubTopicTimeInfo sub_info;
   sub_info.topic_name = in_tag.output_info.topic_name;
@@ -119,11 +109,9 @@ TEST_F(TestTildeDeadlineDetectorNode, test_deadline_detection)
   auto checker_node = std::make_shared<rclcpp::Node>("checker_node");
   bool notification_called = false;
   auto checker_sub = checker_node->create_subscription<tilde_msg::msg::DeadlineNotification>(
-    "deadline_notification",
-    rclcpp::QoS(1).best_effort(),
-    [this, &notification_called, deadline_ms](
-      tilde_msg::msg::DeadlineNotification::UniquePtr msg) -> void
-    {
+    "deadline_notification", rclcpp::QoS(1).best_effort(),
+    [this, &notification_called,
+     deadline_ms](tilde_msg::msg::DeadlineNotification::UniquePtr msg) -> void {
       notification_called = true;
       EXPECT_EQ(msg->topic_name, "next");
       EXPECT_EQ(msg->stamp, get_time(200, 0));
@@ -137,23 +125,19 @@ TEST_F(TestTildeDeadlineDetectorNode, test_deadline_detection)
       EXPECT_TRUE(s.is_overrun);
     });
 
-  auto spin =
-    [tag_sender_node, deadline_detector_node, checker_node]() -> void
-    {
-      rclcpp::spin_some(tag_sender_node);
-      rclcpp::spin_some(deadline_detector_node);
-      rclcpp::spin_some(checker_node);
-    };
+  auto spin = [tag_sender_node, deadline_detector_node, checker_node]() -> void {
+    rclcpp::spin_some(tag_sender_node);
+    rclcpp::spin_some(deadline_detector_node);
+    rclcpp::spin_some(checker_node);
+  };
 
   // case1: not overrun
   {
     auto t1 = get_time(100, 0);
     auto t2 = get_time(100, deadline_ms * 1000 * 1000 - 1);  // ms to ns
-    tilde_msg::msg::MessageTrackingTag sensor_tag =
-      get_message_tracking_tag("sensor", t1, t1);
+    tilde_msg::msg::MessageTrackingTag sensor_tag = get_message_tracking_tag("sensor", t1, t1);
 
-    tilde_msg::msg::MessageTrackingTag next_tag =
-      get_message_tracking_tag("next", t1, t2);
+    tilde_msg::msg::MessageTrackingTag next_tag = get_message_tracking_tag("next", t1, t2);
     add_input_info(next_tag, sensor_tag);
 
     sensor_pub->publish(sensor_tag);
@@ -169,11 +153,9 @@ TEST_F(TestTildeDeadlineDetectorNode, test_deadline_detection)
   {
     auto t1 = get_time(200, 0);
     auto t2 = get_time(200, deadline_ms * 1000 * 1000);  // ms to ns
-    tilde_msg::msg::MessageTrackingTag sensor_tag =
-      get_message_tracking_tag("sensor", t1, t1);
+    tilde_msg::msg::MessageTrackingTag sensor_tag = get_message_tracking_tag("sensor", t1, t1);
 
-    tilde_msg::msg::MessageTrackingTag next_tag =
-      get_message_tracking_tag("next", t1, t2);
+    tilde_msg::msg::MessageTrackingTag next_tag = get_message_tracking_tag("next", t1, t2);
     add_input_info(next_tag, sensor_tag);
 
     sensor_pub->publish(sensor_tag);
@@ -209,11 +191,9 @@ TEST_F(TestTildeDeadlineDetectorNode, test_deadline_detection_multiple_input)
   auto checker_node = std::make_shared<rclcpp::Node>("checker_node");
   bool notification_called = false;
   auto checker_sub = checker_node->create_subscription<tilde_msg::msg::DeadlineNotification>(
-    "deadline_notification",
-    rclcpp::QoS(1).best_effort(),
-    [this, &notification_called, deadline_ms](
-      tilde_msg::msg::DeadlineNotification::UniquePtr msg) -> void
-    {
+    "deadline_notification", rclcpp::QoS(1).best_effort(),
+    [this, &notification_called,
+     deadline_ms](tilde_msg::msg::DeadlineNotification::UniquePtr msg) -> void {
       notification_called = true;
       EXPECT_EQ(msg->topic_name, "next");
       EXPECT_EQ(msg->stamp, get_time(200, 0));
@@ -242,23 +222,19 @@ TEST_F(TestTildeDeadlineDetectorNode, test_deadline_detection_multiple_input)
       EXPECT_FALSE(s2.is_overrun);
     });
 
-  auto spin =
-    [tag_sender_node, deadline_detector_node, checker_node]() -> void
-    {
-      rclcpp::spin_some(tag_sender_node);
-      rclcpp::spin_some(deadline_detector_node);
-      rclcpp::spin_some(checker_node);
-    };
+  auto spin = [tag_sender_node, deadline_detector_node, checker_node]() -> void {
+    rclcpp::spin_some(tag_sender_node);
+    rclcpp::spin_some(deadline_detector_node);
+    rclcpp::spin_some(checker_node);
+  };
 
   // case1: not overrun
   {
     auto t1 = get_time(100, 0);
     auto t2 = get_time(100, deadline_ms * 1000 * 1000 - 1);  // ms to ns
-    tilde_msg::msg::MessageTrackingTag sensor_tag =
-      get_message_tracking_tag("sensor1", t1, t1);
+    tilde_msg::msg::MessageTrackingTag sensor_tag = get_message_tracking_tag("sensor1", t1, t1);
 
-    tilde_msg::msg::MessageTrackingTag next_tag =
-      get_message_tracking_tag("next", t1, t2);
+    tilde_msg::msg::MessageTrackingTag next_tag = get_message_tracking_tag("next", t1, t2);
     add_input_info(next_tag, sensor_tag);
 
     sensor1_pub->publish(sensor_tag);
@@ -276,13 +252,10 @@ TEST_F(TestTildeDeadlineDetectorNode, test_deadline_detection_multiple_input)
     auto t2 = get_time(200, (deadline_ms / 2) * 1000 * 1000);
     auto t3 = get_time(200, deadline_ms * 1000 * 1000);
 
-    tilde_msg::msg::MessageTrackingTag sensor1_tag =
-      get_message_tracking_tag("sensor1", t1, t1);
-    tilde_msg::msg::MessageTrackingTag sensor2_tag =
-      get_message_tracking_tag("sensor2", t2, t2);
+    tilde_msg::msg::MessageTrackingTag sensor1_tag = get_message_tracking_tag("sensor1", t1, t1);
+    tilde_msg::msg::MessageTrackingTag sensor2_tag = get_message_tracking_tag("sensor2", t2, t2);
 
-    tilde_msg::msg::MessageTrackingTag next_tag =
-      get_message_tracking_tag("next", t1, t3);
+    tilde_msg::msg::MessageTrackingTag next_tag = get_message_tracking_tag("next", t1, t3);
     add_input_info(next_tag, sensor1_tag);
     add_input_info(next_tag, sensor2_tag);
 

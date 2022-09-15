@@ -20,12 +20,6 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   find_package(sensor_msgs REQUIRED)
   find_package(std_msgs REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # uncomment the line when this package is not in a git repo
-  # set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
   ament_add_gtest(test_tilde_publisher
@@ -123,8 +117,7 @@ ament_export_dependencies(rclcpp tilde_msg)
 add_library(stee_republisher_node SHARED
   src/stee_republisher_node_pointcloud2.cpp
   src/stee_republisher_node_imu.cpp
-  src/stee_republisher_node_map.cpp
-  )
+  src/stee_republisher_node_map.cpp)
 ament_target_dependencies(stee_republisher_node
   "rclcpp_components")
 target_link_libraries(stee_republisher_node
