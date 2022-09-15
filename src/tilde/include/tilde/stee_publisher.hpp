@@ -15,26 +15,24 @@
 #ifndef TILDE__STEE_PUBLISHER_HPP_
 #define TILDE__STEE_PUBLISHER_HPP_
 
+#include "rclcpp/clock.hpp"
+#include "rclcpp/macros.hpp"
+#include "rclcpp/publisher.hpp"
+#include "tilde/message_conversion.hpp"
+#include "tilde/stee_sources_table.hpp"
+#include "tilde/tilde_publisher.hpp"
+#include "tilde_msg/msg/stee_source.hpp"
+
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <utility>
 
-#include "rclcpp/publisher.hpp"
-#include "rclcpp/clock.hpp"
-#include "rclcpp/macros.hpp"
-
-#include "tilde/message_conversion.hpp"
-#include "tilde/stee_sources_table.hpp"
-#include "tilde/tilde_publisher.hpp"
-
-#include "tilde_msg/msg/stee_source.hpp"
-
 namespace tilde
 {
-template<typename MessageT,
-  typename ConvertedMessageT = ConvertedMessageType<MessageT>,
+template <
+  typename MessageT, typename ConvertedMessageT = ConvertedMessageType<MessageT>,
   typename AllocatorT = std::allocator<void>>
 class SteePublisher
 {
@@ -50,22 +48,19 @@ public:
 
   /// Default constructor
   SteePublisher(
-    std::shared_ptr<SteeSourcesTable> source_table,
-    std::shared_ptr<PublisherT> pub,
-    std::shared_ptr<ConvertedPublisherT> converted_pub,
-    const std::string & node_fqn,
-    std::shared_ptr<rclcpp::Clock> clock,
-    std::shared_ptr<rclcpp::Clock> steady_clock)
+    std::shared_ptr<SteeSourcesTable> source_table, std::shared_ptr<PublisherT> pub,
+    std::shared_ptr<ConvertedPublisherT> converted_pub, const std::string & node_fqn,
+    std::shared_ptr<rclcpp::Clock> clock, std::shared_ptr<rclcpp::Clock> steady_clock)
   : source_table_(source_table),
     pub_(pub),
     converted_pub_(converted_pub),
     node_fqn_(node_fqn),
-    clock_(clock), steady_clock_(steady_clock)
+    clock_(clock),
+    steady_clock_(steady_clock)
   {
   }
 
-  void
-  publish(std::unique_ptr<MessageT, MessageDeleter> msg)
+  void publish(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
     auto converted_msg = std::make_unique<ConvertedMessageT>();
     // TODO(y-okumura-isp): Can we avoid copy?
@@ -79,8 +74,7 @@ public:
     }
   }
 
-  void
-  publish(const MessageT & msg)
+  void publish(const MessageT & msg)
   {
     ConvertedMessageT converted_msg;
     // TODO(y-okumura-isp): Can we avoid copy?
@@ -98,8 +92,7 @@ public:
    * publish() variant
    * We can send a main message but cannot send the corresponding MessageTrackingTag
    */
-  void
-  publish(const rcl_serialized_message_t & serialized_msg)
+  void publish(const rcl_serialized_message_t & serialized_msg)
   {
     std::cout << "publish serialized message (not supported)" << std::endl;
     // publish_info(get_timestamp(clock_->now(), msg.get()));
@@ -112,8 +105,7 @@ public:
    * publish() variant
    * We can send a main message but cannot send the corresponding MessageTrackingTag
    */
-  void
-  publish(const rclcpp::SerializedMessage & serialized_msg)
+  void publish(const rclcpp::SerializedMessage & serialized_msg)
   {
     std::cout << "publish SerializedMessage (not supported)" << std::endl;
     if (pub_) {
@@ -125,8 +117,7 @@ public:
    * publish() variant
    * We can send a main message but cannot send the corresponding MessageTrackingTag
    */
-  void
-  publish(rclcpp::LoanedMessage<MessageT, AllocatorT> && loaned_msg)
+  void publish(rclcpp::LoanedMessage<MessageT, AllocatorT> && loaned_msg)
   {
     std::cout << "publish LoanedMessage (not supported)" << std::endl;
     if (pub_) {
@@ -134,8 +125,7 @@ public:
     }
   }
 
-  size_t
-  get_subscription_count() const
+  size_t get_subscription_count() const
   {
     size_t ret = 0;
     if (pub_) {
@@ -145,19 +135,17 @@ public:
     return ret + converted_pub_->get_subscription_count();
   }
 
-  size_t
-  get_intra_process_subscription_count() const
+  size_t get_intra_process_subscription_count() const
   {
     size_t ret = 0;
     if (pub_) {
-      ret = pub_->get_intra_process_subscription_count() ;
+      ret = pub_->get_intra_process_subscription_count();
     }
     return ret + converted_pub_->get_intra_process_subscription_count();
   }
 
   RCLCPP_PUBLIC
-  const char *
-  get_topic_name() const
+  const char * get_topic_name() const
   {
     if (pub_) {
       return pub_->get_topic_name();
@@ -167,9 +155,7 @@ public:
   }
 
   RCLCPP_PUBLIC
-  void add_explicit_input_info(
-    const std::string & sub_topic,
-    const rclcpp::Time & stamp)
+  void add_explicit_input_info(const std::string & sub_topic, const rclcpp::Time & stamp)
   {
     assert(stamp.get_clock_type() == RCL_ROS_TIME);
     is_explicit = true;
@@ -201,9 +187,7 @@ private:
       for (const auto & topic_stamps : explicit_info_) {
         const auto & topic = topic_stamps.first;
         for (const auto & stamp : topic_stamps.second) {
-          auto sources = source_table_->get_sources(
-            topic,
-            stamp);
+          auto sources = source_table_->get_sources(topic, stamp);
           for (auto & source : sources) {
             converted_msg->sources.emplace_back(std::move(source));
           }

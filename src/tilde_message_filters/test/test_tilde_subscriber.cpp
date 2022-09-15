@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rclcpp/rclcpp.hpp"
+#include "tilde_message_filters/tilde_subscriber.hpp"
+
+#include "rosgraph_msgs/msg/clock.hpp"
+#include "sensor_msgs/msg/point_cloud2.hpp"
+#include "std_msgs/msg/string.hpp"
+
 #include <gtest/gtest.h>
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/point_cloud2.hpp"
-#include "std_msgs/msg/string.hpp"
-#include "rosgraph_msgs/msg/clock.hpp"
-
-#include "tilde_message_filters/tilde_subscriber.hpp"
-
 using TildeNode = tilde::TildeNode;
-template<typename T>
+template <typename T>
 using TildePublisher = tilde::TildePublisher<T>;
-template<typename T>
+template <typename T>
 using TildeSubscriber = tilde_message_filters::TildeSubscriber<T>;
 
 using Node = rclcpp::Node;
@@ -73,10 +73,7 @@ public:
     val_node = std::make_shared<Node>("val_node", options);
   }
 
-  void TearDown() override
-  {
-    rclcpp::shutdown();
-  }
+  void TearDown() override { rclcpp::shutdown(); }
 
   Clock send_clock(int32_t sec, uint32_t nsec)
   {
@@ -175,11 +172,7 @@ TEST_F(TestTildeSubscriber, hold_sub_time)
 
   // check
   rclcpp::Time sub_time, sub_time_steady;
-  sub_node->find_subscription_time(
-    &msg,
-    "/in1",
-    sub_time,
-    sub_time_steady);
-  (void) sub_time_steady;
+  sub_node->find_subscription_time(&msg, "/in1", sub_time, sub_time_steady);
+  (void)sub_time_steady;
   EXPECT_CLOCK(sub_time, t1_sec, t1_nsec);
 }

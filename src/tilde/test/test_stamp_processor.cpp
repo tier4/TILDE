@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "builtin_interfaces/msg/time.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "tilde/tilde_publisher.hpp"
+
+#include "sensor_msgs/msg/point_cloud2.hpp"
+#include "std_msgs/msg/string.hpp"
+
 #include <gtest/gtest.h>
 
 #include <memory>
 #include <string>
 #include <utility>
-
-#include "rclcpp/rclcpp.hpp"
-#include "builtin_interfaces/msg/time.hpp"
-#include "sensor_msgs/msg/point_cloud2.hpp"
-#include "std_msgs/msg/string.hpp"
-
-#include "tilde/tilde_publisher.hpp"
 
 using sensor_msgs::msg::PointCloud2;
 using std_msgs::msg::String;
@@ -44,7 +44,8 @@ struct MsgWithHeaderAndTopLevelStamp
   builtin_interfaces::msg::Time stamp;
 };
 
-TEST_F(TestStampProcessor, pointer_with_header_stamp) {
+TEST_F(TestStampProcessor, pointer_with_header_stamp)
+{
   PointCloud2 msg;
 
   rclcpp::Time expect(1, 2, RCL_ROS_TIME);
@@ -55,14 +56,16 @@ TEST_F(TestStampProcessor, pointer_with_header_stamp) {
   EXPECT_EQ(*stamp, expect);
 }
 
-TEST_F(TestStampProcessor, pointer_without_header_stamp) {
+TEST_F(TestStampProcessor, pointer_without_header_stamp)
+{
   String msg;
   auto stamp = Process<String>::get_timestamp(&msg);
 
   EXPECT_FALSE((stamp ? true : false));
 }
 
-TEST_F(TestStampProcessor, const_pointer_with_header_stamp) {
+TEST_F(TestStampProcessor, const_pointer_with_header_stamp)
+{
   PointCloud2 _msg;
   rclcpp::Time expect(1, 2, RCL_ROS_TIME);
   _msg.header.stamp = expect;
@@ -74,14 +77,16 @@ TEST_F(TestStampProcessor, const_pointer_with_header_stamp) {
   EXPECT_EQ(*stamp, expect);
 }
 
-TEST_F(TestStampProcessor, const_pointer_without_header_stamp) {
+TEST_F(TestStampProcessor, const_pointer_without_header_stamp)
+{
   const String msg;
   auto stamp = Process<String>::get_timestamp_from_const(&msg);
 
   EXPECT_FALSE((stamp ? true : false));
 }
 
-TEST_F(TestStampProcessor, pointer_with_top_level_stamp) {
+TEST_F(TestStampProcessor, pointer_with_top_level_stamp)
+{
   MsgWithTopLevelStamp msg;
 
   rclcpp::Time expect(1, 2, RCL_ROS_TIME);
@@ -95,7 +100,8 @@ TEST_F(TestStampProcessor, pointer_with_top_level_stamp) {
   EXPECT_EQ(*stamp, expect);
 }
 
-TEST_F(TestStampProcessor, const_pointer_with_top_level_stamp) {
+TEST_F(TestStampProcessor, const_pointer_with_top_level_stamp)
+{
   MsgWithTopLevelStamp _msg;
   rclcpp::Time expect(1, 2, RCL_ROS_TIME);
   _msg.stamp = expect;
@@ -110,7 +116,8 @@ TEST_F(TestStampProcessor, const_pointer_with_top_level_stamp) {
   EXPECT_EQ(*stamp, expect);
 }
 
-TEST_F(TestStampProcessor, pointer_with_header_and_top_level_stamp) {
+TEST_F(TestStampProcessor, pointer_with_header_and_top_level_stamp)
+{
   MsgWithHeaderAndTopLevelStamp msg;
 
   rclcpp::Time expect(1, 2, RCL_ROS_TIME);
@@ -126,7 +133,8 @@ TEST_F(TestStampProcessor, pointer_with_header_and_top_level_stamp) {
   EXPECT_EQ(*stamp, expect);
 }
 
-TEST_F(TestStampProcessor, const_pointer_with_header_and_top_level_stamp) {
+TEST_F(TestStampProcessor, const_pointer_with_header_and_top_level_stamp)
+{
   MsgWithHeaderAndTopLevelStamp _msg;
 
   rclcpp::Time expect(1, 2, RCL_ROS_TIME);

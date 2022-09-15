@@ -29,79 +29,40 @@
 #include <lttng/tracepoint.h>
 
 TRACEPOINT_EVENT(
-  TRACEPOINT_PROVIDER,
-  tilde_subscription_init,
+  TRACEPOINT_PROVIDER, tilde_subscription_init,
   TP_ARGS(
-    const void *, subscription_arg,
-    const char *, node_name_arg,
-    const char *, topic_name_arg
-  ),
-  TP_FIELDS(
-    ctf_integer_hex(const void *, subscription, subscription_arg)
-    ctf_string(node_name, node_name_arg)
-    ctf_string(topic_name, topic_name_arg)
-  )
-)
+    const void *, subscription_arg, const char *, node_name_arg, const char *, topic_name_arg),
+  TP_FIELDS(ctf_integer_hex(const void *, subscription, subscription_arg)
+              ctf_string(node_name, node_name_arg) ctf_string(topic_name, topic_name_arg)))
 
 TRACEPOINT_EVENT(
-  TRACEPOINT_PROVIDER,
-  tilde_subscribe,
-  TP_ARGS(
-    const void *, subscription_arg,
-    const uint64_t, tilde_message_id_arg
-  ),
-  TP_FIELDS(
-    ctf_integer_hex(const void *, subscription, subscription_arg)
-    ctf_integer(const uint64_t, tilde_message_id, tilde_message_id_arg)
-  )
-)
+  TRACEPOINT_PROVIDER, tilde_subscribe,
+  TP_ARGS(const void *, subscription_arg, const uint64_t, tilde_message_id_arg),
+  TP_FIELDS(ctf_integer_hex(const void *, subscription, subscription_arg)
+              ctf_integer(const uint64_t, tilde_message_id, tilde_message_id_arg)))
 
 TRACEPOINT_EVENT(
-  TRACEPOINT_PROVIDER,
-  tilde_publisher_init,
-  TP_ARGS(
-    const void *, publisher_arg,
-    const char *, node_name_arg,
-    const char *, topic_name_arg
-  ),
-  TP_FIELDS(
-    ctf_integer_hex(const void *, publisher, publisher_arg)
-    ctf_string(node_name, node_name_arg)
-    ctf_string(topic_name, topic_name_arg)
-  )
-)
+  TRACEPOINT_PROVIDER, tilde_publisher_init,
+  TP_ARGS(const void *, publisher_arg, const char *, node_name_arg, const char *, topic_name_arg),
+  TP_FIELDS(ctf_integer_hex(const void *, publisher, publisher_arg)
+              ctf_string(node_name, node_name_arg) ctf_string(topic_name, topic_name_arg)))
 
 TRACEPOINT_EVENT(
-  TRACEPOINT_PROVIDER,
-  tilde_subscribe_added,
+  TRACEPOINT_PROVIDER, tilde_subscribe_added,
   TP_ARGS(
-    const void *, subscription_id_arg,
-    const char *, node_name_arg,
-    const char *, topic_name_arg
-  ),
-  TP_FIELDS(
-    ctf_integer_hex(const void *, subscription_id, subscription_id_arg)
-    ctf_string(node_name, node_name_arg)
-    ctf_string(topic_name, topic_name_arg)
-  )
-)
+    const void *, subscription_id_arg, const char *, node_name_arg, const char *, topic_name_arg),
+  TP_FIELDS(ctf_integer_hex(const void *, subscription_id, subscription_id_arg)
+              ctf_string(node_name, node_name_arg) ctf_string(topic_name, topic_name_arg)))
 
 TRACEPOINT_EVENT(
-  TRACEPOINT_PROVIDER,
-  tilde_publish,
+  TRACEPOINT_PROVIDER, tilde_publish,
   TP_ARGS(
-    const void *, publisher_arg,
-    const uint64_t, tilde_publish_timestamp_arg,
-    const void *, subscription_id_arg,
-    const uint64_t, tilde_message_id_arg
-  ),
-  TP_FIELDS(
-    ctf_integer_hex(const void *, publisher, publisher_arg)
-    ctf_integer(const uint64_t, tilde_publish_timestamp, tilde_publish_timestamp_arg)
-    ctf_integer_hex(const void *, subscription_id, subscription_id_arg)
-    ctf_integer(const uint64_t, tilde_message_id, tilde_message_id_arg)
-  )
-)
+    const void *, publisher_arg, const uint64_t, tilde_publish_timestamp_arg, const void *,
+    subscription_id_arg, const uint64_t, tilde_message_id_arg),
+  TP_FIELDS(ctf_integer_hex(const void *, publisher, publisher_arg)
+              ctf_integer(const uint64_t, tilde_publish_timestamp, tilde_publish_timestamp_arg)
+                ctf_integer_hex(const void *, subscription_id, subscription_id_arg)
+                  ctf_integer(const uint64_t, tilde_message_id, tilde_message_id_arg)))
 #endif /* _TP_H */
 
 #include <lttng/tracepoint-event.h>

@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_components/register_node_macro.hpp"
+#include "tilde/tilde_node.hpp"
+#include "tilde/tilde_publisher.hpp"
+
+#include "sensor_msgs/msg/point_cloud2.hpp"
+#include "std_msgs/msg/string.hpp"
+
 #include <chrono>
 #include <cstdio>
 #include <memory>
-#include <utility>
 #include <string>
+#include <utility>
 #include <vector>
-
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_components/register_node_macro.hpp"
-
-#include "std_msgs/msg/string.hpp"
-#include "sensor_msgs/msg/point_cloud2.hpp"
-
-#include "tilde/tilde_node.hpp"
-#include "tilde/tilde_publisher.hpp"
 
 using namespace std::chrono_literals;
 
@@ -57,81 +56,61 @@ public:
     rclcpp::QoS qos(rclcpp::KeepLast(7));
 
     sub_pc_ = this->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
-      "topic_with_stamp", qos,
-      [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
-      {
+      "topic_with_stamp", qos, [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void {
         RCLCPP_INFO(
-          this->get_logger(),
-          "RelayTimer sub PointCloud2 seq: %s stamp: %lu",
-          msg->header.frame_id.c_str(),
-          nanoseconds(msg->header.stamp));
+          this->get_logger(), "RelayTimer sub PointCloud2 seq: %s stamp: %lu",
+          msg->header.frame_id.c_str(), nanoseconds(msg->header.stamp));
         msgs_pc_.push_back(std::move(msg));
       });
 
     sub_str_ = this->create_tilde_subscription<std_msgs::msg::String>(
-      "topic_without_stamp", qos,
-      [this](std_msgs::msg::String::UniquePtr msg) -> void
-      {
-        RCLCPP_INFO(
-          this->get_logger(),
-          "RelayTimer sub String seq: %s",
-          msg->data.c_str());
+      "topic_without_stamp", qos, [this](std_msgs::msg::String::UniquePtr msg) -> void {
+        RCLCPP_INFO(this->get_logger(), "RelayTimer sub String seq: %s", msg->data.c_str());
         msgs_str_.push_back(std::move(msg));
       });
-
 
     // Create a function for when messages are to be sent.
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
     auto proc_dur = std::chrono::duration<int64_t, std::milli>(proc_ms);
-    auto timer_callback =
-      [this, proc_dur, update_stamp]() -> void
-      {
-        std::this_thread::sleep_for(proc_dur);
+    auto timer_callback = [this, proc_dur, update_stamp]() -> void {
+      std::this_thread::sleep_for(proc_dur);
 
-        if (msgs_pc_.size() > 0) {
-          auto msg = std::move(this->msgs_pc_.back());
-          msgs_pc_.pop_back();
+      if (msgs_pc_.size() > 0) {
+        auto msg = std::move(this->msgs_pc_.back());
+        msgs_pc_.pop_back();
 
-          // We call explicit API in this example unlike RelayTimer
-          pub_pc_->add_explicit_input_info(
-            this->sub_pc_->get_topic_name(),
-            msg->header.stamp);
+        // We call explicit API in this example unlike RelayTimer
+        pub_pc_->add_explicit_input_info(this->sub_pc_->get_topic_name(), msg->header.stamp);
 
-          auto stamp = msg->header.stamp;
+        auto stamp = msg->header.stamp;
 
-          if (update_stamp) {
-            stamp = this->now();
-            msg->header.stamp = stamp;
-          }
-
-          RCLCPP_INFO(
-            this->get_logger(),
-            "RelayTimer pub PointCloud2 seq: %s stamp: %lu",
-            msg->header.frame_id.c_str(),
-            nanoseconds(msg->header.stamp));
-
-          pub_pc_->publish(std::move(msg));
+        if (update_stamp) {
+          stamp = this->now();
+          msg->header.stamp = stamp;
         }
 
-        if (msgs_str_.size() > 0) {
-          auto msg = std::move(this->msgs_str_.back());
-          msgs_str_.pop_back();
+        RCLCPP_INFO(
+          this->get_logger(), "RelayTimer pub PointCloud2 seq: %s stamp: %lu",
+          msg->header.frame_id.c_str(), nanoseconds(msg->header.stamp));
 
-          // We can not call explicit API because header.stamp does not exist
+        pub_pc_->publish(std::move(msg));
+      }
 
-          RCLCPP_INFO(
-            this->get_logger(),
-            "RelayTimer pub String seq: %s",
-            msg->data.c_str());
+      if (msgs_str_.size() > 0) {
+        auto msg = std::move(this->msgs_str_.back());
+        msgs_str_.pop_back();
 
-          pub_str_->publish(std::move(msg));
-        }
-      };
+        // We can not call explicit API because header.stamp does not exist
+
+        RCLCPP_INFO(this->get_logger(), "RelayTimer pub String seq: %s", msg->data.c_str());
+
+        pub_str_->publish(std::move(msg));
+      }
+    };
 
     // Create a publisher with a custom Quality of Service profile.
-    pub_pc_ = this->create_tilde_publisher<sensor_msgs::msg::PointCloud2>(
-      "relay_buffer_with_stamp",
-      qos);
+    pub_pc_ =
+      this->create_tilde_publisher<sensor_msgs::msg::PointCloud2>("relay_buffer_with_stamp", qos);
     pub_str_ =
       this->create_tilde_publisher<std_msgs::msg::String>("relay_buffer_without_stamp", qos);
 

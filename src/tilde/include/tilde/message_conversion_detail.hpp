@@ -20,30 +20,29 @@
 namespace tilde
 {
 
-template<class K, class V>
+template <class K, class V>
 struct Pair
 {
   using Key = K;
   using Value = V;
 };
 
-template<typename Key, typename T>
+template <typename Key, typename T>
 struct Get;
 
-template<typename Key, typename Head>
+template <typename Key, typename Head>
 struct Get<Key, std::tuple<Head>>
 {
-  using type = typename std::conditional<std::is_same<Key, typename Head::Key>::value,
-      typename Head::Value,
-      std::nullptr_t>::type;
+  using type = typename std::conditional<
+    std::is_same<Key, typename Head::Key>::value, typename Head::Value, std::nullptr_t>::type;
 };
 
-template<typename Key, typename Head, typename ... Tail>
+template <typename Key, typename Head, typename... Tail>
 struct Get<Key, std::tuple<Head, Tail...>>
 {
-  using type = typename std::conditional<std::is_same<Key, typename Head::Key>::value,
-      typename Head::Value,
-      typename Get<Key, std::tuple<Tail...>>::type>::type;
+  using type = typename std::conditional<
+    std::is_same<Key, typename Head::Key>::value, typename Head::Value,
+    typename Get<Key, std::tuple<Tail...>>::type>::type;
 };
 
 }  // namespace tilde

@@ -12,19 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
+#include "message_filters/sync_policies/exact_time.h"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
-
 #include "tilde/tilde_node.hpp"
+#include "tilde_message_filters/tilde_subscriber.hpp"
+#include "tilde_message_filters/tilde_synchronizer.hpp"
 
 #include "sensor_msgs/msg/point_cloud2.hpp"
 
-#include "message_filters/sync_policies/exact_time.h"
-
-#include "tilde_message_filters/tilde_subscriber.hpp"
-#include "tilde_message_filters/tilde_synchronizer.hpp"
+#include <memory>
 
 typedef sensor_msgs::msg::PointCloud2 Msg;
 typedef std::shared_ptr<sensor_msgs::msg::PointCloud2 const> MsgConstPtr;
@@ -50,20 +47,14 @@ public:
     sub_pc1_.subscribe(this, "in1", rmw_qos);
     sub_pc2_.subscribe(this, "in2", rmw_qos);
 
-    sync_ptr_ = std::make_shared<Sync>(
-      this,
-      SyncPolicy(5),
-      sub_pc1_,
-      sub_pc2_);
+    sync_ptr_ = std::make_shared<Sync>(this, SyncPolicy(5), sub_pc1_, sub_pc2_);
 
     pub_ = create_tilde_publisher<Msg>("out2", 1);
 
     // registerCallback(const C& callback) version:
     // <- (const C&) can bind rvalue
-    sync_ptr_->registerCallback(
-      std::bind(
-        &SampleTildeSynchronizer2::sub_callback, this,
-        std::placeholders::_1, std::placeholders::_2));
+    sync_ptr_->registerCallback(std::bind(
+      &SampleTildeSynchronizer2::sub_callback, this, std::placeholders::_1, std::placeholders::_2));
   }
 
 private:
@@ -71,11 +62,9 @@ private:
   std::shared_ptr<Sync> sync_ptr_;
   Publisher pub_;
 
-  void sub_callback(
-    const MsgConstPtr & msg1,
-    const MsgConstPtr & msg2)
+  void sub_callback(const MsgConstPtr & msg1, const MsgConstPtr & msg2)
   {
-    (void) msg2;
+    (void)msg2;
     pub_->publish(*msg1);
   }
 };
@@ -98,36 +87,24 @@ public:
     sub_pc2_.subscribe(this, "in2", rmw_qos);
     sub_pc3_.subscribe(this, "in3", rmw_qos);
 
-    sync_ptr_ = std::make_shared<Sync>(
-      this,
-      SyncPolicy(5),
-      sub_pc1_,
-      sub_pc2_,
-      sub_pc3_);
+    sync_ptr_ = std::make_shared<Sync>(this, SyncPolicy(5), sub_pc1_, sub_pc2_, sub_pc3_);
 
     // registerCallback(const C& callback) version:
     // <- (const C&) can bind rvalue
-    sync_ptr_->registerCallback(
-      std::bind(
-        &SampleTildeSynchronizer3::sub_callback, this,
-        std::placeholders::_1,
-        std::placeholders::_2,
-        std::placeholders::_3
-    ));
+    sync_ptr_->registerCallback(std::bind(
+      &SampleTildeSynchronizer3::sub_callback, this, std::placeholders::_1, std::placeholders::_2,
+      std::placeholders::_3));
   }
 
 private:
   Subscriber sub_pc1_, sub_pc2_, sub_pc3_;
   std::shared_ptr<Sync> sync_ptr_;
 
-  void sub_callback(
-    const MsgConstPtr & msg1,
-    const MsgConstPtr & msg2,
-    const MsgConstPtr & msg3)
+  void sub_callback(const MsgConstPtr & msg1, const MsgConstPtr & msg2, const MsgConstPtr & msg3)
   {
-    (void) msg1;
-    (void) msg2;
-    (void) msg3;
+    (void)msg1;
+    (void)msg2;
+    (void)msg3;
   }
 };
 

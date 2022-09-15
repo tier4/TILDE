@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "tilde_deadline_detector/forward_estimator.hpp"
+
 #include <algorithm>
 #include <map>
 #include <memory>
@@ -19,25 +21,22 @@
 #include <string>
 #include <utility>
 
-#include "tilde_deadline_detector/forward_estimator.hpp"
-
 namespace tilde_deadline_detector
 {
 
-ForwardEstimator::ForwardEstimator()
-{}
+ForwardEstimator::ForwardEstimator() {}
 
-void ForwardEstimator::set_skip_out_to_in(
-  const std::map<std::string, std::string> & skip_out_to_in)
+void ForwardEstimator::set_skip_out_to_in(const std::map<std::string, std::string> & skip_out_to_in)
 {
   skip_out_to_in_ = skip_out_to_in;
 }
 
 void ForwardEstimator::add(
-  std::unique_ptr<MessageTrackingTagMsg> _message_tracking_tag,
-  bool is_sensor)
+  std::unique_ptr<MessageTrackingTagMsg> _message_tracking_tag, bool is_sensor)
 {
-  if (!_message_tracking_tag->output_info.has_header_stamp) {return;}
+  if (!_message_tracking_tag->output_info.has_header_stamp) {
+    return;
+  }
 
   std::shared_ptr<MessageTrackingTagMsg> message_tracking_tag = std::move(_message_tracking_tag);
 
@@ -50,8 +49,7 @@ void ForwardEstimator::add(
 
     sources_[topic_name][stamp] = message_tracking_tag;
     message_sources_[topic_name][stamp].insert(
-      std::weak_ptr<MessageTrackingTagMsg>(
-        message_tracking_tag));
+      std::weak_ptr<MessageTrackingTagMsg>(message_tracking_tag));
     topic_sensors_[topic_name].insert(topic_name);
 
     auto pending_messages_topic_it = pending_messages_.find(topic_name);
@@ -72,9 +70,7 @@ void ForwardEstimator::add(
 
       message_sources_[waited_topic][waited_stamp].insert(
         input_sources.begin(), input_sources.end());
-      topic_sensors_[waited_topic].insert(
-        input_source_topics.begin(),
-        input_source_topics.end());
+      topic_sensors_[waited_topic].insert(input_source_topics.begin(), input_source_topics.end());
     }
 
     pending_messages_topic_it->second.erase(pending_messages_it);
@@ -97,12 +93,13 @@ void ForwardEstimator::add(
   // have input => get reference
   for (const auto & input : message_tracking_tag->input_infos) {
     // get sources of input
-    if (!input.has_header_stamp) {continue;}
+    if (!input.has_header_stamp) {
+      continue;
+    }
 
     auto out_to_in_it = skip_out_to_in_.find(input.topic_name);
     const auto & input_topic =
-      out_to_in_it != skip_out_to_in_.end() ?
-      out_to_in_it->second : input.topic_name;
+      out_to_in_it != skip_out_to_in_.end() ? out_to_in_it->second : input.topic_name;
 
     const auto & input_stamp = rclcpp::Time(input.header_stamp);
     const auto & input_source_topics = topic_sensors_[input_topic];
@@ -121,18 +118,14 @@ void ForwardEstimator::add(
 
     // register sources
     message_sources_[topic_name][stamp].insert(input_sources.begin(), input_sources.end());
-    topic_sensors_[topic_name].insert(
-      input_source_topics.begin(),
-      input_source_topics.end());
+    topic_sensors_[topic_name].insert(input_source_topics.begin(), input_source_topics.end());
 
     // pending messages also get sources
     for (const auto & wait : pending_messages) {
       const auto & wait_topic = std::get<0>(wait);
       const auto & wait_stamp = std::get<1>(wait);
       message_sources_[wait_topic][wait_stamp].insert(input_sources.begin(), input_sources.end());
-      topic_sensors_[wait_topic].insert(
-        input_source_topics.begin(),
-        input_source_topics.end());
+      topic_sensors_[wait_topic].insert(input_source_topics.begin(), input_source_topics.end());
     }
   }
 }
@@ -147,8 +140,7 @@ std::string _time2str(const builtin_interfaces::msg::Time & time)
 }
 
 ForwardEstimator::RefToSources ForwardEstimator::get_ref_to_sources(
-  const std::string & topic_name,
-  const HeaderStamp & stamp) const
+  const std::string & topic_name, const HeaderStamp & stamp) const
 {
   RefToSources ret;
   auto message_sources_topic_it = message_sources_.find(topic_name);
@@ -165,8 +157,7 @@ ForwardEstimator::RefToSources ForwardEstimator::get_ref_to_sources(
 }
 
 ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
-  const std::string & topic_name,
-  const HeaderStamp & stamp) const
+  const std::string & topic_name, const HeaderStamp & stamp) const
 {
   InputSources is;
   auto message_sources_topic_it = message_sources_.find(topic_name);
@@ -199,8 +190,7 @@ ForwardEstimator::InputSources ForwardEstimator::get_input_sources(
 }
 
 std::optional<rclcpp::Time> ForwardEstimator::get_oldest_sensor_stamp(
-  const std::string & topic_name,
-  const HeaderStamp & stamp) const
+  const std::string & topic_name, const HeaderStamp & stamp) const
 {
   auto is = get_input_sources(topic_name, stamp);
   if (is.empty()) {
@@ -220,10 +210,10 @@ void ForwardEstimator::delete_expired(const rclcpp::Time & threshold)
   // delete references
   for (auto & it : message_sources_) {
     auto & stamp_refs = it.second;
-    for (auto stamp_refs_it = stamp_refs.begin();
-      stamp_refs_it != stamp_refs.end(); )
-    {
-      if (threshold < stamp_refs_it->first) {break;}
+    for (auto stamp_refs_it = stamp_refs.begin(); stamp_refs_it != stamp_refs.end();) {
+      if (threshold < stamp_refs_it->first) {
+        break;
+      }
       stamp_refs_it = stamp_refs.erase(stamp_refs_it);
     }
   }
@@ -232,9 +222,10 @@ void ForwardEstimator::delete_expired(const rclcpp::Time & threshold)
   for (auto & it : sources_) {
     auto & stamp_message_tracking_tag = it.second;
     for (auto stamp_message_tracking_tag_it = stamp_message_tracking_tag.begin();
-      stamp_message_tracking_tag_it != stamp_message_tracking_tag.end(); )
-    {
-      if (threshold < stamp_message_tracking_tag_it->first) {break;}
+         stamp_message_tracking_tag_it != stamp_message_tracking_tag.end();) {
+      if (threshold < stamp_message_tracking_tag_it->first) {
+        break;
+      }
       stamp_message_tracking_tag_it->second.reset();
       stamp_message_tracking_tag_it =
         stamp_message_tracking_tag.erase(stamp_message_tracking_tag_it);
@@ -245,9 +236,10 @@ void ForwardEstimator::delete_expired(const rclcpp::Time & threshold)
   for (auto & it : pending_messages_) {
     auto & stamp_messages = it.second;
     for (auto stamp_messages_it = stamp_messages.begin();
-      stamp_messages_it != stamp_messages.end(); )
-    {
-      if (threshold < stamp_messages_it->first) {break;}
+         stamp_messages_it != stamp_messages.end();) {
+      if (threshold < stamp_messages_it->first) {
+        break;
+      }
       stamp_messages_it = stamp_messages.erase(stamp_messages_it);
     }
   }
@@ -284,14 +276,13 @@ void ForwardEstimator::debug_print(bool verbose) const
       n_topic_sensors += it.second.size();
     }
 
-    std::cout << "sources: " << n_sources << " " <<
-      "message_sources: " << n_message_sources << " " <<
-      "topic_sensors: " << n_topic_sensors << std::endl;
+    std::cout << "sources: " << n_sources << " "
+              << "message_sources: " << n_message_sources << " "
+              << "topic_sensors: " << n_topic_sensors << std::endl;
   }
 }
 
-std::map<ForwardEstimator::TopicName, size_t>
-ForwardEstimator::get_pending_message_counts() const
+std::map<ForwardEstimator::TopicName, size_t> ForwardEstimator::get_pending_message_counts() const
 {
   std::map<TopicName, size_t> ret;
 

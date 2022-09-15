@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "builtin_interfaces/msg/time.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "tilde_deadline_detector/forward_estimator.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
+#include "tilde_msg/msg/sub_topic_time_info.hpp"
+
 #include <gtest/gtest.h>
 
 #include <map>
 #include <memory>
 #include <string>
 #include <utility>
-
-#include "rclcpp/rclcpp.hpp"
-#include "builtin_interfaces/msg/time.hpp"
-#include "tilde_msg/msg/message_tracking_tag.hpp"
-#include "tilde_msg/msg/sub_topic_time_info.hpp"
-
-#include "tilde_deadline_detector/forward_estimator.hpp"
 
 using tilde_deadline_detector::ForwardEstimator;
 using tilde_msg::msg::MessageTrackingTag;
@@ -39,10 +38,8 @@ TimeMsg get_time(int sec, int nsec)
   return t;
 }
 
-std::unique_ptr<MessageTrackingTag>
-create_message_tracking_tag(
-  const std::string & topic,
-  const TimeMsg & time)
+std::unique_ptr<MessageTrackingTag> create_message_tracking_tag(
+  const std::string & topic, const TimeMsg & time)
 {
   auto message_tracking_tag = std::make_unique<MessageTrackingTag>();
   message_tracking_tag->output_info.topic_name = topic;
@@ -575,8 +572,7 @@ TEST(TestForwardEstimator, skip_topic)
   // ignore 21 to verify skip
   fe.add(std::move(message_tracking_tag31));
 
-  auto input_sources31 = fe.get_input_sources(
-    topic3, time31);
+  auto input_sources31 = fe.get_input_sources(topic3, time31);
 
   EXPECT_EQ(input_sources31.size(), 1u);
   auto s = input_sources31.begin();

@@ -19,19 +19,19 @@
 #include <map>
 #include <memory>
 // NOLINT to prevent Found C system header after C++ system header
+#include "rclcpp/rclcpp.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
+
 #include <optional>  // NOLINT
 #include <set>
 #include <string>
 #include <tuple>
 #include <unordered_set>
 
-#include "rclcpp/rclcpp.hpp"
-#include "tilde_msg/msg/message_tracking_tag.hpp"
-
 namespace tilde_deadline_detector
 {
 
-template<class C, class T>
+template <class C, class T>
 bool contains(const C & cnt, const T & v)
 {
   return cnt.find(v) != cnt.end();
@@ -79,9 +79,7 @@ public:
    * \param stamp Target header stamp
    * \return set of references to sources
    */
-  RefToSources get_ref_to_sources(
-    const std::string & topic_name,
-    const HeaderStamp & stamp) const;
+  RefToSources get_ref_to_sources(const std::string & topic_name, const HeaderStamp & stamp) const;
 
   /// get all sensor time
   /**
@@ -89,9 +87,7 @@ public:
    * \param stamp Target header stamp
    * \return sensor topic vs its header stamps
    */
-  InputSources get_input_sources(
-    const std::string & topic_name,
-    const HeaderStamp & stamp) const;
+  InputSources get_input_sources(const std::string & topic_name, const HeaderStamp & stamp) const;
 
   /// get the oldest sensor time
   /**
@@ -104,8 +100,7 @@ public:
    * it returns the longest latency in gathered MessageTrackingTag.
    */
   std::optional<rclcpp::Time> get_oldest_sensor_stamp(
-    const std::string & topic_name,
-    const HeaderStamp & stamp) const;
+    const std::string & topic_name, const HeaderStamp & stamp) const;
 
   /// delete old data
   /**

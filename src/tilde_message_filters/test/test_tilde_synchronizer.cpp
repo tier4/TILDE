@@ -12,6 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rclcpp/rclcpp.hpp"
+#include "tilde_message_filters/tilde_subscriber.hpp"
+#include "tilde_message_filters/tilde_synchronizer.hpp"
+
+#include "rosgraph_msgs/msg/clock.hpp"
+#include "sensor_msgs/msg/point_cloud2.hpp"
+#include "std_msgs/msg/string.hpp"
+
 #include <gtest/gtest.h>
 #include <message_filters/pass_through.h>
 
@@ -20,25 +28,17 @@
 #include <string>
 #include <vector>
 
-#include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/point_cloud2.hpp"
-#include "std_msgs/msg/string.hpp"
-#include "rosgraph_msgs/msg/clock.hpp"
-
-#include "tilde_message_filters/tilde_subscriber.hpp"
-#include "tilde_message_filters/tilde_synchronizer.hpp"
-
-template<typename T>
+template <typename T>
 using Subscriber = message_filters::Subscriber<T>;
-template<typename T>
+template <typename T>
 using PassThrough = message_filters::PassThrough<T>;
 
 using TildeNode = tilde::TildeNode;
-template<typename T>
+template <typename T>
 using TildePublisher = tilde::TildePublisher<T>;
-template<typename T>
+template <typename T>
 using TildeSubscriber = tilde_message_filters::TildeSubscriber<T>;
-template<typename T>
+template <typename T>
 using TildeSynchronizer = tilde_message_filters::TildeSynchronizer<T>;
 
 using Node = rclcpp::Node;
@@ -83,10 +83,7 @@ public:
     val_node = std::make_shared<Node>("val_node", options);
   }
 
-  void TearDown() override
-  {
-    rclcpp::shutdown();
-  }
+  void TearDown() override { rclcpp::shutdown(); }
 
   Clock send_clock(int32_t sec, uint32_t nsec)
   {
@@ -112,7 +109,7 @@ public:
     rclcpp::spin_some(val_node);
   }
 
-  template<std::size_t I>
+  template <std::size_t I>
   PointCloudTildeSubscriber & init_and_get_sub()
   {
     static_assert(I < 9);
@@ -142,7 +139,8 @@ void EXPECT_CLOCK(rclcpp::Time time, int sec, uint32_t nsec)
   EXPECT_EQ(t.nanosec, nsec);
 }
 
-TEST_F(TestSynchronizer, exact_policy_2msgs) {
+TEST_F(TestSynchronizer, exact_policy_2msgs)
+{
   auto pub1 = pubs[0];
   auto pub2 = pubs[1];
   auto & sub1 = init_and_get_sub<0>();
@@ -155,11 +153,10 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
 
   bool sync_callback_called = false;
   sync->registerCallback(
-    [this, &sync_callback_called](const PointCloud2ConstPtr & msg1,
-    const PointCloud2ConstPtr & msg2) -> void
-    {
-      (void) msg1;
-      (void) msg2;
+    [this, &sync_callback_called](
+      const PointCloud2ConstPtr & msg1, const PointCloud2ConstPtr & msg2) -> void {
+      (void)msg1;
+      (void)msg2;
       sync_callback_called = true;
       out_pub->publish(*msg1);
     });
@@ -168,8 +165,7 @@ TEST_F(TestSynchronizer, exact_policy_2msgs) {
   bool val_callback_called = false;
   auto val_sub = val_node->create_subscription<MessageTrackingTag>(
     "out/message_tracking_tag", qos,
-    [this, &val_callback_called](MessageTrackingTagPtr pi) -> void
-    {
+    [this, &val_callback_called](MessageTrackingTagPtr pi) -> void {
       val_callback_called = true;
       EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
       EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
@@ -254,11 +250,10 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
 
   bool sync_callback_called = false;
   sync->registerCallback(
-    [this, &sync_callback_called](const PointCloud2ConstPtr & msg1,
-    const PointCloud2ConstPtr & msg2) -> void
-    {
-      (void) msg1;
-      (void) msg2;
+    [this, &sync_callback_called](
+      const PointCloud2ConstPtr & msg1, const PointCloud2ConstPtr & msg2) -> void {
+      (void)msg1;
+      (void)msg2;
       sync_callback_called = true;
       out_pub->publish(*msg1);
     });
@@ -267,8 +262,7 @@ TEST_F(TestSynchronizer, sub_and_tilde_sub)
   bool val_callback_called = false;
   auto val_sub = val_node->create_subscription<MessageTrackingTag>(
     "out/message_tracking_tag", qos,
-    [this, &val_callback_called](MessageTrackingTagPtr pi) -> void
-    {
+    [this, &val_callback_called](MessageTrackingTagPtr pi) -> void {
       val_callback_called = true;
       EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
       EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
@@ -327,10 +321,7 @@ TEST_F(TestSynchronizer, work_with_passthrough)
   auto & sub1 = init_and_get_sub<0>();
   PassThrough<PointCloud2> passthrough;
   sub1.registerCallback(
-    [this, &passthrough](const PointCloud2ConstPtr msg) -> void
-    {
-      passthrough.add(msg);
-    });
+    [this, &passthrough](const PointCloud2ConstPtr msg) -> void { passthrough.add(msg); });
 
   // setup sub_node synchronizer
   using SyncPolicy = message_filters::sync_policies::ExactTime<PointCloud2, PointCloud2>;
@@ -339,11 +330,10 @@ TEST_F(TestSynchronizer, work_with_passthrough)
 
   bool sync_callback_called = false;
   sync->registerCallback(
-    [this, &sync_callback_called](const PointCloud2ConstPtr & msg1,
-    const PointCloud2ConstPtr & msg2) -> void
-    {
-      (void) msg1;
-      (void) msg2;
+    [this, &sync_callback_called](
+      const PointCloud2ConstPtr & msg1, const PointCloud2ConstPtr & msg2) -> void {
+      (void)msg1;
+      (void)msg2;
       sync_callback_called = true;
       out_pub->publish(*msg1);
     });
@@ -352,8 +342,7 @@ TEST_F(TestSynchronizer, work_with_passthrough)
   bool val_callback_called = false;
   auto val_sub = val_node->create_subscription<MessageTrackingTag>(
     "out/message_tracking_tag", qos,
-    [this, &val_callback_called](MessageTrackingTagPtr pi) -> void
-    {
+    [this, &val_callback_called](MessageTrackingTagPtr pi) -> void {
       val_callback_called = true;
       EXPECT_EQ(pi->output_info.header_stamp.sec, 123);
       EXPECT_EQ(pi->output_info.header_stamp.nanosec, 456u);
@@ -416,11 +405,10 @@ TEST_F(TestSynchronizer, order_inversion)
 
   bool sync_callback_called = false;
   sync->registerCallback(
-    [this, &sync_callback_called](const PointCloud2ConstPtr & msg1,
-    const PointCloud2ConstPtr & msg2) -> void
-    {
-      (void) msg1;
-      (void) msg2;
+    [this, &sync_callback_called](
+      const PointCloud2ConstPtr & msg1, const PointCloud2ConstPtr & msg2) -> void {
+      (void)msg1;
+      (void)msg2;
       sync_callback_called = true;
       out_pub->publish(*msg1);
     });
@@ -428,10 +416,8 @@ TEST_F(TestSynchronizer, order_inversion)
   bool val_callback_called = false;
   auto val_sub = val_node->create_subscription<MessageTrackingTag>(
     "out/message_tracking_tag", qos,
-    [this, &val_callback_called,
-    t1_sec, t2_sec, t3_sec,
-    t1_nsec, t2_nsec, t3_nsec](MessageTrackingTagPtr pi) -> void
-    {
+    [this, &val_callback_called, t1_sec, t2_sec, t3_sec, t1_nsec, t2_nsec,
+     t3_nsec](MessageTrackingTagPtr pi) -> void {
       val_callback_called = true;
       EXPECT_EQ(pi->output_info.header_stamp.sec, t2_sec);
       EXPECT_EQ(pi->output_info.header_stamp.nanosec, t2_nsec);

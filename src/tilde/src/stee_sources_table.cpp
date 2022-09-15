@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "tilde/stee_sources_table.hpp"
+
 #include <cassert>
 #include <map>
-
-#include "tilde/stee_sources_table.hpp"
 
 using tilde::SteeSourcesTable;
 
@@ -28,8 +28,7 @@ SteeSourcesTable::SteeSourcesTable(
 }
 
 void SteeSourcesTable::set(
-  const SteeSourcesTable::TopicName & topic,
-  const SteeSourcesTable::Stamp & stamp,
+  const SteeSourcesTable::TopicName & topic, const SteeSourcesTable::Stamp & stamp,
   const SteeSourcesTable::SourcesMsg & sources_msg)
 {
   assert(stamp.get_clock_type() == RCL_ROS_TIME);
@@ -48,8 +47,7 @@ void SteeSourcesTable::set(
   }
 }
 
-SteeSourcesTable::TopicSources
-SteeSourcesTable::get_latest_sources() const
+SteeSourcesTable::TopicSources SteeSourcesTable::get_latest_sources() const
 {
   SteeSourcesTable::TopicSources ret;
 
@@ -74,8 +72,7 @@ SteeSourcesTable::get_latest_sources() const
 }
 
 SteeSourcesTable::SourcesMsg SteeSourcesTable::get_sources(
-  const SteeSourcesTable::TopicName & topic,
-  const SteeSourcesTable::Stamp & stamp) const
+  const SteeSourcesTable::TopicName & topic, const SteeSourcesTable::Stamp & stamp) const
 {
   assert(stamp.get_clock_type() == RCL_ROS_TIME);
   SteeSourcesTable::SourcesMsg empty;

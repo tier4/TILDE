@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_components/register_node_macro.hpp"
+#include "tilde/tilde_node.hpp"
+#include "tilde/tilde_publisher.hpp"
+
+#include "sensor_msgs/msg/point_cloud2.hpp"
+
 #include <chrono>
 #include <cstdio>
 #include <memory>
 #include <utility>
-
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_components/register_node_macro.hpp"
-
-#include "sensor_msgs/msg/point_cloud2.hpp"
-
-#include "tilde/tilde_node.hpp"
-#include "tilde/tilde_publisher.hpp"
 
 using namespace std::chrono_literals;
 
@@ -34,20 +33,17 @@ namespace tilde_sample
 class Goal : public tilde::TildeNode
 {
 public:
-  explicit Goal(const rclcpp::NodeOptions & options)
-  : TildeNode("talker", options)
+  explicit Goal(const rclcpp::NodeOptions & options) : TildeNode("talker", options)
   {
     rclcpp::QoS qos(rclcpp::KeepLast(7));
 
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-    auto sub_callback =
-      [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void
-      {
-        (void) msg;
-        RCLCPP_INFO(this->get_logger(), "received");
-      };
-    sub_pc_ = this->create_tilde_subscription<sensor_msgs::msg::PointCloud2>(
-      "in", qos, sub_callback);
+    auto sub_callback = [this](sensor_msgs::msg::PointCloud2::UniquePtr msg) -> void {
+      (void)msg;
+      RCLCPP_INFO(this->get_logger(), "received");
+    };
+    sub_pc_ =
+      this->create_tilde_subscription<sensor_msgs::msg::PointCloud2>("in", qos, sub_callback);
   }
 
 private:

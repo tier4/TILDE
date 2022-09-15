@@ -12,43 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 /*********************************************************************
-* Software License Agreement (BSD License)
-*
-*  Copyright (c) 2008, Willow Garage, Inc.
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the Willow Garage nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*********************************************************************/
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2008, Willow Garage, Inc.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the Willow Garage nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
+
+#include "tilde_message_filters/tilde_synchronizer.hpp"
+
+#include <rclcpp/rclcpp.hpp>
 
 #include <gtest/gtest.h>
 
-#include <rclcpp/rclcpp.hpp>
-#include "tilde_message_filters/tilde_synchronizer.hpp"
 #include <array>
 
 using namespace message_filters;
@@ -60,7 +62,6 @@ struct Header
   rclcpp::Time stamp;
 };
 
-
 struct Msg
 {
   Header header;
@@ -69,9 +70,9 @@ struct Msg
 typedef std::shared_ptr<Msg> MsgPtr;
 typedef std::shared_ptr<Msg const> MsgConstPtr;
 
-
-template<typename M0, typename M1, typename M2 = NullType, typename M3 = NullType, typename M4 = NullType,
-         typename M5 = NullType, typename M6 = NullType, typename M7 = NullType, typename M8 = NullType>
+template <
+  typename M0, typename M1, typename M2 = NullType, typename M3 = NullType, typename M4 = NullType,
+  typename M5 = NullType, typename M6 = NullType, typename M7 = NullType, typename M8 = NullType>
 struct NullPolicy : public PolicyBase<M0, M1, M2, M3, M4, M5, M6, M7, M8>
 {
   typedef Synchronizer<NullPolicy> Sync;
@@ -83,18 +84,15 @@ struct NullPolicy : public PolicyBase<M0, M1, M2, M3, M4, M5, M6, M7, M8>
 
   NullPolicy()
   {
-    for (int i = 0; i < RealTypeCount::value; ++i)
-    {
+    for (int i = 0; i < RealTypeCount::value; ++i) {
       added_[i] = 0;
     }
   }
 
-  void initParent(Sync*)
-  {
-  }
+  void initParent(Sync *) {}
 
-  template<int i>
-  void add(const typename std::tuple_element<i, Events>::type&)
+  template <int i>
+  void add(const typename std::tuple_element<i, Events>::type &)
   {
     ++added_.at(i);
   }
@@ -158,14 +156,36 @@ TEST(TildeSynchronizer, compile9)
   TildeSynchronizer<Policy9> sync(nullptr, f0, f1, f2, f3, f4, f5, f6, f7, f8);
 }
 
-void function2(const MsgConstPtr&, const MsgConstPtr&) {}
-void function3(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-void function4(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-void function5(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-void function6(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-void function7(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-void function8(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-void function9(const MsgConstPtr&, MsgConstPtr, const MsgPtr&, MsgPtr, const Msg&, Msg, const MessageEvent<Msg const>&, const MessageEvent<Msg>&, const MsgConstPtr&) {}
+void function2(const MsgConstPtr &, const MsgConstPtr &) {}
+void function3(const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &) {}
+void function4(const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &)
+{
+}
+void function5(
+  const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &,
+  const MsgConstPtr &)
+{
+}
+void function6(
+  const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &,
+  const MsgConstPtr &, const MsgConstPtr &)
+{
+}
+void function7(
+  const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &,
+  const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &)
+{
+}
+void function8(
+  const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &,
+  const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &)
+{
+}
+void function9(
+  const MsgConstPtr &, MsgConstPtr, const MsgPtr &, MsgPtr, const Msg &, Msg,
+  const MessageEvent<Msg const> &, const MessageEvent<Msg> &, const MsgConstPtr &)
+{
+}
 
 TEST(TildeSynchronizer, compileFunction2)
 {
@@ -219,13 +239,31 @@ TEST(TildeSynchronizer, compileFunction9)
 
 struct MethodHelper
 {
-  void method2(const MsgConstPtr&, const MsgConstPtr&) {}
-  void method3(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-  void method4(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-  void method5(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-  void method6(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-  void method7(const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&, const MsgConstPtr&) {}
-  void method8(const MsgConstPtr&, MsgConstPtr, const MsgPtr&, MsgPtr, const Msg&, Msg, const MessageEvent<Msg const>&, const MessageEvent<Msg>&) {}
+  void method2(const MsgConstPtr &, const MsgConstPtr &) {}
+  void method3(const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &) {}
+  void method4(const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &)
+  {
+  }
+  void method5(
+    const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &,
+    const MsgConstPtr &)
+  {
+  }
+  void method6(
+    const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &,
+    const MsgConstPtr &, const MsgConstPtr &)
+  {
+  }
+  void method7(
+    const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &,
+    const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &)
+  {
+  }
+  void method8(
+    const MsgConstPtr &, MsgConstPtr, const MsgPtr &, MsgPtr, const Msg &, Msg,
+    const MessageEvent<Msg const> &, const MessageEvent<Msg> &)
+  {
+  }
   // Can only do 8 here because the object instance counts as a parameter and bind only supports 9
 };
 
@@ -472,7 +510,8 @@ TEST(TildeSynchronizer, add9)
   ASSERT_EQ(sync.added_[8], 1);
 }
 */
-int main(int argc, char **argv){
+int main(int argc, char ** argv)
+{
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -12,32 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
-
 #include "tilde/stee_node.hpp"
+
+#include <string>
 
 using tilde::SteeNode;
 
-SteeNode::SteeNode(
-  const std::string & node_name,
-  const rclcpp::NodeOptions & options)
+SteeNode::SteeNode(const std::string & node_name, const rclcpp::NodeOptions & options)
 : Node(node_name, options)
 {
   init();
 }
 
 SteeNode::SteeNode(
-  const std::string & node_name,
-  const std::string & namespace_,
+  const std::string & node_name, const std::string & namespace_,
   const rclcpp::NodeOptions & options)
 : Node(node_name, namespace_, options)
 {
   init();
 }
 
-SteeNode::~SteeNode()
-{
-}
+SteeNode::~SteeNode() {}
 
 void SteeNode::init()
 {
@@ -46,9 +41,10 @@ void SteeNode::init()
   source_table_.reset(new SteeSourcesTable(100));
 
   auto stop_topics_vec = declare_parameter<std::vector<std::string>>(
-      "stee_stop_topics", std::vector<std::string>{
-        "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias",
-      });
+    "stee_stop_topics",
+    std::vector<std::string>{
+      "/localization/pose_twist_fusion_filter/pose_with_covariance_without_yawbias",
+    });
   for (const auto & t : stop_topics_vec) {
     stop_topics_.insert(t);
   }

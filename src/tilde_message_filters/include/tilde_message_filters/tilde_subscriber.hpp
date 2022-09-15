@@ -15,37 +15,34 @@
 #ifndef TILDE_MESSAGE_FILTERS__TILDE_SUBSCRIBER_HPP_
 #define TILDE_MESSAGE_FILTERS__TILDE_SUBSCRIBER_HPP_
 
+#include "message_filters/connection.h"
+#include "message_filters/subscriber.h"
+#include "tilde/tilde_node.hpp"
+
 #include <iostream>
 #include <memory>
 #include <string>
 
-#include "message_filters/subscriber.h"
-#include "message_filters/connection.h"
-
-#include "tilde/tilde_node.hpp"
-
 namespace tilde_message_filters
 {
-template<class>
+template <class>
 inline constexpr bool always_false_v = false;
 
-template<typename P, typename MessageT, typename MessageDeleter>
+template <typename P, typename MessageT, typename MessageDeleter>
 inline constexpr bool is_subscription_message()
 {
   using ConstRef = const MessageT &;
   using UniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
   using SharedConstPtr = std::shared_ptr<const MessageT>;
-  using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT>&;
+  using ConstRefSharedConstPtr = const std::shared_ptr<const MessageT> &;
   using SharedPtr = std::shared_ptr<MessageT>;
 
-  return std::is_same_v<P, ConstRef>||
-         std::is_same_v<P, UniquePtr>||
-         std::is_same_v<P, SharedConstPtr>||
-         std::is_same_v<P, ConstRefSharedConstPtr>||
+  return std::is_same_v<P, ConstRef> || std::is_same_v<P, UniquePtr> ||
+         std::is_same_v<P, SharedConstPtr> || std::is_same_v<P, ConstRefSharedConstPtr> ||
          std::is_same_v<P, SharedPtr>;
 }
 
-template<class M, class NodeType = tilde::TildeNode>
+template <class M, class NodeType = tilde::TildeNode>
 class TildeSubscriber
 {
   using NodePtr = std::shared_ptr<NodeType>;
@@ -64,15 +61,13 @@ public:
   }
 
   TildeSubscriber(
-    NodePtr node, const std::string & topic,
-    const rmw_qos_profile_t qos = rmw_qos_profile_default)
+    NodePtr node, const std::string & topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
   {
     subscribe(node, topic, qos);
   }
 
   void subscribe(
-    NodePtr node, const std::string & topic,
-    const rmw_qos_profile_t qos = rmw_qos_profile_default)
+    NodePtr node, const std::string & topic, const rmw_qos_profile_t qos = rmw_qos_profile_default)
   {
     subscribe(node.get(), topic, qos);
     node_raw_ = nullptr;
@@ -88,30 +83,18 @@ public:
     subscriber_.registerCallback(&TildeSubscriber::register_message_callback, this);
   }
 
-  void subscribe()
-  {
-    subscriber_.subscribe();
-  }
+  void subscribe() { subscriber_.subscribe(); }
 
-  void unsubscribe()
-  {
-    subscriber_.unsubscribe();
-  }
+  void unsubscribe() { subscriber_.unsubscribe(); }
 
   /// get non-FQDN topic name as in message_filter::Subscriber,
-  std::string getTopic() const
-  {
-    return subscriber_.getTopic();
-  }
+  std::string getTopic() const { return subscriber_.getTopic(); }
 
   /// \sa message_filters::Subscriber::add()
-  void add(const EventType & e)
-  {
-    (void)e;
-  }
+  void add(const EventType & e) { (void)e; }
 
   /// \sa message_filters::Subscriber::connectInput()
-  template<typename F>
+  template <typename F>
   void connectInput(F & f)
   {
     (void)f;
@@ -144,43 +127,35 @@ public:
   }
   */
 
-  template<typename C,
-    typename CallbackArgT =
-    typename rclcpp::function_traits::function_traits<C>::template argument_type<0>
-  >
+  template <
+    typename C, typename CallbackArgT =
+                  typename rclcpp::function_traits::function_traits<C>::template argument_type<0>>
   message_filters::Connection registerCallback(const C & callback)
   {
     const auto topic = getTopicFQDN();
 
-    auto new_callback =
-      [this, callback, topic](CallbackArgT msg) -> void
-      {
-        auto pnode = get_node();
+    auto new_callback = [this, callback, topic](CallbackArgT msg) -> void {
+      auto pnode = get_node();
 
-        // msg.get() in below codes:
-        // we can use msg.get() because
-        // - message_filters::simple_filter assumes that
-        //   typename C should be compatible with std::function<void(const MConstPtr&)>
-        // - MConstPtr is std::shared_ptr<M const>
+      // msg.get() in below codes:
+      // we can use msg.get() because
+      // - message_filters::simple_filter assumes that
+      //   typename C should be compatible with std::function<void(const MConstPtr&)>
+      // - MConstPtr is std::shared_ptr<M const>
 
-        // on TildeSubscriber, default callback saves sub_time
-        rclcpp::Time sub_time, sub_time_steady;
-        pnode->find_subscription_time(
-          msg.get(), topic,
-          sub_time, sub_time_steady);
+      // on TildeSubscriber, default callback saves sub_time
+      rclcpp::Time sub_time, sub_time_steady;
+      pnode->find_subscription_time(msg.get(), topic, sub_time, sub_time_steady);
 
-        // update implicit input info
-        pnode->register_message_as_input(
-          msg.get(), topic,
-          sub_time, sub_time_steady);
+      // update implicit input info
+      pnode->register_message_as_input(msg.get(), topic, sub_time, sub_time_steady);
 
-        callback(msg);
-      };
+      callback(msg);
+    };
     return subscriber_.registerCallback(new_callback);
   }
 
-  template<typename P,
-    typename MessageDeleter = std::default_delete<M>>
+  template <typename P, typename MessageDeleter = std::default_delete<M>>
   message_filters::Connection registerCallback(const std::function<void(P)> & callback)
   {
     // We may use SFINAE instead of if constexpr to shorten this function.
@@ -192,43 +167,7 @@ public:
       // As std::function use vtable, we use auto type,
       // not std::function<void(P)> new_callback = ...
       // https://stackoverflow.com/questions/25848690/should-i-use-stdfunction-or-a-function-pointer-in-c
-      auto new_callback =
-        [this, callback, topic](P msg) -> void
-        {
-          auto pnode = get_node();
-
-          // we use msg.get() because
-          // even in this pattern,
-          // P looks to be const shared_ptr (see message_filters::MessageEvent).
-          // TODO(y-okumura-isp): Is ConstRef also possible??
-
-          // on TildeSubscriber, default callback saves sub_time
-          rclcpp::Time sub_time, sub_time_steady;
-          pnode->find_subscription_time(
-            msg.get(), topic,
-            sub_time, sub_time_steady);
-
-          // update implicit input info
-          pnode->register_message_as_input(
-            msg.get(), topic,
-            sub_time, sub_time_steady);
-
-          callback(msg);
-        };
-      return subscriber_.registerCallback(new_callback);
-    }
-  }
-
-  template<typename P>
-  message_filters::Connection registerCallback(void (* callback)(P))
-  {
-    const auto topic = getTopicFQDN();
-    // We use lambda not original function pointer
-    // because we cannot convert captured lambda to function pointer.
-    // https://stackoverflow.com/questions/28746744/passing-capturing-lambda-as-function-pointer
-    auto new_callback =
-      [this, callback, topic](P msg) -> void
-      {
+      auto new_callback = [this, callback, topic](P msg) -> void {
         auto pnode = get_node();
 
         // we use msg.get() because
@@ -238,62 +177,79 @@ public:
 
         // on TildeSubscriber, default callback saves sub_time
         rclcpp::Time sub_time, sub_time_steady;
-        pnode->find_subscription_time(
-          msg.get(), topic,
-          sub_time, sub_time_steady);
+        pnode->find_subscription_time(msg.get(), topic, sub_time, sub_time_steady);
 
         // update implicit input info
-        pnode->register_message_as_input(
-          msg.get(), topic,
-          sub_time, sub_time_steady);
+        pnode->register_message_as_input(msg.get(), topic, sub_time, sub_time_steady);
 
         callback(msg);
       };
+      return subscriber_.registerCallback(new_callback);
+    }
+  }
+
+  template <typename P>
+  message_filters::Connection registerCallback(void (*callback)(P))
+  {
+    const auto topic = getTopicFQDN();
+    // We use lambda not original function pointer
+    // because we cannot convert captured lambda to function pointer.
+    // https://stackoverflow.com/questions/28746744/passing-capturing-lambda-as-function-pointer
+    auto new_callback = [this, callback, topic](P msg) -> void {
+      auto pnode = get_node();
+
+      // we use msg.get() because
+      // even in this pattern,
+      // P looks to be const shared_ptr (see message_filters::MessageEvent).
+      // TODO(y-okumura-isp): Is ConstRef also possible??
+
+      // on TildeSubscriber, default callback saves sub_time
+      rclcpp::Time sub_time, sub_time_steady;
+      pnode->find_subscription_time(msg.get(), topic, sub_time, sub_time_steady);
+
+      // update implicit input info
+      pnode->register_message_as_input(msg.get(), topic, sub_time, sub_time_steady);
+
+      callback(msg);
+    };
     return subscriber_.registerCallback(new_callback);
   }
 
-  template<typename T, typename P>
-  message_filters::Connection registerCallback(void (T::* callback)(P), T * t)
+  template <typename T, typename P>
+  message_filters::Connection registerCallback(void (T::*callback)(P), T * t)
   {
     const auto topic = getTopicFQDN();
     auto bind_callback = std::bind(callback, t, std::placeholders::_1);
-    auto new_callback =
-      [this, bind_callback, topic](P msg) -> void
-      {
-        auto pnode = get_node();
+    auto new_callback = [this, bind_callback, topic](P msg) -> void {
+      auto pnode = get_node();
 
-        // we use msg.get() because
-        // even in this pattern,
-        // P looks to be const shared_ptr (see message_filters::MessageEvent).
-        // TODO(y-okumura-isp): Can the msg type be ConstRef?
+      // we use msg.get() because
+      // even in this pattern,
+      // P looks to be const shared_ptr (see message_filters::MessageEvent).
+      // TODO(y-okumura-isp): Can the msg type be ConstRef?
 
-        // on TildeSubscriber, default callback saves sub_time
-        rclcpp::Time sub_time, sub_time_steady;
-        pnode->find_subscription_time(
-          msg.get(), topic,
-          sub_time, sub_time_steady);
+      // on TildeSubscriber, default callback saves sub_time
+      rclcpp::Time sub_time, sub_time_steady;
+      pnode->find_subscription_time(msg.get(), topic, sub_time, sub_time_steady);
 
-        // update implicit input info
-        pnode->register_message_as_input(
-          msg.get(), topic,
-          sub_time, sub_time_steady);
+      // update implicit input info
+      pnode->register_message_as_input(msg.get(), topic, sub_time, sub_time_steady);
 
-        bind_callback(msg);
-      };
+      bind_callback(msg);
+    };
     // We need to wrap new_callback because P is sometimes non MConstPtr.
     // If P is non MConstPtr, `registerCallback(const C& callback)` is called and
     // subsequent `signal_.addCallback(Callback(callback))` fails because
     // Callback = std::function<void(const MConstPtr&)>.
     // So we wrap new_callback by std::function, and use
     // `registerCallback(const std::function<void(P)>& callback)`.
-    std::function<void(P)> new_callback2 =
-      std::bind(new_callback, std::placeholders::_1);
+    std::function<void(P)> new_callback2 = std::bind(new_callback, std::placeholders::_1);
     return subscriber_.registerCallback(new_callback2);
   }
 
 private:
   NodePtr node_shared_;
-  NodeType * node_raw_ {nullptr};
+  NodeType * node_raw_{nullptr};
   message_filters::Subscriber<M> subscriber_;
 
   NodeType * get_node()
@@ -326,9 +282,7 @@ private:
     auto sub_time = pnode->now();
     auto sub_time_steady = pnode->get_steady_time();
 
-    pnode->register_message_as_input(
-      msg.get(), topic,
-      sub_time, sub_time_steady);
+    pnode->register_message_as_input(msg.get(), topic, sub_time, sub_time_steady);
   }
 };
 }  // namespace tilde_message_filters

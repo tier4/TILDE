@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
-
 #include "tilde/tilde_node.hpp"
+
+#include <string>
 
 using tilde::TildeNode;
 
-TildeNode::TildeNode(
-  const std::string & node_name,
-  const rclcpp::NodeOptions & options)
+TildeNode::TildeNode(const std::string & node_name, const rclcpp::NodeOptions & options)
 : Node(node_name, options)
 {
   steady_clock_.reset(new rclcpp::Clock(RCL_STEADY_TIME));
@@ -30,8 +28,7 @@ TildeNode::TildeNode(
 }
 
 TildeNode::TildeNode(
-  const std::string & node_name,
-  const std::string & namespace_,
+  const std::string & node_name, const std::string & namespace_,
   const rclcpp::NodeOptions & options)
 : Node(node_name, namespace_, options)
 {
@@ -41,6 +38,4 @@ TildeNode::TildeNode(
   this->get_parameter("enable_tilde", enable_tilde);
 }
 
-TildeNode::~TildeNode()
-{
-}
+TildeNode::~TildeNode() {}
