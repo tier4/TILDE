@@ -2,11 +2,13 @@
 
 import pickle
 import argparse
+
 import rosbag2_py
 from rosidl_runtime_py.utilities import get_message
 from rclpy.serialization import deserialize_message
 
-from message_tracking_tag import time2str, Message_Tracking_Tag, Message_Tracking_Tags
+from message_tracking_tag import Message_Tracking_Tag, Message_Tracking_Tags
+
 
 def get_rosbag_options(path, serialization_format='cdr'):
     storage_options = rosbag2_py.StorageOptions(uri=path, storage_id='sqlite3')
@@ -16,6 +18,7 @@ def get_rosbag_options(path, serialization_format='cdr'):
         output_serialization_format=serialization_format)
 
     return storage_options, converter_options
+
 
 def main(args):
     bag_path = args.bag_path
@@ -29,7 +32,6 @@ def main(args):
     # Create a map for quicker lookup
     type_map = {topic_types[i].name: topic_types[i].type for i in range(len(topic_types))}
 
-    if_first = True
     cnt = 0
 
     # topic => list of record
@@ -40,7 +42,7 @@ def main(args):
     while reader.has_next() and cnt <= args.cnt:
         (topic, data, t) = reader.read_next()
         # TODO: need more accurate check
-        if not "/message_tracking_tag" in topic:
+        if "/message_tracking_tag" not in topic:
             continue
 
         msg_type = get_message(type_map[topic])
@@ -48,7 +50,6 @@ def main(args):
 
         out_topic = msg.output_info.topic_name
         out_stamp = msg.output_info.header_stamp
-        out_stamp_s = time2str(out_stamp)
 
         message_tracking_tag = Message_Tracking_Tag(out_topic, out_stamp)
 
@@ -63,7 +64,6 @@ def main(args):
                     skip_topic_vs_count[in_topic] += 1
                 continue
             in_stamp = input_info.header_stamp
-            in_stamp_s = time2str(in_stamp)
 
             message_tracking_tag.add_input_info(in_topic, in_has_stamp, in_stamp)
 
@@ -73,6 +73,7 @@ def main(args):
 
     for topic, count in skip_topic_vs_count.items():
         print(f"skipped {topic} {count} times")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -1,5 +1,6 @@
 import rclpy
-from rosgraph2_impl import Edge, Graph
+from rosgraph2_impl import Graph
+
 
 def get_graph(least_num, prints_edge=False):
     node = rclpy.create_node("topic_traversal_node")
@@ -22,6 +23,7 @@ def get_graph(least_num, prints_edge=False):
             print("  '{}'".format(k))
 
     return graph
+
 
 def find_key(edges, name):
     for key in edges:

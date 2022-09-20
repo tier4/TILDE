@@ -24,7 +24,7 @@
 #include <memory>
 #include <utility>
 
-using namespace std::chrono_literals;
+using namespace std::chrono_literals;  // NOLINT
 
 typedef sensor_msgs::msg::PointCloud2 Msg;
 typedef std::shared_ptr<sensor_msgs::msg::PointCloud2 const> MsgConstPtr;

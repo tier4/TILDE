@@ -33,7 +33,8 @@ add_library(tilde_sample SHARED
   src/sample_publisher.cpp
   src/relay_timer.cpp
   src/relay_timer_with_buffer.cpp
-  src/goal.cpp)
+  src/goal.cpp
+  src/sample_stee_publisher.cpp)
 ament_target_dependencies(tilde_sample
     "rclcpp"
     "rclcpp_components"
@@ -56,7 +57,9 @@ rclcpp_components_register_node(tilde_sample
 rclcpp_components_register_node(tilde_sample
   PLUGIN "tilde_sample::Goal"
   EXECUTABLE goal)
-
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::SampleSteePublisherNode"
+  EXECUTABLE sample_stee_publisher)
 
 install(TARGETS
   tilde_sample)

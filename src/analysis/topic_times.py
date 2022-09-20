@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 import argparse
+
+from rclpy.serialization import deserialize_message
 import rosbag2_py
 from rosidl_runtime_py.utilities import get_message
-from rclpy.serialization import deserialize_message
 
 
 def get_rosbag_options(path, serialization_format='cdr'):
@@ -14,6 +15,7 @@ def get_rosbag_options(path, serialization_format='cdr'):
         output_serialization_format=serialization_format)
 
     return storage_options, converter_options
+
 
 def main(args):
     bag_path = args.bag_path
@@ -32,7 +34,6 @@ def main(args):
     reader.set_filter(storage_filter)
 
     print("topic: {}".format(topic))
-    if_first = True
     cnt = 0
 
     while reader.has_next() and cnt <= args.cnt:
@@ -55,6 +56,7 @@ def main(args):
             msg.header.stamp.nanosec,
             msg.header.frame_id,
             msg_type))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

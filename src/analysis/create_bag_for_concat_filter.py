@@ -7,10 +7,9 @@ import shutil
 import rosbag2_py
 from rosidl_runtime_py.utilities import get_message
 from rclpy.serialization import deserialize_message
-from sensor_msgs.msg import PointCloud2
-from geometry_msgs.msg import TwistStamped
 
 serialization_format = 'cdr'
+
 
 def main(args):
     in_bag_path = args.in_bag
@@ -86,6 +85,7 @@ def main(args):
 
     del writer
     rosbag2_py.Reindexer().reindex(out_storage_options)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

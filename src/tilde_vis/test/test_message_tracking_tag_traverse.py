@@ -128,12 +128,11 @@ def gen_scenario2(
     topic1 --> topic3 --> topic4
     topic2 ---/
 
-    Parameters
-    ----------
-    st: Time
-    st: Time
-    nw_dur: Duration
-    db_dur: Duration
+    Args:
+      st: Time
+      st_steady: Time
+      nw_dur: Duration
+      cb_dur: Duration
 
     Returns
     -------

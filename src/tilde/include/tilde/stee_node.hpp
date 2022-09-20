@@ -23,6 +23,7 @@
 #include "tilde_msg/msg/stee_source.hpp"
 
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -65,9 +66,17 @@ public:
       rclcpp::message_memory_strategy::MessageMemoryStrategy<CallbackMessageT, AllocatorT>,
     typename ConvertedMessageMemoryStrategyT =
       rclcpp::message_memory_strategy::MessageMemoryStrategy<ConvertedMessageT, AllocatorT>,
+#if TILDE_ROS_VERSION <= 202103
     typename SteeSubscriptionT = SteeSubscription<
       MessageT, ConvertedMessageT, AllocatorT, MessageMemoryStrategyT,
-      ConvertedMessageMemoryStrategyT>>
+      ConvertedMessageMemoryStrategyT>
+#else
+    typename SteeSubscriptionT = SteeSubscription<
+      MessageT, ConvertedMessageT, AllocatorT, typename rclcpp::TypeAdapter<MessageT>::custom_type,
+      typename rclcpp::TypeAdapter<MessageT>::ros_message_type, MessageMemoryStrategyT,
+      ConvertedMessageMemoryStrategyT>
+#endif
+    >
   std::shared_ptr<SteeSubscriptionT> create_stee_subscription(
     const std::string & topic_name, const rclcpp::QoS & qos, CallbackT && callback,
     const rclcpp::SubscriptionOptionsWithAllocator<AllocatorT> & options =

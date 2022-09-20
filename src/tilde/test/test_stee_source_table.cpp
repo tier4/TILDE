@@ -31,7 +31,7 @@ public:
   void TearDown() override {}
 };
 
-rclcpp::Time get_time(int32_t sec, uint32_t nsec) { return rclcpp::Time(sec, nsec); }
+rclcpp::Time get_time(int32_t sec, uint32_t nsec) { return rclcpp::Time(sec, nsec, RCL_ROS_TIME); }
 
 void add_sources(
   const std::string & in_topic, const rclcpp::Time & stamp, const rclcpp::Time & steady,

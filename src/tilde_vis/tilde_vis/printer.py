@@ -41,7 +41,7 @@ class NcursesPrinter(object):
     NPAGE = curses.KEY_NPAGE
 
     def __init__(self, stdscr):
-        """Constructor."""
+        """Initialize."""
         stdscr.scrollok(True)
         stdscr.timeout(0)  # set non-blocking
         self.stdscr = stdscr

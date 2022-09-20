@@ -83,7 +83,7 @@ def run(args):
 
 
 def main():
-    """Main."""
+    """Run main."""
     parser = argparse.ArgumentParser()
     parser.add_argument('bag_path')
     parser.add_argument(

@@ -30,17 +30,15 @@ class TopicInfo(object):
         """
         Hold information similar to MessageTrackingTag in/out info.
 
-        Parameters
-        ----------
-        topic: target topic [string]
-        pubsub_stamp:
-          when publish or subscription callback is called
-          [builtin_interfaces.msg.Time]
-        pubsub_stamp_steady:
-          same with above but in steady time
-          [builtin_interfaces.mg.Time]
-        has_stamp: whether main topic has header.stamp or not [bool]
-        stamp: header.stamp [builtin_interfaces.msg.Time]
+        :param topic: target topic [string]
+        :param pubsub_stamp:
+            when publish or subscription callback is called
+            [builtin_interfaces.msg.Time]
+        :param pubsub_stamp_steady:
+            same with above but in steady time
+            [builtin_interfaces.mg.Time]
+        :param has_stamp: whether main topic has header.stamp or not [bool]
+        :param stamp: header.stamp [builtin_interfaces.msg.Time]
 
         """
         self.topic = topic
@@ -66,14 +64,12 @@ class MessageTrackingTag(object):
     def __init__(self, out_topic, pub_time, pub_time_steady,
                  has_stamp, out_stamp):
         """
-        Constructor.
+        Initialize data.
 
-        Parameters
-        ----------
-        out_topic: topic name
-        pub_time: when publish main topic [builtin_interfaces.msg.Time]
-        has_stamp: whether main topic has header.stamp [bool]
-        out_stamp: main topic header.stamp [builtin_interfaces.msg.Time]
+        :param out_topic: topic name
+        :param pub_time: when publish main topic [builtin_interfaces.msg.Time]
+        :param has_stamp: whether main topic has header.stamp [bool]
+        :param out_stamp: main topic header.stamp [builtin_interfaces.msg.Time]
 
         """
         self.out_info = TopicInfo(out_topic, pub_time, pub_time_steady,
@@ -86,11 +82,9 @@ class MessageTrackingTag(object):
         """
         Add input info.
 
-        Parameters
-        ----------
-        in_topic: topic string
-        has_stamp: bool
-        stamp: header stamp [builtin_interfaces.msg.Time]
+        :param in_topic: topic string
+        :param has_stamp: bool
+        :param stamp: header stamp [builtin_interfaces.msg.Time]
 
         """
         info = TopicInfo(in_topic, sub_stamp, sub_stamp_steady,
@@ -116,13 +110,8 @@ class MessageTrackingTag(object):
         """
         Convert MessageTrackingTagMsg to MessageTrackingTag.
 
-        Parameters
-        ----------
-        message_tracking_tag_msg: MessageTrackingTagMsg
-
-        Returns
-        -------
-        MessageTrackingTag
+        :param message_tracking_tag_msg: MessageTrackingTagMsg
+        :return MessageTrackingTag
 
         """
         output_info = message_tracking_tag_msg.output_info
@@ -153,7 +142,7 @@ class MessageTrackingTags(object):
     """
 
     def __init__(self):
-        """Constructor."""
+        """Initialize data."""
         # {topic => {stamp_str => MessageTrackingTag}}
         self.topic_vs_message_tracking_tags = {}
 
@@ -174,9 +163,7 @@ class MessageTrackingTags(object):
         """
         Erase added message_tracking_tag where out_stamp < stamp.
 
-        Parameters
-        ----------
-        stamp: builtin_interfaces.msg.Time
+        :param stamp: builtin_interfaces.msg.Time
 
         """
         def time_ge(lhs, rhs):
@@ -191,8 +178,8 @@ class MessageTrackingTags(object):
             although clock_type has no meaning.
 
             """
-            [lhs_sec, lhs_nano_sec] = map(lambda x: int(x), lhs.split('.'))
-            [rhs_sec, rhs_nano_sec] = map(lambda x: int(x), rhs.split('.'))
+            lhs_sec, lhs_nano_sec = (int(x) for x in lhs.split('.'))
+            rhs_sec, rhs_nano_sec = (int(x) for x in rhs.split('.'))
             lhs_time = Time(seconds=lhs_sec, nanoseconds=lhs_nano_sec)
             rhs_time = Time(seconds=rhs_sec, nanoseconds=rhs_nano_sec)
             return lhs_time <= rhs_time
@@ -224,14 +211,9 @@ class MessageTrackingTags(object):
         """
         Get a MessageTrackingTag.
 
-        Parameters
-        ----------
-        topic: str
-        stamp: str such as 1618559286.884563157
-
-        Return
-        ------
-        MessageTrackingTag or None
+        :param topic: str
+        :param stamp: str such as 1618559286.884563157
+        :return MessageTrackingTag or None
 
         """
         ret = None
@@ -259,9 +241,8 @@ class MessageTrackingTags(object):
         """
         Gather input topics by ignoring stamps.
 
-        Return
-        ------
-        set of topic name
+        :param topic: topic name
+        :return set of topic name
 
         """
         ret = set()

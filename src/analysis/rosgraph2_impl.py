@@ -34,24 +34,21 @@
 # Adopted from the ROS1 ros_comm repository
 # https://github.com/ros/ros_comm/blob/5de058ad1bbf3a525ae3f5288a76e59ec0dd62d0/tools/rosgraph/src/rosgraph/impl/graph.py
 
+# flake8: noqa
+
 from __future__ import print_function
 
 """
 Data structures and library for representing ROS Computation Graph state.
 """
 
-import sys
 import time
 import itertools
 import random
-import logging
-import traceback
-import socket
 
 from collections import defaultdict
 
 from python_qt_binding.QtCore import qDebug, qWarning
-from rclpy import logging
 from rclpy.qos import qos_check_compatible
 from rclpy.qos import QoSCompatibility
 
@@ -61,6 +58,8 @@ _ROS_NAME = '/rosviz'
 
 def topic_node(topic):
     """
+    Write me.
+
     In order to prevent topic/node name aliasing, we have to remap
     topic node names. Currently we just prepend a space, which is
     an illegal ROS name and thus not aliased.
@@ -71,6 +70,8 @@ def topic_node(topic):
 
 def node_topic(node):
     """
+    Write me.
+
     Inverse of topic_node
     @return str: undo topic_node() operation
     """
@@ -79,6 +80,8 @@ def node_topic(node):
 
 class BadNode(object):
     """
+    Write me.
+
     Data structure for storing info about a 'bad' node
     """
 
@@ -89,6 +92,8 @@ class BadNode(object):
 
     def __init__(self, name, node_type, reason):
         """
+        Write me.
+
         @param type: DEAD | WONKY
         @type  type: int
         """
@@ -99,8 +104,11 @@ class BadNode(object):
 
 class EdgeList(object):
     """
+    Write me.
+
     Data structure for storing Edge instances
     """
+
     __slots__ = ['edges_by_start', 'edges_by_end']
 
     def __init__(self):
@@ -109,13 +117,15 @@ class EdgeList(object):
         self.edges_by_end = {}
 
     def __iter__(self):
-        return itertools.chain(*[v for v in self.edges_by_start.values()])
+        return itertools.chain(*[v for v in self.edges_by_start.values()])  # NOLINT
 
     def has(self, edge):
         return edge in self
 
     def __contains__(self, edge):
         """
+        Write me.
+
         @return: True if edge is in edge list
         @rtype: bool
         """
@@ -124,7 +134,8 @@ class EdgeList(object):
 
     def add(self, edge):
         """
-        Add an edge to our internal representation. not multi-thread safe
+        Add an edge to our internal representation. not multi-thread safe.
+
         @param edge: edge to add
         @type  edge: Edge
         """
@@ -147,6 +158,8 @@ class EdgeList(object):
 
     def add_edges(self, start, dest, direction, label='', qos=None):
         """
+        Write me.
+
         Create Edge instances for args and add resulting edges to edge
         list. Convenience method to avoid repetitive logging, etc...
         @param edge_list: data structure to add edge to
@@ -160,7 +173,6 @@ class EdgeList(object):
         @return: True if update occurred
         @rtype: bool
         """
-
         # the warnings should generally be temporary, occurring of the
         # master/node information becomes stale while we are still
         # doing an update
@@ -176,12 +188,13 @@ class EdgeList(object):
 
     def delete_all(self, node):
         """
-        Delete all edges that start or end at node
+        Delete all edges that start or end at node.
+
         @param node: name of node
         @type  node: str
         """
-        def matching(map, pref):
-            return [map[k] for k in map.keys() if k.startswith(pref)]
+        def matching(map_, pref):
+            return [map_[k] for k in map.keys() if k.startswith(pref)]
 
         pref = node+"|"
         edge_lists = matching(self.edges_by_start, pref) + matching(self.edges_by_end, pref)
@@ -191,7 +204,7 @@ class EdgeList(object):
 
     def delete(self, edge):
         # see note in __init__
-        def update_map(map, key, edge):
+        def update_map(map, key, edge):  # NOLINT
             if key in map:
                 edges = map[key]
                 if edge in edges:
@@ -202,9 +215,7 @@ class EdgeList(object):
 
 
 class Edge(object):
-    """
-    Data structure for representing ROS node graph edge
-    """
+    """Data structure for representing ROS node graph edge."""
 
     __slots__ = ['start', 'end', 'label', 'key', 'r_key', 'qos']
 
@@ -230,8 +241,9 @@ class Edge(object):
 
 def edge_args(start, dest, direction, label, qos):
     """
-    compute argument ordering for Edge constructor based on direction flag
-    @param direction str: 'i', 'o', or 'b' (in/out/bi_dir) relative to \a start
+    Compute argument ordering for Edge constructor based on direction flag.
+
+    @param direction str: i, o, or b (in/out/bi_dir) relative to start
     @param start str: name of starting node
     @param start dest: name of destination node
     """
@@ -246,6 +258,7 @@ def edge_args(start, dest, direction, label, qos):
 class Graph(object):
     """
     Utility class for polling ROS statistics from running ROS graph.
+
     Not multi-thread-safe
     """
 
@@ -255,9 +268,9 @@ class Graph(object):
         self.topic_ns = topic_ns or '/'
 
         # ROS nodes
-        self.nn_nodes = set([])
+        self.nn_nodes = set([])  # NOLINT
         # ROS topic nodes
-        self.nt_nodes = set([])
+        self.nt_nodes = set([])  # NOLINT
 
         # ROS nodes that aren't responding quickly
         self.bad_nodes = {}
@@ -293,6 +306,8 @@ class Graph(object):
 
     def set_node_stale(self, stale_secs):
         """
+        Write me.
+
         @param stale_secs: seconds that data is considered fresh
         @type  stale_secs: double
         """
@@ -300,6 +315,8 @@ class Graph(object):
 
     def _graph_refresh(self):
         """
+        Write me.
+
         @return: True if nodes information was updated
         @rtype: bool
         """
@@ -421,9 +438,7 @@ class Graph(object):
             self.bad_nodes_lock.release()
 
     def _unmark_bad_node(self, node, reason):
-        """
-        Promotes bad node to 'wonky' status.
-        """
+        """Promotes bad node to 'wonky' status."""
         try:
             # bad nodes are updated in a separate thread, so lock
             self.bad_nodes_lock.acquire()
@@ -434,7 +449,8 @@ class Graph(object):
 
     def _node_refresh_bus_info(self, node, bad_node=False):
         """
-        Retrieve bus info from the node and update nodes and edges as appropriate
+        Retrieve bus info from the node and update nodes and edges as appropriate.
+
         @param node: node name
         @type  node: str
         @param api: XML-RPC proxy
@@ -449,7 +465,8 @@ class Graph(object):
 
     def _node_refresh(self, node, bad_node=False):
         """
-        Contact node for stats/connectivity information
+        Contact node for stats/connectivity information.
+
         @param node: name of node to contact
         @type  node: str
         @param bad_node: if True, node has connectivity issues
@@ -477,6 +494,8 @@ class Graph(object):
 
     def bad_update(self):
         """
+        Write me.
+
         Update loop for nodes with bad connectivity. We box them separately
         so that we can maintain the good performance of the normal update loop.
         Once a node is on the bad list it stays there.
@@ -516,10 +535,11 @@ class Graph(object):
 
     def update(self):
         """
+        Write me.
+
         Update all the stats. This method may take awhile to complete as it will
         communicate with all nodes + master.
         """
-
         last_node_refresh = self.last_node_refresh
 
         # nodes left to check

@@ -59,7 +59,7 @@ class TopicInfoStatistics(object):
     """TopicInfo statistics."""
 
     def __init__(self, topics, max_rows=10):
-        """Constructor."""
+        """Initialize statistics data."""
         self.topics = topics
         self.t2i = {topic: i for i, topic in enumerate(topics)}
         self.seq2time = defaultdict(
@@ -139,7 +139,7 @@ class PathVisNode(Node):
     """Path visualization node."""
 
     def __init__(self):
-        """Constructor."""
+        """Initialize."""
         super().__init__('path_vis_node')
         self.declare_parameter('topics', LIDAR_PREPROCESS)
         self.declare_parameter('window', 10)
@@ -188,7 +188,7 @@ class PathVisNode(Node):
 
 
 def main(args=None):
-    """Main."""
+    """Run PathVisNode."""
     rclpy.init(args=args)
     node = PathVisNode()
 
