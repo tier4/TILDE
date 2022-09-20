@@ -28,7 +28,7 @@
 
 using namespace std::chrono_literals;  // NOLINT
 
-const int64_t TIMER_MS_DEFAULT = 1000;
+const int64_t g_timer_ms_default = 1000;
 
 namespace tilde_sample
 {
@@ -39,14 +39,14 @@ public:
   explicit SampleSteePublisherNode(const rclcpp::NodeOptions & options)
   : SteeNode("sample_stee_publisher_node", options)
   {
-    const std::string TIMER_MS = "timer_ms";
+    const std::string timer_ms_name = "timer_ms";
 
-    declare_parameter<int64_t>(TIMER_MS, TIMER_MS_DEFAULT);
-    auto timer_ms = get_parameter(TIMER_MS).get_value<int64_t>();
+    declare_parameter<int64_t>(timer_ms_name, g_timer_ms_default);
+    auto timer_ms = get_parameter(timer_ms_name).get_value<int64_t>();
     std::cout << "timer_ms: " << timer_ms << std::endl;
 
     // Create a function for when messages are to be sent.
-    setvbuf(stdout, NULL, _IONBF, BUFSIZ);
+    setvbuf(stdout, nullptr, _IONBF, BUFSIZ);
     auto publish_message = [this]() -> void {
       auto time_now = this->now();
 
