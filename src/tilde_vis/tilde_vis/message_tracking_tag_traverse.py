@@ -42,15 +42,13 @@ class SolverResult(object):
         """
         Initialize data.
 
-        Parameters
-        ----------
-        topic: topic [string]
-        stamp: header.stamp [rclpy.Time]
-        dur_ms: duration of header.stamp in ms [double]
-        dur_pub_ms: duration of output.pub_time in ms [double]
-        dur_pub_ms_steady: same with above but in steady clock ms [double]
-        is_leaf: bool
-        parent: parent topic [string]
+        :param topic: topic [string]
+        :param stamp: header.stamp [rclpy.Time]
+        :param dur_ms: duration of header.stamp in ms [double]
+        :param dur_pub_ms: duration of output.pub_time in ms [double]
+        :param dur_pub_ms_steady: steady clock ms [double]
+        :param is_leaf: bool
+        :param parent: parent topic [string]
 
         """
         self.topic = topic
@@ -74,21 +72,16 @@ class SolverResultsPrinter(object):
         from output topic to source topics.
         Multiple input topics are shown by indented listing.
 
-        Example
-        ---------------
+        Example:
+        -------
           topic               dur   e2e
           out_topic:
             in_topic1         0.1   0.1
                in_topic1_1    0.2   0.2
             in_topic2         0.3   0.3
 
-        Parameters
-        ----------
-        results: SolverResults
-
-        Return
-        ------
-        array of string
+        :param results: SolverResults
+        :return array of string
 
         """
         pass
@@ -129,16 +122,11 @@ class InputSensorStampSolver(object):
         """
         Traverse from (tgt_topic, tgt_stamp)-message.
 
-        Parameters
-        ----------
-        topic: target topic
-        stamp: target stamp(str)
-
-        stops: list of stop topics to prevent loop
-
-        Return
-        ------
-        SolverResults
+        :param message_tracking_tags: MessageTrackingTags
+        :param tgt_topic: target topic
+        :param tgt_stamp: target stamp(str)
+        :param stops: list of stop topics to prevent loop
+        :return SolverResults
 
         Calculate topic_stamp_to_sensor_stamp internally.
 
@@ -215,21 +203,18 @@ class InputSensorStampSolver(object):
         """
         Traverse DAG from output to input.
 
-        Parameters
-        ----------
-        message_tracking_tags: message_tracking_tags [MessageTrackingTags]
-        tgt_topic: output topic [string]
-        tgt_stamp: output header stamp [string]
-        stops: stop list
-
-        Return
-        ------
-        TreeNode
-        - Tree structure represents TopicGraph.
-          This means that even if some MessageTrackingTags loss in some timing,
-          returned TreeNode preserve entire graph.
-        - .name means topic
-        - .data is MessageTrackingTag of the topic. [] whn MessageTrackingTag loss
+        :param message_tracking_tags: message_tracking_tags
+        :param tgt_topic: output topic [string]
+        :param tgt_stamp: output header stamp [string]
+        :param stops: stop list
+        :return TreeNode
+            - Tree structure represents TopicGraph.
+              This means that even if some MessageTrackingTags loss
+              in some timing,
+              returned TreeNode preserve entire graph.
+            - .name means topic
+            - .data is MessageTrackingTag of the topic.
+              [] whn MessageTrackingTag loss
 
         """
         skips = self.skips
@@ -289,14 +274,9 @@ class InputSensorStampSolver(object):
         """
         Get empty results to know graph.
 
-        Parameters
-        ----------
-        tgt_topic: output topic [string]
-        stops: stop list
-
-        Returns
-        -------
-        TreeNode
+        :param tgt_topic: output topic [string]
+        :param stops: stop list
+        :return TreeNode
 
         """
         skips = self.skips
@@ -330,10 +310,9 @@ class TopicGraph(object):
         """
         Initialize graph.
 
-        Parameters
-        ----------
-        message_tracking_tags: MessageTrackingTags
-        skips: skip topics. {downstream: upstream} by input-to-output order
+        :param message_tracking_tags: MessageTrackingTags
+        :param skips: skip topics. {downstream: upstream}
+               by input-to-output order
                ex) {"/sensing/lidar/top/rectified/pointcloud_ex":
                     "/sensing/lidar/top/mirror_cropped/pointcloud_ex"}
 
@@ -372,13 +351,8 @@ class TopicGraph(object):
         """
         Get input topics of the target topic.
 
-        Parameters
-        ----------
-        topic: topic name
-
-        Return
-        ------
-        List[Topic]
+        :param topic: topic name
+        :return List[Topic]
 
         """
         out_topic_idx = self.t2i[topic]
@@ -388,13 +362,8 @@ class TopicGraph(object):
         """
         Do depth first search from the topic.
 
-        Parameters
-        ----------
-        start_topic: topic name
-
-        Return
-        ------
-        topic names in appearance order
+        :param start_topic: topic name
+        :return topic names in appearance order
 
         """
         edges = self.rev_edges
@@ -419,13 +388,8 @@ class TopicGraph(object):
         """
         Do breadth first search from the topic.
 
-        Parameters
-        ----------
-        start_topic: topic name
-
-        Return
-        ------
-        topic names in appearance order
+        :param start_topic: topic name
+        :return topic names in appearance order
 
         """
         edges = self.rev_edges

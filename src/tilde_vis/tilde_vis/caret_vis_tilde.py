@@ -110,8 +110,10 @@ def build_latency_table(traces, ds):
 
     Parameters
     ----------
-    traces: CARET traces
-    ds: list to output
+    traces: list
+       CARET traces
+    ds: list
+       list to output
 
     """
     traces_dict = {trace.uuid: trace for trace in traces}

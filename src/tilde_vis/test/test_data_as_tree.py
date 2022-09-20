@@ -55,11 +55,12 @@ def get_complex_tree():
     """
     Get complex tree.
 
-    Return
+    Return:
     ------
     see the following `sample` variable.
     The name of the top node is "root".
     So, call `ret.get_chile("p1")` and so on to access nodes.
+
     """
     sample = {
         'p1': {

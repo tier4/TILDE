@@ -59,9 +59,7 @@ class TreeNode(object):
         """
         Add data.
 
-        Parameters
-        ----------
-        d: any value or object
+        :param d: any value or object
 
         """
         self.data.append(d)
@@ -72,13 +70,8 @@ class TreeNode(object):
 
         Internally, pre-order DFS is used.
 
-        Parameters
-        ----------
-        fn: callable, which takes TreeNode
-
-        Return
-        ------
-        list of fn return
+        :param fn: callable, which takes TreeNode
+        :return list of fn return
 
         """
         children = self.children
@@ -96,13 +89,8 @@ class TreeNode(object):
 
         Internally, pre-order DFS is used.
 
-        Parameters
-        ----------
-        fn: callback such as fn(tree_node_obj, depth)
-
-        Return
-        ------
-        list of fn return
+        :param fn: callback such as fn(tree_node_obj, depth)
+        :return list of fn return
 
         """
         children = self.children
@@ -121,9 +109,7 @@ class TreeNode(object):
         If self does not have some keys which rhs has,
         then new nodes are added.
 
-        Parameters
-        ----------
-        rhs: another TreeNode
+        :param rhs: another TreeNode
 
         """
         def _merge(lhs, rhs):

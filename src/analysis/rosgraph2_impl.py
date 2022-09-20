@@ -540,7 +540,6 @@ class Graph(object):
         Update all the stats. This method may take awhile to complete as it will
         communicate with all nodes + master.
         """
-
         last_node_refresh = self.last_node_refresh
 
         # nodes left to check
