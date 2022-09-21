@@ -66,7 +66,7 @@ public:
       rclcpp::message_memory_strategy::MessageMemoryStrategy<CallbackMessageT, AllocatorT>,
     typename ConvertedMessageMemoryStrategyT =
       rclcpp::message_memory_strategy::MessageMemoryStrategy<ConvertedMessageT, AllocatorT>,
-#if TILDE_ROS_VERSION <= 202103
+#if ROS_DISTRO_GALACTIC
     typename SteeSubscriptionT = SteeSubscription<
       MessageT, ConvertedMessageT, AllocatorT, MessageMemoryStrategyT,
       ConvertedMessageMemoryStrategyT>

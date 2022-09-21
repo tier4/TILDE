@@ -93,6 +93,21 @@ rclcpp::Node の子クラスです。
 既存のアプリケーションに TILDE を組み込む際は以下の流れになります。
 ※ TODO: TILDE ライブラリ（\*.so）の取込み手順
 
+- packages.xml に以下を追加
+
+```xml
+<depend>tilde_cmake</depend>
+<depend>tilde</depend>
+```
+
+- CMakeLists.txt に以下を追加
+
+```cmake
+find_package(tilde_cmake REQUIRED)
+tilde_package()
+find_package(tilde REQUIRED)
+```
+
 - rclcpp::Node, rclcpp::Node::create_publisher, rclcpp::Node::create_subscription に代わり tilde の各 API の利用
   - rclcpp::Node とコンストラクタを tilde::TildeNode に置換
   - create_subscription() を create_tilde_subscription() に置換

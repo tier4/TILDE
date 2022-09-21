@@ -23,7 +23,7 @@
 namespace tilde
 {
 
-#if TILDE_ROS_VERSION <= 202103
+#if ROS_DISTRO_GALACTIC
 template <
   typename CallbackMessageT,
   typename ConvertedCallbackMessageT = ConvertedMessageType<CallbackMessageT>,
@@ -46,7 +46,7 @@ template <
 class SteeSubscription
 {
 private:
-#if TILDE_ROS_VERSION <= 202103
+#if ROS_DISTRO_GALACTIC
   using SubscriptionT = rclcpp::Subscription<CallbackMessageT, AllocatorT, MessageMemoryStrategyT>;
   using ConvertedSubscriptionT =
     rclcpp::Subscription<ConvertedCallbackMessageT, AllocatorT, ConvertedMessageMemoryStrategyT>;
