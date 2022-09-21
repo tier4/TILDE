@@ -13,6 +13,7 @@
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
   <depend>rmw</depend>
+  <depend>tilde_cmake</depend>
   <depend>tilde_msg</depend>
 
   <test_depend>ament_lint_auto</test_depend>

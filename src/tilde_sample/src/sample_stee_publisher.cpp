@@ -47,6 +47,7 @@ public:
 
     // Create a function for when messages are to be sent.
     setvbuf(stdout, nullptr, _IONBF, BUFSIZ);
+
     auto publish_message = [this]() -> void {
       auto time_now = this->now();
 

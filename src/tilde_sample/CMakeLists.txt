@@ -14,6 +14,8 @@ find_package(rclcpp_components REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
+find_package(tilde_cmake REQUIRED)
+tilde_package()
 find_package(tilde REQUIRED)
 
 if(BUILD_TESTING)
