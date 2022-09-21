@@ -154,6 +154,11 @@ public:
     return converted_pub_->get_topic_name();
   }
 
+  /// Explicit API
+  /**
+   * \param[in] sub_topic topic FQN
+   * \param[in] stamp header.stamp of the used message
+   */
   RCLCPP_PUBLIC
   void add_explicit_input_info(const std::string & sub_topic, const rclcpp::Time & stamp)
   {
@@ -193,6 +198,7 @@ private:
           }
         }
       }
+      explicit_info_.clear();
     }
   }
 };
