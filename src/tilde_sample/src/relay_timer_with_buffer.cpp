@@ -27,7 +27,7 @@
 #include <utility>
 #include <vector>
 
-using namespace std::chrono_literals;
+using namespace std::chrono_literals;  // NOLINT
 
 const int64_t TIMER_MS_DEFAULT = 1000;
 const int64_t PROC_MS_DEFAULT = 10;

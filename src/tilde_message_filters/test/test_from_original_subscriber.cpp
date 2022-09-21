@@ -48,7 +48,7 @@
 #include <gtest/gtest.h>
 
 // see ros2/rclcpp#1619,1713
-// TODO: remove this comment, and the `NonConstHelper` tests
+// TODO: remove this comment, and the `NonConstHelper` tests // NOLINT
 // once the deprecated signatures have been discontinued.
 #define RCLCPP_AVOID_DEPRECATIONS_FOR_UNIT_TESTS 1
 #include "message_filters/chain.h"
@@ -60,8 +60,8 @@
 
 #include "sensor_msgs/msg/imu.hpp"
 
-using namespace message_filters;
-using namespace tilde_message_filters;
+using namespace message_filters;        // NOLINT
+using namespace tilde_message_filters;  // NOLINT
 typedef sensor_msgs::msg::Imu Msg;
 typedef std::shared_ptr<sensor_msgs::msg::Imu const> MsgConstPtr;
 typedef std::shared_ptr<sensor_msgs::msg::Imu> MsgPtr;

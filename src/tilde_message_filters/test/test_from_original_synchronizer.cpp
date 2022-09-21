@@ -53,9 +53,9 @@
 
 #include <array>
 
-using namespace message_filters;
-using namespace tilde_message_filters;
-using namespace std::placeholders;
+using namespace message_filters;        // NOLINT
+using namespace tilde_message_filters;  // NOLINT
+using namespace std::placeholders;      // NOLINT
 
 struct Header
 {

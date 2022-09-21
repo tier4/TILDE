@@ -23,6 +23,7 @@
 #include "tilde_msg/msg/stee_source.hpp"
 
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>

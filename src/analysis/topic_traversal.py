@@ -14,6 +14,7 @@ EXCLUDE_TOPICS = [
     "/clock",
     ]
 
+
 def main(args):
     rclpy.init()
     node = rclpy.create_node("topic_traversal_node")
@@ -54,7 +55,7 @@ def main(args):
 
     def traverse(now):
         # print("path: {}, traverse {}".format(path, now))
-        if now == None:
+        if now is None:
             return False
         if now in seen:  # basically, assume now is not in seen
             return False
@@ -89,6 +90,7 @@ def main(args):
 
     for i in path:
         print("  '{}'".format(i))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

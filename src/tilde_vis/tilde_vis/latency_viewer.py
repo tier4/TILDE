@@ -97,15 +97,10 @@ def truncate(s, left_length=20, n=80):
     """
     Truncate string.
 
-    Parameters
-    ----------
-    s: string
-    left_length: first part length
-    n: total length
-
-    Return
-    ------
-    truncated string such that "abc...edf"
+    :param s: string
+    :param left_length: first part length
+    :param n: total length
+    :return truncated string such that "abc...edf"
 
     """
     assert left_length + 5 < n
@@ -123,7 +118,7 @@ class LatencyStat(object):
     """Latency statistics."""
 
     def __init__(self):
-        """Constructor."""
+        """Initialize data."""
         self.dur_ms_list = []
         self.dur_pub_ms_list = []
         self.dur_pub_ms_steady_list = []
@@ -133,9 +128,7 @@ class LatencyStat(object):
         """
         Add single result.
 
-        Parameters
-        ----------
-        r: message_tracking_tag_traverse.SolverResults
+        :param r: message_tracking_tag_traverse.SolverResults
 
         """
         self.dur_ms_list.append(r.dur_ms)
@@ -182,16 +175,14 @@ class PerTopicLatencyStat(object):
     """Per topic latency statistics."""
 
     def __init__(self):
-        """Constructor."""
+        """Initialize data."""
         self.data = {}
 
     def add(self, r):
         """
         Add single result.
 
-        Parameters
-        ----------
-        r: message_tracking_tag_traverse.SolverResults
+        :param r: message_tracking_tag_traverse.SolverResults
 
         """
         self.data.setdefault(r.topic, LatencyStat()).add(r)
@@ -207,9 +198,7 @@ class PerTopicLatencyStat(object):
         """
         Print report.
 
-        Parameters
-        ----------
-        printer: see printer.py
+        :param printer: see printer.py
 
         """
         logs = []
@@ -245,19 +234,14 @@ def calc_one_hot(results):
     """
     Calculate one hot result.
 
-    Parameters
-    ----------
-    results: see InputSensorStampSolver.solve2
-
-    Return
-    ------
-    list of (depth, topic name, dur, dur_steady, is_leaf)
-    depth: depth of watched topic
-    topic_name: watched topic
-    dur: final topic pub_time - sensor pub_time
-    dur_steady: steady version of dur
-    is_leaf: leaf of not [bool]
-    stamp: target topic output stamp
+    :param results: see InputSensorStampSolver.solve2
+    :return list of (depth, topic name, dur, dur_steady, is_leaf)
+      depth: depth of watched topic
+      topic_name: watched topic
+      dur: final topic pub_time - sensor pub_time
+      dur_steady: steady version of dur
+      is_leaf: leaf of not [bool]
+      stamp: target topic output stamp
 
     """
     last_pub_time = Time.from_msg(results.data[0].out_info.pubsub_stamp)
@@ -286,23 +270,19 @@ def calc_one_hot(results):
     return results.apply_with_depth(calc)
 
 
-def handle_stat(stamps, message_tracking_tags, target_topic, solver, stops, dumps=False):
+def handle_stat(stamps, message_tracking_tags, target_topic, solver, stops,
+                dumps=False):
     """
     Calculate latency statistics.
 
-    Parameters
-    ----------
-    stamps:
-    message_tracking_tags:
-    target_topic:
-    solver:
-    stops:
-    dumps:
-
-    Result
-    ------
-    TreeNode.
-    .data: see calc_stat
+    :param stamps: stamp
+    :param message_tracking_tags: message tracking tag
+    :param target_topic: target topic
+    :param solver: InputSensorStampSolver
+    :param stops: list of stop targets
+    :param dumps: dump pkl file if True for debug
+    :return TreeNode.
+      .data: see calc_stat
 
     """
     idx = -3
@@ -338,15 +318,10 @@ def update_stat(results):
     """
     Update results to have durations.
 
-    Parameters
-    ----------
-    results: see InputSensorStampSolver.solve2
-
-    Return
-    ------
-    results with
-    results.data: [(dur_ms, dur_ms_steady)]
-    results.data_orig = results.data
+    :param results: TreeNode see InputSensorStampSolver.solve2
+    :return updated results with
+      results.data: [(dur_ms, dur_ms_steady)]
+      results.data_orig = results.data
 
     """
     last_pub_time = Time.from_msg(
@@ -382,13 +357,8 @@ def calc_stat(results):
     """
     Calculate statistics.
 
-    Parameters
-    ----------
-    results: TreeNode which is updated by update_stat
-
-    Return
-    ------
-    list of dictionary whose keys are:
+    :param results: TreeNode which is updated by update_stat
+    :return list of dictionary whose keys are:
       "depth"
       "name"
       "dur_min"
@@ -435,11 +405,9 @@ class LatencyViewerNode(Node):
 
     def __init__(self, stdscr=None):
         """
-        Constructor.
+        Initialize Node.
 
-        Parameters
-        ----------
-        stdscr: if not None, use ncurses
+        :param stdscr: if not None, use ncurses
 
         """
         super().__init__('latency_viewer_node')
@@ -608,13 +576,8 @@ class LatencyViewerNode(Node):
         """
         Report statistics.
 
-        Parameters
-        ----------
-        stamps: stamps sorted by old-to-new order
-
-        Returns
-        -------
-        list of string
+        :param stamps: stamps sorted by old-to-new order
+        :return list of string
 
         """
         message_tracking_tags = self.message_tracking_tags
@@ -673,13 +636,8 @@ class LatencyViewerNode(Node):
         """
         Report only one message.
 
-        Parameters
-        ----------
-        stamps: stamps sorted by old-to-new order
-
-        Returns
-        -------
-        array of strings for log
+        :param stamps: stamps sorted by old-to-new order
+        :return array of strings for log
 
         """
         message_tracking_tags = self.message_tracking_tags
@@ -696,8 +654,8 @@ class LatencyViewerNode(Node):
             idx = 0
 
         target_stamp = stamps[idx]
-        results = solver.solve2(message_tracking_tags, target_topic, target_stamp,
-                                stops=stops)
+        results = solver.solve2(message_tracking_tags, target_topic,
+                                target_stamp, stops=stops)
 
         if self.dumps:
             pickle.dump(results,
@@ -763,7 +721,7 @@ class LatencyViewerNode(Node):
         handle_ms = (et1 - st) * 1000
 
         # cleanup MessageTrackingTags
-        (latest_sec, latest_ns) = map(lambda x: int(x), stamps[-1].split('.'))
+        (latest_sec, latest_ns) = (int(x) for x in stamps[-1].split('.'))
         until_stamp = TimeMsg(sec=latest_sec - self.keep_info_sec,
                               nanosec=latest_ns)
         message_tracking_tags.erase_until(until_stamp)
@@ -781,14 +739,8 @@ class LatencyViewerNode(Node):
         """
         Get all topic infos.
 
-        Parameters
-        ----------
-        excludes: topic names
-
-        Returns
-        -------
-        map
-          a list of message_tracking_tag topics
+        :param excludes: topic names
+        :return a list of message_tracking_tag topics
 
         """
         # short sleep between node creation and get_topic_names_and_types
@@ -801,7 +753,7 @@ class LatencyViewerNode(Node):
         topic_and_types = self.get_topic_names_and_types()
         filtered_topic_and_types = \
             filter(lambda x: msg_type in x[1], topic_and_types)
-        topics = map(lambda x: x[0], filtered_topic_and_types)
+        topics = (x[0] for x in filtered_topic_and_types)
         topics = filter(lambda x: x not in excludes, topics)
 
         return topics
@@ -817,7 +769,7 @@ def main_curses(stdscr, args=None):
 
 
 def main(args=None):
-    """Main."""
+    """Run main."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--batch', action='store_true',

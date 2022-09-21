@@ -5,15 +5,15 @@ import argparse
 from collections import deque, defaultdict
 import time
 
-import rclpy
-from rclpy.clock import Clock, ClockType
 from rclpy.time import Time
 
-from message_tracking_tag import time2str, Message_Tracking_Tag, Message_Tracking_Tags
+from message_tracking_tag import time2str
+
 
 def str_stamp2time(timestamp: str):
     sec, nanosec = timestamp.split(".")
     return Time(seconds=int(sec), nanoseconds=int(nanosec))
+
 
 class InputSensorStampSolver(object):
     def __init__(self):
@@ -22,6 +22,8 @@ class InputSensorStampSolver(object):
 
     def solve(self, message_tracking_tags, tgt_topic, tgt_stamp):
         """
+        Solve.
+
         topic: target topic
         stamp: target stamp(str)
 
@@ -33,7 +35,6 @@ class InputSensorStampSolver(object):
         path_bfs = graph.bfs_rev(tgt_topic)
         is_leaf = {t: b for (t, b) in path_bfs}
 
-        wants = []  # topic, stamp
         stamp = tgt_stamp
 
         # dists[topic][stamp]
@@ -94,7 +95,7 @@ class InputSensorStampSolver(object):
 
 
 class TopicGraph(object):
-    "Construct topic graph by ignoring stamps"
+    """Construct topic graph by ignoring stamps."""
 
     def __init__(self, message_tracking_tags):
         self.topics = sorted(message_tracking_tags.all_topics())
@@ -116,24 +117,26 @@ class TopicGraph(object):
 
     def rev_topics(self, topic):
         """
-        get input topics
+        Get input topics.
+
         return List[Topic]
         """
         input_topics = self.t2i[topic]
-        return [self.topics[i] for i in input_topics.rev_edges[i]]
+        return [self.topics[i] for i in input_topics.rev_edges]
 
     def dfs_rev(self, start_topic):
-        '''
-        traverse topic graph reversely from start_topic
+        """
+        Traverse topic graph reversely from start_topic.
 
         return topic names in appearance order
-        '''
+        """
         edges = self.rev_edges
         n = len(edges)
         seen = [False for _ in range(n)]
         sid = self.t2i[start_topic]
 
         ret = []
+
         def dfs(v):
             ret.append(self.topics[v])
             seen[v] = True
@@ -146,9 +149,7 @@ class TopicGraph(object):
         return ret
 
     def bfs_rev(self, start_topic):
-        """
-        return list of (topic, is_leaf)
-        """
+        """Return list of (topic, is_leaf)."""
         edges = self.rev_edges
         n = len(edges)
         dist = [-1 for _ in range(n)]
@@ -170,6 +171,7 @@ class TopicGraph(object):
 
         return paths
 
+
 def main(args):
     pickle_file = args.pickle_file
     message_tracking_tags = pickle.load(open(pickle_file, "rb"))
@@ -177,9 +179,8 @@ def main(args):
     tgt_topic = args.topic
     tgt_stamp = sorted(message_tracking_tags.stamps(tgt_topic))[args.stamp_index]
 
-    graph = TopicGraph(message_tracking_tags)
-    bfs_path = graph.bfs_rev(tgt_topic)
-
+    # graph = TopicGraph(message_tracking_tags)
+    # bfs_path = graph.bfs_rev(tgt_topic)
     # print(f"BFS from {tgt_topic}")
     # for p, is_leaf in bfs_path:
     #     print(f"  {p} {is_leaf}")
@@ -191,6 +192,7 @@ def main(args):
     et = time.time()
 
     print(f"solve {(et-st) * 1000} [ms]")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
