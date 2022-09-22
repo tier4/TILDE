@@ -18,7 +18,9 @@
 #include "rclcpp/subscription.hpp"
 #include "tilde/message_conversion.hpp"
 
+#include <cassert>
 #include <memory>
+#include <string>
 
 namespace tilde
 {
@@ -72,17 +74,25 @@ public:
   {
     assert(converted_sub_ == nullptr);
     sub_ = sub;
+    topic_fqn_ = sub->get_topic_name();
   }
 
   void set_converted_sub(std::shared_ptr<ConvertedSubscriptionT> converted_sub)
   {
     assert(sub_ == nullptr);
     converted_sub_ = converted_sub;
+    std::string extended_name = converted_sub_->get_topic_name();
+    std::string affix = "/stee";
+    assert(affix.length() < extended_name.length());
+    topic_fqn_ = extended_name.substr(0, extended_name.length() - affix.length());
   }
+
+  [[nodiscard]] RCLCPP_PUBLIC const char * get_topic_name() const { return topic_fqn_.c_str(); }
 
 private:
   std::shared_ptr<SubscriptionT> sub_;
   std::shared_ptr<ConvertedSubscriptionT> converted_sub_;
+  std::string topic_fqn_;
 };
 
 }  // namespace tilde
