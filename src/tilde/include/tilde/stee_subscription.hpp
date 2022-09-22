@@ -87,8 +87,7 @@ public:
     topic_fqn_ = extended_name.substr(0, extended_name.length() - affix.length());
   }
 
-  [[nodiscard]] RCLCPP_PUBLIC
-  const char * get_topic_name() const { return topic_fqn_.c_str(); }
+  [[nodiscard]] RCLCPP_PUBLIC const char * get_topic_name() const { return topic_fqn_.c_str(); }
 
 private:
   std::shared_ptr<SubscriptionT> sub_;
