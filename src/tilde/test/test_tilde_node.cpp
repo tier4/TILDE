@@ -368,3 +368,109 @@ TEST_F(TestTildeNode, publish_top_level_stamp)
 
   EXPECT_TRUE(checker_sub_called);
 }
+
+TEST_F(TestTildeNode, param_enable_tilde)
+{
+  rclcpp::NodeOptions options;
+  options.append_parameter_override("use_sim_time", true);
+
+  auto main_node = std::make_shared<TildeNode>("mainNode", options);
+  auto checker_node = std::make_shared<rclcpp::Node>("checkerNode", options);
+
+  auto main_pub =
+    main_node->create_tilde_publisher<tilde_msg::msg::TestTopLevelStamp>("out_topic", 1);
+
+  bool checker_sub_called = false;
+  auto checker_sub = checker_node->create_subscription<tilde_msg::msg::MessageTrackingTag>(
+    "out_topic/message_tracking_tag", 1,
+    [&checker_sub_called](
+      tilde_msg::msg::MessageTrackingTag::UniquePtr message_tracking_tag_msg) -> void {
+      (void)message_tracking_tag_msg;
+      checker_sub_called = true;
+      EXPECT_TRUE(message_tracking_tag_msg->output_info.has_header_stamp);
+    });
+
+  // under enable_tilde = true
+  tilde_msg::msg::TestTopLevelStamp msg;
+  msg.stamp.sec = 1234;
+  msg.stamp.nanosec = 5678;
+
+  main_pub->publish(msg);
+  rclcpp::Rate(50).sleep();
+  rclcpp::spin_some(checker_node);
+
+  EXPECT_TRUE(checker_sub_called);
+
+  // under enable_tilde = false
+  rclcpp::Parameter param("enable_tilde", false);
+  main_node->set_parameter(param);
+  rclcpp::spin_some(main_node);
+  checker_sub_called = false;
+
+  msg.stamp.sec = 2234;
+  msg.stamp.nanosec = 5679;
+
+  main_pub->publish(msg);
+  rclcpp::Rate(50).sleep();
+  rclcpp::spin_some(checker_node);
+
+  EXPECT_FALSE(checker_sub_called);
+}
+
+class ChildParamCallback : public TildeNode
+{
+public:
+  explicit ChildParamCallback(const rclcpp::NodeOptions & options)
+  : TildeNode("child_param_callback", options)
+  {
+    this->declare_parameter<std::string>("child_param", "original");
+    this->get_parameter("child_param", child_param_);
+
+    param_callback_handle_ =
+      this->add_on_set_parameters_callback([this](std::vector<rclcpp::Parameter> parameters) {
+        auto result = rcl_interfaces::msg::SetParametersResult();
+
+        result.successful = true;
+        for (auto parameter : parameters) {
+          if (parameter.get_name() == "child_param") {
+            child_param_ = parameter.as_string();
+          }
+        }
+        return result;
+      });
+  }
+
+  std::string child_param_;
+
+private:
+  OnSetParametersCallbackHandle::SharedPtr param_callback_handle_;
+};
+
+TEST_F(TestTildeNode, child_param_callback)
+{
+  rclcpp::NodeOptions options;
+
+  auto node = std::make_shared<ChildParamCallback>(options);
+
+  // check default
+  bool enable_tilde = false;
+  node->get_parameter("enable_tilde", enable_tilde);
+  EXPECT_TRUE(enable_tilde);
+
+  std::string child_param = "";
+  node->get_parameter("child_param", child_param);
+  EXPECT_EQ(child_param, "original");
+
+  // update
+  rclcpp::Parameter enable_tilde_update("enable_tilde", false);
+  node->set_parameter(enable_tilde_update);
+  rclcpp::Parameter child_param_update("child_param", "updated");
+  node->set_parameter(child_param_update);
+
+  // check
+  node->get_parameter("enable_tilde", enable_tilde);
+  EXPECT_FALSE(enable_tilde);
+
+  node->get_parameter("child_param", child_param);
+  EXPECT_EQ(child_param, "updated");
+}

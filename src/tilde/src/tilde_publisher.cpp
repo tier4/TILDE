@@ -36,11 +36,12 @@ rclcpp::Time tilde::get_timestamp(rclcpp::Time t, ...)
 
 TildePublisherBase::TildePublisherBase(
   std::shared_ptr<rclcpp::Clock> clock, std::shared_ptr<rclcpp::Clock> steady_clock,
-  const std::string & node_fqn)
+  const std::string & node_fqn, bool enable)
 : clock_(clock),
   steady_clock_(steady_clock),
   node_fqn_(node_fqn),
   seq_(0),
+  enable_(enable),
   is_explicit_(false),
   MAX_SUB_CALLBACK_INFOS_SEC_(2)
 {
@@ -159,6 +160,8 @@ bool TildePublisherBase::get_input_info(
   info = *(it->second);
   return true;
 }
+
+void TildePublisherBase::set_enable(bool enable) { enable_ = enable; }
 
 void TildePublisherBase::print_input_infos()
 {

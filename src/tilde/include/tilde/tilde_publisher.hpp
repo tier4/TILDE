@@ -176,10 +176,11 @@ public:
    * \param[in] clock for RCL_ROS_TIME
    * \param[in] clock for RCL_STEADY_TIME
    * \param[in] node_fqn a node name
+   * \param[in] enable enable TILDE or not
    */
   explicit TildePublisherBase(
     std::shared_ptr<rclcpp::Clock> clock, std::shared_ptr<rclcpp::Clock> steady_clock,
-    const std::string & node_fqn);
+    const std::string & node_fqn, bool enable = true);
 
   /// Set implicit input info
   /**
@@ -249,6 +250,12 @@ public:
   bool get_input_info(
     const std::string & topic, const rclcpp::Time & header_stamp, InputInfo & info);
 
+  /// Enable or disable TILDE
+  /**
+   * \param[in] enable boolean
+   */
+  void set_enable(bool enable);
+
   void print_input_infos();
 
 protected:
@@ -259,6 +266,8 @@ protected:
   int64_t seq_;
 
   std::map<std::string, std::string> sub_topics_;
+
+  bool enable_;
 
 private:
   // parent node subscription topic vs InputInfo
@@ -295,10 +304,7 @@ public:
     std::shared_ptr<MessageTrackingTagPublisher> info_pub, std::shared_ptr<PublisherT> pub,
     const std::string & node_fqn, std::shared_ptr<rclcpp::Clock> clock,
     std::shared_ptr<rclcpp::Clock> steady_clock, bool enable)
-  : TildePublisherBase(clock, steady_clock, node_fqn),
-    info_pub_(info_pub),
-    pub_(pub),
-    enable_(enable)
+  : TildePublisherBase(clock, steady_clock, node_fqn, enable), info_pub_(info_pub), pub_(pub)
   {
   }
 
@@ -367,7 +373,6 @@ private:
   std::shared_ptr<MessageTrackingTagPublisher> info_pub_;
   std::shared_ptr<PublisherT> pub_;
   const std::string node_fqn_;
-  bool enable_;
 
   /// Publish MessageTrackingTag
   /**
