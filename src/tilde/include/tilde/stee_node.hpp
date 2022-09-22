@@ -88,10 +88,7 @@ public:
     std::shared_ptr<ConvertedSubscriptionT> converted_sub{nullptr};
     auto stee_sub = std::make_shared<SteeSubscriptionT>();
 
-    // TODO(y-okumura-isp): make instance variable
-    bool enable_stee = true;
-
-    if (enable_stee) {
+    if (enable_stee_) {
       using rclcpp::node_interfaces::get_node_topics_interface;
       auto node_topics_interface = get_node_topics_interface(this);
       auto resolved_topic_name = node_topics_interface->resolve_topic_name(topic_name);
@@ -221,6 +218,15 @@ private:
    * We can set it only by startup option for now.
    */
   std::set<std::string> stop_topics_;
+
+  /// Enable STEE or not
+  /**
+   * We can set this parameter by "enable_stee" only at initialization.
+   * This is because if we change "enable/disable" dynamically,
+   * we need to dynamically change the message type (original type or STEE type).
+   * We cannot do this without re-create the publisher/subscription pair.
+   */
+  bool enable_stee_;
 
   template <class MessageT, class ConvertedMessageT = ConvertedMessageType<MessageT>>
   void set_source_table(const std::string & topic, const ConvertedMessageT * msg)

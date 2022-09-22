@@ -536,3 +536,34 @@ TEST_F(TestSteeNode, two_topics_one_pub)
   rclcpp::spin_some(checker_node);
   EXPECT_TRUE(checker_received);
 }
+
+TEST_F(TestSteeNode, param_enable_stee)
+{
+  rclcpp::NodeOptions options;
+  options.append_parameter_override("use_sim_time", true);
+  options.append_parameter_override("enable_stee", false);
+
+  // if not enable_stee, we can communicate non-stee publisher and
+  // stee subscription
+  auto sensor_node = std::make_shared<SteeNode>("sensor_node", options);
+  auto main_node = std::make_shared<SteeNode>("main_node", options);
+
+  auto non_stee_pub = sensor_node->create_publisher<PointCloud2>("topic", 1);
+
+  bool got_message = false;
+  auto main_stee_sub = main_node->create_stee_subscription<PointCloud2>(
+    "topic", 1, [&got_message](std::shared_ptr<const PointCloud2> msg) -> void {
+      (void)msg;
+      got_message = true;
+    });
+
+  // publish sensor
+  PointCloud2 msg;
+  msg.header.stamp = get_time(1, 100);
+  msg.header.frame_id = "by_sensor1";
+  non_stee_pub->publish(msg);
+
+  rclcpp::Rate(50).sleep();
+  rclcpp::spin_some(main_node);
+  EXPECT_TRUE(got_message);
+}

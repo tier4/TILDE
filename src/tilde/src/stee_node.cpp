@@ -40,6 +40,9 @@ void SteeNode::init()
   // TODO(y-okumura-isp): set appropriate max stamps
   source_table_.reset(new SteeSourcesTable(100));
 
+  declare_parameter<bool>("enable_stee", true);
+  get_parameter("enable_stee", enable_stee_);
+
   auto stop_topics_vec = declare_parameter<std::vector<std::string>>(
     "stee_stop_topics",
     std::vector<std::string>{
