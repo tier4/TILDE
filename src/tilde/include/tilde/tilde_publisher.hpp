@@ -359,7 +359,8 @@ public:
 
   // TODO(y-okumura-isp) get_allocator
 
-  size_t get_subscription_count() const { return pub_->get_subscription_count(); }
+  size_t get_subscription_count() const {
+    return pub_->get_subscription_count(); }
 
   size_t get_intra_process_subscription_count() const
   {
@@ -367,7 +368,8 @@ public:
   }
 
   RCLCPP_PUBLIC
-  const char * get_topic_name() const { return pub_->get_topic_name(); }
+  const char * get_topic_name() const {
+    return pub_->get_topic_name(); }
 
 private:
   std::shared_ptr<MessageTrackingTagPublisher> info_pub_;
