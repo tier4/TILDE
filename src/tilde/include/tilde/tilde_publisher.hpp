@@ -304,7 +304,7 @@ public:
     std::shared_ptr<MessageTrackingTagPublisher> info_pub, std::shared_ptr<PublisherT> pub,
     const std::string & node_fqn, std::shared_ptr<rclcpp::Clock> clock,
     std::shared_ptr<rclcpp::Clock> steady_clock, bool enable)
-  : TildePublisherBase(clock, steady_clock, node_fqn, enable), info_pub_(info_pub), pub_(pub)
+  : TildePublisherBase(clock, steady_clock, node_fqn, enable), info_pub_(std::move(info_pub), pub_(pub)
   {
   }
 
