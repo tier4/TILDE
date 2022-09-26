@@ -426,12 +426,12 @@ public:
     this->declare_parameter<std::string>("child_param", "original");
     this->get_parameter("child_param", child_param_);
 
-    param_callback_handle_ =
-      this->add_on_set_parameters_callback([this](std::vector<rclcpp::Parameter> parameters) {
+    param_callback_handle_ = this->add_on_set_parameters_callback(
+      [this](const std::vector<rclcpp::Parameter> & parameters) {
         auto result = rcl_interfaces::msg::SetParametersResult();
 
         result.successful = true;
-        for (auto parameter : parameters) {
+        for (const auto & parameter : parameters) {
           if (parameter.get_name() == "child_param") {
             child_param_ = parameter.as_string();
           }
@@ -457,7 +457,7 @@ TEST_F(TestTildeNode, child_param_callback)
   node->get_parameter("enable_tilde", enable_tilde);
   EXPECT_TRUE(enable_tilde);
 
-  std::string child_param = "";
+  std::string child_param;
   node->get_parameter("child_param", child_param);
   EXPECT_EQ(child_param, "original");
 

@@ -79,7 +79,7 @@ public:
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   RCLCPP_PUBLIC
-  virtual ~TildeNode();
+  virtual ~TildeNode() = default;
 
   /// create custom subscription
   template <

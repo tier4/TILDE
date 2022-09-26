@@ -35,11 +35,11 @@ rclcpp::Time tilde::get_timestamp(rclcpp::Time t, ...)
 }
 
 TildePublisherBase::TildePublisherBase(
-  std::shared_ptr<rclcpp::Clock> clock, std::shared_ptr<rclcpp::Clock> steady_clock,
-  const std::string & node_fqn, bool enable)
+  const std::shared_ptr<rclcpp::Clock> & clock, const std::shared_ptr<rclcpp::Clock> & steady_clock,
+  std::string node_fqn, bool enable)
 : clock_(clock),
   steady_clock_(steady_clock),
-  node_fqn_(node_fqn),
+  node_fqn_(std::move(node_fqn)),
   seq_(0),
   enable_(enable),
   is_explicit_(false),

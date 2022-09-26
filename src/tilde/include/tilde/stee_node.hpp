@@ -226,7 +226,7 @@ private:
    * we need to dynamically change the message type (original type or STEE type).
    * We cannot do this without re-create the publisher/subscription pair.
    */
-  bool enable_stee_;
+  bool enable_stee_{};
 
   template <class MessageT, class ConvertedMessageT = ConvertedMessageType<MessageT>>
   void set_source_table(const std::string & topic, const ConvertedMessageT * msg)

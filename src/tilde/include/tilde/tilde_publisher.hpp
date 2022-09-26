@@ -179,8 +179,8 @@ public:
    * \param[in] enable enable TILDE or not
    */
   explicit TildePublisherBase(
-    std::shared_ptr<rclcpp::Clock> clock, std::shared_ptr<rclcpp::Clock> steady_clock,
-    const std::string & node_fqn, bool enable = true);
+    const std::shared_ptr<rclcpp::Clock> & clock,
+    const std::shared_ptr<rclcpp::Clock> & steady_clock, std::string node_fqn, bool enable = true);
 
   /// Set implicit input info
   /**
@@ -302,9 +302,9 @@ public:
   /// Default constructor
   TildePublisher(
     std::shared_ptr<MessageTrackingTagPublisher> info_pub, std::shared_ptr<PublisherT> pub,
-    const std::string & node_fqn, std::shared_ptr<rclcpp::Clock> clock,
-    std::shared_ptr<rclcpp::Clock> steady_clock, bool enable)
-  : TildePublisherBase(clock, steady_clock, node_fqn, enable), info_pub_(std::move(info_pub), pub_(pub)
+    const std::string & node_fqn, const std::shared_ptr<rclcpp::Clock> & clock,
+    const std::shared_ptr<rclcpp::Clock> & steady_clock, bool enable)
+  : TildePublisherBase(clock, steady_clock, node_fqn, enable), info_pub_(info_pub), pub_(pub)
   {
   }
 
@@ -359,8 +359,7 @@ public:
 
   // TODO(y-okumura-isp) get_allocator
 
-  size_t get_subscription_count() const {
-    return pub_->get_subscription_count(); }
+  size_t get_subscription_count() const { return pub_->get_subscription_count(); }
 
   size_t get_intra_process_subscription_count() const
   {
@@ -368,8 +367,7 @@ public:
   }
 
   RCLCPP_PUBLIC
-  const char * get_topic_name() const {
-    return pub_->get_topic_name(); }
+  const char * get_topic_name() const { return pub_->get_topic_name(); }
 
 private:
   std::shared_ptr<MessageTrackingTagPublisher> info_pub_;

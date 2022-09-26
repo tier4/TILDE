@@ -40,11 +40,11 @@ void TildeNode::init()
   this->get_parameter("enable_tilde", enable_tilde_);
 
   param_callback_handle_ =
-    this->add_on_set_parameters_callback([this](std::vector<rclcpp::Parameter> parameters) {
+    this->add_on_set_parameters_callback([this](const std::vector<rclcpp::Parameter> & parameters) {
       auto result = rcl_interfaces::msg::SetParametersResult();
 
       result.successful = true;
-      for (auto parameter : parameters) {
+      for (const auto & parameter : parameters) {
         if (parameter.get_name() == "enable_tilde") {
           enable_tilde_ = parameter.as_bool();
           for (auto & [topic, pub] : tilde_pubs_) {
@@ -57,5 +57,3 @@ void TildeNode::init()
       return result;
     });
 }
-
-TildeNode::~TildeNode() {}
