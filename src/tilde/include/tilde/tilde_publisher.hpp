@@ -179,8 +179,8 @@ public:
    * \param[in] enable enable TILDE or not
    */
   explicit TildePublisherBase(
-    const std::shared_ptr<rclcpp::Clock> & clock,
-    const std::shared_ptr<rclcpp::Clock> & steady_clock, std::string node_fqn, bool enable = true);
+    std::shared_ptr<rclcpp::Clock> clock, std::shared_ptr<rclcpp::Clock> steady_clock,
+    std::string node_fqn, bool enable = true);
 
   /// Set implicit input info
   /**
