@@ -26,6 +26,12 @@
 namespace tilde
 {
 
+struct SteeSourceCmp
+{
+  bool operator()(
+    const tilde_msg::msg::SteeSource & lhs, const tilde_msg::msg::SteeSource & rhs) const;
+};
+
 class SteeSourcesTable
 {
 public:

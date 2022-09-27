@@ -181,10 +181,16 @@ private:
 
   void set_sources(ConvertedMessageT * converted_msg)
   {
+    std::set<tilde_msg::msg::SteeSource, SteeSourceCmp> found;
+
     if (!is_explicit) {
       auto topic_sources = source_table_->get_latest_sources();
       for (auto & topic_source : topic_sources) {
         for (auto & source : topic_source.second) {
+          if (found.find(source) != found.end()) {
+            continue;
+          }
+          found.insert(source);
           converted_msg->sources.emplace_back(std::move(source));
         }
       }
@@ -194,6 +200,10 @@ private:
         for (const auto & stamp : topic_stamps.second) {
           auto sources = source_table_->get_sources(topic, stamp);
           for (auto & source : sources) {
+            if (found.find(source) != found.end()) {
+              continue;
+            }
+            found.insert(source);
             converted_msg->sources.emplace_back(std::move(source));
           }
         }

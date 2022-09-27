@@ -20,8 +20,53 @@
 #include <utility>
 #include <vector>
 
+using tilde::SteeSourceCmp;
 using tilde::SteeSourcesTable;
 using tilde_msg::msg::SteeSource;
+
+TEST(TestSteeSourceCmp, simple_test)
+{
+  SteeSourceCmp cmp;
+  tilde_msg::msg::SteeSource lhs, rhs;
+
+  // topic order differs
+  lhs.topic = "in1";
+  rhs.topic = "in2";
+
+  EXPECT_TRUE(cmp(lhs, rhs));
+  EXPECT_FALSE(cmp(rhs, lhs));
+
+  // same topic order
+  rhs.topic = lhs.topic;
+  EXPECT_FALSE(cmp(lhs, rhs));
+  EXPECT_FALSE(cmp(rhs, lhs));
+
+  // stamp.sec differs
+  rhs.stamp.sec = 1;
+  EXPECT_TRUE(cmp(lhs, rhs));
+  EXPECT_FALSE(cmp(rhs, lhs));
+
+  lhs.stamp.sec = rhs.stamp.sec;
+
+  // stamp.nanosec differs
+  rhs.stamp.nanosec = 1;
+  EXPECT_TRUE(cmp(lhs, rhs));
+  EXPECT_FALSE(cmp(rhs, lhs));
+
+  lhs.stamp.nanosec = rhs.stamp.nanosec;
+
+  // first_subscription_steady_time.sec differs
+  rhs.first_subscription_steady_time.sec = 1;
+  EXPECT_TRUE(cmp(lhs, rhs));
+  EXPECT_FALSE(cmp(rhs, lhs));
+
+  lhs.first_subscription_steady_time.sec = rhs.first_subscription_steady_time.sec;
+
+  // first_subscription_steady_time.nanosec differs
+  rhs.first_subscription_steady_time.nanosec = 1;
+  EXPECT_TRUE(cmp(lhs, rhs));
+  EXPECT_FALSE(cmp(rhs, lhs));
+}
 
 class TestSteeSourcesTable : public ::testing::Test
 {
@@ -278,4 +323,47 @@ TEST_F(TestSteeSourcesTable, stamp_deletion)
 
   // check topic1 msg1 is purged
   EXPECT_EQ(table.get_sources("topic1", topic11_stamp).size(), 0u);
+}
+
+TEST_F(TestSteeSourcesTable, duplicated_stamp)
+{
+  SteeSourcesTable table(100);
+
+  {
+    SteeSourcesTable::SourcesMsg sources_msg;
+    auto stamp = get_time(110, 0);
+    auto steady = get_time(0, 11);
+    tilde_msg::msg::SteeSource source;
+    source.topic = "in";
+    source.stamp = stamp;
+    source.first_subscription_steady_time = steady;
+
+    // set same stamp multiple times
+    sources_msg.push_back(source);
+    sources_msg.push_back(source);
+    sources_msg.push_back(source);
+
+    // set different source
+    source.topic = "in1";
+    sources_msg.push_back(source);
+
+    table.set("topic", stamp, sources_msg);
+  }
+
+  // expect only two sources
+  auto latest_sources = table.get_latest_sources()["topic"];
+  EXPECT_EQ(latest_sources.size(), 2u);
+  for (const auto & source : latest_sources) {
+    if (source.topic == "in") {
+      EXPECT_EQ(source.stamp.sec, 110);
+      EXPECT_EQ(source.stamp.nanosec, 0u);
+      EXPECT_EQ(source.first_subscription_steady_time.sec, 0);
+      EXPECT_EQ(source.first_subscription_steady_time.nanosec, 11u);
+    } else if (source.topic == "in1") {
+      EXPECT_EQ(source.stamp.sec, 110);
+      EXPECT_EQ(source.stamp.nanosec, 0u);
+      EXPECT_EQ(source.first_subscription_steady_time.sec, 0);
+      EXPECT_EQ(source.first_subscription_steady_time.nanosec, 11u);
+    }
+  }
 }
