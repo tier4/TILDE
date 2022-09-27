@@ -27,7 +27,8 @@ using tilde_msg::msg::SteeSource;
 TEST(TestSteeSourceCmp, simple_test)
 {
   SteeSourceCmp cmp;
-  tilde_msg::msg::SteeSource lhs, rhs;
+  tilde_msg::msg::SteeSource lhs;
+  tilde_msg::msg::SteeSource rhs;
 
   // topic order differs
   lhs.topic = "in1";

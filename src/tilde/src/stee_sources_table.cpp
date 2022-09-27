@@ -16,6 +16,7 @@
 
 #include <cassert>
 #include <map>
+#include <utility>
 
 using tilde::SteeSourceCmp;
 using tilde::SteeSourcesTable;
@@ -24,7 +25,7 @@ SteeSourcesTable::SteeSourcesTable(
   size_t default_max_stamps_per_topic,
   std::map<SteeSourcesTable::TopicName, size_t> max_stamps_per_topic)
 : default_max_stamps_per_topic_(default_max_stamps_per_topic),
-  max_stamps_per_topic_(max_stamps_per_topic)
+  max_stamps_per_topic_(std::move(max_stamps_per_topic))
 {
 }
 
