@@ -16,15 +16,27 @@
 
 #include <cassert>
 #include <map>
+#include <utility>
 
+using tilde::SteeSourceCmp;
 using tilde::SteeSourcesTable;
 
 SteeSourcesTable::SteeSourcesTable(
   size_t default_max_stamps_per_topic,
   std::map<SteeSourcesTable::TopicName, size_t> max_stamps_per_topic)
 : default_max_stamps_per_topic_(default_max_stamps_per_topic),
-  max_stamps_per_topic_(max_stamps_per_topic)
+  max_stamps_per_topic_(std::move(max_stamps_per_topic))
 {
+}
+
+bool SteeSourceCmp::operator()(
+  const tilde_msg::msg::SteeSource & lhs, const tilde_msg::msg::SteeSource & rhs) const
+{
+  return (
+    lhs.topic < rhs.topic || lhs.stamp.sec < rhs.stamp.sec ||
+    lhs.stamp.nanosec < rhs.stamp.nanosec ||
+    lhs.first_subscription_steady_time.sec < rhs.first_subscription_steady_time.sec ||
+    lhs.first_subscription_steady_time.nanosec < rhs.first_subscription_steady_time.nanosec);
 }
 
 void SteeSourcesTable::set(
@@ -32,7 +44,15 @@ void SteeSourcesTable::set(
   const SteeSourcesTable::SourcesMsg & sources_msg)
 {
   assert(stamp.get_clock_type() == RCL_ROS_TIME);
-  sources_[topic][stamp] = sources_msg;
+
+  std::set<tilde_msg::msg::SteeSource, SteeSourceCmp> found;
+  for (const auto & source : sources_msg) {
+    if (found.find(source) != found.end()) {
+      continue;
+    }
+    found.insert(source);
+    sources_[topic][stamp].push_back(source);
+  }
   latest_[topic] = stamp;
 
   auto max_stamps = default_max_stamps_per_topic_;

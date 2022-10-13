@@ -163,7 +163,7 @@ public:
   void add_explicit_input_info(const std::string & sub_topic, const rclcpp::Time & stamp)
   {
     assert(stamp.get_clock_type() == RCL_ROS_TIME);
-    is_explicit = true;
+    is_explicit_ = true;
     explicit_info_[sub_topic].insert(stamp);
   }
 
@@ -175,16 +175,22 @@ private:
   std::shared_ptr<rclcpp::Clock> clock_;
   std::shared_ptr<rclcpp::Clock> steady_clock_;
 
-  bool is_explicit{false};
+  bool is_explicit_{false};
   // explicit input data
   std::map<std::string, std::set<rclcpp::Time>> explicit_info_;
 
   void set_sources(ConvertedMessageT * converted_msg)
   {
-    if (!is_explicit) {
+    std::set<tilde_msg::msg::SteeSource, SteeSourceCmp> found;
+
+    if (!is_explicit_) {
       auto topic_sources = source_table_->get_latest_sources();
       for (auto & topic_source : topic_sources) {
         for (auto & source : topic_source.second) {
+          if (found.find(source) != found.end()) {
+            continue;
+          }
+          found.insert(source);
           converted_msg->sources.emplace_back(std::move(source));
         }
       }
@@ -194,6 +200,10 @@ private:
         for (const auto & stamp : topic_stamps.second) {
           auto sources = source_table_->get_sources(topic, stamp);
           for (auto & source : sources) {
+            if (found.find(source) != found.end()) {
+              continue;
+            }
+            found.insert(source);
             converted_msg->sources.emplace_back(std::move(source));
           }
         }

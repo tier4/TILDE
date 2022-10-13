@@ -567,3 +567,89 @@ TEST_F(TestSteeNode, param_enable_stee)
   rclcpp::spin_some(main_node);
   EXPECT_TRUE(got_message);
 }
+
+TEST_F(TestSteeNode, remove_duplicated_sources)
+{
+  /* DAG is
+   *   A --> B --> C -->
+   *   |           ^
+   *   +-----------+
+   *
+   * Check C publishes unique A entry although the same message of A is used by B, and C.
+   * Originally, A was listed twice.
+   */
+
+  rclcpp::NodeOptions options;
+  options.append_parameter_override("use_sim_time", true);
+
+  auto node_a = std::make_shared<SteeNode>("nodeA", options);
+  auto node_b = std::make_shared<SteeNode>("nodeB", options);
+  auto node_c = std::make_shared<SteeNode>("nodeC", options);
+  auto checker_node = std::make_shared<rclcpp::Node>("checker_node", options);
+
+  // nodeA directly publish SteePointCloud2 to fill sources field manually
+  auto pub_a = node_a->create_publisher<SteePointCloud2>("a/stee", 1);
+
+  // subscriptions of A
+  bool get_b_a{false};
+  auto sub_b_a = node_b->create_stee_subscription<PointCloud2>(
+    "a", 1, [&get_b_a](std::shared_ptr<const PointCloud2> msg) {
+      (void)msg;
+      get_b_a = true;
+    });
+  bool get_c_a{false};
+  auto sub_c_a = node_c->create_stee_subscription<PointCloud2>(
+    "a", 1, [&get_c_a](std::shared_ptr<const PointCloud2> msg) {
+      (void)msg;
+      get_c_a = true;
+    });
+
+  auto pub_b = node_b->create_stee_publisher<PointCloud2>("b", 1);
+
+  auto pub_c = node_c->create_stee_publisher<PointCloud2>("c", 1);
+  bool get_c_b{false};
+  auto sub_c_b = node_c->create_stee_subscription<PointCloud2>(
+    "b", 1, [&pub_c, &get_c_b](std::shared_ptr<const PointCloud2> msg) {
+      get_c_b = true;
+      pub_c->publish(*msg);
+    });
+
+  bool checker_node_called{false};
+  auto sub_checker = checker_node->create_subscription<SteePointCloud2>(
+    "c/stee", 1, [&checker_node_called](std::shared_ptr<const SteePointCloud2> msg) {
+      checker_node_called = true;
+      EXPECT_EQ(msg->sources.size(), 1u);
+      EXPECT_EQ(msg->sources[0].topic, "in");
+      EXPECT_EQ(msg->sources[0].stamp.sec, 8);
+      EXPECT_EQ(msg->sources[0].stamp.nanosec, 18u);
+      EXPECT_EQ(msg->sources[0].first_subscription_steady_time.sec, 5);
+      EXPECT_EQ(msg->sources[0].first_subscription_steady_time.nanosec, 15u);
+    });
+
+  SteePointCloud2 msg_a;
+  msg_a.body.header.stamp = get_time(10, 110);
+  tilde_msg::msg::SteeSource source;
+  source.topic = "in";
+  source.stamp = get_time(8, 18);
+  source.first_subscription_steady_time = get_time(5, 15);
+  msg_a.sources.push_back(source);
+
+  pub_a->publish(msg_a);
+  rclcpp::Rate(50).sleep();
+  rclcpp::spin_some(node_b);
+  rclcpp::spin_some(node_c);
+
+  PointCloud2 msg_b;
+  msg_b.header.stamp = msg_a.body.header.stamp;
+  pub_b->publish(msg_b);
+  rclcpp::Rate(50).sleep();
+  rclcpp::spin_some(node_c);
+
+  rclcpp::Rate(50).sleep();
+  rclcpp::spin_some(checker_node);
+
+  EXPECT_TRUE(get_b_a);
+  EXPECT_TRUE(get_c_a);
+  EXPECT_TRUE(get_c_b);
+  EXPECT_TRUE(checker_node_called);
+}
