@@ -15,6 +15,7 @@
 #ifndef TILDE__TILDE_NODE_HPP_
 #define TILDE__TILDE_NODE_HPP_
 
+#include "rcl_interfaces/msg/set_parameters_result.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/message_info.hpp"
 #include "rclcpp/node.hpp"
@@ -78,7 +79,7 @@ public:
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   RCLCPP_PUBLIC
-  virtual ~TildeNode();
+  virtual ~TildeNode() = default;
 
   /// create custom subscription
   template <
@@ -110,7 +111,7 @@ public:
 
     auto main_topic_callback = [this, resolved_topic_name, callback,
                                 callback_addr](CallbackArgT msg) -> void {
-      if (this->enable_tilde) {
+      if (this->enable_tilde_) {
         auto subscription_time = this->now();
         auto subscription_time_steady = this->steady_clock_->now();
 
@@ -147,7 +148,7 @@ public:
 
     auto tilde_pub = std::make_shared<TildePublisherT>(
       info_pub, pub, get_fully_qualified_name(), this->get_clock(), steady_clock_,
-      this->enable_tilde);
+      this->enable_tilde_);
     tilde_pubs_[info_topic] = tilde_pub;
 
     tracepoint(
@@ -246,8 +247,11 @@ private:
   std::shared_ptr<rclcpp::Clock> steady_clock_;
 
   /// whether to enable tilde
-  // TODO(y-okumura-isp) enable dynamic configuration
-  bool enable_tilde;
+  bool enable_tilde_;
+
+  OnSetParametersCallbackHandle::SharedPtr param_callback_handle_;
+
+  void init();
 };
 
 }  // namespace tilde

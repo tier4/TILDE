@@ -21,10 +21,7 @@ using tilde::TildeNode;
 TildeNode::TildeNode(const std::string & node_name, const rclcpp::NodeOptions & options)
 : Node(node_name, options)
 {
-  steady_clock_.reset(new rclcpp::Clock(RCL_STEADY_TIME));
-  this->declare_parameter<bool>("enable_tilde", true);
-
-  this->get_parameter("enable_tilde", enable_tilde);
+  init();
 }
 
 TildeNode::TildeNode(
@@ -32,10 +29,31 @@ TildeNode::TildeNode(
   const rclcpp::NodeOptions & options)
 : Node(node_name, namespace_, options)
 {
+  init();
+}
+
+void TildeNode::init()
+{
   steady_clock_.reset(new rclcpp::Clock(RCL_STEADY_TIME));
   this->declare_parameter<bool>("enable_tilde", true);
 
-  this->get_parameter("enable_tilde", enable_tilde);
-}
+  this->get_parameter("enable_tilde", enable_tilde_);
 
-TildeNode::~TildeNode() {}
+  param_callback_handle_ =
+    this->add_on_set_parameters_callback([this](const std::vector<rclcpp::Parameter> & parameters) {
+      auto result = rcl_interfaces::msg::SetParametersResult();
+
+      result.successful = true;
+      for (const auto & parameter : parameters) {
+        if (parameter.get_name() == "enable_tilde") {
+          enable_tilde_ = parameter.as_bool();
+          for (auto & [topic, pub] : tilde_pubs_) {
+            (void)topic;
+            pub->set_enable(enable_tilde_);
+          }
+        }
+      }
+
+      return result;
+    });
+}
