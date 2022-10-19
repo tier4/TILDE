@@ -88,7 +88,3 @@ def com_show_inner_state(static_plist, target_topics, active_path):
             print(f"{topic}: {msg}")
             print(f"-----------------------------------------")
     print(f"(END)--------------------------------------\n", flush=True)
-
-
-
-

@@ -59,7 +59,7 @@ class TildeAggregateNode(Node):
         except Exception as e:
             print(f"## {e}: {fn}", file=sys.stderr)
             sys.exit(-1)
-        
+
         # make path_list
         make_path_list_from_yaml(fn, self.static_path_list)
         if len(self.static_path_list) == 0:
@@ -72,7 +72,7 @@ class TildeAggregateNode(Node):
         self.original_topic_subscribe()
         # intial topic detect and subscription
         self.mtt_topic_subscribe()
-        # timer callback 
+        # timer callback
         self.create_timer(RECONFIG_TIME, self.reconfig_callback)
         self.create_timer(TICK_TIME, self.tick_callback)
 
@@ -166,9 +166,9 @@ class TildeAggregateNode(Node):
     def original_topic_subscribe(self):
         profile = QoSProfile(reliability=rclpy.qos.ReliabilityPolicy.BEST_EFFORT, history=rclpy.qos.HistoryPolicy.KEEP_LAST, depth=5)
         sub = self.create_subscription(
-                                        TildeAggregatorCommand, 
-                                        ORIGINAL_TOPIC, 
-                                        self.original_command_callback, 
+                                        TildeAggregatorCommand,
+                                        ORIGINAL_TOPIC,
+                                        self.original_command_callback,
                                         profile
                                         )
 
@@ -188,8 +188,8 @@ class TildeAggregateNode(Node):
             if TARGET_TOPIC in w[0]:
                 DP(f" [{w[0]}]: {w[1]} subscribed")
                 sub = self.create_subscription(
-                                                w[1], 
-                                                w[0], 
+                                                w[1],
+                                                w[0],
                                                 self.default_callback,
                                                 profile
                                                )
@@ -216,17 +216,17 @@ class TildeAggregateNode(Node):
             if mtt_topic == pinfo.top_topic.name:
                 # top topic
                 sub = self.create_subscription(
-                                                MessageTrackingTag, 
-                                                mtt_topic, 
-                                                self.top_topic_callback_wrapper(mtt_topic, pinfo, tinfo), 
+                                                MessageTrackingTag,
+                                                mtt_topic,
+                                                self.top_topic_callback_wrapper(mtt_topic, pinfo, tinfo),
                                                 profile
                                                 )
             else:
                 # other topics
                 sub = self.create_subscription(
-                                                MessageTrackingTag, 
-                                                mtt_topic, 
-                                                self.mtt_topic_callback_wrapper(mtt_topic, pinfo, tinfo), 
+                                                MessageTrackingTag,
+                                                mtt_topic,
+                                                self.mtt_topic_callback_wrapper(mtt_topic, pinfo, tinfo),
                                                 profile
                                                 )
             self.register_subscriber(sub, mtt_topic)

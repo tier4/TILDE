@@ -26,7 +26,7 @@ def make_path_list_from_yaml(fn, plist):
         print(location())
         print(f"##{e}: No such file or yaml load error {fn}", file=sys.stderr)
         sys.exit(-1)
-        
+
     for k1 in [key for key in yaml_data.keys()]:
         if k1 == YAML_PARAMS:
             # parameters
@@ -36,7 +36,7 @@ def make_path_list_from_yaml(fn, plist):
         else:
             # path = topic flow list
             path_info = yaml_data[k1]
-            
+
             DP(f"{location()}: {k1=} {path_info=}")
             pinfo = TildePathManageTable()
             pinfo.path_name = k1
@@ -133,7 +133,7 @@ def top_topic_receive_main(msg, active_path_list, topic_name, pinfo, tinfo, sub_
     new_pinfo = new_path_list_add(msg, topic_name, pinfo, tinfo, sub_time)
     active_path_list.active_path.append(new_pinfo)
     DP(f"--- TOP topic registered {topic_name} in {pinfo.path_name} ---")
-        
+
 def match_topic_in_path(msg, active_path_list, topic_name, pinfo, time):
     if register_topic_info(msg, topic_name, pinfo, time) == False:
         return False
@@ -141,7 +141,7 @@ def match_topic_in_path(msg, active_path_list, topic_name, pinfo, time):
     if path_comlete_check_and_proc(pinfo, time, concurrent) == True:
         active_path_list.active_path.remove(pinfo)
     return True
-        
+
 def topic_receive_main(msg, active_path_list, topic_name, init_pinfo, init_tinfo, time):
     """
     - 受信トピックがどのパス(複数インスタンスあり)に含まれているか探索
@@ -149,7 +149,7 @@ def topic_receive_main(msg, active_path_list, topic_name, init_pinfo, init_tinfo
       (前提：異なるパスに同じトピックは含まれないこと)
       - 該当トピックが受信済なら該当パスインスタンスはスキップ
       - 基本的に、該当トピックのpub時間がtopトピックのpub時間以降ならskip
-      
+
     以下は該当パス(複数インスタンスあり)内での処理
     - 受信トピックのinputトピック(複数あり)＋sub時間が、topトピック名＋pub時間以上
     - 受信トピックのoutputトピック＋pub時間が、他のトピックのinputトピック＋sub時間以下
@@ -161,7 +161,7 @@ def topic_receive_main(msg, active_path_list, topic_name, init_pinfo, init_tinfo
         new_tp.recv_time = time
         active_path_list.pending_msg.append({topic_name: new_tp})
         return False
-    
+
     for pinfo in [pinfo for pinfo in active_path_list.active_path if topic_name in pinfo.topic_dict.keys()]:
         #DP(f"{location()}: {topic_name=} {pinfo=}")
         #DP(f"====================================")
@@ -297,13 +297,13 @@ def deadline_timer_cancel(pinfo):
 def pub_complete_topic(pinfo, concurrent):
     DP(f"{location()}: !!! [{pinfo.path_name} ({concurrent})] COMPLETED {pinfo.end - pinfo.start:.4f}")
     return
-        
+
 def pub_deadline_miss_topic(pinfo, concurrent):
     DP(f"{location()}: !!! [{pinfo.path_name} ({concurrent})] DEADLINE_MISS {pinfo.end - pinfo.start:.4f}")
     return
 
 def deadline_check_and_proc(active_path_list, cur_time, tick):
-    for pinfo in active_path_list.active_path: 
+    for pinfo in active_path_list.active_path:
         if pinfo.status != ST_START or pinfo.timer_counter == 0.0:
             continue
         pinfo.timer_counter -= tick
@@ -324,6 +324,3 @@ def deadline_check_and_proc(active_path_list, cur_time, tick):
                 active_path_list.active_path.remove(pinfo)
             except Exception as e:
                 print(f"{location()}: [Exception] {e}", flush=True)
-
-
-

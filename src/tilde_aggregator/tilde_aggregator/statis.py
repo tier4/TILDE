@@ -75,7 +75,7 @@ def calc_statis_hz(path_name, topic_name, msg):
                         ts.hz_max = 0.0
                     ts.prev_time = cur_time
                     ts.hz_ave = ts.hz_acum / max(1, ts.acum_cnt)
-                        
+
 def set_statis_path(id, pinfo):
     diff_time = pinfo.end - pinfo.start
     for sl in  g_statis_list.statis_list:
@@ -125,7 +125,7 @@ def com_show_statis(command):
              ")
         if pn not in print_topic:
             for ts in ps.stat_topic:
-                tn = ts.topic_name            
+                tn = ts.topic_name
                 recv_count = ts.acum_cnt
                 min = ts.hz_min
                 max = ts.hz_max

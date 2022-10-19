@@ -29,4 +29,3 @@ def generate_launch_description():
         path_list_arg,
         tilde_aggregator_node
     ])
-
