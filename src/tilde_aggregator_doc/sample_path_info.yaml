@@ -1,0 +1,29 @@
+# path is topic flow
+#path_A:
+# deadline_timer: 0.0
+# topic_name:
+#   skip: prev_topic_name_in_path
+#   order: 0
+#   timer: 0.0
+
+params:
+  # nothing
+PATH-top_ring_outlier_filter:
+  deadline_timer: 3.0
+  topic_list:
+    #/sensing/lidar/top/velodyne_packets: # velodyne_msgs/msg/VelodyneScan
+    #/sensing/lidar/top/pointcloud_raw_ex: # sensor_msgs/msg/PointCloud2
+    /sensing/lidar/top/self_cropped/pointcloud_ex: # sensor_msgs/msg/PointCloud2
+    /sensing/lidar/top/mirror_cropped/pointcloud_ex: # sensor_msgs/msg/PointCloud2
+    /sensing/lidar/top/rectified/pointcloud_ex: # sensor_msgs/msg/PointCloud2
+    # /sensing/lidar/top/ring_outlier_filter
+
+PATH-left_outlier_filter:
+  deadline_timer: 5.0
+  topic_list:
+    # /sensing/lidar/left/ring_outlier_filter
+    /sensing/lidar/left/self_cropped/pointcloud_ex: # sensor_msgs/msg/PointCloud2
+    /sensing/lidar/left/mirror_cropped/pointcloud_ex: # sensor_msgs/msg/PointCloud2
+    /sensing/lidar/left/rectified/pointcloud_ex: # sensor_msgs/msg/PointCloud2
+#    /sensing/lidar/left/pointcloud_raw_ex: # sensor_msgs/msg/PointCloud2
+#    /sensing/lidar/left/velodyne_packets: # velodyne_msgs/msg/VelodyneScan
