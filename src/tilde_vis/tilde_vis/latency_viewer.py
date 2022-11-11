@@ -600,8 +600,8 @@ class LatencyViewerNode(Node):
             '{:>6} {:>6} {:>6}'
         logs.append(fmt.format(
             'topic',
-            'e2e', 'e2e', 'e2e',
-            'e2e_s', 'e2e_s', 'e2e_s'
+            'min', 'mean', 'max',
+            'min_s', 'mean_s', 'max_s'
         ))
 
         for stat in stats:
