@@ -89,6 +89,7 @@ STOPS = [
     '/perception/occupancy_grid_map/map',
     '/perception/object_recognition/detection/detection_by_tracker/objects',
     '/perception/object_recognition/tracking/objects',
+    '/localization/pose_twist_fusion_filter/biased_pose_with_covariance',
     ]
 DUMP_DIR = 'dump.d'
 
