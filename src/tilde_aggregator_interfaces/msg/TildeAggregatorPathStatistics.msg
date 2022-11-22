@@ -1,0 +1,10 @@
+string path_name
+int32 completed_count
+int32 deadline_miss_count
+float64 completed_time_min
+float64 completed_time_max
+float64 completed_time_ave
+int32 cur_instance_count
+int32 pending_msg_count
+
+TildeAggregatorTopicStatistics[] topic_statis

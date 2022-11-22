@@ -1,0 +1,11 @@
+string topic_name
+int32 recv_count
+float64 hz_min
+float64 hz_max
+float64 hz_ave
+float64 resp_min
+float64 resp_max
+float64 resp_ave
+int32 dup_count
+int32 out_of_order_count
+int32 missing_count_in_active_path
