@@ -353,3 +353,81 @@ input_infos:                          # multiple input because explicit API is n
     sec: 0
     nanosec: 0
 ```
+
+## TILDE_iceoryx-support demo
+
+### Adjusting the size of the data
+
+Modify the array size.
+
+```bash
+## path: src/tilde_msg/msg/StaticSize.msg
+int64 id
+int64 timestamp
+uint8[2147483648] data   <--
+```
+
+### Demo startup
+
+Launch four terminals, run RouDi daemon in the first terminal.
+
+```bash
+iox-roudi -c roudi_config.toml
+```
+
+Run the publisher and subscriber in the second and third terminal respectively.
+
+```bash
+CYCLONEDDS_URI=file://$PWD/cyclonedds.xml ros2 run tilde_sample publisher_without_stamp_loan
+CYCLONEDDS_URI=file://$PWD/cyclonedds.xml ros2 run tilde_sample relay_timer_loan
+```
+![pic](https://i.328888.xyz/2023/03/20/PNzpL.png)
+
+Or use the following `ros2 launch` command to run both nodes.
+
+```
+CYCLONEDDS_URI=file://$PWD/cyclonedds.xml ros2 launch tilde_sample publisher_relay_without_header_loan.launch.py
+```
+
+See MessageTrackingTag by execute the following commands.
+
+```bash
+ros2 topic echo relay_without_stamp_loan/message_tracking_tag
+```
+
+An example of MessageTrackingTag.
+
+```
+header:
+  stamp:
+    sec: 1679292280
+    nanosec: 163271900
+  frame_id: ''
+output_info:
+  topic_name: /relay_without_stamp_loan
+  node_fqn: ''
+  seq: 164
+  pub_time:
+    sec: 1679292280
+    nanosec: 163274465
+  pub_time_steady:
+    sec: 7547
+    nanosec: 125041406
+  has_header_stamp: false
+  header_stamp:
+    sec: 0
+    nanosec: 0
+input_infos:
+- topic_name: /topic_without_stamp_loan
+  sub_time:
+    sec: 1679292280
+    nanosec: 152736919
+  sub_time_steady:
+    sec: 7547
+    nanosec: 114505558
+  has_header_stamp: false
+  header_stamp:
+    sec: 0
+    nanosec: 0
+---
+```
