@@ -1,4 +1,0 @@
-tilde_node:
-  ros__parameters:
-   ## if you want to use loaned messages, please turn it on.
-   is_loaned: false

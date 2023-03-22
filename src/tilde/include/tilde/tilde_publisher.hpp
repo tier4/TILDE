@@ -406,7 +406,6 @@ private:
   /**
    * \param has_header_stamp whether main message has header.stamp
    * \param t header stamp
-   * \param iceoryx_enable whether iceoryx is enabled
    */
   void publish_info(const std::optional<rclcpp::Time> & t)
   {
