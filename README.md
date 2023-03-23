@@ -1,5 +1,7 @@
 # TILDE - Tilde Is Latency Data Embedding
 
+early_deadline_detector is included in the package.
+
 [README(ja)](./doc/README.md)
 
 ## Contents
