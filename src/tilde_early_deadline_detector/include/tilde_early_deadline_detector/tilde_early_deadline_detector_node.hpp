@@ -31,7 +31,6 @@
 // map header
 #include <iostream>
 
-
 namespace tilde_early_deadline_detector
 {
 struct PerformanceCounter
@@ -87,13 +86,12 @@ private:
 
   rclcpp::Publisher<tilde_msg::msg::DeadlineNotification>::SharedPtr notification_pub_;
 
- PerformanceCounter message_tracking_tag_callback_counter_;
- PerformanceCounter timer_callback_counter_;
+  PerformanceCounter message_tracking_tag_callback_counter_;
+  PerformanceCounter timer_callback_counter_;
 
   void init();
   void message_tracking_tag_callback(tilde_msg::msg::MessageTrackingTag::UniquePtr msg);
 };
-
 
 /// change here
 /// changed constructor name
@@ -101,7 +99,8 @@ private:
 // override the part differs from TildeDeadlineDetectorNode
 // delete the same code(compare to TildeDeadlineDetectorNode) later
 // class TildeEarlyDeadlineDetectorNode : public tilde_deadline_detector::TildeDeadlineDetectorNode{
-//   using MessageTrackingTagSubscription = rclcpp::Subscription<tilde_msg::msg::MessageTrackingTag>;
+//   using MessageTrackingTagSubscription =
+//   rclcpp::Subscription<tilde_msg::msg::MessageTrackingTag>;
 
 // public:
 //   // constructors
@@ -152,6 +151,6 @@ private:
 //   void message_tracking_tag_callback(tilde_msg::msg::MessageTrackingTag::UniquePtr msg);
 // };
 
-}  // namespace tilde_deadline_detector
+}  // namespace tilde_early_deadline_detector
 
-#endif  // TILDE_EARLY_DEADLINE_DETECTOR__TILDE_DEADLINE_DETECTOR_NODE_HPP_
+#endif  // TILDE_EARLY_DEADLINE_DETECTOR__TILDE_EARLY_DEADLINE_DETECTOR_NODE_HPP_
