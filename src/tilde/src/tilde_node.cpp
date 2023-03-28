@@ -14,8 +14,8 @@
 
 #include "tilde/tilde_node.hpp"
 
-#include <string>
 #include <iostream>
+#include <string>
 
 using tilde::TildeNode;
 
@@ -39,7 +39,7 @@ void TildeNode::init()
   this->declare_parameter<bool>("enable_tilde", true);
 
   this->get_parameter("enable_tilde", enable_tilde_);
-  std::cout  << "enable_tilde: " << enable_tilde_ << std::endl;
+  std::cout << "enable_tilde: " << enable_tilde_ << std::endl;
 
   param_callback_handle_ =
     this->add_on_set_parameters_callback([this](const std::vector<rclcpp::Parameter> & parameters) {

@@ -135,6 +135,6 @@ private:
   void update_pending(std::shared_ptr<MessageTrackingTagMsg> message_tracking_tag);
 };
 
-}  // namespace tilde_deadline_detector
+}  // namespace tilde_early_deadline_detector
 
 #endif  // TILDE_EARLY_DEADLINE_DETECTOR__FORWARD_ESTIMATOR_HPP_

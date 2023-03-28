@@ -293,4 +293,4 @@ std::map<ForwardEstimator::TopicName, size_t> ForwardEstimator::get_pending_mess
   return ret;
 }
 
-}  // namespace tilde_deadline_detector
+}  // namespace tilde_early_deadline_detector

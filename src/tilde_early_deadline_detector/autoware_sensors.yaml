@@ -1,9 +1,7 @@
 tilde_early_deadline_detector_node:
   ros__parameters:
     # input of e2e
-    sensor_topics: [
-        "/sensing/lidar/top/self_cropped/pointcloud_ex"
-      ]
+    sensor_topics: ["/sensing/lidar/top/self_cropped/pointcloud_ex"]
     # early deadline detection points (not the output of e2e)
     target_topics: [
         # "/sensing/lidar/top/self_cropped/pointcloud_ex",
@@ -23,7 +21,7 @@ tilde_early_deadline_detector_node:
     # specify deadline ms for topics in target_topics order.
     # 0 means no deadline, and negative values are replaced by 0
     # deadline_ms corresponds to target_topics
-    deadline_ms: [553,553,553,553,553,553,553,553,553]
+    deadline_ms: [553, 553, 553, 553, 553, 553, 553, 553, 553]
     # parameters of debug messages
     print_report: true
     show_performance: true

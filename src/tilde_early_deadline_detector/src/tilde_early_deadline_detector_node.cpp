@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "tilde_early_deadline_detector/tilde_early_deadline_detector_node.hpp"
+
 #include "builtin_interfaces/msg/time.hpp"
 #include "rcutils/time.h"
 #include "tilde_msg/msg/deadline_notification.hpp"
@@ -34,8 +35,8 @@
 #include <map>
 
 // container
-#include<array>
-#include<iterator>
+#include <array>
+#include <iterator>
 
 using std::chrono::milliseconds;
 using tilde_msg::msg::MessageTrackingTag;
@@ -44,24 +45,26 @@ using tilde_msg::msg::MessageTrackingTag;
 // processed_num: execute time of the path
 // deadline_miss_num: number of early deadline detection by early_deadline_detector
 // deadline_miss_true_num: number of deadline miss that actually occurred
-int processed_num=0;
-int deadline_miss_num=0;
-int deadline_miss_true_num=0;
+int processed_num = 0;
+int deadline_miss_num = 0;
+int deadline_miss_true_num = 0;
 // indicators(initialize)
-double tp=0;
-double tn=0;
-double fp=0;
-double fn=0;
+double tp = 0;
+double tn = 0;
+double fp = 0;
+double fn = 0;
 double accuracy = 0;
 double precision = 0;
 double recall = 0;
 double f_measure = 0;
 
-namespace tilde_early_deadline_detector{
+namespace tilde_early_deadline_detector
+{
 // get estimated latency of the rest part
 // map means the sets of topic name and estimated latency to the end topic
 // topics are from example path
-double estimate_latency(std::string topic_name){
+double estimate_latency(std::string topic_name)
+{
   // 99percentile
   std::map<std::string, double> map{
     // {"/sensing/lidar/top/self_cropped/pointcloud_ex", 552.49},
@@ -76,8 +79,7 @@ double estimate_latency(std::string topic_name){
     {"/localization/kinematic_state", 189.19},
     {"/planning/scenario_planning/scenario_selector/trajectory", 163.32},
     {"/planning/scenario_planning/trajectory", 143.17},
-    {"/control/trajectory_follower/control_cmd", 0.8}
-  };
+    {"/control/trajectory_follower/control_cmd", 0.8}};
 
   // // 95percentile
   // std::map<std::string, double> map{
@@ -191,7 +193,7 @@ void TildeEarlyDeadlineDetectorNode::init()
   sensor_topics_.insert(tmp_sensor_topics.begin(), tmp_sensor_topics.end());
 
   auto tmp_target_topics =
-  declare_parameter<std::vector<std::string>>("target_topics", std::vector<std::string>{});
+    declare_parameter<std::vector<std::string>>("target_topics", std::vector<std::string>{});
   target_topics_.insert(tmp_target_topics.begin(), tmp_target_topics.end());
 
   auto deadline_ms = declare_parameter<std::vector<int64_t>>("deadline_ms", std::vector<int64_t>{});
@@ -219,7 +221,8 @@ void TildeEarlyDeadlineDetectorNode::init()
   bool show_performance = declare_parameter<bool>("show_performance", false);
 
   // init topic_vs_deadline_ms_
-  // topic_vs_deadline_ms_[topic] means the deadline of each target topic(refer to autoware_sensors.yaml)
+  // topic_vs_deadline_ms_[topic] means the deadline of each target topic(refer to
+  // autoware_sensors.yaml)
   for (size_t i = 0; i < tmp_target_topics.size(); i++) {
     auto topic = tmp_target_topics[i];
     auto deadline = i < deadline_ms.size() ? deadline_ms[i] : 0;
@@ -263,7 +266,7 @@ void TildeEarlyDeadlineDetectorNode::init()
   };
 
   // print topic names subscribed by early_deadline_detector
-  for(auto itr = topics.begin(); itr != topics.end(); ++itr) {
+  for (auto itr = topics.begin(); itr != topics.end(); ++itr) {
     std::cout << *itr << "\n";
   }
 
@@ -287,7 +290,8 @@ void TildeEarlyDeadlineDetectorNode::init()
     auto sub = create_subscription<MessageTrackingTag>(
       topic, qos,
       std::bind(
-        &TildeEarlyDeadlineDetectorNode::message_tracking_tag_callback, this, std::placeholders::_1));
+        &TildeEarlyDeadlineDetectorNode::message_tracking_tag_callback, this,
+        std::placeholders::_1));
     subs_.push_back(sub);
   }
 
@@ -316,7 +320,8 @@ void TildeEarlyDeadlineDetectorNode::init()
                   << "  max: " << message_tracking_tag_callback_counter_.max << "\n"
                   << "timer_callback: "
                   << "  avg: " << timer_callback_counter_.avg << "\n"
-                  << "  max: " << timer_callback_counter_.max << "\n"
+                  << "  max: " << timer_callback_counter_.max
+                  << "\n"
                   // debug
                   // << "  processed_num: " << processed_num << "\n"
                   // << "  deadline_miss_num: " << deadline_miss_num << "\n"
@@ -344,17 +349,17 @@ void print_report(
   }
   std::cout << "-------" << std::endl;
   // print figures for measurement
-  std::cout << "  processed times: " <<  processed_num << "\n"
-            << "  deadline_miss_num: " <<  deadline_miss_num << "\n"
-            << "  deadline_miss_true_num: " <<  deadline_miss_true_num << "\n"
-            << "  tp: " <<  tp << "\n"
-            << "  tn: " <<  tn << "\n"
-            << "  fp: " <<  fp << "\n"
-            << "  fn: " <<  fn << "\n"
-            << "  accuracy: " <<  accuracy << "\n"
-            << "  precision: " <<  precision << "\n"
-            << "  recall: " <<  recall << "\n"
-            << "  f_measure: " <<  f_measure << "\n"
+  std::cout << "  processed times: " << processed_num << "\n"
+            << "  deadline_miss_num: " << deadline_miss_num << "\n"
+            << "  deadline_miss_true_num: " << deadline_miss_true_num << "\n"
+            << "  tp: " << tp << "\n"
+            << "  tn: " << tn << "\n"
+            << "  fp: " << fp << "\n"
+            << "  fn: " << fn << "\n"
+            << "  accuracy: " << accuracy << "\n"
+            << "  precision: " << precision << "\n"
+            << "  recall: " << recall << "\n"
+            << "  f_measure: " << f_measure << "\n"
             << std::endl;
   std::cout << std::endl;
 }
@@ -371,7 +376,7 @@ void TildeEarlyDeadlineDetectorNode::message_tracking_tag_callback(
 
   // measure e2e latency
   builtin_interfaces::msg::Time pub_time_steady_e2e;
-  if (message_tracking_tag->output_info.topic_name=="/control/trajectory_follower/control_cmd"){
+  if (message_tracking_tag->output_info.topic_name == "/control/trajectory_follower/control_cmd") {
     pub_time_steady_e2e = message_tracking_tag->output_info.pub_time_steady;
   }
 
@@ -381,7 +386,7 @@ void TildeEarlyDeadlineDetectorNode::message_tracking_tag_callback(
   bool is_sensor =
     (sensor_topics_.find(message_tracking_tag->output_info.topic_name) != sensor_topics_.end());
   fe.add(std::move(message_tracking_tag), is_sensor);
-  
+
   if (!contains(target_topics_, target)) {
     return;
   }
@@ -428,30 +433,33 @@ void TildeEarlyDeadlineDetectorNode::message_tracking_tag_callback(
     // // debug
     // std::cout << "source_msg.topic: " << source_msg.topic << "\n"
     //           << "source_msg.stamp: " << time2str(source_msg.stamp) << std::endl;
-    
+
     auto elapsed = rclcpp::Time(pub_time_steady) - rclcpp::Time(src->output_info.pub_time_steady);
-    auto e2e_latency = rclcpp::Time(pub_time_steady_e2e) - rclcpp::Time(src->output_info.pub_time_steady);
+    auto e2e_latency =
+      rclcpp::Time(pub_time_steady_e2e) - rclcpp::Time(src->output_info.pub_time_steady);
     source_msg.elapsed = elapsed;
     processed_num++;
 
     // flags for counting tp, tn, fp, fn
-    int flag_deadline_miss=0;
-    int flag_deadline_miss_true=0;
+    int flag_deadline_miss = 0;
+    int flag_deadline_miss_true = 0;
 
     /// expression of early deadline detection
     // x: RCUTILS_MS_TO_NS(deadline) <- deadline of whole path
     // y: elapsed.nanoseconds() <- execution time of executed part
-    // z: estimate_latency(it->second) <- estimated execution time of the rest part <- called by hash(key: target)
-    // if x <= y + z, deadline miss is detected
-    if (RCUTILS_MS_TO_NS(deadline_ms) <= elapsed.nanoseconds() + RCUTILS_MS_TO_NS(estimate_latency(target))) {
+    // z: estimate_latency(it->second) <- estimated execution time of the rest part <- called by
+    // hash(key: target) if x <= y + z, deadline miss is detected
+    if (
+      RCUTILS_MS_TO_NS(deadline_ms) <=
+      elapsed.nanoseconds() + RCUTILS_MS_TO_NS(estimate_latency(target))) {
       std::cout << "-------" << std::endl;
       std::cout << "deadline miss" << std::endl;
       source_msg.is_overrun = true;
       is_overrun = true;
       deadline_miss_num++;
-      flag_deadline_miss++; // flag_deadline_miss=1
+      flag_deadline_miss++;  // flag_deadline_miss=1
     }
-    
+
     /// expression of normal deadline detection
     // a: RCUTILS_MS_TO_NS(deadline) <- deadline of whole path
     // b: e2e_latency.nanoseconds() <- execution time of whole path
@@ -459,27 +467,27 @@ void TildeEarlyDeadlineDetectorNode::message_tracking_tag_callback(
     if (RCUTILS_MS_TO_NS(deadline_ms) <= e2e_latency.nanoseconds()) {
       std::cout << "true deadline miss" << std::endl;
       deadline_miss_true_num++;
-      flag_deadline_miss_true++; // flag_deadline_miss_true=1
+      flag_deadline_miss_true++;  // flag_deadline_miss_true=1
     }
     notification_msg.sources.push_back(source_msg);
 
     // count tp, tn, fp, fn
-    if(flag_deadline_miss!=0 && flag_deadline_miss_true !=0)
+    if (flag_deadline_miss != 0 && flag_deadline_miss_true != 0)
       tp++;
-    else if(flag_deadline_miss==0 && flag_deadline_miss_true==0)
+    else if (flag_deadline_miss == 0 && flag_deadline_miss_true == 0)
       tn++;
-    else if(flag_deadline_miss!=0 && flag_deadline_miss_true==0)
+    else if (flag_deadline_miss != 0 && flag_deadline_miss_true == 0)
       fp++;
-    else if(flag_deadline_miss==0 && flag_deadline_miss_true!=0)
+    else if (flag_deadline_miss == 0 && flag_deadline_miss_true != 0)
       fn++;
 
     // calculate accuracy, precision, recall, f_measure
-    if(deadline_miss_true_num!=0 && (processed_num - deadline_miss_true_num)!=0){
-      if(tp!=0 || fp!=0 || fn!=0){
+    if (deadline_miss_true_num != 0 && (processed_num - deadline_miss_true_num) != 0) {
+      if (tp != 0 || fp != 0 || fn != 0) {
         accuracy = (tp + tn) / (tp + tn + fp + fn);
         precision = tp / (tp + fp);
         recall = tp / (tp + fn);
-        if(precision != 0 || recall != 0){
+        if (precision != 0 || recall != 0) {
           f_measure = 2 * precision * recall / (precision + recall);
         }
       }
@@ -490,21 +498,23 @@ void TildeEarlyDeadlineDetectorNode::message_tracking_tag_callback(
     // publish deadline_notification if overruns
     notification_pub_->publish(notification_msg);
     printf("notificated.\n");
-    std::cout << "  notification_msg.header.stamp: " << time2str(notification_msg.header.stamp) << "\n"
+    std::cout << "  notification_msg.header.stamp: " << time2str(notification_msg.header.stamp)
+              << "\n"
               << "  notification_msg.topic_name: " << notification_msg.topic_name << "\n"
-              << "  notification_msg.stamp: " << time2str(notification_msg.stamp) << "\n"
+              << "  notification_msg.stamp: " << time2str(notification_msg.stamp)
+              << "\n"
               // print figures for measurement
-              << "  processed times: " <<  processed_num << "\n"
-              << "  deadline miss times: " <<  deadline_miss_num << "\n"
-              << "  true deadline miss times: " <<  deadline_miss_true_num << "\n"
-              << "  tp: " <<  tp << "\n"
-              << "  tn: " <<  tn << "\n"
-              << "  fp: " <<  fp << "\n"
-              << "  fn: " <<  fn << "\n"
-              << "  accuracy: " <<  accuracy << "\n"
-              << "  precision: " <<  precision << "\n"
-              << "  recall: " <<  recall << "\n"
-              << "  f_measure: " <<  f_measure << "\n"
+              << "  processed times: " << processed_num << "\n"
+              << "  deadline miss times: " << deadline_miss_num << "\n"
+              << "  true deadline miss times: " << deadline_miss_true_num << "\n"
+              << "  tp: " << tp << "\n"
+              << "  tn: " << tn << "\n"
+              << "  fp: " << fp << "\n"
+              << "  fn: " << fn << "\n"
+              << "  accuracy: " << accuracy << "\n"
+              << "  precision: " << precision << "\n"
+              << "  recall: " << recall << "\n"
+              << "  f_measure: " << f_measure << "\n"
               << std::endl;
   }
 
