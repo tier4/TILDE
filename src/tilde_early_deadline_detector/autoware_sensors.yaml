@@ -1,0 +1,30 @@
+tilde_early_deadline_detector_node:
+  ros__parameters:
+    # input of e2e
+    sensor_topics: [
+        "/sensing/lidar/top/self_cropped/pointcloud_ex"
+      ]
+    # early deadline detection points (not the output of e2e)
+    target_topics: [
+        # "/sensing/lidar/top/self_cropped/pointcloud_ex",
+        # "/sensing/lidar/top/mirror_cropped/pointcloud_ex",
+        # "/sensing/lidar/top/rectified/pointcloud_ex",
+        # "/sensing/lidar/top/outlier_filtered/pointcloud",
+        "/localization/util/measurement_range/pointcloud",
+        "/localization/util/voxel_grid_downsample/pointcloud",
+        "/localization/util/downsample/pointcloud",
+        "/localization/pose_estimator/pose_with_covariance",
+        "/localization/pose_twist_fusion_filter/kinematic_state",
+        "/localization/kinematic_state",
+        "/planning/scenario_planning/scenario_selector/trajectory",
+        "/planning/scenario_planning/trajectory",
+        "/control/trajectory_follower/control_cmd",
+      ]
+    # specify deadline ms for topics in target_topics order.
+    # 0 means no deadline, and negative values are replaced by 0
+    # deadline_ms corresponds to target_topics
+    deadline_ms: [553,553,553,553,553,553,553,553,553]
+    # parameters of debug messages
+    print_report: true
+    show_performance: true
+    print_pending_messages: false
