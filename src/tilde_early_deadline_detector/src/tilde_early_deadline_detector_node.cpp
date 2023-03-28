@@ -482,10 +482,18 @@ void TildeEarlyDeadlineDetectorNode::message_tracking_tag_callback(
 
     // calculate accuracy, precision, recall, f_measure
     if (deadline_miss_true_num != 0 && (processed_num - deadline_miss_true_num) != 0) {
-      if (tp + tn + fp + fn > 0) {accuracy = (tp + tn) / (tp + tn + fp + fn);}
-      if (tp + fp > 0) {precision = tp / (tp + fp);}
-      if (tp + fn > 0) {recall = tp / (tp + fn);}
-      if (precision + recall > 0) {f_measure = 2 * precision * recall / (precision + recall);}
+      if (tp + tn + fp + fn > 0) {
+        accuracy = (tp + tn) / (tp + tn + fp + fn);
+      }
+      if (tp + fp > 0) {
+        precision = tp / (tp + fp);
+      }
+      if (tp + fn > 0) {
+        recall = tp / (tp + fn);
+      }
+      if (precision + recall > 0) {
+        f_measure = 2 * precision * recall / (precision + recall);
+      }
     }
   }
 
