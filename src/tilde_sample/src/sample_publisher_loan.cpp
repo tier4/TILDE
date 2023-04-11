@@ -16,8 +16,8 @@
 #include "rclcpp_components/register_node_macro.hpp"
 #include "tilde/tilde_node.hpp"
 #include "tilde/tilde_publisher.hpp"
-
 #include "tilde_msg/msg/static_size.hpp"
+
 #include "std_msgs/msg/string.hpp"
 
 #include <sys/time.h>
@@ -56,7 +56,9 @@ public:
       auto msg_loan_ = pub_loan_->borrow_loaned_message();
       msg_loan_.get().id = count_++;
 
-      RCLCPP_INFO(this->get_logger(), "(tilde_iceoryx-support) Publishing Message ID: '%ld'", msg_loan_.get().id);
+      RCLCPP_INFO(
+        this->get_logger(), "(tilde_iceoryx-support) Publishing Message ID: '%ld'",
+        msg_loan_.get().id);
 
       struct timeval tv;
       gettimeofday(&tv, NULL);
@@ -67,7 +69,8 @@ public:
 
     // Create a publisher with a custom Quality of Service profile.
     rclcpp::QoS qos(rclcpp::KeepLast(7));
-    pub_loan_ = this->create_tilde_publisher<tilde_msg::msg::StaticSize>("topic_without_stamp_loan", qos);
+    pub_loan_ =
+      this->create_tilde_publisher<tilde_msg::msg::StaticSize>("topic_without_stamp_loan", qos);
 
     // Use a timer to schedule periodic message publishing.
     auto dur = std::chrono::duration<int64_t, std::milli>(timer_ms);

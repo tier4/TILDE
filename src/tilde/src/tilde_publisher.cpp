@@ -14,10 +14,9 @@
 
 #include "tilde/tilde_publisher.hpp"
 
-#include "tilde_msg/msg/sub_topic_time_info.hpp"
-
 #include "rclcpp/loaned_message.hpp"
 #include "tilde_msg/msg/message_tracking_tag.hpp"
+#include "tilde_msg/msg/sub_topic_time_info.hpp"
 
 #include <memory>
 #include <string>

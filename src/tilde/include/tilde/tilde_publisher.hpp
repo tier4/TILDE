@@ -34,7 +34,7 @@
 namespace tilde
 {
 
-template<typename MessageT, typename AllocatorT>
+template <typename MessageT, typename AllocatorT>
 class LoanedMessage;
 
 /// Internal class to hold input message information
@@ -305,7 +305,7 @@ private:
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(TildePublisher)
   using ROSMessageType = typename rclcpp::TypeAdapter<MessageT>::ros_message_type;
-  
+
   /// Default constructor
   TildePublisher(
     std::shared_ptr<MessageTrackingTagPublisher> info_pub, std::shared_ptr<PublisherT> pub,
@@ -313,7 +313,6 @@ public:
     const std::shared_ptr<rclcpp::Clock> & steady_clock, bool enable)
   : TildePublisherBase(clock, steady_clock, node_fqn, enable), info_pub_(info_pub), pub_(pub)
   {
-    
   }
 
   /// Borrow a loaned ROS message from the middleware.
@@ -325,8 +324,7 @@ public:
   rclcpp::LoanedMessage<ROSMessageType, AllocatorT> borrow_loaned_message()
   {
     return rclcpp::LoanedMessage<ROSMessageType, AllocatorT>(
-      *pub_,
-      pub_->get_ros_message_type_allocator());
+      *pub_, pub_->get_ros_message_type_allocator());
   }
 
   void publish(std::unique_ptr<MessageT, MessageDeleter> msg)
@@ -367,20 +365,21 @@ public:
     std::cout << "publish SerializedMessage (not supported)" << std::endl;
     pub_->publish(serialized_msg);
   }
-  
+
   /**
    * publish loan message
    * \param loaned_msg loan message
    */
   void publish(rclcpp::LoanedMessage<ROSMessageType, AllocatorT> && loaned_msg)
   {
-    if (enable_){
+    if (enable_) {
       // register publish_info
       auto stamp = get_timestamp(clock_->now());
       publish_info(stamp);
-      // std::cout << "the publish() where defined in tilde_publish.hpp has been called." << std::endl;
+      // std::cout << "the publish() where defined in tilde_publish.hpp has been called." <<
+      // std::endl;
       pub_->publish(std::move(loaned_msg));
-    }else{
+    } else {
       std::cout << "TILDE is not enabled" << std::endl;
     }
   }
@@ -439,7 +438,6 @@ private:
 
     info_pub_->publish(std::move(msg));
   }
-
 };
 
 }  // namespace tilde

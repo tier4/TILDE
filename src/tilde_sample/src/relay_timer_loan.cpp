@@ -16,8 +16,8 @@
 #include "rclcpp_components/register_node_macro.hpp"
 #include "tilde/tilde_node.hpp"
 #include "tilde/tilde_publisher.hpp"
-
 #include "tilde_msg/msg/static_size.hpp"
+
 #include "std_msgs/msg/string.hpp"
 
 #include <sys/time.h>
@@ -41,7 +41,8 @@ namespace tilde_sample
 class RelayTimerLoan : public tilde::TildeNode
 {
 public:
-  explicit RelayTimerLoan(const rclcpp::NodeOptions & options) : TildeNode("relay_timer_loan", options)
+  explicit RelayTimerLoan(const rclcpp::NodeOptions & options)
+  : TildeNode("relay_timer_loan", options)
   {
     const std::string TIMER_MS = "timer_ms";
     const std::string PROC_MS = "proc_ms";
@@ -63,14 +64,16 @@ public:
         auto now = tv.tv_sec * 1000 * 1000 + tv.tv_usec;
         uint64_t latency = now - msg->timestamp;
 
-        RCLCPP_INFO(this->get_logger(), "(tilde_iceoryx-support) I heard message ID: '%ld', latency = %ld us", msg->id, latency);
+        RCLCPP_INFO(
+          this->get_logger(), "(tilde_iceoryx-support) I heard message ID: '%ld', latency = %ld us",
+          msg->id, latency);
 
         // write to .csv file(latency)
         // std::ofstream oFile;
         // oFile.open("tilde_iceoryx_support_latency.csv", std::ios::app);
         // oFile << msg->id << "," << latency << std::endl;
         // oFile.close();
-        
+
         msg_loan_ = msg;
       });
 
@@ -85,7 +88,8 @@ public:
     };
 
     // Create a publisher with a custom Quality of Service profile.
-    pub_ = this->create_tilde_publisher<tilde_msg::msg::StaticSize>("relay_without_stamp_loan", qos);
+    pub_ =
+      this->create_tilde_publisher<tilde_msg::msg::StaticSize>("relay_without_stamp_loan", qos);
 
     auto timer_dur = std::chrono::duration<int64_t, std::milli>(timer_ms);
     timer_ = this->create_wall_timer(timer_dur, timer_callback);
