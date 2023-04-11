@@ -356,6 +356,9 @@ input_infos:                          # multiple input because explicit API is n
 
 ## TILDE_iceoryx-support demo
 
+TILDE needs to use `std_msg/header` when tracing messages, but it is a bad news that zero copy does not support handling dynamic size messages.
+However the message is supported if there is a stamp field directly below the message even if there is no header.
+
 ### Adjusting the size of the data
 
 Modify the array size.
