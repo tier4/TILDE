@@ -381,11 +381,12 @@ Run the publisher and subscriber in the second and third terminal respectively.
 CYCLONEDDS_URI=file://$PWD/cyclonedds.xml ros2 run tilde_sample publisher_without_stamp_loan
 CYCLONEDDS_URI=file://$PWD/cyclonedds.xml ros2 run tilde_sample relay_timer_loan
 ```
+
 ![pic](https://i.328888.xyz/2023/03/20/PNzpL.png)
 
 Or use the following `ros2 launch` command to run both nodes.
 
-```
+```bash
 CYCLONEDDS_URI=file://$PWD/cyclonedds.xml ros2 launch tilde_sample publisher_relay_without_header_loan.launch.py
 ```
 
@@ -397,7 +398,7 @@ ros2 topic echo relay_without_stamp_loan/message_tracking_tag
 
 An example of MessageTrackingTag.
 
-```
+```bash
 header:
   stamp:
     sec: 1679292280
