@@ -34,6 +34,9 @@
 namespace tilde
 {
 
+template <typename MessageT, typename AllocatorT>
+class LoanedMessage;
+
 /// Internal class to hold input message information
 class InputInfo
 {
@@ -227,6 +230,9 @@ public:
    */
   void fill_input_info(tilde_msg::msg::MessageTrackingTag & info_msg);
 
+  // loan message
+  void fill_input_info_loaned(rclcpp::LoanedMessage<tilde_msg::msg::MessageTrackingTag> & info_msg);
+
   /// Set how long to hold InputInfo
   /**
    * TildePublisher holds InputInfo of every message just a seconds to
@@ -298,6 +304,7 @@ private:
 
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(TildePublisher)
+  using ROSMessageType = typename rclcpp::TypeAdapter<MessageT>::ros_message_type;
 
   /// Default constructor
   TildePublisher(
@@ -306,6 +313,18 @@ public:
     const std::shared_ptr<rclcpp::Clock> & steady_clock, bool enable)
   : TildePublisherBase(clock, steady_clock, node_fqn, enable), info_pub_(info_pub), pub_(pub)
   {
+  }
+
+  /// Borrow a loaned ROS message from the middleware.
+  /**
+   * \sa rclcpp::LoanedMessage for details of the LoanedMessage class.
+   *
+   * \return LoanedMessage containing memory for a ROS message of type ROSMessageType
+   */
+  rclcpp::LoanedMessage<ROSMessageType, AllocatorT> borrow_loaned_message()
+  {
+    return rclcpp::LoanedMessage<ROSMessageType, AllocatorT>(
+      *pub_, pub_->get_ros_message_type_allocator());
   }
 
   void publish(std::unique_ptr<MessageT, MessageDeleter> msg)
@@ -348,13 +367,21 @@ public:
   }
 
   /**
-   * publish() variant
-   * can send a main message but cannot send the corresponding MessageTrackingTag
+   * publish loan message
+   * \param loaned_msg loan message
    */
-  void publish(rclcpp::LoanedMessage<MessageT, AllocatorT> && loaned_msg)
+  void publish(rclcpp::LoanedMessage<ROSMessageType, AllocatorT> && loaned_msg)
   {
-    std::cout << "publish LoanedMessage (not supported)" << std::endl;
-    pub_->publish(loaned_msg);
+    if (enable_) {
+      // register publish_info
+      auto stamp = get_timestamp(clock_->now());
+      publish_info(stamp);
+      // std::cout << "the publish() where defined in tilde_publish.hpp has been called." <<
+      // std::endl;
+      pub_->publish(std::move(loaned_msg));
+    } else {
+      std::cout << "TILDE is not enabled" << std::endl;
+    }
   }
 
   // TODO(y-okumura-isp) get_allocator

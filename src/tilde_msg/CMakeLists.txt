@@ -27,7 +27,7 @@ set(msg_files
   "msg/TestTopLevelStamp.msg"
   "msg/Source.msg"
   "msg/DeadlineNotification.msg"
-
+  "msg/StaticSize.msg"
   "msg/SteeSource.msg"
 
   # sensor_msgs

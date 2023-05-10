@@ -17,6 +17,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(tilde_cmake REQUIRED)
 tilde_package()
 find_package(tilde REQUIRED)
+find_package(tilde_msg REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -32,6 +33,8 @@ endif()
 include_directories(include)
 
 add_library(tilde_sample SHARED
+  src/sample_publisher_loan.cpp
+  src/relay_timer_loan.cpp
   src/sample_publisher.cpp
   src/relay_timer.cpp
   src/relay_timer_with_buffer.cpp
@@ -42,7 +45,15 @@ ament_target_dependencies(tilde_sample
     "rclcpp_components"
     "std_msgs"
     "tilde"
+    "tilde_msg"
     "sensor_msgs")
+
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::SamplePublisherWithoutStampLoan"
+  EXECUTABLE publisher_without_stamp_loan)
+rclcpp_components_register_node(tilde_sample
+  PLUGIN "tilde_sample::RelayTimerLoan"
+  EXECUTABLE relay_timer_loan)
 
 rclcpp_components_register_node(tilde_sample
   PLUGIN "tilde_sample::SamplePublisherWithStamp"

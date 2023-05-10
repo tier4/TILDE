@@ -14,6 +14,8 @@
 
 #include "tilde/tilde_publisher.hpp"
 
+#include "rclcpp/loaned_message.hpp"
+#include "tilde_msg/msg/message_tracking_tag.hpp"
 #include "tilde_msg/msg/sub_topic_time_info.hpp"
 
 #include <memory>
@@ -30,7 +32,7 @@ bool InputInfo::operator==(const InputInfo & rhs) const
 
 rclcpp::Time tilde::get_timestamp(rclcpp::Time t, ...)
 {
-  std::cout << "get rclcpp::Time t" << std::endl;
+  // std::cout << "get rclcpp::Time t" << std::endl;
   return t;
 }
 
