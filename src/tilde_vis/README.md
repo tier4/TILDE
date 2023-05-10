@@ -111,7 +111,7 @@ Columns are "topic name", "header stamp", "latency in ROS time", "latency in ste
      /vehicle/status/twist*                                                                        NA     NA     NA
 ```
 
-See [latency_viewer.md](../../doc/latency_viewer.md) in detail (in Japanese).
+See [latency_viewer.md](https://github.com/tier4/TILDE/blob/master/doc/latency_viewer.md) in detail (in Japanese).
 
 ### key binding in ncurses view
 
