@@ -2,6 +2,25 @@
 
 [README(ja)](./doc/README.md)
 
+## Publications & presentations
+
+If you find TILDE is useful in your research, please consider citing:
+
+- Xuankeng He, Hiromi Sato, Yoshikazu Okumura, and Takuya Azumi, "TILDE: Topic-tracking Infrastructure for Dynamic Message Latency and Deadline Evaluator for ROS 2 Application," The 27th International Symposium on Distributed Simulation and Real Time Applications (DS-RT), 2023.
+
+<details>
+<summary>BibTeX</summary>
+
+```bibtex
+@inproceedings{TILDE,
+title={{TILDE}: {Topic-tracking} {Infrastructure} for {Dynamic} {Message Latency} and {Deadline Evaluator} for {ROS} 2 {Application}},
+author={Xuankeng He, Hiromi Sato, Yoshikazu Okumura, and Takuya Azumi},
+booktitle={Proceedings of The 27th International Symposium on Distributed Simulation and Real Time Applications (DS-RT)},
+year={2023}}
+```
+
+</details>
+
 ## Contents
 
 | src/         | about                                                |
