@@ -18,6 +18,7 @@ author={Xuankeng He, Hiromi Sato, Yoshikazu Okumura, and Takuya Azumi},
 booktitle={Proceedings of The 27th International Symposium on Distributed Simulation and Real Time Applications (DS-RT)},
 year={2023}}
 ```
+
 </details>
 
 ## Contents
