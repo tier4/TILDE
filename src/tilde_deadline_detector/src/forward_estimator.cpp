@@ -276,8 +276,7 @@ void ForwardEstimator::debug_print(bool verbose) const
       n_topic_sensors += it.second.size();
     }
 
-    std::cout << "sources: " << n_sources << " "
-              << "message_sources: " << n_message_sources << " "
+    std::cout << "sources: " << n_sources << " " << "message_sources: " << n_message_sources << " "
               << "topic_sensors: " << n_topic_sensors << std::endl;
   }
 }
