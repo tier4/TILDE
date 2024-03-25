@@ -179,11 +179,10 @@ void TildeDeadlineDetectorNode::init()
         std::chrono::duration_cast<std::chrono::milliseconds>(et - st).count());
 
       if (show_performance) {
-        std::cout << "message_tracking_tag_callback: "
-                  << "  avg: " << message_tracking_tag_callback_counter_.avg << "\n"
+        std::cout << "message_tracking_tag_callback: " << "  avg: "
+                  << message_tracking_tag_callback_counter_.avg << "\n"
                   << "  max: " << message_tracking_tag_callback_counter_.max << "\n"
-                  << "timer_callback: "
-                  << "  avg: " << timer_callback_counter_.avg << "\n"
+                  << "timer_callback: " << "  avg: " << timer_callback_counter_.avg << "\n"
                   << "  max: " << timer_callback_counter_.max << std::endl;
         this->fe.debug_print();
       }
