@@ -44,7 +44,10 @@ struct NonConstHelper
 
 std::shared_ptr<tilde::TildePublisher<Msg>> g_pub_callback_fn_;
 
-void callback_fn(MsgConstPtr msg) { g_pub_callback_fn_->publish(*msg); }
+void callback_fn(MsgConstPtr msg)
+{
+  g_pub_callback_fn_->publish(*msg);
+}
 
 template <typename CallbackT>
 void func(CallbackT && callback)  // add [[deprecated]] to show deduced type
