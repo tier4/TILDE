@@ -24,7 +24,9 @@
 namespace tilde_deadline_detector
 {
 
-ForwardEstimator::ForwardEstimator() {}
+ForwardEstimator::ForwardEstimator()
+{
+}
 
 void ForwardEstimator::set_skip_out_to_in(const std::map<std::string, std::string> & skip_out_to_in)
 {
