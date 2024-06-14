@@ -72,7 +72,9 @@ TildeDeadlineDetectorNode::TildeDeadlineDetectorNode(const rclcpp::NodeOptions &
   init();
 }
 
-TildeDeadlineDetectorNode::~TildeDeadlineDetectorNode() {}
+TildeDeadlineDetectorNode::~TildeDeadlineDetectorNode()
+{
+}
 
 std::set<std::string> TildeDeadlineDetectorNode::get_message_tracking_tag_topics() const
 {

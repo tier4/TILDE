@@ -32,7 +32,9 @@ SteeNode::SteeNode(
   init();
 }
 
-SteeNode::~SteeNode() {}
+SteeNode::~SteeNode()
+{
+}
 
 void SteeNode::init()
 {
