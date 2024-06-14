@@ -161,7 +161,10 @@ bool TildePublisherBase::get_input_info(
   return true;
 }
 
-void TildePublisherBase::set_enable(bool enable) { enable_ = enable; }
+void TildePublisherBase::set_enable(bool enable)
+{
+  enable_ = enable;
+}
 
 void TildePublisherBase::print_input_infos()
 {

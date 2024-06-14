@@ -156,8 +156,12 @@ TEST(TildeSynchronizer, compile9)
   TildeSynchronizer<Policy9> sync(nullptr, f0, f1, f2, f3, f4, f5, f6, f7, f8);
 }
 
-void function2(const MsgConstPtr &, const MsgConstPtr &) {}
-void function3(const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &) {}
+void function2(const MsgConstPtr &, const MsgConstPtr &)
+{
+}
+void function3(const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &)
+{
+}
 void function4(const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &, const MsgConstPtr &)
 {
 }
