@@ -325,8 +325,9 @@ public:
       callback(msg0, msg1, msg2);
     };
 
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   }
 
   template <
@@ -353,9 +354,10 @@ public:
 
       callback(msg0, msg1, msg2, msg3);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4));
   }
 
   template <
@@ -385,9 +387,10 @@ public:
 
       callback(msg0, msg1, msg2, msg3, msg4);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5));
   }
 
   template <
@@ -420,9 +423,10 @@ public:
 
       callback(msg0, msg1, msg2, msg3, msg4, msg5);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6));
   }
 
   template <
@@ -459,9 +463,11 @@ public:
 
       callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6,
+        std::placeholders::_7));
   }
 
   template <
@@ -501,10 +507,11 @@ public:
 
       callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
-      std::placeholders::_8));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
+        std::placeholders::_8));
   }
 
   template <
@@ -547,10 +554,11 @@ public:
 
       callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
-      std::placeholders::_8, std::placeholders::_9));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
+        std::placeholders::_8, std::placeholders::_9));
   }
 
   // non-const C callback&
@@ -596,8 +604,9 @@ public:
       callback(msg0, msg1, msg2);
     };
 
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   }
 
   template <
@@ -624,9 +633,10 @@ public:
 
       callback(msg0, msg1, msg2, msg3);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4));
   }
 
   template <
@@ -656,9 +666,10 @@ public:
 
       callback(msg0, msg1, msg2, msg3, msg4);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5));
   }
 
   template <
@@ -691,9 +702,10 @@ public:
 
       callback(msg0, msg1, msg2, msg3, msg4, msg5);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6));
   }
 
   template <
@@ -730,9 +742,11 @@ public:
 
       callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6,
+        std::placeholders::_7));
   }
 
   template <
@@ -772,10 +786,11 @@ public:
 
       callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
-      std::placeholders::_8));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
+        std::placeholders::_8));
   }
 
   template <
@@ -818,10 +833,11 @@ public:
 
       callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8);
     };
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
-      std::placeholders::_8, std::placeholders::_9));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
+        std::placeholders::_8, std::placeholders::_9));
   }
 
   // (const C& callback, T* t)
@@ -869,8 +885,9 @@ public:
       bind_callback(msg0, msg1, msg2);
     };
 
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
   }
 
   template <
@@ -900,9 +917,10 @@ public:
       bind_callback(msg0, msg1, msg2, msg3);
     };
 
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4));
   }
 
   template <
@@ -935,9 +953,10 @@ public:
       bind_callback(msg0, msg1, msg2, msg3, msg4);
     };
 
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5));
   }
 
   template <
@@ -974,9 +993,10 @@ public:
       bind_callback(msg0, msg1, msg2, msg3, msg4, msg5);
     };
 
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6));
   }
 
   template <
@@ -1016,9 +1036,11 @@ public:
       bind_callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6);
     };
 
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6,
+        std::placeholders::_7));
   }
 
   template <
@@ -1062,10 +1084,11 @@ public:
       bind_callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7);
     };
 
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
-      std::placeholders::_8));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
+        std::placeholders::_8));
   }
 
   template <
@@ -1113,10 +1136,11 @@ public:
       bind_callback(msg0, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8);
     };
 
-    return sync_ptr_->registerCallback(std::bind(
-      new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
-      std::placeholders::_8, std::placeholders::_9));
+    return sync_ptr_->registerCallback(
+      std::bind(
+        new_callback_lambda, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7,
+        std::placeholders::_8, std::placeholders::_9));
   }
 
   // (C& callback, T* t)

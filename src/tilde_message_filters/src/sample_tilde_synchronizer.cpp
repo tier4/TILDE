@@ -53,8 +53,10 @@ public:
 
     // registerCallback(const C& callback) version:
     // <- (const C&) can bind rvalue
-    sync_ptr_->registerCallback(std::bind(
-      &SampleTildeSynchronizer2::sub_callback, this, std::placeholders::_1, std::placeholders::_2));
+    sync_ptr_->registerCallback(
+      std::bind(
+        &SampleTildeSynchronizer2::sub_callback, this, std::placeholders::_1,
+        std::placeholders::_2));
   }
 
 private:
@@ -91,9 +93,10 @@ public:
 
     // registerCallback(const C& callback) version:
     // <- (const C&) can bind rvalue
-    sync_ptr_->registerCallback(std::bind(
-      &SampleTildeSynchronizer3::sub_callback, this, std::placeholders::_1, std::placeholders::_2,
-      std::placeholders::_3));
+    sync_ptr_->registerCallback(
+      std::bind(
+        &SampleTildeSynchronizer3::sub_callback, this, std::placeholders::_1, std::placeholders::_2,
+        std::placeholders::_3));
   }
 
 private:
